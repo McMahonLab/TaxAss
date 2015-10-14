@@ -1,0 +1,127 @@
+# RRR 8-25-15
+
+# This script generates a \n separated file of query sequence IDs that match a criteria.
+
+# The script is called from the command line with the following 5 arguments in order:
+# 1st		the path to the r script.  The script is called 8-24-15_Filter_BLAST_for_tax_assignment.R
+# 2nd		the path to the formatted blast file. This is the otus.taxonomy.blast.table file from step 3
+# 3rd		the path the to file you are creating. This is the list of sequence ID's matching your criteria.
+# 4th		the cutoff percent identity to use. Note this is the calculated "true" full length percent identity
+# 5th		want matches? TRUE or FALSE. TRUE: return seqID's >= cutoff, FALSE: return seqID's < cutoff
+# Example syntax in terminal:
+# Rscript scriptname.R blastfilename outputfilename cutoff# TRUE/FALSE
+
+# The format of the blast file is -outfmt "6 qseqid pident length qlen qstart qend" 
+# The format of the output file is \n separated qseqids
+
+# This script caclulates the full-length query's percent ID (BLAST may leave gaps at the ends).
+# Then it finds all the query IDs >= OR < the specified (full-length) percent ID cutoff.
+# The output of this script can be fed into the fetch_fastas_with_seqIDs.py python script.
+
+#####
+# Receive arguments from terminal command line
+#####
+
+userprefs <- commandArgs(trailingOnly = TRUE)
+blast.file.path <- userprefs[1]
+output.file.path <- userprefs[2]
+users.cutoff <- as.numeric(userprefs[3])
+user.wants.matches <- as.logical(userprefs[4])
+
+#####
+# Define Functions
+#####
+
+# Import the blast output
+import.BLAST.data <- function(){
+  blast <- read.table(file = blast.file.path, sep = "\t", stringsAsFactors = F)
+  colnames(blast) <- c("qseqid","pident","length","qlen","qstart","qend")
+  return(blast)
+}
+
+# Format the blast data for downstream analyses
+format.BLAST.data <- function(BlastTable){
+  blast <- BlastTable
+  
+  # format numbers as numberic instead of integer
+  blast[,2:6] <- apply(blast[,2:6], 2, as.numeric)
+  
+  # add a query alignment length column 
+  q.align <- blast$qend - blast$qstart + 1   # add 1 b/c start is 1 instead of 0.  for 4 aligned pairs, start=1, end=4, length=4-1+1=4
+  blast <- cbind(blast,q.align)              
+  
+  # remove the now unnecessary qend/qstart columns
+  blast <- blast[,-(5:6)]
+  
+  # are most of the alignments full length?
+  cat("\nalignment length \tmean:", mean(blast$length), "\t\tmin:", min(blast$length), "\t\tmax:",max(blast$length),
+      "\nthe query length \tmean:", mean(blast$qlen), "\t\tmin:", min(blast$qlen), "\t\tmax:",max(blast$qlen),"\n")
+  
+  return(blast)
+}
+
+# Calculate pident for full length queries (account for any gaps at ends of HSPs) for the whole table
+calc.full.pIDs <- function(BlastTable){
+  blast <- BlastTable
+  
+  # define function to apply to each row
+  pid.fun <- function(NumericBlastMatrixRow){
+    b <- NumericBlastMatrixRow
+    pid <- (b[1] * b[2]) / (b[2] - b[4] + b[3]) # (pident * length) / (length - q.align + qlen)
+    return(pid)
+  }
+  
+  # create a numeric blast matrix to use the apply funciton
+  b <- blast[,-1]
+  b <- as.matrix(b)
+  
+  # find the "true" pid for the full length sequence of each blast hit
+  true.pids <- apply(b, 1, pid.fun)
+  
+  # add this to the blast table
+  blast <- cbind(blast, true.pids)
+  
+  return(blast)
+}
+
+# select qseqids that are above or below the true.percent.id cutoff
+find.FW.seqIDs <- function(BlastTable, cutoff.perc.id, want.matches){
+  blast <- BlastTable
+  cutoff <- cutoff.perc.id
+  hits <- want.matches
+  
+  if (hits == TRUE){
+    index <- which(blast$true.pids >= cutoff)
+  }else{
+    index <- which(blast$true.pids < cutoff)
+  }
+  
+  seq.ids <- blast[index,1]
+  
+  write(x = seq.ids, file = output.file.path, sep="\n")
+  
+  if (hits == TRUE){
+    cat("\nAdded",length(seq.ids),"sequences matching the FW database with >= ", 
+        cutoff, "% sequence identity to",output.file.path,
+        "\nAssign taxonomy to these sequences using the Freshwater database\n\n")
+  }else{
+    cat("\nAdded",length(seq.ids),"sequences matching the FW database with < ", 
+    cutoff, "% sequence identity to",output.file.path,
+    "\nAssign taxonomy to these sequences using the GreenGenes database\n\n")
+  }
+  
+  
+}
+
+
+#####
+# Use Functions
+#####
+
+blast <- import.BLAST.data()
+
+blast <- format.BLAST.data(BlastTable = blast)
+
+blast <- calc.full.pIDs(BlastTable = blast)
+
+find.FW.seqIDs(BlastTable = blast, cutoff.perc.id = users.cutoff, want.matches = user.wants.matches)

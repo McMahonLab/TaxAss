@@ -31,3 +31,7 @@ fetch_seqIDs_blast_removed.py
 	Then it creates a .fasta file of these sequences that can be concatenated to the .fasta
 	file of BLAST seqIDs under the pident cutoff.
 
+
+9-28-15 Clean workflow.txt
+
+	This is Robin's step by step workflow file.  It explains how to use all the scripts.

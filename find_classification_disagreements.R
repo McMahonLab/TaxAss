@@ -14,11 +14,16 @@
 # Receive arguments from terminal command line
 #####
 
-userprefs <- commandArgs(trailingOnly = TRUE)
-fw.plus.gg.tax.file.path <- userprefs[1]
-gg.only.tax.file.path <- userprefs[2]
-results.folder.path <- userprefs[3]
-taxonomy.bootstrap.cutoff <- userprefs[4]
+# userprefs <- commandArgs(trailingOnly = TRUE)
+# fw.plus.gg.tax.file.path <- userprefs[1]
+# gg.only.tax.file.path <- userprefs[2]
+# results.folder.path <- userprefs[3]
+# taxonomy.bootstrap.cutoff <- userprefs[4]
+
+fw.plus.gg.tax.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take4/otus.94.taxonomy"
+gg.only.tax.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take4/otus.gg.taxonomy"
+results.folder.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take4/compare_percID-94_to_gg-only/"
+taxonomy.bootstrap.cutoff <- 60
 
 
 #####
@@ -159,10 +164,10 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
   cat("there are ", length(index), " conflicting names at ", taxa.names[t], " level\n")
   
   # Compare the conflicting tables in entirety, use the original files with percents still in it
-  conflicting <- cbind(gg.percents[index,], fw.percents[index,])
+  conflicting <- cbind(gg.percents[index,,drop=F], fw.percents[index,,drop=F])
   
   # Check that the files still line up correctly
-  check.files.match(FWtable = conflicting[,9:16], GGtable = conflicting[,1:8])
+  check.files.match(FWtable = conflicting[,9:16,drop=F], GGtable = conflicting[,1:8,drop=F])
   
   # Export a file with the conflicting rows side by side.
   write.csv(conflicting, file = paste(results.folder.path, "/", taxa.names[t],"_conflicts.csv", sep=""))
@@ -170,7 +175,7 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
 
 # Entertain user with a poem while they wait:
 print.poem <- function(){
-  cat("\nAnd the Days Are Not Full Enough\n\nAnd the days are not full enough\nAnd the nights are not full enough\nAnd life slips by like a field mouse\n\tNot shaking the grass.\n\nby Ezra Pound\n")
+  cat("\nAnd the Days Are Not Full Enough\nby Ezra Pound\n\nAnd the days are not full enough\nAnd the nights are not full enough\nAnd life slips by like a field mouse\n\tNot shaking the grass.\n\n")
 }
 
 #####

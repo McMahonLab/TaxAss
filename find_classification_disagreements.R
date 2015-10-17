@@ -94,7 +94,9 @@ check.files.match <- function(FWtable, GGtable){
   fw <- FWtable
   
   order.check <- all.equal(fw[,1], gg[,1])
-  cat("\n\nDo the sequence ID numbers in each table match?", as.character(order.check), "\n\n")
+  if (order.check == FALSE){
+    cat("\n\nWARNING!! The Indexing of your files is messed up!!\n\n")
+  }
 }
 
 # Remove parentheses of % confidence so that names in each table match exactly
@@ -141,7 +143,7 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
 }
 
 
-# Find clones misclassified at a given phylogenetic level, t
+# Find seqs misclassified at a given phylogenetic level, t
 find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_percents, TaxaLevel){
   fw <- FWtable
   gg <- GGtable
@@ -154,7 +156,7 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
   # compare names in column t+1, because first columns are seqID and t=1 is kingdom, t=7 is tribe
   # ignore names that say unclassified
   index <- which(gg[,t+1] != fw[,t+1] & gg[,t+1] != "unclassified" & fw[,t+1] != "unclassified")
-  cat("there are ", length(index), " conflicting names at ", taxa.names[t], " level")
+  cat("there are ", length(index), " conflicting names at ", taxa.names[t], " level\n")
   
   # Compare the conflicting tables in entirety, use the original files with percents still in it
   conflicting <- cbind(gg.percents[index,], fw.percents[index,])
@@ -166,10 +168,16 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
   write.csv(conflicting, file = paste(results.folder.path, "/", taxa.names[t],"_conflicts.csv", sep=""))
 }
 
+# Entertain user with a poem while they wait:
+print.poem <- function(){
+  cat("\nAnd the Days Are Not Full Enough\n\nAnd the days are not full enough\nAnd the nights are not full enough\nAnd life slips by like a field mouse\n\tNot shaking the grass.\n\nby Ezra Pound\n")
+}
 
 #####
 # Use Functions
 #####
+
+print.poem()
 
 fw.percents <- import.FW.names()
 gg.percents <- import.GG.names()
@@ -180,9 +188,9 @@ fw.percents <- reformat.fw(FWtable = fw.percents)
 check.files.match(FWtable = fw.percents, GGtable = gg.percents)
 
 fw <- do.bootstrap.cutoff(TaxonomyTable = fw.percents, BootstrapCutoff = taxonomy.bootstrap.cutoff)
-cat("\nOHHHHHHH, we're half-way the-ere\n")
+cat("\nFinished bootstrap value cutoff on workflow's taxonomy file.\n")
 gg <- do.bootstrap.cutoff(TaxonomyTable = gg.percents, BootstrapCutoff = taxonomy.bootstrap.cutoff)
-cat("OOOOOO-OOOH, livin' on a prayer\n")
+cat("Finished bootstrap cutoff on comparison taxonomy file.\n\n")
 
 check.files.match(FWtable = fw, GGtable = gg)
 

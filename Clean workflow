@@ -60,6 +60,65 @@ ________________________________________________________________________________
 
 -1. background on why we chose this workflow
 
+Our original taxonomy assignment workflow was straightforward and more simple: 
+	everything was classified to 70% using our FW database
+	all classifications that weren't "unclassified" at the lineage level were kept
+	everything else was re-classified using green genes to 60%
+
+However this workflow was flawed due to a misunderstanding of the classification p values:
+	-The 70% bootstrap value refers to the repeatability of the taxonomy assignment,
+	NOT to it's accuracy.
+	-A classification that is given at 70% confidence means that 70% of the time 
+	when you feed that sequence into that database it goes into that group.
+	-The classifier sill puts anything you feed into it a classification, 
+	even it the true classification is not included in the database.
+	-The GG database is huge, if you put something into it that the database doesn't have,
+	it will likely put it in random different clusters each time and it will be "unclassified"
+	-Our database is small.  If you put something into it that it doesn't have,
+	it fill find whatever it's closest to and consistently call it that because there are 
+	not as many dissimilar options to spread it between.
+		consistently. meaning a high bootstrap value.
+	-simple example: if you give our FW database an archaea sequence, 100% of the time
+	it will say it is a bacteria- because the database only has bacteria in it.
+
+Consequences of the flaw:
+	-we were forcing sequences that do not match well to be called our favorite FW taxa
+		-we may have missed other taxa that may be important
+		-we may have muddied the relationships of our key taxa by adding in unrelated ones
+
+Possible solutions and why they don't work:
+	-Classify in GG first
+		-then reclassify the "freshwater" phylums.
+		-this is basically what Jason did to solve the problem
+		-but phyla are too broad in GG, can't assume everything in phylum is in our database
+	-Classify in GG first
+		-then reclassify the "freshwater" orders (or some lower level)
+		-but GG lacks the resolution to identify those orders,
+		we'd miss many sequences b/c GG would call them unclassified
+	-Combine the two taxonomy databases and classify all at once
+		-if something is present in both databases, it will be split during classification,
+		50% going into one, the other 50% into the other, and remain unclassified
+	-Classify our sequences with green genes, remove those green genes sequences, and then
+	combine the databases and classify all at once
+		-the taxonomy databases are highly curated, adding something new in is not that simple.
+			-the structure of the two databases may differ at higher taxonomic resolution
+			-the green genes classification might not actually be a good match if the freshwater
+			sequence just doesn't exist in green genes, so then we'd be removing an unrelated
+			sequence that we shouldn't.
+				-how can you differentiate if the fw sequence does not exist in gg
+				or if the fw sequence exists in gg but is only named to class level.
+	-Classify the sequences in the freshwater database with a different method, like BLAST,
+	since it's a small database anyway.
+		-the taxonomy assignment algorithm takes into consideration phylogeny, which is a
+		better classification that by just using sequence similarity.
+	
+Our solution/this workflow (that we think works):
+	-Classify in FW first, but with a cutoff not based on clustering bootstrap values
+		-use a BLAST cutoff to identify highly similar sequences to those in
+		our freshwater sequence database
+		-classify those hightly similar sequences with a classification algorithm and our db
+		-classify the remaining sequences with a large database
+		
 
 __________________________________________________________________________________________
 

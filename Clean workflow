@@ -296,7 +296,7 @@ What each file is:
 Note: You may need to choose a different "true pident" cutoff for your sequence data.
 I chose mine based on values that gave me classifications consistent to the class level 
 between the small and large databases. You can use a supplementary R script & workflow to 
-repeat this.
+repeat this.  One thing that might affect this choice is the length of your sequences.
 
 
 __________________________________________________________________________________________
@@ -346,7 +346,8 @@ What each file is:
 
 Note: It's a little concerning that so many sequences were not reported by blast.  They are
 16S sequences so shouldn't they all be pretty close?? This may mean we should tweak the 
-penalty values.  It definitely deserves another look.
+penalty values.  It definitely deserves another look. Note that these sequences are already 
+curated to remove bad reads using mothur & Alex's pipeline.
 
 __________________________________________________________________________________________
 
@@ -433,7 +434,8 @@ What the output files are (note you have no control over the name extensions add
 NOTE: these bootstrap percent confidence values are NOT the confidence that the taxonomy 
 assignment is *correct*, just that it is *repeatable* in that database.  This is another 
 paremeter that we could explore changing more in the future.  It likely should be different
-in the different databases also because of the different database sizes.
+in the different databases also because of the different database sizes.  I left cutoff out
+in this command so that you can explore the different results of it later, in step 11.
 
 
 __________________________________________________________________________________________
@@ -507,16 +509,32 @@ Replace: semicolon
 
 You can do this in a text editor, or using bash.
 
+For bash, Full Four Commands (Type in Terminal):
+
 sed 's/[[:blank:]]/\;/' <otus.taxonomy >otus.taxonomy.reformatted
 mv otus.taxonomy.reformatted otus.taxonomy
+sed 's/[[:blank:]]/\;/' <otus.general.taxonomy >otus.genearl.taxonomy.reformatted
+mv otus.general.taxonomy.reformatted otus.general.taxonomy
 
-sed 's/[[:blank:]]/\;/' <otus.gg.taxonomy >otus.gg.taxonomy.reformatted
-mv otus.gg.taxonomy.reformatted otus.gg.taxonomy
+Syntax of commands and what each argument does:
+	sed 's/find/replace/ <input >output
+		sed		is a "stream editor," a function for editing streams of text in the terminal
+		's		tells it you are doing a substitution
+		find	this is the character string you are finding
+		replace	this is what you are replacing it with
+		input	this is the file sed searches through, here it is
+				otus.taxonomy
+				otus.general.taxonomy
+		output	this is the file sed creates (note it must have a different name than input)
+	
+	mv filename1 filename2
+		mv		this is a function to move (aka rename) a file from name1 to name2
+				simply keeping the edited file the same name  
+		
 
-
-***elaborate description missing....
 ***I should use mv above when I rename files too, to keep the total # of crap down
 instead of cat that I think leaves the old file there still too...
+
 
 __________________________________________________________________________________________
 

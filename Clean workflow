@@ -586,3 +586,4 @@ because it makes sense to make our database cutoff much higher than the gg one
 buuuuttt, maybe doesn't matter.  maybe just something to do for the final file version.
 like I should just write that part of the script into a separate script that gives ppl
 a clean file with only the cutoff they want showing with names.
+

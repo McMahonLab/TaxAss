@@ -127,7 +127,7 @@ print.poem <- function(){
 #####
 
 # Find index of sequences that were classified by the freshwater database, not green genes
-# note this returns indeces that match the gg and fw tables, not the taxonomies.
+# note this returns indeces that match the gg and fw tables, so a vector if indeces, not a tax table
 find.fw.indeces <- function(TaxonomyTable, SeqIDs){
   tax <- TaxonomyTable
   ids <- SeqIDs
@@ -164,8 +164,6 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   tax <- as.matrix(TaxonomyTable)
   cutoff <- BootstrapCutoff
   
-  # Do calculations
-  # Note: this will give an error if there are ANY names that do not have 
   # parentheses and are named something that is not "unclassified" or "unknown"
   tax.nums <- apply(tax[,2:ncol(tax)],2,pull.out.percent)
   index <- which(tax.nums == "unclassified" | tax.nums == "unknown")
@@ -220,15 +218,17 @@ print.poem()
 fw.percents <- import.FW.names()
 gg.percents <- import.GG.names()
 
+gg.percents <- reformat.gg(GGtable = gg.percents)
+fw.percents <- reformat.fw(FWtable = fw.percents)
+
+check.files.match(FWtable = fw.percents, GGtable = gg.percents)
+
 fw.seq.ids <- import.FW.seq.IDs()
 fw.indeces <- find.fw.indeces(TaxonomyTable = fw.percents, SeqIDs = fw.seq.ids)
 fw.percents.fw.only <- fw.percents[fw.indeces,]
 gg.percents.fw.only <- gg.percents[fw.indeces,]
 
-gg.percents <- reformat.gg(GGtable = gg.percents)
-fw.percents <- reformat.fw(FWtable = fw.percents)
-
-check.files.match(FWtable = fw.percents, GGtable = gg.percents)
+check.files.match(FWtable = fw.percents.fw.only, GGtable = gg.percents.fw.only)
 
 fw <- do.bootstrap.cutoff(TaxonomyTable = fw.percents, BootstrapCutoff = taxonomy.bootstrap.cutoff)
 cat("\nFinished bootstrap value cutoff on workflow's taxonomy file.\n")

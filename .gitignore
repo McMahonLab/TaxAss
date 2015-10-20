@@ -1,5 +1,11 @@
+# Hidden files
 .Rhistory
+.DS_Store
+.Rproj.user/
+
+# Databases
 databases/gg_13_5_taxonomy
 databases/gg_13_5.fasta
-.Rproj.user/
+
+# Code files
 Taxonomy_Assignment_Scripts.Rproj

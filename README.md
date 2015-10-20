@@ -72,6 +72,9 @@ Our solution/this workflow (that we think works):
 		-classify those hightly similar sequences with a classification algorithm and our db
 		-classify the remaining sequences with a large database
 
+Prerequisites
+---
+
 Workflow Summary
 ---
 This workflow assigns taxonomy to a fasta file of otu sequences using both a

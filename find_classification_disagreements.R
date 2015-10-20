@@ -24,11 +24,18 @@ fw.plus.gg.tax.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take4/otus.
 gg.only.tax.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take4/otus.gg.taxonomy"
 results.folder.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take4/compare_percID-94_to_gg-only/"
 taxonomy.bootstrap.cutoff <- 60
-
+fw.seq.ids.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take4/ids.above.94"
 
 #####
-# Define Functions
+# Define Functions for Import and Formatting
 #####
+
+# Import the freshwater sequence IDs as determined by the BLAST cutoff in workflow step 4
+import.FW.seq.IDs <- function(){
+  fw.seqs <- scan(file = fw.seq.ids.file.path)
+  fw.seqs <- as.character(fw.seqs)
+  return(fw.seqs)
+}
 
 # Import the otu taxonomies assigned with both FW and GG
 import.FW.names <- function(){
@@ -110,27 +117,56 @@ remove.parentheses <- function(x){
   return(fixed.name)
 }
 
+# Entertain user with a poem while they wait:
+print.poem <- function(){
+  cat("\nAnd the Days Are Not Full Enough\nby Ezra Pound\n\nAnd the days are not full enough\nAnd the nights are not full enough\nAnd life slips by like a field mouse\n\tNot shaking the grass.\n\n")
+}
+
+#####
+# Define Functions for Data Analysis
+#####
+
+# Find index of sequences that were classified by the freshwater database, not green genes
+# note this returns indeces that match the gg and fw tables, not the taxonomies.
+find.fw.indeces <- function(TaxonomyTable, SeqIDs){
+  tax <- TaxonomyTable
+  ids <- SeqIDs
+  
+  index <- NULL
+  for (e in 1:length(ids)){
+    index <- c(index, which(tax[,1] == ids[e]))
+  }
+  return(index)
+}
+
+# Given a single taxonomy name, pull out the bootstrap percent.
+# For example, text = k__Bacteria(100) would return (as character) 100
+# But also, text = text = "unclassified" would return (as character) unclassified
+pull.out.percent <- function(text){
+  text <- sub(pattern = '.*\\(', replacement = '\\(', x = text)
+  text <- sub(pattern = '\\(', replacement = '', x = text)
+  text <- sub(pattern = '\\)', replacement = '', x = text)
+  return(text)
+}
+
+# When the value supplied is FALSE, the text is changed to "unclassified"
+make.unclassified <- function(text,val){
+  if (val == F){
+    text <- "unclassified"
+  }
+  return(text)
+}
+
 # Apply classification bootstrap value cutoff 
+# Everything below the supplied cutoff value is changed to "unclassified"
 # (this stat is the % of times it got classified into that taxonomy cluster)
 do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   tax <- as.matrix(TaxonomyTable)
   cutoff <- BootstrapCutoff
   
-  # define two internal functions:
-  pull.out.percent <- function(text){
-    text <- sub(pattern = '.*\\(', replacement = '\\(', x = text)
-    text <- sub(pattern = '\\(', replacement = '', x = text)
-    text <- sub(pattern = '\\)', replacement = '', x = text)
-    return(text)
-  }
-  make.unclassified <- function(text,val){
-    if (val == F){
-      text <- "unclassified"
-    }
-    return(text)
-  }
-  
   # Do calculations
+  # Note: this will give an error if there are ANY names that do not have 
+  # parentheses and are named something that is not "unclassified" or "unknown"
   tax.nums <- apply(tax[,2:ncol(tax)],2,pull.out.percent)
   index <- which(tax.nums == "unclassified" | tax.nums == "unknown")
   tax.nums[index] <- 0
@@ -138,6 +174,7 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   tax.TF <- tax.nums >= cutoff
   
   # could you do this faster with sweep() ?  I think so...
+  # ehh, but sweep requires stats calculated from itself, and this is a separate matrix
   for (r in 1:nrow(tax)){
     for (c in 2:ncol(tax)){
       tax[r,c] <- make.unclassified(text = tax[r,c], val = tax.TF[r,c-1])
@@ -173,10 +210,6 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
   write.csv(conflicting, file = paste(results.folder.path, "/", taxa.names[t],"_conflicts.csv", sep=""))
 }
 
-# Entertain user with a poem while they wait:
-print.poem <- function(){
-  cat("\nAnd the Days Are Not Full Enough\nby Ezra Pound\n\nAnd the days are not full enough\nAnd the nights are not full enough\nAnd life slips by like a field mouse\n\tNot shaking the grass.\n\n")
-}
 
 #####
 # Use Functions
@@ -186,6 +219,11 @@ print.poem()
 
 fw.percents <- import.FW.names()
 gg.percents <- import.GG.names()
+
+fw.seq.ids <- import.FW.seq.IDs()
+fw.indeces <- find.fw.indeces(TaxonomyTable = fw.percents, SeqIDs = fw.seq.ids)
+fw.percents.fw.only <- fw.percents[fw.indeces,]
+gg.percents.fw.only <- gg.percents[fw.indeces,]
 
 gg.percents <- reformat.gg(GGtable = gg.percents)
 fw.percents <- reformat.fw(FWtable = fw.percents)

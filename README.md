@@ -8,8 +8,8 @@ All rights reserved.
 Overview
 ---
 
-This workflow assigns taxonomy to a fasta file of otu sequences using both a
-small, custom taxonomy database and a large general database.
+This workflow assigns taxonomy to a fasta file of OTU sequences using both a
+small, custom taxonomy database and a large general database. The workflow was developed specifically for the classification of freshwater OTUs against the McMahonLab's [curated freshwater database](https://github.com/mcmahon-uw/FWMFG). Your mileage may vary.
 
 Background
 ---

@@ -13,31 +13,19 @@ small, custom taxonomy database and a large general database. The workflow was d
 
 Background
 ---
-Our original taxonomy assignment workflow was straightforward and more simple:
-	everything was classified to 70% using our FW database
-	all classifications that weren't "unclassified" at the lineage level were kept
-	everything else was re-classified using green genes to 60%
 
-However this workflow was flawed due to a misunderstanding of the classification p values:
-	-The 70% bootstrap value refers to the repeatability of the taxonomy assignment,
-	NOT to it's accuracy.
-	-A classification that is given at 70% confidence means that 70% of the time
-	when you feed that sequence into that database it goes into that group.
-	-The classifier sill puts anything you feed into it a classification,
-	even it the true classification is not included in the database.
-	-The GG database is huge, if you put something into it that the database doesn't have,
-	it will likely put it in random different clusters each time and it will be "unclassified"
-	-Our database is small.  If you put something into it that it doesn't have,
-	it fill find whatever it's closest to and consistently call it that because there are
-	not as many dissimilar options to spread it between.
-		consistently. meaning a high bootstrap value.
-	-simple example: if you give our FW database an archaea sequence, 100% of the time
-	it will say it is a bacteria- because the database only has bacteria in it.
+Our lab's 16S taxonomy pipeline uses the [RDP classifier](https://github.com/rdpstaff/classifier) to classify OTUs. as implemented in [mothur](http://www.mothur.org/) (or [qiime](http://qiime.org/)).
 
-Consequences of the flaw:
-	-we were forcing sequences that do not match well to be called our favorite FW taxa
-		-we may have missed other taxa that may be important
-		-we may have muddied the relationships of our key taxa by adding in unrelated ones
+The original process was straightforward. Sequences were classified using our FW database, and all "lineage"-level assignments with greater than 70% bootstrap support were kept. The remaining OTUs were classified using the GreenGenes database, with 60% bootstrap support.
+
+However, this workflow was flawed due to a misunderstanding of the bootstrap support values. The RDP classifier is a Bayesian classifier, and was developed using the (large) [RDP database](https://rdp.cme.msu.edu/). The classifier uses the reference database to calculate the probability that a novel sequence belongs to a particular OTU defined in the reference database. The OTU is classified as a member of the genus giving the highest probability score, __regardless of the value of that probability__. The process is repeated 100 times to give a bootstrap support score, which is reported by the classifier. In other words, the classifier will classify any sequence you give it: if the "true" classification is absent from the classifier, the sequence will still be classified, albeit possibly with low probability (unreported) and low bootstrap support (reported).
+
+This procedure is acceptable for the GreenGenes or RDP databases. The databases are large: if you attempt to classify something that the database doesn't have,	it will likely be classified differently each time and the bootstrap support score will be low (e.g., the sequence will be "unclassified"). However, our database is small. If you attempt to classify a novel sequence, the classifier will report the most probable sequence, even if the probability is low. Because there are fewer sequences, the bootstrap support value is also likely to be higher. Because the classifier does not report the probabilities, you have no __a priori__ way of knowing if a sequence has been mis-classified. As a simple example, if you give our FW database an archaeal sequence, 100% of the time the sequence will be classified as bacterial, because the database only has bacteria in it.
+
+As a consequence, we were "forcing" sequences to be classified as belonging to defined FW taxa, even if they did not match well. We may have "missed" other important (non-FW) taxa, because they were not represented in the database. Finally, we may have muddled the relationships of our key taxa by adding in unrelated ones.
+
+Possible solutions
+---
 
 Possible solutions and why they don't work:
 	-Classify in GG first

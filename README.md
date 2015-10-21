@@ -40,6 +40,9 @@ Robin Rohwer identified and evaluated a number of possible solutions, as describ
 
 Proposed Solution
 ---
+
+Our propose solution is as follows, and as documented in further detail in this workflow.
+
 1. First classify novel sequences using the FW database, but define a cutoff independent of RDP classifer bootstrap support values.
 2. Use a BLAST cutoff to identify highly similar sequences to those in our FW sequence database.
 3. Classify those sequences using the FW database.

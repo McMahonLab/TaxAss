@@ -24,34 +24,19 @@ This procedure is acceptable for the GreenGenes or RDP databases. The databases 
 
 As a consequence, we were "forcing" sequences to be classified as belonging to defined FW taxa, even if they did not match well. We may have "missed" other important (non-FW) taxa, because they were not represented in the database. Finally, we may have muddled the relationships of our key taxa by adding in unrelated ones.
 
-Possible solutions
+Possible Solutions
 ---
+Robin Rohwer identified and evaluated a number of possible solutions, as described below.
 
-Possible solutions and why they don't work:
-	-Classify in GG first
-		-then reclassify the "freshwater" phylums.
-		-this is basically what Jason did to solve the problem
-		-but phyla are too broad in GG, can't assume everything in phylum is in our database
-	-Classify in GG first
-		-then reclassify the "freshwater" orders (or some lower level)
-		-but GG lacks the resolution to identify those orders,
-		we'd miss many sequences b/c GG would call them unclassified
-	-Combine the two taxonomy databases and classify all at once
-		-if something is present in both databases, it will be split during classification,
-		50% going into one, the other 50% into the other, and remain unclassified
-	-Classify our sequences with green genes, remove those green genes sequences, and then
-	combine the databases and classify all at once
-		-the taxonomy databases are highly curated, adding something new in is not that simple.
-			-the structure of the two databases may differ at higher taxonomic resolution
-			-the green genes classification might not actually be a good match if the freshwater
-			sequence just doesn't exist in green genes, so then we'd be removing an unrelated
-			sequence that we shouldn't.
-				-how can you differentiate if the fw sequence does not exist in gg
-				or if the fw sequence exists in gg but is only named to class level.
-	-Classify the sequences in the freshwater database with a different method, like BLAST,
-	since it's a small database anyway.
-		-the taxonomy assignment algorithm takes into consideration phylogeny, which is a
-		better classification that by just using sequence similarity.
+1. Classify in GreenGenes first, then reclassify just those phyla with known freshwater representatives. This approach was adopted by Jason Flowers. However, phyla with known freshwater representatives also contain non-FW taxa whih are not in our database.
+
+2. Classify in GreenGenes first, then reclassify just those orders unique to freshwater. However, GreenGenes has insufficient sequences from those orders to give a confident classification, so many FW taxa would get "unclassified." As a result, we would miss many "true" FW sequences.
+
+3. Combine the two taxonomy databases and classify all samples at once. However, if some OTUs are present in both databases (classified differently, one FW and one the Linnean equivalent), novel sequences will be split during classification (50% FW, 50% Linnean), and remain unclassified.
+
+4. Classify our sequences with GreenGenes, remove those sequences, and the combine the databases to classify all at once. However, the taxonomy databases are highly curated and adding something new is not that simple. Further, the structure of the two databases may differ at finer taxonomic resolution. Thus, the GreenGenes classification might not be a good match if the FW sequence doesn't exist in GreenGenes, so we would be removing an unrelated sequence that we shouldn't. There is no good way to differentiate between scenarios where the FW sequence doesn't exist in GreenGenes, or exists and is just classified to the class level (FW taxonomy differs from Linnean at order and narrower).
+
+5. Classify the sequences in the FW database with a different method, such as BLAST, since it's a small database anyway. However, the taxonomy assignment algorithm takes into consideration phylogeny, which is a better classification than that obtained by just using sequence similarity.
 
 Our solution/this workflow (that we think works):
 	-Classify in FW first, but with a cutoff not based on clustering bootstrap values

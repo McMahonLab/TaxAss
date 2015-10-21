@@ -127,7 +127,7 @@ print.poem <- function(){
 #####
 
 # Find index of sequences that were classified by the freshwater database, not green genes
-# note this returns indeces that match the gg and fw tables, so a vector if indeces, not a tax table
+# note this returns indeces that match the gg and fw tables, so a vector of indeces, not a tax table
 find.fw.indeces <- function(TaxonomyTable, SeqIDs){
   tax <- TaxonomyTable
   ids <- SeqIDs
@@ -139,15 +139,33 @@ find.fw.indeces <- function(TaxonomyTable, SeqIDs){
   return(index)
 }
 
+# names with no bootstrap values become bootstrap = 0, check what these names are:
+warn.nonparen.entries<- function(TaxonomyTable){
+  tax <- TaxonomyTable
+  odd.entries <- unique(grep(pattern = '.*\\(', x <- tax[,2:8], value = TRUE, invert=T))
+  if (length(odd.entries) > 0){
+  cat("\nWarning: These names in your taxonomy table are missing a bootstrap taxonomy assignment value:\n\n",
+      odd.entries,
+      "\n\nThese names are being renamed as \"unclassified\". If that seems incorrect",
+      "then you have to figure out why the numbers are missing from them.", 
+      "\nHave a lot of names here? Check that in the step 7 mothur command probs=T\n")
+  }
+}
+
 # Given a single taxonomy name, pull out the bootstrap percent.
 # For example, text = k__Bacteria(100) would return (as character) 100
-# But also, text = text = "unclassified" would return (as character) unclassified
+# But also, text = "unclassified" would return (as character) unclassified
 pull.out.percent <- function(text){
+  # Make any entries without parentheses be zero- the "unclassified" ones don't have bootstrap values
+  grep(pattern = '.*\\(', x <- text, value = TRUE, invert = TRUE) #see what the abnormal entries ARE
+  grep(pattern = '.*\\(', x <- text, value = FALSE, invert = TRUE) #indeces so you cna replace them
+  # replace all taxonomy names with just the bootstrap value
   text <- sub(pattern = '.*\\(', replacement = '\\(', x = text)
   text <- sub(pattern = '\\(', replacement = '', x = text)
   text <- sub(pattern = '\\)', replacement = '', x = text)
   return(text)
 }
+
 
 # When the value supplied is FALSE, the text is changed to "unclassified"
 make.unclassified <- function(text,val){

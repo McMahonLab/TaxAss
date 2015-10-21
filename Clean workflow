@@ -544,7 +544,10 @@ ________________________________________________________________________________
 The R script find_classification_disagreements.R  creates a folder containing a file for 
 each upper taxonomic level (kingdom, phylum, class, order, lineage) that lists all of the 
 classification disagreements at that taxonomic level between the custom + general taxonomy
-database workflow and the general only taxonomy database workflow.
+database workflow and the general only taxonomy database workflow. Note that this only 
+compares classifications made in the custom database, it ignores differences between 
+classifications that were both made by the general database (which can happen because 
+the classification algorithm is stochastic.)
 
 This script also allows the user to choose a bootstrap %confidence cutoff under which all
 the lower assignments are unclassified.  The script does not include unclassified names in 
@@ -557,7 +560,7 @@ Note: you must create a new folder to save these results in before running the s
 
 Full Command (type in terminal):
 
-Rscript find_classification_disagreements.R fw.plus.gg.tax.file.path gg.only.tax.file.path results.folder.path taxonomy.bootstrap.cutoff
+Rscript find_classification_disagreements.R fw.plus.gg.tax.file.path gg.only.tax.file.path results.folder.path taxonomy.bootstrap.cutoff seq.ids.above.cutoff.file.path
 
 Note: you must enter all the arguments in this order.
 
@@ -573,6 +576,10 @@ What the arguments are:
 											NOTE: you must create this folder before running script!
 	taxonomy.bootstrap.cutoff				this is the % confidence cutoff you want to use 
 											on the general database assignments
+	seq.ids.above.cutoff.file.path			this is the path to the file created in step 4 that
+											contains all of the sequence IDs above or equal to 
+											your BLAST cutoff. i.e. the path to ids.above.98
+											
 
 What the generated files in your folder are:
 	kingdom_conflicts.csv
@@ -581,9 +588,6 @@ What the generated files in your folder are:
 	order_conflicts.csv
 	lineage_conflicts.csv
 
-****should add a way to separately specify the bootstrap cutoff for each database-
-because it makes sense to make our database cutoff much higher than the gg one
-buuuuttt, maybe doesn't matter.  maybe just something to do for the final file version.
-like I should just write that part of the script into a separate script that gives ppl
-a clean file with only the cutoff they want showing with names.
+****need a finishing touch script that lets people convert their taxonomy table to using their desired cutoff.
+And has uniform unclassified names.  ie, just that part of this script for the final file.
 

@@ -14,21 +14,23 @@
 # Receive arguments from terminal command line
 #####
 
-# userprefs <- commandArgs(trailingOnly = TRUE)
-# fw.plus.gg.tax.file.path <- userprefs[1]
-# gg.only.tax.file.path <- userprefs[2]
-# results.folder.path <- userprefs[3]
-# taxonomy.bootstrap.cutoff <- userprefs[4]
-
-fw.plus.gg.tax.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take4/otus.94.taxonomy"
-gg.only.tax.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take4/otus.gg.taxonomy"
-results.folder.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take4/compare_percID-94_to_gg-only/"
-taxonomy.bootstrap.cutoff <- 60
+userprefs <- commandArgs(trailingOnly = TRUE)
+fw.plus.gg.tax.file.path <- userprefs[1]
+gg.only.tax.file.path <- userprefs[2]
+results.folder.path <- userprefs[3]
+taxonomy.bootstrap.cutoff <- userprefs[4]
 
 
 #####
-# Define Functions
+# Define Functions for Import and Formatting
 #####
+
+# Import the freshwater sequence IDs as determined by the BLAST cutoff in workflow step 4
+import.FW.seq.IDs <- function(){
+  fw.seqs <- scan(file = fw.seq.ids.file.path)
+  fw.seqs <- as.character(fw.seqs)
+  return(fw.seqs)
+}
 
 # Import the otu taxonomies assigned with both FW and GG
 import.FW.names <- function(){
@@ -110,34 +112,86 @@ remove.parentheses <- function(x){
   return(fixed.name)
 }
 
+# Entertain user with a poem while they wait:
+print.poem <- function(){
+  cat("\nAnd the Days Are Not Full Enough\nby Ezra Pound\n\nAnd the days are not full enough\nAnd the nights are not full enough\nAnd life slips by like a field mouse\n\tNot shaking the grass.\n\n")
+}
+
+
+#####
+# Define Functions for Data Analysis
+#####
+
+# Find index of sequences that were classified by the freshwater database, not green genes
+# note this returns indeces that match the gg and fw tables, so a vector of indeces, not a tax table
+find.fw.indeces <- function(TaxonomyTable, SeqIDs){
+  tax <- TaxonomyTable
+  ids <- SeqIDs
+  
+  index <- NULL
+  for (e in 1:length(ids)){
+    index <- c(index, which(tax[,1] == ids[e]))
+  }
+  return(index)
+}
+
+# this makes all the unclassified/unknown/any other word for it names be uniformly called "unclassified"
+# finds them b/c those names do not have bootstrap percents in parentheses, i.e. the (70)
+uniform.unclass.names <- function(TaxonomyTable){
+  tax <- TaxonomyTable
+  
+  # Warn user the names you are changing
+  odd.entries <- unique(grep(pattern = '.*\\(', x <- tax[,2:8], value = TRUE, invert=T))
+  if (length(odd.entries) > 0){
+  cat("\nWarning: These names in your taxonomy table are missing a bootstrap taxonomy assignment value:\n\n",
+      odd.entries,
+      "\n\nThese names will be renamed as \"unclassified\". If that seems incorrect",
+      "then you have to figure out why the parentheses are missing from them.", 
+      "\nHave ALL your names here? Check that in the step 7 mothur command probs=T\n")
+  }
+  
+  # Change all those names to unclassified (sometimes, for example, they might be "unknown")
+  index <- grep(pattern = '.*\\(', x <- tax[,2:8], value = FALSE, invert=T)
+  tax[,2:8][index] <- "unclassified"
+  
+  return(tax)
+}
+
+# Given a single taxonomy name, pull out the bootstrap percent.
+# For example, text = k__Bacteria(100) would return (as character) 100
+# But also, text = "unclassified" would return (as character) "unclassified"
+pull.out.percent <- function(text){
+  text <- sub(pattern = '.*\\(', replacement = '\\(', x = text)
+  text <- sub(pattern = '\\(', replacement = '', x = text)
+  text <- sub(pattern = '\\)', replacement = '', x = text)
+  return(text)
+}
+
+# When the value supplied is FALSE, the text is changed to "unclassified"
+# This is used in do.bootstrap.cutoff()
+make.unclassified <- function(text,val){
+  if (val == F){
+    text <- "unclassified"
+  }
+  return(text)
+}
+
 # Apply classification bootstrap value cutoff 
+# Everything below the supplied cutoff value is changed to "unclassified"
 # (this stat is the % of times it got classified into that taxonomy cluster)
 do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   tax <- as.matrix(TaxonomyTable)
   cutoff <- BootstrapCutoff
   
-  # define two internal functions:
-  pull.out.percent <- function(text){
-    text <- sub(pattern = '.*\\(', replacement = '\\(', x = text)
-    text <- sub(pattern = '\\(', replacement = '', x = text)
-    text <- sub(pattern = '\\)', replacement = '', x = text)
-    return(text)
-  }
-  make.unclassified <- function(text,val){
-    if (val == F){
-      text <- "unclassified"
-    }
-    return(text)
-  }
-  
-  # Do calculations
+  # parentheses and are named something that is not "unclassified" or "unknown"
   tax.nums <- apply(tax[,2:ncol(tax)],2,pull.out.percent)
-  index <- which(tax.nums == "unclassified" | tax.nums == "unknown")
+  index <- which(tax.nums == "unclassified")
   tax.nums[index] <- 0
   tax.nums <- apply(X = tax.nums, MARGIN = 2, FUN = as.numeric)
   tax.TF <- tax.nums >= cutoff
   
   # could you do this faster with sweep() ?  I think so...
+  # ehh, but sweep requires stats calculated from itself, and this is a separate matrix
   for (r in 1:nrow(tax)){
     for (c in 2:ncol(tax)){
       tax[r,c] <- make.unclassified(text = tax[r,c], val = tax.TF[r,c-1])
@@ -146,7 +200,6 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   
   return(tax)
 }
-
 
 # Find seqs misclassified at a given phylogenetic level, t
 find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_percents, TaxaLevel){
@@ -173,10 +226,6 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
   write.csv(conflicting, file = paste(results.folder.path, "/", taxa.names[t],"_conflicts.csv", sep=""))
 }
 
-# Entertain user with a poem while they wait:
-print.poem <- function(){
-  cat("\nAnd the Days Are Not Full Enough\nby Ezra Pound\n\nAnd the days are not full enough\nAnd the nights are not full enough\nAnd life slips by like a field mouse\n\tNot shaking the grass.\n\n")
-}
 
 #####
 # Use Functions
@@ -192,20 +241,29 @@ fw.percents <- reformat.fw(FWtable = fw.percents)
 
 check.files.match(FWtable = fw.percents, GGtable = gg.percents)
 
-fw <- do.bootstrap.cutoff(TaxonomyTable = fw.percents, BootstrapCutoff = taxonomy.bootstrap.cutoff)
+# Only compare the classifications made by the fw database to the gg classifications, not full tax tables
+fw.seq.ids <- import.FW.seq.IDs()
+fw.indeces <- find.fw.indeces(TaxonomyTable = fw.percents, SeqIDs = fw.seq.ids)
+fw.percents.fw.only <- fw.percents[fw.indeces,]
+gg.percents.fw.only <- gg.percents[fw.indeces,]
+
+check.files.match(FWtable = fw.percents.fw.only, GGtable = gg.percents.fw.only)
+
+fw.fw.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.fw.only, BootstrapCutoff = taxonomy.bootstrap.cutoff)
 cat("\nFinished bootstrap value cutoff on workflow's taxonomy file.\n")
-gg <- do.bootstrap.cutoff(TaxonomyTable = gg.percents, BootstrapCutoff = taxonomy.bootstrap.cutoff)
+gg.fw.only <- do.bootstrap.cutoff(TaxonomyTable = gg.percents.fw.only, BootstrapCutoff = taxonomy.bootstrap.cutoff)
 cat("Finished bootstrap cutoff on comparison taxonomy file.\n\n")
 
-check.files.match(FWtable = fw, GGtable = gg)
+check.files.match(FWtable = fw.fw.only, GGtable = gg.fw.only)
 
-fw <- apply(fw, 2, remove.parentheses)
-gg <- apply(gg, 2, remove.parentheses)
+fw.fw.only <- apply(fw.fw.only, 2, remove.parentheses)
+gg.fw.only <- apply(gg.fw.only, 2, remove.parentheses)
 
-check.files.match(FWtable = fw, GGtable = gg)
+check.files.match(FWtable = fw.fw.only, GGtable = gg.fw.only)
 
 for (t in 1:5){
-  find.conflicting.names(FWtable = fw, GGtable = gg, FWtable_percents = fw.percents, GGtable_percents = gg.percents, TaxaLevel = t)
+  find.conflicting.names(FWtable = fw.fw.only, GGtable = gg.fw.only, FWtable_percents = fw.percents.fw.only, 
+                         GGtable_percents = gg.percents.fw.only, TaxaLevel = t)
 }
 
 

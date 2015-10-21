@@ -14,17 +14,12 @@
 # Receive arguments from terminal command line
 #####
 
-# userprefs <- commandArgs(trailingOnly = TRUE)
-# fw.plus.gg.tax.file.path <- userprefs[1]
-# gg.only.tax.file.path <- userprefs[2]
-# results.folder.path <- userprefs[3]
-# taxonomy.bootstrap.cutoff <- userprefs[4]
+userprefs <- commandArgs(trailingOnly = TRUE)
+fw.plus.gg.tax.file.path <- userprefs[1]
+gg.only.tax.file.path <- userprefs[2]
+results.folder.path <- userprefs[3]
+taxonomy.bootstrap.cutoff <- userprefs[4]
 
-fw.plus.gg.tax.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take4/otus.94.taxonomy"
-gg.only.tax.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take4/otus.gg.taxonomy"
-results.folder.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take4/compare_percID-94_to_gg-only/"
-taxonomy.bootstrap.cutoff <- 60
-fw.seq.ids.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take4/ids.above.94"
 
 #####
 # Define Functions for Import and Formatting
@@ -121,6 +116,7 @@ remove.parentheses <- function(x){
 print.poem <- function(){
   cat("\nAnd the Days Are Not Full Enough\nby Ezra Pound\n\nAnd the days are not full enough\nAnd the nights are not full enough\nAnd life slips by like a field mouse\n\tNot shaking the grass.\n\n")
 }
+
 
 #####
 # Define Functions for Data Analysis

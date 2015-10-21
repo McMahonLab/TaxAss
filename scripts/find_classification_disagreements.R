@@ -139,35 +139,40 @@ find.fw.indeces <- function(TaxonomyTable, SeqIDs){
   return(index)
 }
 
-# names with no bootstrap values become bootstrap = 0, check what these names are:
-warn.nonparen.entries<- function(TaxonomyTable){
+# this makes all the unclassified/unknown/any other word for it names be uniformly called "unclassified"
+# finds them b/c those names do not have bootstrap percents in parentheses, i.e. the (70)
+uniform.unclass.names <- function(TaxonomyTable){
   tax <- TaxonomyTable
+  
+  # Warn user the names you are changing
   odd.entries <- unique(grep(pattern = '.*\\(', x <- tax[,2:8], value = TRUE, invert=T))
   if (length(odd.entries) > 0){
   cat("\nWarning: These names in your taxonomy table are missing a bootstrap taxonomy assignment value:\n\n",
       odd.entries,
-      "\n\nThese names are being renamed as \"unclassified\". If that seems incorrect",
-      "then you have to figure out why the numbers are missing from them.", 
-      "\nHave a lot of names here? Check that in the step 7 mothur command probs=T\n")
+      "\n\nThese names will be renamed as \"unclassified\". If that seems incorrect",
+      "then you have to figure out why the parentheses are missing from them.", 
+      "\nHave ALL your names here? Check that in the step 7 mothur command probs=T\n")
   }
+  
+  # Change all those names to unclassified (sometimes, for example, they might be "unknown")
+  index <- grep(pattern = '.*\\(', x <- tax[,2:8], value = FALSE, invert=T)
+  tax[,2:8][index] <- "unclassified"
+  
+  return(tax)
 }
 
 # Given a single taxonomy name, pull out the bootstrap percent.
 # For example, text = k__Bacteria(100) would return (as character) 100
-# But also, text = "unclassified" would return (as character) unclassified
+# But also, text = "unclassified" would return (as character) "unclassified"
 pull.out.percent <- function(text){
-  # Make any entries without parentheses be zero- the "unclassified" ones don't have bootstrap values
-  grep(pattern = '.*\\(', x <- text, value = TRUE, invert = TRUE) #see what the abnormal entries ARE
-  grep(pattern = '.*\\(', x <- text, value = FALSE, invert = TRUE) #indeces so you cna replace them
-  # replace all taxonomy names with just the bootstrap value
   text <- sub(pattern = '.*\\(', replacement = '\\(', x = text)
   text <- sub(pattern = '\\(', replacement = '', x = text)
   text <- sub(pattern = '\\)', replacement = '', x = text)
   return(text)
 }
 
-
 # When the value supplied is FALSE, the text is changed to "unclassified"
+# This is used in do.bootstrap.cutoff()
 make.unclassified <- function(text,val){
   if (val == F){
     text <- "unclassified"
@@ -184,7 +189,7 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   
   # parentheses and are named something that is not "unclassified" or "unknown"
   tax.nums <- apply(tax[,2:ncol(tax)],2,pull.out.percent)
-  index <- which(tax.nums == "unclassified" | tax.nums == "unknown")
+  index <- which(tax.nums == "unclassified")
   tax.nums[index] <- 0
   tax.nums <- apply(X = tax.nums, MARGIN = 2, FUN = as.numeric)
   tax.TF <- tax.nums >= cutoff
@@ -199,7 +204,6 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   
   return(tax)
 }
-
 
 # Find seqs misclassified at a given phylogenetic level, t
 find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_percents, TaxaLevel){
@@ -241,6 +245,7 @@ fw.percents <- reformat.fw(FWtable = fw.percents)
 
 check.files.match(FWtable = fw.percents, GGtable = gg.percents)
 
+# Only compare the classifications made by the fw database to the gg classifications, not full tax tables
 fw.seq.ids <- import.FW.seq.IDs()
 fw.indeces <- find.fw.indeces(TaxonomyTable = fw.percents, SeqIDs = fw.seq.ids)
 fw.percents.fw.only <- fw.percents[fw.indeces,]
@@ -248,20 +253,21 @@ gg.percents.fw.only <- gg.percents[fw.indeces,]
 
 check.files.match(FWtable = fw.percents.fw.only, GGtable = gg.percents.fw.only)
 
-fw <- do.bootstrap.cutoff(TaxonomyTable = fw.percents, BootstrapCutoff = taxonomy.bootstrap.cutoff)
+fw.fw.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.fw.only, BootstrapCutoff = taxonomy.bootstrap.cutoff)
 cat("\nFinished bootstrap value cutoff on workflow's taxonomy file.\n")
-gg <- do.bootstrap.cutoff(TaxonomyTable = gg.percents, BootstrapCutoff = taxonomy.bootstrap.cutoff)
+gg.fw.only <- do.bootstrap.cutoff(TaxonomyTable = gg.percents.fw.only, BootstrapCutoff = taxonomy.bootstrap.cutoff)
 cat("Finished bootstrap cutoff on comparison taxonomy file.\n\n")
 
-check.files.match(FWtable = fw, GGtable = gg)
+check.files.match(FWtable = fw.fw.only, GGtable = gg.fw.only)
 
-fw <- apply(fw, 2, remove.parentheses)
-gg <- apply(gg, 2, remove.parentheses)
+fw.fw.only <- apply(fw.fw.only, 2, remove.parentheses)
+gg.fw.only <- apply(gg.fw.only, 2, remove.parentheses)
 
-check.files.match(FWtable = fw, GGtable = gg)
+check.files.match(FWtable = fw.fw.only, GGtable = gg.fw.only)
 
 for (t in 1:5){
-  find.conflicting.names(FWtable = fw, GGtable = gg, FWtable_percents = fw.percents, GGtable_percents = gg.percents, TaxaLevel = t)
+  find.conflicting.names(FWtable = fw.fw.only, GGtable = gg.fw.only, FWtable_percents = fw.percents.fw.only, 
+                         GGtable_percents = gg.percents.fw.only, TaxaLevel = t)
 }
 
 

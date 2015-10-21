@@ -38,12 +38,12 @@ Robin Rohwer identified and evaluated a number of possible solutions, as describ
 
 5. Classify the sequences in the FW database with a different method, such as BLAST, since it's a small database anyway. However, the taxonomy assignment algorithm takes into consideration phylogeny, which is a better classification than that obtained by just using sequence similarity.
 
-Our solution/this workflow (that we think works):
-	-Classify in FW first, but with a cutoff not based on clustering bootstrap values
-		-use a BLAST cutoff to identify highly similar sequences to those in
-		our freshwater sequence database
-		-classify those hightly similar sequences with a classification algorithm and our db
-		-classify the remaining sequences with a large database
+Proposed Solution
+---
+1. First classify novel sequences using the FW database, but define a cutoff independent of RDP classifer bootstrap support values.
+2. Use a BLAST cutoff to identify highly similar sequences to those in our FW sequence database.
+3. Classify those sequences using the FW database.
+4. Classify the remainining sequences with GreenGenes.
 
 Prerequisites
 ---

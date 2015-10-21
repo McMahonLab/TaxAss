@@ -60,7 +60,30 @@ Prior to using this workflow, please make sure the following software are instal
 
 Workflow Summary
 ---
-
+1. Formatting
+    * Format all nucleotide sequence files such that they follow the example given in `scripts\FWonly_7Sept2015.fasta`
+    * Format the taxonomic databases such that follow the example given in `scripts/FWonly_7Sept2015.taxonomy`.
 
 Detailed Workflow Instructions and Notes
 ---
+
+1. Formatting of nucleotide sequences and taxonomic databases  
+
+    Reformat `fasta` files of nucleotide sequences to have no whitespace in the seqID line. BLAST does not parse whitespace well, and will consider any text after a space to be a comment. Having BLAST IDs that don't match the full comment line of the `fasta` file break the script `fetch_fastas_with_seqIDs.py`. **This file of sequences to be classified will be called `otus.fasta`.**
+
+
+    Reformat your taxonomy files to be compatible with `mothur`.  `mothur` requires each line to be of the form:
+
+      `seqID<tab>k_kingdom;p_phylum;...;s_species;`
+
+    where taxonomic levels beneath `kingdom` are optional. The file __cannot__ contain whitespace, and the semi-colon at the end is required.
+
+    In this workflow, we will refer to the following taxonomy files:
+
+    * custom - the curated database you wish to use before primary classification.
+    * general - the large database you with to use for classifying the remaining sequences.
+
+    Each database will have two files:
+
+    * `.fasta` - fasta nucleotide file of sequences and IDs
+    * `.taxonomy` - IDs with taxonomic names

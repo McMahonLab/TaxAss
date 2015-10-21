@@ -47,6 +47,13 @@ Proposed Solution
 
 Prerequisites
 ---
+Prior to using this workflow, please make sure the following software are installed and working:
+
+* [mothur](http://mothur.org/wiki/Main_Page)
+* [BLAST](http://www.ncbi.nlm.nih.gov/books/NBK52640/)
+* [Python](https://www.python.org/)
+* [R](https://www.r-project.org/)
+* A text editor, such as [TextWrangler](http://www.barebones.com/products/textwrangler/), [Atom](https://atom.io/), or [emacs](https://www.gnu.org/software/emacs/)
 
 Workflow Summary
 ---

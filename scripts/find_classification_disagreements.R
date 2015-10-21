@@ -8,24 +8,25 @@
 # Then I'll choose a BLAST cutoff level that includes the most sequences
 # for classification by FW but still avoids conflicting classifications
 # with GG at phylum and class levels.
-# More details in 8-26-15 Analysis notes.
+# More details in 8-26-15 Analysis notes, 10-19-15 Analysis Notes, 10-21-15 Analysis Notes
+# This script generates files/data that the next scripts use for plots/stats
 
 #####
 # Receive arguments from terminal command line
 #####
 
-# userprefs <- commandArgs(trailingOnly = TRUE)
-# fw.plus.gg.tax.file.path <- userprefs[1]
-# gg.only.tax.file.path <- userprefs[2]
-# results.folder.path <- userprefs[3]
-# taxonomy.bootstrap.cutoff <- userprefs[4]
-# fw.seq.ids.file.path <- userprefs[5]
+userprefs <- commandArgs(trailingOnly = TRUE)
+fw.plus.gg.tax.file.path <- userprefs[1]
+gg.only.tax.file.path <- userprefs[2]
+results.folder.path <- userprefs[3]
+taxonomy.bootstrap.cutoff <- userprefs[4]
+fw.seq.ids.file.path <- userprefs[5]
 
-fw.plus.gg.tax.file.path <- "../../take4/otus.94.taxonomy"
-gg.only.tax.file.path <- "../../take4/otus.gg.taxonomy"
-results.folder.path <- "../../take4/compare_percID-94_to_gg-only/"
-taxonomy.bootstrap.cutoff <- 60
-fw.seq.ids.file.path <- "../../take4/ids.above.94"
+# fw.plus.gg.tax.file.path <- "../../take4/otus.94.taxonomy"
+# gg.only.tax.file.path <- "../../take4/otus.gg.taxonomy"
+# results.folder.path <- "../../take4/compare_percID-94_to_gg-only/"
+# taxonomy.bootstrap.cutoff <- 60
+# fw.seq.ids.file.path <- "../../take4/ids.above.94"
 
 #####
 # Define Functions for Import and Formatting
@@ -206,19 +207,6 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   return(tax)
 }
 
-# Check how high the freshwater bootstrap values end up given your cutoff.
-view.bootstraps <- function(TaxonomyTable){
-  tax <- TaxonomyTable
-  
-  # create a matrix of bootstrap numbers, copy from lines 187-190
-  tax.nums <- apply(tax[,2:ncol(tax)],2,pull.out.percent)
-  index <- which(tax.nums == "unclassified")
-  tax.nums[index] <- 0
-  tax.nums <- apply(X = tax.nums, MARGIN = 2, FUN = as.numeric)
-  
-  return(tax.nums)
-}
-
 # Find seqs misclassified at a given phylogenetic level, t
 find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_percents, TaxaLevel, tracker){
   fw <- FWtable
@@ -247,6 +235,19 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
   
   #Track the number of mismatches at each level
   return(num.mismatches)
+}
+
+# Check how high the freshwater bootstrap values end up given your cutoff.
+view.bootstraps <- function(TaxonomyTable){
+  tax <- TaxonomyTable
+  
+  # create a matrix of bootstrap numbers, copy from do.bootstrap.cutoff()
+  tax.nums <- apply(tax[,2:ncol(tax)],2,pull.out.percent)
+  index <- which(tax.nums == "unclassified")
+  tax.nums[index] <- 0
+  tax.nums <- apply(X = tax.nums, MARGIN = 2, FUN = as.numeric)
+  
+  return(tax.nums)
 }
 
 
@@ -284,13 +285,22 @@ gg.fw.only <- apply(gg.fw.only, 2, remove.parentheses)
 
 check.files.match(FWtable = fw.fw.only, GGtable = gg.fw.only)
 
-#####
-
+# Generate the files comparing classifications made by fw to those of gg
+# Generate a summary file listing the total number of classification disagreements at each level
 num.mismatches <- vector(mode = "numeric", length = 5)
 names(num.mismatches) <- c("kingdom","phylum","class","order","lineage")
 for (t in 1:5){
   num.mismatches <- find.conflicting.names(FWtable = fw.fw.only, GGtable = gg.fw.only, FWtable_percents = fw.percents.fw.only, 
-                         GGtable_percents = gg.percents.fw.only, TaxaLevel = t, tracker = num.mismatches)
+                                           GGtable_percents = gg.percents.fw.only, TaxaLevel = t, tracker = num.mismatches)
 }
 write.csv(num.mismatches, file = paste(results.folder.path, "/", "conflicts_summary.csv", sep=""))
 
+# Generate a file of the fw-assigned taxonomies, and a matching table of just their bootstrap values
+fw.bootstraps <- view.bootstraps(TaxonomyTable = fw.percents.fw.only)
+write.csv(fw.bootstraps, file = paste(results.folder.path, "/", "fw_classified_bootstraps.csv", sep=""))
+write.csv(fw.percents.fw.only, file = paste(results.folder.path, "/", "fw_classified_taxonomies.csv", sep=""))
+
+# Generate a file of the gg taxonomies for the fw-assigned sequences, and a matching table of gg bootstraps
+gg.bootstraps <- view.bootstraps(TaxonomyTable = gg.percents.fw.only)
+write.csv(fw.bootstraps, file = paste(results.folder.path, "/", "gg_classified_bootstraps.csv", sep=""))
+write.csv(fw.percents.fw.only, file = paste(results.folder.path, "/", "gg_classified_taxonomies.csv", sep=""))

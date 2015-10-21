@@ -19,7 +19,7 @@ fw.plus.gg.tax.file.path <- userprefs[1]
 gg.only.tax.file.path <- userprefs[2]
 results.folder.path <- userprefs[3]
 taxonomy.bootstrap.cutoff <- userprefs[4]
-
+fw.seq.ids.file.path <- userprefs[5]
 
 #####
 # Define Functions for Import and Formatting

@@ -72,6 +72,11 @@ Workflow Summary
 
     `blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 1`
 
+3. Reformat BLAST Database
+
+    ` blast_formatter -archive otus.custom.blast -outfmt "6 qseqid pident length qlen qstart qend" -out otus.custom.blast.table`
+
+
 Detailed Workflow Instructions and Notes
 ---
 
@@ -159,10 +164,45 @@ Detailed Workflow Instructions and Notes
     | -task megablast | Optimized version of BLAST to detect high similarity hits. It is also the blastn default task. More info [here](http://www.ncbi.nlm.nih.gov/Class/MLACourse/Modules/BLAST/nucleotide_blast.html). |
     | -db custom.db | Name of the blast database created previously (without the additional file extensions).|
     | -out otus.custom.blast | Location of the BLAST output file to be created. |
-    | -outfmt 11 | Formate to be used with `blast_formatter`. |
+    | -outfmt 11 | Format to be used with `blast_formatter`. ASN.1 format. |
     |	-max_target_seqs 1 | Only keep the best hit for each query sequence. ]
 
     __Note__.
       * We would like to find the longest matching sequence with a percent ID which still matches the cutoff. However, it's possible that the best hit is a shorter sequence with a higher percent ID.
       * This is something that could be examined to decide if `blastn` custom scoring should be used instead of `megablast`.
       * The R script in step 4 reports stats on alignment length vs. query length. If many alignments are shorter than the full sequence, consider evaluating beyond the first hit.
+
+
+3. Reformat BLAST Results
+
+    The `blast_formatter` function in reformats the ASN.1-formatted file and reformats it to other formats. We reformat to a custom table format to feed into `find_seqIDs_with_pident.R`. However, using `blast_formatter` you can look at your blast results from the previous step any way you'd like.
+
+    Full Command (type in terminal):
+
+    `blast_formatter -archive otus.custom.blast -outfmt "6 qseqid pident length qlen qstart qend" -out otus.custom.blast.table`
+
+      What the filenames are:
+
+      | File  | Description  |
+      |---|---|
+      | otus.custom.blast	| BLAST result file generated in Step 2, in the ASN.1 blast file format. |
+      | otus.custom.blast.table | BLAST results reformatted into a six-column table for `find_seqIDs_with_pident.R`.  The tab-delimited columns are: qseqid pident length qlen qstart qend.
+
+      What each flag does:		
+
+      | Flag | Description |
+      |------|-------------|
+      | -archive otus.custom.blast | Specify path to the blast result file you are reformatting. |
+      | -outfmt "6 qseqid pident length qlen qstart qend" | `6` is tabular format without headers or other information between rows of data, with columns further describe below. |
+      | -out otus.custom.blast.table | Specify path to the output file of formatted blast results. |
+
+      Columns in re-formatted BLAST results.
+
+      | Number | Name | Description |
+      |--------|------|-------------|
+      | 1 | qseqid | query (OTU) sequence ID |
+      | 2 | pident | percent identity (# of matches / # "columns" in the sequence) |
+      | 3 | length | length of alignment |
+      | 4 | qlen | full length of query sequence |
+      | 5 | qstart | index of beginning of alignment on query sequence |
+      | 6 | qend | index of end of alignment on query sequence |

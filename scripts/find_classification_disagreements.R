@@ -8,7 +8,8 @@
 # Then I'll choose a BLAST cutoff level that includes the most sequences
 # for classification by FW but still avoids conflicting classifications
 # with GG at phylum and class levels.
-# More details in 8-26-15 Analysis notes.
+# More details in 8-26-15 Analysis notes, 10-19-15 Analysis Notes, 10-21-15 Analysis Notes
+# This script generates files/data that the next scripts use for plots/stats
 
 #####
 # Receive arguments from terminal command line
@@ -21,15 +22,19 @@ results.folder.path <- userprefs[3]
 taxonomy.bootstrap.cutoff <- userprefs[4]
 fw.seq.ids.file.path <- userprefs[5]
 
+# fw.plus.gg.tax.file.path <- "../../take4/otus.94.taxonomy"
+# gg.only.tax.file.path <- "../../take4/otus.gg.taxonomy"
+# results.folder.path <- "../../take4/compare_percID-94_to_gg-only/"
+# taxonomy.bootstrap.cutoff <- 60
+# fw.seq.ids.file.path <- "../../take4/ids.above.94"
+
 #####
 # Define Functions for Import and Formatting
 #####
 
-# Import the freshwater sequence IDs as determined by the BLAST cutoff in workflow step 4
-import.FW.seq.IDs <- function(){
-  fw.seqs <- scan(file = fw.seq.ids.file.path)
-  fw.seqs <- as.character(fw.seqs)
-  return(fw.seqs)
+# Entertain user with a poem while they wait:
+print.poem <- function(){
+  cat("\nAnd the Days Are Not Full Enough\nby Ezra Pound\n\nAnd the days are not full enough\nAnd the nights are not full enough\nAnd life slips by like a field mouse\n\tNot shaking the grass.\n\n")
 }
 
 # Import the otu taxonomies assigned with both FW and GG
@@ -106,15 +111,17 @@ check.files.match <- function(FWtable, GGtable){
   }
 }
 
+# Import the freshwater sequence IDs as determined by the BLAST cutoff in workflow step 4
+import.FW.seq.IDs <- function(){
+  fw.seqs <- scan(file = fw.seq.ids.file.path)
+  fw.seqs <- as.character(fw.seqs)
+  return(fw.seqs)
+}
+
 # Remove parentheses of % confidence so that names in each table match exactly
 remove.parentheses <- function(x){
   fixed.name <- sub(pattern = '\\(.*\\)' , replacement = '', x = x)
   return(fixed.name)
-}
-
-# Entertain user with a poem while they wait:
-print.poem <- function(){
-  cat("\nAnd the Days Are Not Full Enough\nby Ezra Pound\n\nAnd the days are not full enough\nAnd the nights are not full enough\nAnd life slips by like a field mouse\n\tNot shaking the grass.\n\n")
 }
 
 
@@ -158,8 +165,7 @@ uniform.unclass.names <- function(TaxonomyTable){
 }
 
 # Given a single taxonomy name, pull out the bootstrap percent.
-# For example, text = k__Bacteria(100) would return (as character) 100
-# But also, text = "unclassified" would return (as character) "unclassified"
+# text = k__Bacteria(100) returns (as character) 100, But text = "unclassified" returns (as character) "unclassified"
 pull.out.percent <- function(text){
   text <- sub(pattern = '.*\\(', replacement = '\\(', x = text)
   text <- sub(pattern = '\\(', replacement = '', x = text)
@@ -183,7 +189,7 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   tax <- as.matrix(TaxonomyTable)
   cutoff <- BootstrapCutoff
   
-  # parentheses and are named something that is not "unclassified" or "unknown"
+  # create a matrix of bootstrap numbers and then a T/F matrix
   tax.nums <- apply(tax[,2:ncol(tax)],2,pull.out.percent)
   index <- which(tax.nums == "unclassified")
   tax.nums[index] <- 0
@@ -202,12 +208,13 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
 }
 
 # Find seqs misclassified at a given phylogenetic level, t
-find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_percents, TaxaLevel){
+find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_percents, TaxaLevel, tracker){
   fw <- FWtable
   gg <- GGtable
   fw.percents <- FWtable_percents
   gg.percents <- GGtable_percents
   t <- TaxaLevel
+  num.mismatches <- tracker
   
   taxa.names <- c("kingdom","phylum","class","order","lineage","clade","tribe")
   
@@ -215,6 +222,7 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
   # ignore names that say unclassified
   index <- which(gg[,t+1] != fw[,t+1] & gg[,t+1] != "unclassified" & fw[,t+1] != "unclassified")
   cat("there are ", length(index), " conflicting names at ", taxa.names[t], " level\n")
+  num.mismatches[t] <- length(index)
   
   # Compare the conflicting tables in entirety, use the original files with percents still in it
   conflicting <- cbind(gg.percents[index,,drop=F], fw.percents[index,,drop=F])
@@ -224,6 +232,22 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
   
   # Export a file with the conflicting rows side by side.
   write.csv(conflicting, file = paste(results.folder.path, "/", taxa.names[t],"_conflicts.csv", sep=""))
+  
+  #Track the number of mismatches at each level
+  return(num.mismatches)
+}
+
+# Check how high the freshwater bootstrap values end up given your cutoff.
+view.bootstraps <- function(TaxonomyTable){
+  tax <- TaxonomyTable
+  
+  # create a matrix of bootstrap numbers, copy from do.bootstrap.cutoff()
+  tax.nums <- apply(tax[,2:ncol(tax)],2,pull.out.percent)
+  index <- which(tax.nums == "unclassified")
+  tax.nums[index] <- 0
+  tax.nums <- apply(X = tax.nums, MARGIN = 2, FUN = as.numeric)
+  
+  return(tax.nums)
 }
 
 
@@ -261,9 +285,22 @@ gg.fw.only <- apply(gg.fw.only, 2, remove.parentheses)
 
 check.files.match(FWtable = fw.fw.only, GGtable = gg.fw.only)
 
+# Generate the files comparing classifications made by fw to those of gg
+# Generate a summary file listing the total number of classification disagreements at each level
+num.mismatches <- vector(mode = "numeric", length = 5)
+names(num.mismatches) <- c("kingdom","phylum","class","order","lineage")
 for (t in 1:5){
-  find.conflicting.names(FWtable = fw.fw.only, GGtable = gg.fw.only, FWtable_percents = fw.percents.fw.only, 
-                         GGtable_percents = gg.percents.fw.only, TaxaLevel = t)
+  num.mismatches <- find.conflicting.names(FWtable = fw.fw.only, GGtable = gg.fw.only, FWtable_percents = fw.percents.fw.only, 
+                                           GGtable_percents = gg.percents.fw.only, TaxaLevel = t, tracker = num.mismatches)
 }
+write.csv(num.mismatches, file = paste(results.folder.path, "/", "conflicts_summary.csv", sep=""))
 
+# Generate a file of the fw-assigned taxonomies, and a matching table of just their bootstrap values
+fw.bootstraps <- view.bootstraps(TaxonomyTable = fw.percents.fw.only)
+write.csv(fw.bootstraps, file = paste(results.folder.path, "/", "fw_classified_bootstraps.csv", sep=""))
+write.csv(fw.percents.fw.only, file = paste(results.folder.path, "/", "fw_classified_taxonomies.csv", sep=""))
 
+# Generate a file of the gg taxonomies for the fw-assigned sequences, and a matching table of gg bootstraps
+gg.bootstraps <- view.bootstraps(TaxonomyTable = gg.percents.fw.only)
+write.csv(fw.bootstraps, file = paste(results.folder.path, "/", "gg_classified_bootstraps.csv", sep=""))
+write.csv(fw.percents.fw.only, file = paste(results.folder.path, "/", "gg_classified_taxonomies.csv", sep=""))

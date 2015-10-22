@@ -60,14 +60,18 @@ Prior to using this workflow, please make sure the following software are instal
 
 Workflow Summary
 ---
-1. Formatting
-    * Format all nucleotide sequence files such that they follow the example given in `scripts\FWonly_7Sept2015.fasta`
-    * Format the taxonomic databases such that follow the example given in `scripts/FWonly_7Sept2015.taxonomy`.
+0. Formatting
+  * Format all nucleotide sequence files such that they follow the example given in `scripts\FWonly_7Sept2015.fasta`
+  * Format the taxonomic databases such that follow the example given in `scripts/FWonly_7Sept2015.taxonomy`.
+
+1. BLAST Database Creation
+
+    `makeblastdb -dbtype nucl -in custom.fasta -input_type fasta -parse_seqids -out custom.db`
 
 Detailed Workflow Instructions and Notes
 ---
 
-1. Formatting of nucleotide sequences and taxonomic databases  
+0. Formatting of nucleotide sequences and taxonomic databases  
 
     Reformat `fasta` files of nucleotide sequences to have no whitespace in the seqID line. BLAST does not parse whitespace well, and will consider any text after a space to be a comment. Having BLAST IDs that don't match the full comment line of the `fasta` file break the script `fetch_fastas_with_seqIDs.py`. **This file of sequences to be classified will be called `otus.fasta`.**
 
@@ -80,10 +84,46 @@ Detailed Workflow Instructions and Notes
 
     In this workflow, we will refer to the following taxonomy files:
 
-    * custom - the curated database you wish to use before primary classification.
-    * general - the large database you with to use for classifying the remaining sequences.
+    * `custom` - the curated database you wish to use before primary classification.
+    * `general` - the large database you with to use for classifying the remaining sequences.
 
     Each database will have two files:
 
     * `.fasta` - fasta nucleotide file of sequences and IDs
     * `.taxonomy` - IDs with taxonomic names
+
+
+1. Creation of BLAST database from curated taxonomy
+
+    Use the command `makeblastdb` to create a BLAST database out of the FW taxonomy fasta files. We need to create a database because:  
+    	1. BLAST will run faster  
+    	2. Having a database is necessary for some of the output formats
+
+    Full command (typed in terminal):  
+
+      `makeblastdb -dbtype nucl -in custom.fasta -input_type fasta -parse_seqids -out custom.db`
+
+    What the filenames are:
+
+    | File  | Description  |
+    |---|---|
+    | `custom.fasta` | Path to the small custom taxonomy file you want to use to assign for primary classification (e.g., the freshwater taxonomy database). __Note__: if the file path contains spaces, the path needs to be double-quoted: `' "/path/double quoted" '`.  |
+    | `custom.db` | Name of the BLAST DB to be created. The command will generate six files with different final extensions, but all begin with this string.  
+
+    What each flag does:
+
+    | Flag | Description |
+    |------|-------------|
+    | `-dbtype nucl`	| A required argument, specifying the database input file contains nucleic acid sequencess (nucl) |
+    | `-in custom.fasta` |	Path of the input file to be used for DB creation |
+    | `-input_type fasta` | Specify the input file is in `fasta` format |
+    | `-parse_seqids` | Include sequence IDs in the formatted DB, so that sequences can later be retrieved. Also necessary for using blast_formatter later. |
+    | `-out custom.db` | Specify path for the database files to be created |
+
+    These six files are created:  
+    * custom.db.nhr  
+  	* custom.db.nog  
+  	* custom.db.nsd  
+  	* custom.db.nsi  
+  	* custom.db.nsq  
+    But the string `custom.db` is all that's required to invoke the DB later.

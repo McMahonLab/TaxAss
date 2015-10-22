@@ -68,6 +68,10 @@ Workflow Summary
 
     `makeblastdb -dbtype nucl -in custom.fasta -input_type fasta -parse_seqids -out custom.db`
 
+2. Run BLAST
+
+    `blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 1`
+
 Detailed Workflow Instructions and Notes
 ---
 
@@ -127,3 +131,38 @@ Detailed Workflow Instructions and Notes
   	* custom.db.nsi  
   	* custom.db.nsq  
     But the string `custom.db` is all that's required to invoke the DB later.
+
+2. Run BLAST
+
+    Use the command `blastn` to run a megablast that returns the best hit in the taxonomy database (subject) for each of your OTU sequences (queries). Megablast is optimized for finding very similar matches with sequences longer than 30 bp.  
+
+    __Note__: This workflow was made for ~100 bp sequences and may need to be re-optimized for sequences of different lengths.
+
+    Full Command (type in terminal):
+
+    `blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 1`
+
+
+    What the filenames are:
+
+    | File  | Description  |
+    |---|---|
+    | otus.fasta | The query file. The `fasta` file of sequences you want classified. |
+    | custom.db | The subject file. The BLAST database made from custom taxonomy sequences in Step 1. |
+    |  otus.custom.blast	| The BLAST output file. Its format is unreadable by you, but will be reformatted using `blast_formatter`. |
+
+    What each flag does:						
+
+    | Flag | Description |
+    |------|-------------|
+    | -query otus.fasta |	Location of the query file. |
+    | -task megablast | Optimized version of BLAST to detect high similarity hits. It is also the blastn default task. More info [here](http://www.ncbi.nlm.nih.gov/Class/MLACourse/Modules/BLAST/nucleotide_blast.html). |
+    | -db custom.db | Name of the blast database created previously (without the additional file extensions).|
+    | -out otus.custom.blast | Location of the BLAST output file to be created. |
+    | -outfmt 11 | Formate to be used with `blast_formatter`. |
+    |	-max_target_seqs 1 | Only keep the best hit for each query sequence. ]
+
+    __Note__.
+      * We would like to find the longest matching sequence with a percent ID which still matches the cutoff. However, it's possible that the best hit is a shorter sequence with a higher percent ID.
+      * This is something that could be examined to decide if `blastn` custom scoring should be used instead of `megablast`.
+      * The R script in step 4 reports stats on alignment length vs. query length. If many alignments are shorter than the full sequence, consider evaluating beyond the first hit.

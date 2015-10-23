@@ -76,6 +76,11 @@ Workflow Summary
 
     ` blast_formatter -archive otus.custom.blast -outfmt "6 qseqid pident length qlen qstart qend" -out otus.custom.blast.table`
 
+4. Filter BLAST Results (Run one script twice)
+
+    `Rscript find_seqIDs_with_pident.R otus.custom.blast.table outputfile cutoff TRUE`
+
+    `Rscript find_seqIDs_with_pident.R otus.custom.blast.table outputfile cutoff FALSE`
 
 Detailed Workflow Instructions and Notes
 ---
@@ -206,3 +211,43 @@ Detailed Workflow Instructions and Notes
       | 4 | qlen | full length of query sequence |
       | 5 | qstart | index of beginning of alignment on query sequence |
       | 6 | qend | index of end of alignment on query sequence |
+
+4. Filter BLAST results
+
+      `find_seqIDs_with_pident.R` takes the formatted BLAST file and
+      calculates a corrected pident value that corrects the value for the entire length of the query. The corrected pident is a worst case scenario that assumes any edge gaps are mismatches.
+
+      Calculation:
+      `corrected pident" = pident * length / (length - (qend - qstart) + qlen)`
+
+      The R script is run twice, once to generate the sequence ID's above/equal to the "true pident" cutoff that are destined for taxonomy assignment in the small custom database, and once to generate the sequence ID's below the cutoff that are destined for taxonomy assignment in the large general database.
+
+      Full Two Commands (type in terminal):
+
+      `Rscript find_seqIDs_with_pident.R otus.custom.blast.table outputfile cutoff TRUE`
+
+      `Rscript find_seqIDs_with_pident.R otus.custom.blast.table outputfile cutoff FALSE`
+
+      __Note__: Rscript requires R v 3.2 or higher. The path to the R executable must be added to your `PATH` variable.
+
+      The arguments must be in the correct order. Rscript sources the .R script using the arguments supplied after it in the terminal. Separate all arguments with a space.
+
+      What each argument is:
+
+      | Number | Name | Description |
+      |--------|------|-------------|
+      | 1 | script.R | Path to `find_seqIDs_with_pident.R` |
+      | 2 | otus.custom.blast.table | Path to `otus.custom.blast.table`from Step 3 |
+      |	3 | outputfile | Path the to file you are creating, the list of sequence ID's matching your criteria (T or F for meeting the cutoff). |
+      | 4 | Cutoff | Numeric representing the "corrected pident" to use for matches. |
+      | 5 | Matches | TRUE or FALSE. TRUE: return seqID's >= cutoff, FALSE: return seqID's < cutoff |
+
+      What each file is:
+
+      | File | Description |
+      |------|-------------|
+      | find_seqIDs_with_pident.R	| Script for this step. |
+      | otus.custom.blast.table	| The formatted blast output from step 3
+      | outputfile | Path the to file you are creating, the list of sequence ID's matching your criteria (T or F for meeting the cutoff). These files are newline \n delimited seqIDs. |
+
+      __Note__: You may need to choose a different "corrected pident" cutoff for your sequence data. We selected a pident that gave classifications consistent to the class level between the small and large databases.

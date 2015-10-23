@@ -55,7 +55,7 @@ Prior to using this workflow, please make sure the following software are instal
 * [mothur](http://mothur.org/wiki/Main_Page)
 * [BLAST](http://www.ncbi.nlm.nih.gov/books/NBK52640/)
 * [Python](https://www.python.org/)
-* [R](https://www.r-project.org/)
+* [R](https://www.r-project.org/), version 3.2 or newer (required for Rscript in steps 4 and 11)
 * A text editor, such as [TextWrangler](http://www.barebones.com/products/textwrangler/), [Atom](https://atom.io/), or [emacs](https://www.gnu.org/software/emacs/)
 
 Workflow Summary

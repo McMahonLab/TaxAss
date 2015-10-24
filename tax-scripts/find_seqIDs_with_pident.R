@@ -77,7 +77,7 @@ calc.full.pIDs <- function(BlastTable){
   }
   
   # create a numeric blast matrix to use the apply funciton
-  b <- blast[,-1]
+  b <- blast[,-c(1,5)] #** subtracted 5 for sseqid testing!*** remove later?
   b <- as.matrix(b)
   
   # find the "true" pid for the full length sequence of each blast hit
@@ -106,13 +106,13 @@ find.FW.seqIDs <- function(BlastTable, cutoff.perc.id, want.matches){
   write(x = seq.ids, file = output.file.path, sep="\n")
   
   if (hits == TRUE){
-    cat("\nAdded",length(seq.ids),"sequences matching the FW database with >= ", 
+    cat("\nAdded",length(seq.ids),"sequences matching the custom database with >= ", 
         cutoff, "% sequence identity to",output.file.path,
-        "\nAssign taxonomy to these sequences using the Freshwater database\n\n")
+        "\nAssign taxonomy to these sequences using the Small Custom database\n\n")
   }else{
-    cat("\nAdded",length(seq.ids),"sequences matching the FW database with < ", 
+    cat("\nAdded",length(seq.ids),"sequences matching the custom database with < ", 
     cutoff, "% sequence identity to",output.file.path,
-    "\nAssign taxonomy to these sequences using the GreenGenes database\n\n")
+    "\nAssign taxonomy to these sequences using the Large General database\n\n")
   }
   
   

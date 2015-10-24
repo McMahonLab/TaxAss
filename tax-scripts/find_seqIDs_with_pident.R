@@ -40,7 +40,7 @@ user.wants.matches <- TRUE
 # Import the blast output
 import.BLAST.data <- function(){
   blast <- read.table(file = blast.file.path, sep = "\t", stringsAsFactors = F)
-  colnames(blast) <- c("qseqid","pident","length","qlen","qstart","qend","sseqid")
+  colnames(blast) <- c("qseqid","pident","length","qlen","qstart","qend")
   return(blast)
 }
 
@@ -77,7 +77,7 @@ calc.full.pIDs <- function(BlastTable){
   }
   
   # create a numeric blast matrix to use the apply funciton
-  b <- blast[,-c(1,5)] #** subtracted 5 for sseqid testing!*** remove later?
+  b <- blast[,-1]
   b <- as.matrix(b)
   
   # find the "true" pid for the full length sequence of each blast hit
@@ -126,6 +126,9 @@ choose.best.hit <- function(BlastTable){
   blast <- blast[index.best.ids,]
   # add a column with the hit number
   blast <- cbind(blast, hit.num.best.ids)
+  
+  # save this table to feed into a plotting/analysis script
+  write.csv(x = blast, file = "~/Desktop/hitstats.csv")
   
   return(blast)
 }

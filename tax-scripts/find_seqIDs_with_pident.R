@@ -89,6 +89,48 @@ calc.full.pIDs <- function(BlastTable){
   return(blast)
 }
 
+# choose the hit with the best "full length" pident- report which # hit it is.
+choose.best.hit <- function(BlastTable){
+  blast <- BlastTable
+  
+  # get a list of all the unique id names, and set up blank vectors to record which are best
+  unique.qids <- unique(blast$qseqid)
+  index.best.ids <- NULL
+  hit.num.best.ids <- NULL
+  
+  # for each unique query id name, report the index and hit number of the best "full length" hit
+  for (q in 1:length(unique.qids)){
+    index.same.ids <- which(blast$qseqid == unique.qids[q])
+    
+    # start with the first hit as the default best one
+    index.best <- index.same.ids[1]
+    hit.num <- 1
+    
+    # if there are multiple hits, replace if another is better
+    if (length(index.same.ids) > 1){
+      for (i in 2:length(index.same.ids)){
+        if (blast$true.pids[index.same.ids][i] > blast$true.pids[index.best]){
+          index.best <- index.same.ids[i]
+          hit.num <- i
+        }
+      }
+    }
+    
+    # record the blast table index of the best hit
+    index.best.ids <- c(index.best.ids, index.best)
+    # record which number hit that was.
+    hit.num.best.ids <- c(hit.num.best.ids, hit.num)
+  }
+  
+  # change blast table to only contain the best hits
+  blast <- blast[index.best.ids,]
+  # add a column with the hit number
+  blast <- cbind(blast, hit.num.best.ids)
+  
+  return(blast)
+}
+
+
 # select qseqids that are above or below the true.percent.id cutoff
 find.FW.seqIDs <- function(BlastTable, cutoff.perc.id, want.matches){
   blast <- BlastTable
@@ -128,5 +170,7 @@ blast <- import.BLAST.data()
 blast <- format.BLAST.data(BlastTable = blast)
 
 blast <- calc.full.pIDs(BlastTable = blast)
+
+blast <- choose.best.hit(BlastTable = blast)
 
 find.FW.seqIDs(BlastTable = blast, cutoff.perc.id = users.cutoff, want.matches = user.wants.matches)

@@ -22,11 +22,16 @@
 # Receive arguments from terminal command line
 #####
 
-userprefs <- commandArgs(trailingOnly = TRUE)
-blast.file.path <- userprefs[1]
-output.file.path <- userprefs[2]
-users.cutoff <- as.numeric(userprefs[3])
-user.wants.matches <- as.logical(userprefs[4])
+# userprefs <- commandArgs(trailingOnly = TRUE)
+# blast.file.path <- userprefs[1]
+# output.file.path <- userprefs[2]
+# users.cutoff <- as.numeric(userprefs[3])
+# user.wants.matches <- as.logical(userprefs[4])
+
+blast.file.path <- "../../take4/otus.fw.blast.table"
+output.file.path <- "~/Desktop/test"
+users.cutoff <- 94
+user.wants.matches <- TRUE
 
 #####
 # Define Functions
@@ -35,7 +40,7 @@ user.wants.matches <- as.logical(userprefs[4])
 # Import the blast output
 import.BLAST.data <- function(){
   blast <- read.table(file = blast.file.path, sep = "\t", stringsAsFactors = F)
-  colnames(blast) <- c("qseqid","pident","length","qlen","qstart","qend")
+  colnames(blast) <- c("qseqid","pident","length","qlen","qstart","qend","sseqid")
   return(blast)
 }
 

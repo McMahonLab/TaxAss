@@ -26,3 +26,10 @@ fetch_seqIDs_blast_removed.py
 ---
 
 Script that takes the list of sequence IDs that BLAST returns and finds all the seqIDs BLAST didn't report because they were not good enough hits. Then it creates a .fasta file of these sequences that can be concatenated to the .fasta file of BLAST seqIDs under the pident cutoff.
+
+
+plot_blast_hit_stats.R
+---
+
+Script that analyzes whether the BLAST results appear to be giving the best corrected hit with BLAST's best hit.
+This is in progress.  See 10-25-15 Analysis Notes.  Not ready for terminal command line use yet.

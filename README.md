@@ -55,19 +55,37 @@ Prior to using this workflow, please make sure the following software are instal
 * [mothur](http://mothur.org/wiki/Main_Page)
 * [BLAST](http://www.ncbi.nlm.nih.gov/books/NBK52640/)
 * [Python](https://www.python.org/)
-* [R](https://www.r-project.org/)
+* [R](https://www.r-project.org/), version 3.2 or newer (required for Rscript in steps 4 and 11)
 * A text editor, such as [TextWrangler](http://www.barebones.com/products/textwrangler/), [Atom](https://atom.io/), or [emacs](https://www.gnu.org/software/emacs/)
 
 Workflow Summary
 ---
-1. Formatting
-    * Format all nucleotide sequence files such that they follow the example given in `scripts\FWonly_7Sept2015.fasta`
-    * Format the taxonomic databases such that follow the example given in `scripts/FWonly_7Sept2015.taxonomy`.
+0. Formatting
+  * Format all nucleotide sequence files such that they follow the example given in `scripts\FWonly_7Sept2015.fasta`
+  * Format the taxonomic databases such that follow the example given in `scripts/FWonly_7Sept2015.taxonomy`.
+
+1. BLAST Database Creation
+
+    `makeblastdb -dbtype nucl -in custom.fasta -input_type fasta -parse_seqids -out custom.db`
+
+2. Run BLAST
+
+    `blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 1`
+
+3. Reformat BLAST Database
+
+    ` blast_formatter -archive otus.custom.blast -outfmt "6 qseqid pident length qlen qstart qend" -out otus.custom.blast.table`
+
+4. Filter BLAST Results (Run one script twice)
+
+    `Rscript find_seqIDs_with_pident.R otus.custom.blast.table outputfile cutoff TRUE`
+
+    `Rscript find_seqIDs_with_pident.R otus.custom.blast.table outputfile cutoff FALSE`
 
 Detailed Workflow Instructions and Notes
 ---
 
-1. Formatting of nucleotide sequences and taxonomic databases  
+0. Formatting of nucleotide sequences and taxonomic databases  
 
     Reformat `fasta` files of nucleotide sequences to have no whitespace in the seqID line. BLAST does not parse whitespace well, and will consider any text after a space to be a comment. Having BLAST IDs that don't match the full comment line of the `fasta` file break the script `fetch_fastas_with_seqIDs.py`. **This file of sequences to be classified will be called `otus.fasta`.**
 
@@ -80,10 +98,156 @@ Detailed Workflow Instructions and Notes
 
     In this workflow, we will refer to the following taxonomy files:
 
-    * custom - the curated database you wish to use before primary classification.
-    * general - the large database you with to use for classifying the remaining sequences.
+    * `custom` - the curated database you wish to use before primary classification.
+    * `general` - the large database you with to use for classifying the remaining sequences.
 
     Each database will have two files:
 
     * `.fasta` - fasta nucleotide file of sequences and IDs
     * `.taxonomy` - IDs with taxonomic names
+
+
+1. Creation of BLAST database from curated taxonomy
+
+    Use the command `makeblastdb` to create a BLAST database out of the FW taxonomy fasta files. We need to create a database because:  
+    	1. BLAST will run faster  
+    	2. Having a database is necessary for some of the output formats
+
+    Full command (typed in terminal):  
+
+      `makeblastdb -dbtype nucl -in custom.fasta -input_type fasta -parse_seqids -out custom.db`
+
+    What the filenames are:
+
+    | File  | Description  |
+    |---|---|
+    | `custom.fasta` | Path to the small custom taxonomy file you want to use to assign for primary classification (e.g., the freshwater taxonomy database). __Note__: if the file path contains spaces, the path needs to be double-quoted: `' "/path/double quoted" '`.  |
+    | `custom.db` | Name of the BLAST DB to be created. The command will generate six files with different final extensions, but all begin with this string.  
+
+    What each flag does:
+
+    | Flag | Description |
+    |------|-------------|
+    | `-dbtype nucl`	| A required argument, specifying the database input file contains nucleic acid sequencess (nucl) |
+    | `-in custom.fasta` |	Path of the input file to be used for DB creation |
+    | `-input_type fasta` | Specify the input file is in `fasta` format |
+    | `-parse_seqids` | Include sequence IDs in the formatted DB, so that sequences can later be retrieved. Also necessary for using blast_formatter later. |
+    | `-out custom.db` | Specify path for the database files to be created |
+
+    These six files are created:  
+    * custom.db.nhr  
+  	* custom.db.nog  
+  	* custom.db.nsd  
+  	* custom.db.nsi  
+  	* custom.db.nsq  
+    But the string `custom.db` is all that's required to invoke the DB later.
+
+2. Run BLAST
+
+    Use the command `blastn` to run a megablast that returns the best hit in the taxonomy database (subject) for each of your OTU sequences (queries). Megablast is optimized for finding very similar matches with sequences longer than 30 bp.  
+
+    __Note__: This workflow was made for ~100 bp sequences and may need to be re-optimized for sequences of different lengths.
+
+    Full Command (type in terminal):
+
+    `blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 1`
+
+
+    What the filenames are:
+
+    | File  | Description  |
+    |---|---|
+    | otus.fasta | The query file. The `fasta` file of sequences you want classified. |
+    | custom.db | The subject file. The BLAST database made from custom taxonomy sequences in Step 1. |
+    |  otus.custom.blast	| The BLAST output file. Its format is unreadable by you, but will be reformatted using `blast_formatter`. |
+
+    What each flag does:						
+
+    | Flag | Description |
+    |------|-------------|
+    | -query otus.fasta |	Location of the query file. |
+    | -task megablast | Optimized version of BLAST to detect high similarity hits. It is also the blastn default task. More info [here](http://www.ncbi.nlm.nih.gov/Class/MLACourse/Modules/BLAST/nucleotide_blast.html). |
+    | -db custom.db | Name of the blast database created previously (without the additional file extensions).|
+    | -out otus.custom.blast | Location of the BLAST output file to be created. |
+    | -outfmt 11 | Format to be used with `blast_formatter`. ASN.1 format. |
+    |	-max_target_seqs 1 | Only keep the best hit for each query sequence. ]
+
+    __Note__.
+      * We would like to find the longest matching sequence with a percent ID which still matches the cutoff. However, it's possible that the best hit is a shorter sequence with a higher percent ID.
+      * This is something that could be examined to decide if `blastn` custom scoring should be used instead of `megablast`.
+      * The R script in step 4 reports stats on alignment length vs. query length. If many alignments are shorter than the full sequence, consider evaluating beyond the first hit.
+
+
+3. Reformat BLAST Results
+
+    The `blast_formatter` function in reformats the ASN.1-formatted file and reformats it to other formats. We reformat to a custom table format to feed into `find_seqIDs_with_pident.R`. However, using `blast_formatter` you can look at your blast results from the previous step any way you'd like.
+
+    Full Command (type in terminal):
+
+    `blast_formatter -archive otus.custom.blast -outfmt "6 qseqid pident length qlen qstart qend" -out otus.custom.blast.table`
+
+      What the filenames are:
+
+      | File  | Description  |
+      |---|---|
+      | otus.custom.blast	| BLAST result file generated in Step 2, in the ASN.1 blast file format. |
+      | otus.custom.blast.table | BLAST results reformatted into a six-column table for `find_seqIDs_with_pident.R`.  The tab-delimited columns are: qseqid pident length qlen qstart qend.
+
+      What each flag does:		
+
+      | Flag | Description |
+      |------|-------------|
+      | -archive otus.custom.blast | Specify path to the blast result file you are reformatting. |
+      | -outfmt "6 qseqid pident length qlen qstart qend" | `6` is tabular format without headers or other information between rows of data, with columns further describe below. |
+      | -out otus.custom.blast.table | Specify path to the output file of formatted blast results. |
+
+      Columns in re-formatted BLAST results.
+
+      | Number | Name | Description |
+      |--------|------|-------------|
+      | 1 | qseqid | query (OTU) sequence ID |
+      | 2 | pident | percent identity (# of matches / # "columns" in the sequence) |
+      | 3 | length | length of alignment |
+      | 4 | qlen | full length of query sequence |
+      | 5 | qstart | index of beginning of alignment on query sequence |
+      | 6 | qend | index of end of alignment on query sequence |
+
+4. Filter BLAST results
+
+      `find_seqIDs_with_pident.R` takes the formatted BLAST file and
+      calculates a corrected pident value that corrects the value for the entire length of the query. The corrected pident is a worst case scenario that assumes any edge gaps are mismatches.
+
+      Calculation:
+      `corrected pident" = pident * length / (length - (qend - qstart) + qlen)`
+
+      The R script is run twice, once to generate the sequence ID's above/equal to the "true pident" cutoff that are destined for taxonomy assignment in the small custom database, and once to generate the sequence ID's below the cutoff that are destined for taxonomy assignment in the large general database.
+
+      Full Two Commands (type in terminal):
+
+      `Rscript find_seqIDs_with_pident.R otus.custom.blast.table outputfile cutoff TRUE`
+
+      `Rscript find_seqIDs_with_pident.R otus.custom.blast.table outputfile cutoff FALSE`
+
+      __Note__: Rscript requires R v 3.2 or higher. The path to the R executable must be added to your `PATH` variable.
+
+      The arguments must be in the correct order. Rscript sources the .R script using the arguments supplied after it in the terminal. Separate all arguments with a space.
+
+      What each argument is:
+
+      | Number | Name | Description |
+      |--------|------|-------------|
+      | 1 | script.R | Path to `find_seqIDs_with_pident.R` |
+      | 2 | otus.custom.blast.table | Path to `otus.custom.blast.table`from Step 3 |
+      |	3 | outputfile | Path the to file you are creating, the list of sequence ID's matching your criteria (T or F for meeting the cutoff). |
+      | 4 | Cutoff | Numeric representing the "corrected pident" to use for matches. |
+      | 5 | Matches | TRUE or FALSE. TRUE: return seqID's >= cutoff, FALSE: return seqID's < cutoff |
+
+      What each file is:
+
+      | File | Description |
+      |------|-------------|
+      | find_seqIDs_with_pident.R	| Script for this step. |
+      | otus.custom.blast.table	| The formatted blast output from step 3
+      | outputfile | Path the to file you are creating, the list of sequence ID's matching your criteria (T or F for meeting the cutoff). These files are newline \n delimited seqIDs. |
+
+      __Note__: You may need to choose a different "corrected pident" cutoff for your sequence data. We selected a pident that gave classifications consistent to the class level between the small and large databases.

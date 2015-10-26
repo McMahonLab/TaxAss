@@ -299,12 +299,15 @@ num.mismatches <- data.frame("TaxaLevel" = names(num.mismatches),"NumConflicts" 
 write.csv(num.mismatches, file = paste(results.folder.path, "/", "conflicts_summary.csv", sep=""))
 
 # Generate a file of the fw-assigned taxonomies, and a matching table of just their bootstrap values
-  # File written: the "fw_classified_bootstraps.csv" that lists the 
+  # File written: the "fw_classified_bootstraps.csv" that lists the bootstrap of all sequences classified by freshwater
+  # File written: the "fw_classified_taxonomies.csv" that lists the taxonomy of all sequences classified by freshwater
 fw.bootstraps <- view.bootstraps(TaxonomyTable = fw.percents.fw.only)
 write.csv(fw.bootstraps, file = paste(results.folder.path, "/", "fw_classified_bootstraps.csv", sep=""))
 write.csv(fw.percents.fw.only, file = paste(results.folder.path, "/", "fw_classified_taxonomies.csv", sep=""))
 
 # Generate a file of the gg taxonomies for the fw-assigned sequences, and a matching table of gg bootstraps
+  # File written: the "gg_classified_bootstraps.csv" that lists the bootstrap of all sequences classified by freshwater
+  # File written: the "gg_classified_taxonomies.csv" that lists the taxonomy of all sequences classified by freshwater
 gg.bootstraps <- view.bootstraps(TaxonomyTable = gg.percents.fw.only)
 write.csv(fw.bootstraps, file = paste(results.folder.path, "/", "gg_classified_bootstraps.csv", sep=""))
 write.csv(fw.percents.fw.only, file = paste(results.folder.path, "/", "gg_classified_taxonomies.csv", sep=""))

@@ -237,6 +237,21 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
   return(num.mismatches)
 }
 
+# Set up a summary vector to fill
+create.summary.vector <- function(){
+  num.mismatches <- vector(mode = "numeric", length = 5)
+  names(num.mismatches) <- c("kingdom","phylum","class","order","lineage")
+  return(num.mismatches)
+}
+
+# Format and export the summary vector
+export.summary.stats <- function(SummaryVector){
+  num.mismatches <- SummaryVector
+  num.mismatches <- c(num.mismatches,"numFWseqs" = nrow(fw.fw.only))
+  num.mismatches <- data.frame("TaxaLevel" = names(num.mismatches),"NumConflicts" = num.mismatches, row.names = NULL)
+  write.csv(num.mismatches, file = paste(results.folder.path, "/", "conflicts_summary.csv", sep=""))
+}
+
 # Check how high the freshwater bootstrap values end up given your cutoff.
 view.bootstraps <- function(TaxonomyTable){
   tax <- TaxonomyTable
@@ -287,16 +302,14 @@ check.files.match(FWtable = fw.fw.only, GGtable = gg.fw.only)
 
 # Generate the files comparing classifications made by fw to those of gg
 # Generate a summary file listing the total number of classification disagreements at each level
-  # Files written in find.conflicting.names(): the "TaxaLevel_conflicts.csv" that puts taxonomy tables side by side
-  # File written afer loop: the "conflicts_summary.csv" that lists how many conflicts were at each level
-num.mismatches <- vector(mode = "numeric", length = 5)
-names(num.mismatches) <- c("kingdom","phylum","class","order","lineage")
+  # Files written in find.conflicting.names() loop: the "TaxaLevel_conflicts.csv" that puts taxonomy tables side by side
+  # File written afer loop: the "conflicts_summary.csv" that lists how many conflicts were at each level, and how many seqs were classified by FW
+num.mismatches <- create.summary.vector()
 for (t in 1:5){
   num.mismatches <- find.conflicting.names(FWtable = fw.fw.only, GGtable = gg.fw.only, FWtable_percents = fw.percents.fw.only, 
                                            GGtable_percents = gg.percents.fw.only, TaxaLevel = t, tracker = num.mismatches)
 }
-num.mismatches <- data.frame("TaxaLevel" = names(num.mismatches),"NumConflicts" = num.mismatches, row.names = NULL)
-write.csv(num.mismatches, file = paste(results.folder.path, "/", "conflicts_summary.csv", sep=""))
+export.summary.stats(SummaryVector = num.mismatches)
 
 # Generate a file of the fw-assigned taxonomies, and a matching table of just their bootstrap values
   # File written: the "fw_classified_bootstraps.csv" that lists the bootstrap of all sequences classified by freshwater

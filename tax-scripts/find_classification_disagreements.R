@@ -15,18 +15,18 @@
 # Receive arguments from terminal command line
 #####
 
-userprefs <- commandArgs(trailingOnly = TRUE)
-fw.plus.gg.tax.file.path <- userprefs[1]
-gg.only.tax.file.path <- userprefs[2]
-results.folder.path <- userprefs[3]
-taxonomy.bootstrap.cutoff <- userprefs[4]
-fw.seq.ids.file.path <- userprefs[5]
+# userprefs <- commandArgs(trailingOnly = TRUE)
+# fw.plus.gg.tax.file.path <- userprefs[1]
+# gg.only.tax.file.path <- userprefs[2]
+# results.folder.path <- userprefs[3]
+# taxonomy.bootstrap.cutoff <- userprefs[4]
+# fw.seq.ids.file.path <- userprefs[5]
 
-# fw.plus.gg.tax.file.path <- "../../take4/otus.94.taxonomy"
-# gg.only.tax.file.path <- "../../take4/otus.gg.taxonomy"
-# results.folder.path <- "../../take4/compare_percID-94_to_gg-only/"
-# taxonomy.bootstrap.cutoff <- 60
-# fw.seq.ids.file.path <- "../../take4/ids.above.94"
+fw.plus.gg.tax.file.path <- "../../take4/otus.94.taxonomy"
+gg.only.tax.file.path <- "../../take4/otus.gg.taxonomy"
+results.folder.path <- "../../take4/compare_percID-94_to_gg-only/"
+taxonomy.bootstrap.cutoff <- 60
+fw.seq.ids.file.path <- "../../take4/ids.above.94"
 
 #####
 # Define Functions for Import and Formatting
@@ -287,15 +287,19 @@ check.files.match(FWtable = fw.fw.only, GGtable = gg.fw.only)
 
 # Generate the files comparing classifications made by fw to those of gg
 # Generate a summary file listing the total number of classification disagreements at each level
+  # Files written in find.conflicting.names(): the "TaxaLevel_conflicts.csv" that puts taxonomy tables side by side
+  # File written afer loop: the "conflicts_summary.csv" that lists how many conflicts were at each level
 num.mismatches <- vector(mode = "numeric", length = 5)
 names(num.mismatches) <- c("kingdom","phylum","class","order","lineage")
 for (t in 1:5){
   num.mismatches <- find.conflicting.names(FWtable = fw.fw.only, GGtable = gg.fw.only, FWtable_percents = fw.percents.fw.only, 
                                            GGtable_percents = gg.percents.fw.only, TaxaLevel = t, tracker = num.mismatches)
 }
+num.mismatches <- data.frame("TaxaLevel" = names(num.mismatches),"NumConflicts" = num.mismatches, row.names = NULL)
 write.csv(num.mismatches, file = paste(results.folder.path, "/", "conflicts_summary.csv", sep=""))
 
 # Generate a file of the fw-assigned taxonomies, and a matching table of just their bootstrap values
+  # File written: the "fw_classified_bootstraps.csv" that lists the 
 fw.bootstraps <- view.bootstraps(TaxonomyTable = fw.percents.fw.only)
 write.csv(fw.bootstraps, file = paste(results.folder.path, "/", "fw_classified_bootstraps.csv", sep=""))
 write.csv(fw.percents.fw.only, file = paste(results.folder.path, "/", "fw_classified_taxonomies.csv", sep=""))

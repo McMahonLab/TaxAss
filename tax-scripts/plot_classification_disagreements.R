@@ -4,9 +4,83 @@
 # compare pidents based on # OTUs and # reads impacted.
 
 #####
-# Import the Data
+# Receive arguments from terminal command line
 #####
-pid.results <- read.table("data/8-28-15_pident_cutoffs_results", sep="\t", header=T)
+
+# userprefs <- commandArgs(trailingOnly = TRUE)
+# fw.plus.gg.tax.file.path <- userprefs[1]
+# gg.only.tax.file.path <- userprefs[2]
+# results.folder.path <- userprefs[3]
+# taxonomy.bootstrap.cutoff <- userprefs[4]
+# fw.seq.ids.file.path <- userprefs[5]
+
+# Do some sort of loop, the user enters all the folder paths, and then 
+# for (p in 1:length(supplied arguments)) {create variables for each path name}
+
+example.user.args <- c("../../take4/compare_percID-93_to_gg-only/conflicts_summary.csv", 93, 
+                       "../../take4/compare_percID-94_to_gg-only/conflicts_summary.csv", 94,
+                       "../../take4/compare_percID-95_to_gg-only/conflicts_summary.csv", 95,
+                       "../../take4/compare_percID-96_to_gg-only/conflicts_summary.csv", 96,
+                       "../../take4/compare_percID-97_to_gg-only/conflicts_summary.csv", 97,
+                       "../../take4/compare_percID-98_to_gg-only/conflicts_summary.csv", 98,
+                       "../../take4/compare_percID-99_to_gg-only/conflicts_summary.csv", 99,
+                       "../../take4/compare_percID-100_to_gg-only/conflicts_summary.csv", 100)
+
+
+
+#####
+# Define functions to import the data
+#####
+
+import.conflict.nums.data <- function(FilePath){
+  nums <- read.csv(FilePath)
+  nums <- nums[,2:3]
+  return(nums)
+}
+
+import.all.conflict.summaries.into.list <- function(UserArgs){
+  example.user.args <- UserArgs
+  
+  mismatches <- list(NULL)
+  counter <- 1
+  for (p in seq(from = 1, to = length(example.user.args), by = 2)){
+    mismatches[[counter]] <- import.conflict.nums.data(FilePath = example.user.args[p])
+    names(mismatches)[counter] <- example.user.args[p+1]
+    counter <- counter + 1
+  }
+  
+  return(mismatches)
+}
+
+
+#####
+# Define functions to analyze the data
+#####
+
+
+#####
+# Define functions to plot the data
+#####
+
+plot.num.forced.taxa <- function(NumConflictsTable, color)
+
+
+  
+#####
+# Use Functions
+#####
+
+all.mismatches <- import.all.conflict.summaries.into.list(UserArgs = example.user.args)
+  
+  
+  
+  
+  
+  
+
+
+
+
 
 
 #####

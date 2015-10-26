@@ -22,11 +22,11 @@
 # taxonomy.bootstrap.cutoff <- userprefs[4]
 # fw.seq.ids.file.path <- userprefs[5]
 
-fw.plus.gg.tax.file.path <- "../../take4/otus.94.taxonomy"
+fw.plus.gg.tax.file.path <- "../../take4/otus.98.taxonomy"
 gg.only.tax.file.path <- "../../take4/otus.gg.taxonomy"
-results.folder.path <- "../../take4/compare_percID-94_to_gg-only/"
+results.folder.path <- "../../take4/compare_percID-98_to_gg-only/"
 taxonomy.bootstrap.cutoff <- 60
-fw.seq.ids.file.path <- "../../take4/ids.above.94"
+fw.seq.ids.file.path <- "../../take4/ids.above.98"
 
 #####
 # Define Functions for Import and Formatting

@@ -72,7 +72,8 @@ import.all.conflict.summaries.into.list <- function(UserArgs){
 #####
 
 plot.num.forced.otus <- function(ConflictsSummaryTables, y.axis.limit=0){
-  mismatches <- ConflictsSummaryTables
+  # remove the last row of number FW sequences, that's not needed for this plot.
+  mismatches <- ConflictsSummaryTables[1:(nrow(ConflictsSummaryTables)-1),]
   pidents <- colnames(mismatches)
   pidents <- as.numeric(pidents)
   if (y.axis.limit == 0){
@@ -97,19 +98,23 @@ plot.num.forced.otus <- function(ConflictsSummaryTables, y.axis.limit=0){
 }
 
 plot.num.classified.outs <- function(ConflictsSummaryTables){
+  num.fw <- ConflictsSummaryTables[nrow(ConflictsSummaryTables),]
+  pidents <- colnames(ConflictsSummaryTables)
+  pidents <- as.numeric(pidents)
   
+  plot(x = pidents, y = num.fw)
 }
   
 #####
 # Use Functions
 #####
 
-all.mismatches <- import.all.conflict.summaries.into.list(UserArgs = example.user.args)
+all.summaries <- import.all.conflict.summaries.into.list(UserArgs = example.user.args)
 
-plot.num.forced.otus(ConflictsSummaryTables = all.mismatches)
+plot.num.forced.otus(ConflictsSummaryTables = all.summaries)
+plot.num.forced.otus(ConflictsSummaryTables = all.summaries, y.axis.limit = 200)
+  
 
-  
-  
   
   
 

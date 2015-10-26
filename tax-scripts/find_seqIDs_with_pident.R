@@ -22,11 +22,16 @@
 # Receive arguments from terminal command line
 #####
 
-userprefs <- commandArgs(trailingOnly = TRUE)
-blast.file.path <- userprefs[1]
-output.file.path <- userprefs[2]
-users.cutoff <- as.numeric(userprefs[3])
-user.wants.matches <- as.logical(userprefs[4])
+# userprefs <- commandArgs(trailingOnly = TRUE)
+# blast.file.path <- userprefs[1]
+# output.file.path <- userprefs[2]
+# users.cutoff <- as.numeric(userprefs[3])
+# user.wants.matches <- as.logical(userprefs[4])
+
+blast.file.path <- "../../take4/otus.fw.blast.table"
+output.file.path <- "~/Desktop/test"
+users.cutoff <- 94
+user.wants.matches <- TRUE
 
 #####
 # Define Functions
@@ -84,6 +89,51 @@ calc.full.pIDs <- function(BlastTable){
   return(blast)
 }
 
+# choose the hit with the best "full length" pident- report which # hit it is.
+choose.best.hit <- function(BlastTable){
+  blast <- BlastTable
+  
+  # get a list of all the unique id names, and set up blank vectors to record which are best
+  unique.qids <- unique(blast$qseqid)
+  index.best.ids <- NULL
+  hit.num.best.ids <- NULL
+  
+  # for each unique query id name, report the index and hit number of the best "full length" hit
+  for (q in 1:length(unique.qids)){
+    index.same.ids <- which(blast$qseqid == unique.qids[q])
+    
+    # start with the first hit as the default best one
+    index.best <- index.same.ids[1]
+    hit.num <- 1
+    
+    # if there are multiple hits, replace if another is better
+    if (length(index.same.ids) > 1){
+      for (i in 2:length(index.same.ids)){
+        if (blast$true.pids[index.same.ids][i] > blast$true.pids[index.best]){
+          index.best <- index.same.ids[i]
+          hit.num <- i
+        }
+      }
+    }
+    
+    # record the blast table index of the best hit
+    index.best.ids <- c(index.best.ids, index.best)
+    # record which number hit that was.
+    hit.num.best.ids <- c(hit.num.best.ids, hit.num)
+  }
+  
+  # change blast table to only contain the best hits
+  blast <- blast[index.best.ids,]
+  # add a column with the hit number
+  blast <- cbind(blast, hit.num.best.ids)
+  
+  # save this table to feed into a plotting/analysis script
+  write.csv(x = blast, file = "~/Desktop/hitstats.csv")
+  
+  return(blast)
+}
+
+
 # select qseqids that are above or below the true.percent.id cutoff
 find.FW.seqIDs <- function(BlastTable, cutoff.perc.id, want.matches){
   blast <- BlastTable
@@ -101,13 +151,13 @@ find.FW.seqIDs <- function(BlastTable, cutoff.perc.id, want.matches){
   write(x = seq.ids, file = output.file.path, sep="\n")
   
   if (hits == TRUE){
-    cat("\nAdded",length(seq.ids),"sequences matching the FW database with >= ", 
+    cat("\nAdded",length(seq.ids),"sequences matching the custom database with >= ", 
         cutoff, "% sequence identity to",output.file.path,
-        "\nAssign taxonomy to these sequences using the Freshwater database\n\n")
+        "\nAssign taxonomy to these sequences using the Small Custom database\n\n")
   }else{
-    cat("\nAdded",length(seq.ids),"sequences matching the FW database with < ", 
+    cat("\nAdded",length(seq.ids),"sequences matching the custom database with < ", 
     cutoff, "% sequence identity to",output.file.path,
-    "\nAssign taxonomy to these sequences using the GreenGenes database\n\n")
+    "\nAssign taxonomy to these sequences using the Large General database\n\n")
   }
   
   
@@ -123,5 +173,7 @@ blast <- import.BLAST.data()
 blast <- format.BLAST.data(BlastTable = blast)
 
 blast <- calc.full.pIDs(BlastTable = blast)
+
+blast <- choose.best.hit(BlastTable = blast)
 
 find.FW.seqIDs(BlastTable = blast, cutoff.perc.id = users.cutoff, want.matches = user.wants.matches)

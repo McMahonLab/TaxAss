@@ -2,7 +2,7 @@
 .Rhistory
 .DS_Store
 .Rproj.user/
-scripts/.RData
+tax-scripts/.RData
 
 # Databases
 databases/gg_13_5_taxonomy
@@ -16,3 +16,4 @@ databases/FWonly_7Sept2015.nsq
 
 # Other files
 Taxonomy_Assignment_Scripts.Rproj
+tax-scripts/tax-scripts.Rproj

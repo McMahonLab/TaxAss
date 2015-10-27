@@ -22,16 +22,17 @@
 # Receive arguments from terminal command line
 #####
 
-# userprefs <- commandArgs(trailingOnly = TRUE)
-# blast.file.path <- userprefs[1]
-# output.file.path <- userprefs[2]
-# users.cutoff <- as.numeric(userprefs[3])
-# user.wants.matches <- as.logical(userprefs[4])
+userprefs <- commandArgs(trailingOnly = TRUE)
+blast.file.path <- userprefs[1]
+output.file.path <- userprefs[2]
+hit.stats.path <- userprefs[3]
+users.cutoff <- as.numeric(userprefs[4])
+user.wants.matches <- as.logical(userprefs[5])
 
-blast.file.path <- "../../take4/otus.fw.blast.table"
-output.file.path <- "~/Desktop/test"
-users.cutoff <- 94
-user.wants.matches <- TRUE
+#blast.file.path <- "../../take4/otus.fw.blast.table"
+#output.file.path <- "~/Desktop/test"
+#users.cutoff <- 94
+#user.wants.matches <- TRUE
 
 #####
 # Define Functions
@@ -128,7 +129,7 @@ choose.best.hit <- function(BlastTable){
   blast <- cbind(blast, hit.num.best.ids)
   
   # save this table to feed into a plotting/analysis script
-  write.csv(x = blast, file = "~/Desktop/hitstats.csv")
+  write.csv(x = blast, file = hit.stats.path)
   
   return(blast)
 }

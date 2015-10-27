@@ -22,11 +22,11 @@
 # taxonomy.bootstrap.cutoff <- userprefs[4]
 # fw.seq.ids.file.path <- userprefs[5]
 
-fw.plus.gg.tax.file.path <- "../../take4/otus.98.taxonomy"
+fw.plus.gg.tax.file.path <- "../../take4/otus.100.taxonomy"
 gg.only.tax.file.path <- "../../take4/otus.gg.taxonomy"
-results.folder.path <- "../../take4/compare_percID-98_to_gg-only/"
+results.folder.path <- "../../take4/compare_percID-100_to_gg-only/"
 taxonomy.bootstrap.cutoff <- 60
-fw.seq.ids.file.path <- "../../take4/ids.above.98"
+fw.seq.ids.file.path <- "../../take4/ids.above.100"
 
 #####
 # Define Functions for Import and Formatting
@@ -248,6 +248,7 @@ create.summary.vector <- function(){
 export.summary.stats <- function(SummaryVector){
   num.mismatches <- SummaryVector
   num.mismatches <- c(num.mismatches,"numFWseqs" = nrow(fw.fw.only))
+  num.mismatches <- c(num.mismatches, "numALLseqs" = nrow(fw.percents))
   num.mismatches <- data.frame("TaxaLevel" = names(num.mismatches),"NumConflicts" = num.mismatches, row.names = NULL)
   write.csv(num.mismatches, file = paste(results.folder.path, "/", "conflicts_summary.csv", sep=""))
 }

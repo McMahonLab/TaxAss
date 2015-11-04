@@ -86,7 +86,9 @@ Workflow Summary
 
     `python fetch_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table ids.missing`
 
-    `cat ids.below.cutoff ids.missing > ids.below.cutoff.all`
+    `cat ids.missing > ids.below.cutoff`
+
+    `rm ids.missing`
 
 6. Create FASTA files of sequences above and below the cutoff
 
@@ -273,13 +275,13 @@ Detailed Workflow Instructions and Notes
 
     The python script `fetch_seqIDs_blast_removed.py` is used to find all of the sequence IDs in the original `fasta` file that do not appear in the BLAST output.  The python script then creates a new file in the same format as step 4's R script output file (a newline-delimited list of the missing sequence IDs).
 
-    The bash command `cat` concatenates these missing ids with the ids below the chosen cutoff pident.  That is because the ids blast didn't report hits for had even worse pidents than the ones that didn't make the R script cutoff. All of these sequences will be classified using the large database.
+    The bash command `cat` appends these missing ids with the ids below the chosen cutoff pident.  That is because the ids blast didn't report hits for had even worse pidents than the ones that didn't make the R script cutoff. All of these sequences will be classified using the large database.
 
     Full Two Commands (type in terminal):
 
     `python fetch_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table ids.missing`
 
-    `cat ids.below.cutoff ids.missing > ids.below.cutoff.all`
+    `cat ids.missing > ids.below.cutoff`
 
     What each argument is (1st command):
 
@@ -293,7 +295,7 @@ Detailed Workflow Instructions and Notes
 
     What the syntax is (2nd command):
 
-    `cat file1 file2 > file3`		means "combine file1 and file2 into file 3"
+    `cat file1 >> file2`		means "append file1 on file2"
 
     What each file is:
 
@@ -304,7 +306,6 @@ Detailed Workflow Instructions and Notes
     | otus.custom.blast.table | Reformatted blast results from step 3 |
     | ids.missing | File of missing seqIDs created in this step|
     | ids.below.cutoff | seqIDs below the specified cutoff, as identified in Step 4 |
-    | ids.below.cutoff.all | All seqIDs below below the specified cutoff |
 
     __Note__: It's a little concerning that so many sequences were not reported by BLAST.  They are 16S sequences so shouldn't they all be pretty close?? This may mean we should tweak the penalty values.  It definitely deserves another look. Note that these sequences are already curated to remove bad reads using `mothur` & Alex's pipeline.
 

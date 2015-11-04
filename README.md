@@ -82,6 +82,18 @@ Workflow Summary
 
     `Rscript find_seqIDs_with_pident.R otus.custom.blast.table ids.below.cutoff hits.below.cutoff cutoff FALSE`
 
+5. Recover sequence IDs with no BLAST hit
+
+    `python fetch_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table ids.missing`
+
+    `cat ids.below.cutoff ids.missing > ids.below.cutoff.all`
+
+6. Create FASTA files of sequences above and below the cutoff
+
+  	`python fetch_fastas_with_seqIDs.py ids.above.cutoff otus.fasta otus.above.cutoff.fasta`
+
+    `python fetch_fastas_with_seqIDs.py ids.below.cutoff.all otus.fasta otus.below.cutoff.fasta`
+
 Detailed Workflow Instructions and Notes
 ---
 
@@ -253,3 +265,78 @@ Detailed Workflow Instructions and Notes
       | hits.above.cutoff / hits.below.cutoff | Path the to file you are creating, the list of BLAST hits for each sequence. |
 
       __Note__: You may need to choose a different "corrected pident" cutoff for your sequence data. We selected a pident that gave classifications consistent to the class level between the small and large databases.
+
+
+5. Recover sequence IDs with no BLAST hit
+
+    Blast has a built in reporting cutoff based on e-values. The e-value depends on the length of the hit and the size of the database, and it reflects how frequently you would see a hit of that quality by chance. The default e-value cutoff is 10, which means BLAST does not report a match that you'd see 10 or more times by chance.  For more about the e-value statistics, click [here](http://www.ncbi.nlm.nih.gov/BLAST/tutorial/Altschul-1.html).
+
+    The python script `fetch_seqIDs_blast_removed.py` is used to find all of the sequence IDs in the original `fasta` file that do not appear in the BLAST output.  The python script then creates a new file in the same format as step 4's R script output file (a newline-delimited list of the missing sequence IDs).
+
+    The bash command `cat` concatenates these missing ids with the ids below the chosen cutoff pident.  That is because the ids blast didn't report hits for had even worse pidents than the ones that didn't make the R script cutoff. All of these sequences will be classified using the large database.
+
+    Full Two Commands (type in terminal):
+
+    `python fetch_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table ids.missing`
+
+    `cat ids.below.cutoff ids.missing > ids.below.cutoff.all`
+
+    What each argument is (1st command):
+
+    | Number | Name | Description |
+    |--------|------|-------------|
+    | 1 | fetch_seqIDs_blast_removed.py | Path to the script fetch_seqIDs_blast_removed.py |
+    | 2 | otus.fasta | Path to the fasta file containing all the seqIDs |
+    | 3 | otus.custom.blast.table | Path to the formatted BLAST output from Step 3 |
+    | 4 | ids.missing | Desired path to the output file of missing sequence IDs |
+
+
+    What the syntax is (2nd command):
+
+    `cat file1 file2 > file3`		means "combine file1 and file2 into file 3"
+
+    What each file is:
+
+    | File | Description |
+    |------|-------------|
+    | fetch_seqIDs_blast_removed.py | Python script you're running |
+    | otus.fasta | Original fasta file of sequences from step 0 |
+    | otus.custom.blast.table | Reformatted blast results from step 3 |
+    | ids.missing | File of missing seqIDs created in this step|
+    | ids.below.cutoff | seqIDs below the specified cutoff, as identified in Step 4 |
+    | ids.below.cutoff.all | All seqIDs below below the specified cutoff |
+
+    __Note__: It's a little concerning that so many sequences were not reported by BLAST.  They are 16S sequences so shouldn't they all be pretty close?? This may mean we should tweak the penalty values.  It definitely deserves another look. Note that these sequences are already curated to remove bad reads using `mothur` & Alex's pipeline.
+
+
+6. Create FASTA files of sequences above and below the cutoff
+
+    The fetch_fastas_with_seqIDs.py takes the sequence IDs selected from the BLAST output  and finds them in the original query fasta file. It then creates a new fasta file containing just the desired sequences. Run the command twice to generate sequences above and below the pident cutoff. These will be classified using the custom and general taxonomic databases, respectively.
+
+    Full Two Commands (type in terminal):
+
+    `python fetch_fastas_with_seqIDs.py ids.above.cutoff otus.fasta otus.above.cutoff.fasta`
+
+    `python fetch_fastas_with_seqIDs.py ids.below.cutoff.all otus.fasta otus.below.cutoff.fasta`
+
+    These arguments must be in the correct order. Python sources the .py script using the arguments supplied after it in the terminal. Separate all arguments with a space.
+
+    What each argument is:
+
+    | Number | Name | Description |
+    |--------|------|-------------|
+    | 1 | fetch_fastas_with_seqIDs.py | The path to this script. |
+    | 2 | ids.above.cutoff | the path to the file with newline-separated seqIDs that was generated in Step 4 |
+    | 3 | otus.fasta | The path to the otu fasta file containing all the seqIDs from Step 0 |
+    | 4 | otus.above.cutoff.fasta | Desired path to the new fasta file the script generates. __Note__: If this file already exist the script will delete it before starting. |
+
+    What each file is:
+
+    | File | Description |
+    |------|-------------|
+    | fetch_fastas_with_seqIDs.py | The python script you're sourcing |
+    | ids.below.cutoff | The file of seqIDs at or above your cutoff from Step 4 |
+    | ids.below.cutoff.all| The file of seqIDs below your cutoff from Step 5 |
+    | otus.fasta | The original fasta file of otu sequences to be classified |
+    | otus.below.cutoff.fasta | The output file with fasta sequences at or above the cutoff |
+    | otus.above.cutoff.fasta | The output file with fasta sequences below the cutoff |

@@ -70,7 +70,7 @@ Workflow Summary
 
 2. Run BLAST
 
-    `blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 1`
+    `blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs maxSeqs`
 
 3. Reformat BLAST Database
 
@@ -78,9 +78,9 @@ Workflow Summary
 
 4. Filter BLAST Results (Run one script twice)
 
-    `Rscript find_seqIDs_with_pident.R otus.custom.blast.table outputfile hitsFile cutoff TRUE`
+    `Rscript find_seqIDs_with_pident.R otus.custom.blast.table ids.above.cutoff hits.above.cutoff cutoff TRUE`
 
-    `Rscript find_seqIDs_with_pident.R otus.custom.blast.table outputfile hitsFile cutoff FALSE`
+    `Rscript find_seqIDs_with_pident.R otus.custom.blast.table ids.below.cutoff hits.below.cutoff cutoff FALSE`
 
 Detailed Workflow Instructions and Notes
 ---
@@ -150,7 +150,7 @@ Detailed Workflow Instructions and Notes
 
     Full Command (type in terminal):
 
-    `blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 1`
+    `blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs maxSeqs`
 
 
     What the filenames are:
@@ -170,7 +170,7 @@ Detailed Workflow Instructions and Notes
     | -db custom.db | Name of the blast database created previously (without the additional file extensions).|
     | -out otus.custom.blast | Location of the BLAST output file to be created. |
     | -outfmt 11 | Format to be used with `blast_formatter`. ASN.1 format. |
-    |	-max_target_seqs 1 | Only keep the best hit for each query sequence. ]
+    |	-max_target_seqs maxSeqs | Keep the top maxSeqs hits for each query sequence. |
 
     __Note__.
       * We would like to find the longest matching sequence with a percent ID which still matches the cutoff. However, it's possible that the best hit is a shorter sequence with a higher percent ID.
@@ -224,9 +224,9 @@ Detailed Workflow Instructions and Notes
 
       Full Two Commands (type in terminal):
 
-      `Rscript find_seqIDs_with_pident.R otus.custom.blast.table outputfile hitsFile cutoff TRUE`
+      `Rscript find_seqIDs_with_pident.R otus.custom.blast.table ids.above.cutoff hits.above.cutoff cutoff TRUE`
 
-      `Rscript find_seqIDs_with_pident.R otus.custom.blast.table outputfile hitsFile cutoff FALSE`
+      `Rscript find_seqIDs_with_pident.R otus.custom.blast.table ids.below.cutoff hits.below.cutoff cutoff FALSE`
 
       __Note__: Rscript requires R v 3.2 or higher. The path to the R executable must be added to your `PATH` variable.
 
@@ -238,8 +238,8 @@ Detailed Workflow Instructions and Notes
       |--------|------|-------------|
       | 1 | script.R | Path to `find_seqIDs_with_pident.R` |
       | 2 | otus.custom.blast.table | Path to `otus.custom.blast.table`from Step 3 |
-      |	3 | outputfile | Path the to file you are creating, the list of sequence ID's matching your criteria (T or F for meeting the cutoff). |
-      |	4 | hitsfile | Path to a secondary file. This will (optinally) be used to create plot to assess the pident. |
+      |	3 | ids.above.cutoff / ids.below.cutoff | Path the to file you are creating, the list of sequence ID's matching your criteria (T or F for meeting the cutoff). |
+      |	4 | hits.above.cutoff / hits.below.cutoff | Path to a secondary file. This will (optinally) be used to create plot to assess the pident. |
       | 5 | Cutoff | Numeric representing the "corrected pident" to use for matches. |
       | 6 | Matches | TRUE or FALSE. TRUE: return seqID's >= cutoff, FALSE: return seqID's < cutoff |
 
@@ -249,6 +249,7 @@ Detailed Workflow Instructions and Notes
       |------|-------------|
       | find_seqIDs_with_pident.R	| Script for this step. |
       | otus.custom.blast.table	| The formatted blast output from step 3
-      | outputfile | Path the to file you are creating, the list of sequence ID's matching your criteria (T or F for meeting the cutoff). These files are newline \n delimited seqIDs. |
+      | ids.above.cutoff / ids.below.cutoff | Path the to file you are creating, the list of sequence ID's matching your criteria (T or F for meeting the cutoff). These files are newline \n delimited seqIDs. |
+      | hits.above.cutoff / hits.below.cutoff | Path the to file you are creating, the list of BLAST hits for each sequence. |
 
       __Note__: You may need to choose a different "corrected pident" cutoff for your sequence data. We selected a pident that gave classifications consistent to the class level between the small and large databases.

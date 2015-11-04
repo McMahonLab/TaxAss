@@ -78,9 +78,9 @@ Workflow Summary
 
 4. Filter BLAST Results (Run one script twice)
 
-    `Rscript find_seqIDs_with_pident.R otus.custom.blast.table outputfile cutoff TRUE`
+    `Rscript find_seqIDs_with_pident.R otus.custom.blast.table outputfile hitsFile cutoff TRUE`
 
-    `Rscript find_seqIDs_with_pident.R otus.custom.blast.table outputfile cutoff FALSE`
+    `Rscript find_seqIDs_with_pident.R otus.custom.blast.table outputfile hitsFile cutoff FALSE`
 
 Detailed Workflow Instructions and Notes
 ---
@@ -224,9 +224,9 @@ Detailed Workflow Instructions and Notes
 
       Full Two Commands (type in terminal):
 
-      `Rscript find_seqIDs_with_pident.R otus.custom.blast.table outputfile cutoff TRUE`
+      `Rscript find_seqIDs_with_pident.R otus.custom.blast.table outputfile hitsFile cutoff TRUE`
 
-      `Rscript find_seqIDs_with_pident.R otus.custom.blast.table outputfile cutoff FALSE`
+      `Rscript find_seqIDs_with_pident.R otus.custom.blast.table outputfile hitsFile cutoff FALSE`
 
       __Note__: Rscript requires R v 3.2 or higher. The path to the R executable must be added to your `PATH` variable.
 
@@ -239,8 +239,9 @@ Detailed Workflow Instructions and Notes
       | 1 | script.R | Path to `find_seqIDs_with_pident.R` |
       | 2 | otus.custom.blast.table | Path to `otus.custom.blast.table`from Step 3 |
       |	3 | outputfile | Path the to file you are creating, the list of sequence ID's matching your criteria (T or F for meeting the cutoff). |
-      | 4 | Cutoff | Numeric representing the "corrected pident" to use for matches. |
-      | 5 | Matches | TRUE or FALSE. TRUE: return seqID's >= cutoff, FALSE: return seqID's < cutoff |
+      |	4 | hitsfile | Path to a secondary file. This will (optinally) be used to create plot to assess the pident. |
+      | 5 | Cutoff | Numeric representing the "corrected pident" to use for matches. |
+      | 6 | Matches | TRUE or FALSE. TRUE: return seqID's >= cutoff, FALSE: return seqID's < cutoff |
 
       What each file is:
 

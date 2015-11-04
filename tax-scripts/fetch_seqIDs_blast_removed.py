@@ -44,14 +44,13 @@ if os.path.isfile(outputfile) :
 
 fasta = open(fastafile,"r")
 
-LineType = 1	# when LineType=1 it is a >ID line, when LineType=-1 it is an ATGC line
 allIDs = []
 
 for line in fasta :
-	if LineType == 1 :
+	if str.startswith(line, '>') :
 		line = line.strip()
 		allIDs.append(line[1:])
-	LineType = LineType * -1
+
 
 
 # Create List of all SeqIDs in blast output file

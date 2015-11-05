@@ -5,7 +5,7 @@
 tax-scripts/.RData
 
 # Databases
-databases/gg_13_5_taxonomy
+databases/gg_13_5.taxonomy
 databases/gg_13_5.fasta
 databases/FWonly_7Sept2015.nhr
 databases/FWonly_7Sept2015.nin

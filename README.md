@@ -92,7 +92,7 @@ Workflow Summary
 
     `python fetch_fastas_with_seqIDs.py ids.below.cutoff.all otus.fasta otus.below.cutoff.fasta`
 
-7. Assign taxonomy using `mothur`
+7. Assign taxonomy using `mothur` using our proposed two-step workflow
 
     `mothur`
 
@@ -102,6 +102,9 @@ Workflow Summary
 
     `quit()`
 
+8. Combine taxonomy files (terminal)
+
+    `cat otus.above.cutoff.custom.wang.taxonomy otus.below.cutoff.general.wang.taxonomy > otus.taxonomy`
 
 Detailed Workflow Instructions and Notes
 ---
@@ -371,7 +374,7 @@ Detailed Workflow Instructions and Notes
 
       | File | Description |
       |------|-------------|
-      | otus.above.cutoff.98.fast | Fasta file containing only seqIDs >= the  cutoff, from step 5 |
+      | otus.above.cutoff.cutoff.fast | Fasta file containing only seqIDs >= the  cutoff, from step 5 |
       | otus.below.cutoff.fasta | Fasta file containing only seqIDs < the  cutoff, from step 5 |
       | custom.fasta | Fasta file for the small custom taxonomy database |
       | general.fasta	| Fasta file for the general taxonomy database |
@@ -392,9 +395,29 @@ Detailed Workflow Instructions and Notes
 
       What the output files are (note you have no control over the name extensions added):
 
-      * otus.above.98.custom.wang.taxonomy  
-      * otus.above.98.custom.wang.tax.summary  
-      * otus.below.98.general.wang.taxonomy
-      * otus.below.98.general.wang.tax.summary
+      * otus.above.cutoff.custom.wang.taxonomy  
+      * otus.above.cutoff.custom.wang.tax.summary  
+      * otus.below.cutoff.general.wang.taxonomy
+      * otus.below.cutoff.general.wang.tax.summary
 
       **Note**: These bootstrap percent confidence values are NOT the confidence that the taxonomy assignment is *correct*, just that it is *repeatable* in that database. This is another paremeter that we could explore changing more in the future. I left cutoff out in this command so that you can explore the different results of it later, in step 11.
+
+8. Combine taxonomy files
+
+    Concatenate the two taxonomy files to create one complete one using the `cat` command.
+
+    Full Command (type in terminal):
+
+    `cat otus.above.cutoff.custom.wang.taxonomy otus.below.cutoff.general.wang.taxonomy > otus.taxonomy`
+
+    Command syntax:
+
+    `cat file1 file2 > file3` means "combine file1 and file2 into file 3"
+
+    What the filenames are:
+
+    | File | Description |
+    |------|-------------|
+    | otus.above.cutoff.custom.wang.taxonomy | Taxonomy file for sequences classified with custom database |
+    | otus.below.cutoff.general.wang.taxonomy | Taxonomy file for sequences classified with general database |
+    | otus.taxonomy	| Name for the concatenated taxonomy file|

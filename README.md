@@ -92,6 +92,17 @@ Workflow Summary
 
     `python fetch_fastas_with_seqIDs.py ids.below.cutoff.all otus.fasta otus.below.cutoff.fasta`
 
+7. Assign taxonomy using `mothur`
+
+    `mothur`
+
+    `classify.seqs(fasta=otus.above.cutoff.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2)`
+
+    `classify.seqs(fasta=otus.below.cutoff.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)`
+
+    `quit()`
+
+
 Detailed Workflow Instructions and Notes
 ---
 
@@ -333,3 +344,57 @@ Detailed Workflow Instructions and Notes
     | otus.fasta | The original fasta file of otu sequences to be classified |
     | otus.below.cutoff.fasta | The output file with fasta sequences at or above the cutoff |
     | otus.above.cutoff.fasta | The output file with fasta sequences below the cutoff |
+
+
+7. Assign taxonomy using `mothur`
+
+    The classify.seqs() command in mothur classifies sequences using a specified algorithm and a provided taxonomy database. The output file is a list of sequence ID's next to their assigned taxonomy.
+
+    Full Four Commands (type in terminal):
+
+      `mothur`
+
+      `classify.seqs(fasta=otus.above.cutoff.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2)`
+
+      `classify.seqs(fasta=otus.below.cutoff.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)`
+
+      `quit()`
+
+      What the first and last commands do:
+
+      | Command | Description |
+      |------|-------------|
+      | mothur | Path to the `mothur` installation on your computer. Or type `mothur` directly if it has been added to your path. You must open `mothur` to use the command `classify.seqs()`. |
+      |	quit() | Exits `mothur` |
+
+      What the filenames are:
+
+      | File | Description |
+      |------|-------------|
+      | otus.above.cutoff.98.fast | Fasta file containing only seqIDs >= the  cutoff, from step 5 |
+      | otus.below.cutoff.fasta | Fasta file containing only seqIDs < the  cutoff, from step 5 |
+      | custom.fasta | Fasta file for the small custom taxonomy database |
+      | general.fasta	| Fasta file for the general taxonomy database |
+      | custom.taxonomy |	Taxonomy file for the small custom taxonomy database |
+      | general.taxonomy |	Taxonomy file for the general taxonomy database |
+
+      What each flag does:
+
+      | Flag | Description |
+      |------|-------------|
+      | fasta= | Path to the .fasta file to be classified |
+      | template= | Path to the .fasta file of the taxonomy database |
+      | taxonomy=	| Path to the taxonomy file of the taxonomy database |
+      | method= | Algorithm for assigning taxonomy. Default is `wang`. |
+      | probs= | T or F, show the bootstrap support values or not? |
+      | cutoff= | Minimum bootstrap value for getting a name instead of unclassified. A typical minimum is 60%, and the default is no cutoff, full reporting. In this workflow, a subsequent R script applies a cutoff after the fact. |
+      | processors=	| The number of processors to use |
+
+      What the output files are (note you have no control over the name extensions added):
+
+      * otus.above.98.custom.wang.taxonomy  
+      * otus.above.98.custom.wang.tax.summary  
+      * otus.below.98.general.wang.taxonomy
+      * otus.below.98.general.wang.tax.summary
+
+      **Note**: These bootstrap percent confidence values are NOT the confidence that the taxonomy assignment is *correct*, just that it is *repeatable* in that database. This is another paremeter that we could explore changing more in the future. I left cutoff out in this command so that you can explore the different results of it later, in step 11.

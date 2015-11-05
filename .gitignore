@@ -7,12 +7,20 @@ tax-scripts/.RData
 # Databases
 databases/gg_13_5.taxonomy
 databases/gg_13_5.fasta
+databases/gg_13_8_99.taxonomy
+databases/gg_13_8_99.fasta
 databases/FWonly_7Sept2015.nhr
 databases/FWonly_7Sept2015.nin
 databases/FWonly_7Sept2015.nog
 databases/FWonly_7Sept2015.nsd
 databases/FWonly_7Sept2015.nsi
 databases/FWonly_7Sept2015.nsq
+databases/*.8mer
+databases/*.numNonZero
+databases/*.prob
+databases/*.sum
+databases/*.train
+
 
 # Other files
 Taxonomy_Assignment_Scripts.Rproj

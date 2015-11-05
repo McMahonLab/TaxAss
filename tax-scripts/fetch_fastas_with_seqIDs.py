@@ -23,6 +23,7 @@ idfile = sys.argv[1]
 fastafile = sys.argv[2]
 outputfile = sys.argv[3]
 
+
 # delete the output file if it already exists so that you append to a blank file
 if os.path.isfile(outputfile) :
 	os.remove(outputfile)
@@ -33,20 +34,16 @@ SeqIDsFile = open(idfile,"r")
 
 for SeqID in SeqIDsFile :
 	fastaFile = open(fastafile,"r")
-	LineType = 1	# when LineType=1 it is a >ID line, when LineType=-1 it is an ATGC line
 	
 	for line in fastaFile :
-		if LineType == 1 :
-			IDline = line
-			
-		if LineType == -1 :
+         if str.startswith(line, '>') :
+                 IDline = line			
+         else :
 			fastaLine = line
 			if SeqID == IDline[1:] : 	# start with index 1 of ID line b/c index 0 is the "side carat" 
 				with open(outputfile, "a") as ResultFile :
 					ResultFile.write(IDline)
 					ResultFile.write(fastaLine)
-		
-		LineType = LineType * -1
 	fastaFile.close()
 SeqIDsFile.close()
 

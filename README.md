@@ -106,6 +106,15 @@ Workflow Summary
 
     `cat otus.above.cutoff.custom.wang.taxonomy otus.below.cutoff.general.wang.taxonomy > otus.taxonomy`
 
+***Steps 9 to 11 are optional***. These steps enable the user to assess their chosen pident (and boostrap?) cutoofs.
+
+
+9. Assign taxonomy using `mothur` using the general database
+
+        `cat otus.above.cutoff.custom.wang.taxonomy otus.below.cutoff.general.wang.taxonomy > otus.taxonomy`
+
+10. Reformat taxonomy files. The R script in step 11 requires semicolon delimited taxonomy files.  The mothur taxonomy files are delimited with both tabs and semicolons. In the output of Steps 8 and 9, replace the tabs with semi-colons.
+
 Detailed Workflow Instructions and Notes
 ---
 
@@ -421,3 +430,53 @@ Detailed Workflow Instructions and Notes
     | otus.above.cutoff.custom.wang.taxonomy | Taxonomy file for sequences classified with custom database |
     | otus.below.cutoff.general.wang.taxonomy | Taxonomy file for sequences classified with general database |
     | otus.taxonomy	| Name for the concatenated taxonomy file|
+
+9. Assign taxonomy with general database only
+
+    Get a large, general database classification of your `otus.fasta` file to compare to. These databases (such as GreenGenes) are huge, so the taxonomy assignment clustering algorithm is likely to only settle on a given taxonomic assignment if it is unambiguously correct.  Therefore, we trust the upper level Green Genes assignments more than our custom database, even though we trust the lower level taxonomic assignments using our custom database more.
+
+    In this step, taxonomies are assigned with the general database using `mothur`. The assignments will later be compared to the results using a custom classification.
+
+    Full Four Commands (type in terminal):
+
+    `mothur`
+
+    `classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)`
+
+    `quit()`
+
+    What the commands do: See step 7 for a detailed explanation of these four commands and their arguments.
+
+    What the filenames are:
+
+    | File | Description |
+    |------|-------------|
+    | otus.fasta | Fasta file of sequences to be classified |
+    | general.fasta | Fasta file of the large general database |
+    | general.taxonomy |  Taxonomy file of the large, general database |
+
+
+10. Reformat taxonomy files.
+
+    The R script in step 11 requires semicolon delimited taxonomy files.  The mothur taxonomy files are delimited with both tabs and semicolons. In the output of Steps 8 and 9, replace the tabs with semi-colons.
+
+    One way of doing on in bash is described below.
+
+    `sed 's/[[:blank:]]/\;/' <otus.taxonomy >otus.taxonomy.reformatted`
+
+    `mv otus.taxonomy.reformatted otus.taxonomy`
+
+    `sed 's/[[:blank:]]/\;/' <otus.general.taxonomy  >otus.genearl.taxonomy.reformatted`
+
+    `mv otus.general.taxonomy.reformatted otus.general.taxonomy`
+
+    Syntax of the command `sed 's/find/replace/ <input >output`:
+
+    | Command/Argument | Function |
+    |------------------|----------|
+    | sed | A "stream editor," a function for editing streams of text in the terminal |
+    | 's | Perform a substition |
+    | find | Character string to be found |
+    | replace | Character string to replace it with |
+    | input | The file to be searched, either `otus.taxonomy` or   				`otus.general.taxonomy` |
+    | output | The file `sed` creates. Must have a different name than the input. | 

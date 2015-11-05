@@ -84,11 +84,7 @@ Workflow Summary
 
 5. Recover sequence IDs with no BLAST hit
 
-    `python fetch_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table ids.missing`
-
-    `cat ids.missing > ids.below.cutoff`
-
-    `rm ids.missing`
+    `python fetch_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table otus.below.cutoff`
 
 6. Create FASTA files of sequences above and below the cutoff
 
@@ -273,15 +269,11 @@ Detailed Workflow Instructions and Notes
 
     Blast has a built in reporting cutoff based on e-values. The e-value depends on the length of the hit and the size of the database, and it reflects how frequently you would see a hit of that quality by chance. The default e-value cutoff is 10, which means BLAST does not report a match that you'd see 10 or more times by chance.  For more about the e-value statistics, click [here](http://www.ncbi.nlm.nih.gov/BLAST/tutorial/Altschul-1.html).
 
-    The python script `fetch_seqIDs_blast_removed.py` is used to find all of the sequence IDs in the original `fasta` file that do not appear in the BLAST output.  The python script then creates a new file in the same format as step 4's R script output file (a newline-delimited list of the missing sequence IDs).
-
-    The bash command `cat` appends these missing ids with the ids below the chosen cutoff pident.  That is because the ids blast didn't report hits for had even worse pidents than the ones that didn't make the R script cutoff. All of these sequences will be classified using the large database.
+    The python script `fetch_seqIDs_blast_removed.py` is used to find all of the sequence IDs in the original `fasta` file that do not appear in the BLAST output.  The python script then appends these ids with the ids below the chosen cutoff pident.  That is because the ids blast didn't report hits for had even worse pidents than the ones that didn't make the R script cutoff. All of these sequences will be classified using the large database.
 
     Full Two Commands (type in terminal):
 
-    `python fetch_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table ids.missing`
-
-    `cat ids.missing > ids.below.cutoff`
+    `python fetch_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table otus.below.cutoff`
 
     What each argument is (1st command):
 

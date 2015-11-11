@@ -139,6 +139,8 @@ Workflow Summary
 
 10. Reformat taxonomy files. The R script in step 11 requires semicolon delimited taxonomy files.  The mothur taxonomy files are delimited with both tabs and semicolons. In the output of Steps 8 and 9, replace the tabs with semi-colons.
 
+**The included script `wrapperFunction` will perform all of these steps using default parameters. Run it at your own risk.**
+
 Detailed Workflow Instructions and Notes
 ---
 

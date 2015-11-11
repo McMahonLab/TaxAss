@@ -24,23 +24,27 @@ import subprocess
 ### User-defined files and folder structure
 ################################################################################
 # Define data folders
-otuCountsFolder = 'rawData'
-processedDataFolder = 'processedData'
+rawDataFolder = '../rawData'
+processedDataFolder = '../processedData'
+
+# Check that output folder exists
+if not os.path.exists(processedDataFolder):
+    os.makedirs(processedDataFolder)
 
 # Define user-specified variables
 pident = 90
 numSeqs = 5
-queryFasta = '/Users/joshamilton/Documents/Research/2015d-TagTaxonomyWorkflow/MendotaTags/rawData/otus.fasta'
-customFasta = '/Users/joshamilton/Documents/Research/2015d-TagTaxonomyWorkflow/16STaxAss-GitHubRepo/databases/FWonly_7Sept2015.fasta'
-customTaxonomy = '/Users/joshamilton/Documents/Research/2015d-TagTaxonomyWorkflow/16STaxAss-GitHubRepo/databases/FWonly_7Sept2015.taxonomy'
-generalFasta = '/Users/joshamilton/Documents/Research/2015d-TagTaxonomyWorkflow/16STaxAss-GitHubRepo/databases/gg_13_5.fasta'
-generalTaxonomy = '/Users/joshamilton/Documents/Research/2015d-TagTaxonomyWorkflow/16STaxAss-GitHubRepo/databases/gg_13_5.taxonomy'
+queryFasta = '../rawData/otus.fasta'
+customFasta = '../databases/FWonly_7Sept2015.fasta'
+customTaxonomy = '../databases/FWonly_7Sept2015.taxonomy'
+generalFasta = '../databases/gg_13_5.fasta'
+generalTaxonomy = '../databases/gg_13_5.taxonomy'
 
 #%%#############################################################################
 ### Static folder structure
 ################################################################################
 # Define fixed input and output files
-pathToScripts = '/Users/joshamilton/Documents/Research/2015d-TagTaxonomyWorkflow/16STaxAss-GitHubRepo/tax-scripts'
+pathToScripts = '../tax-scripts'
 
 # Names for output files generated during script operation
 
@@ -165,13 +169,13 @@ with open(processedDataFolder+'/'+otuFileName+'.taxonomy', 'w') as outfile:
 ################################################################################
 
 subprocess.call(['mothur',
-                 '#classify.seqs(fasta='+otuCountsFolder+'/'+otuFileName+'.fasta, template='
+                 '#classify.seqs(fasta='+rawDataFolder+'/'+otuFileName+'.fasta, template='
                  +generalFasta+', taxonomy='+generalTaxonomy
                  +', method=wang, probs=T, processors=2)'])
 
 # Move output files to the proper directory
 
-for file in glob.glob(otuCountsFolder+'/*gg*'):                                                                                                               
+for file in glob.glob(rawDataFolder+'/*gg*'):                                                                                                               
     shutil.move(file, processedDataFolder)
     
 #%%#############################################################################

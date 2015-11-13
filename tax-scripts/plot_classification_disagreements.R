@@ -120,7 +120,7 @@ plot.num.classified.outs <- function(ConflictsSummaryTables){
 all.summaries <- import.all.conflict.summaries.into.list(UserArgs = example.user.args)
 
 plot.num.forced.otus(ConflictsSummaryTables = all.summaries)
-plot.num.forced.otus(ConflictsSummaryTables = all.summaries, y.axis.limit = 200)
+plot.num.forced.otus(ConflictsSummaryTables = all.summaries, y.axis.limit = 5)
 
 plot.num.classified.outs(ConflictsSummaryTables = all.summaries)
 

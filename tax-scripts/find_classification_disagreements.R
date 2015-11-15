@@ -24,7 +24,7 @@
 
 fw.plus.gg.tax.file.path <- "../../take5/otus.100.taxonomy"
 gg.only.tax.file.path <- "../../take5/otus.gg.taxonomy"
-results.folder.path <- "../../take5/compare_percID-100_to_gg-only/"
+results.folder.path <- "../../take5/conflicts_100"
 taxonomy.bootstrap.cutoff <- 60
 fw.seq.ids.file.path <- "../../take5/ids.above.100"
 
@@ -217,10 +217,9 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
 }
 
 # Find seqs misclassified at a given phylogenetic level, t
-find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_percents, TaxaLevel, tracker){
+find.conflicting.names <- function(FWtable, GGtable, GGtable_percents, TaxaLevel, tracker){
   fw <- FWtable
   gg <- GGtable
-  fw.percents <- FWtable_percents
   gg.percents <- GGtable_percents
   t <- TaxaLevel
   num.mismatches <- tracker
@@ -234,7 +233,7 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
   num.mismatches[t] <- length(index)
   
   # Compare the conflicting tables in entirety, use the original files with percents still in it
-  conflicting <- cbind(gg.percents[index,,drop=F], fw.percents[index,,drop=F])
+  conflicting <- cbind(gg.percents[index,,drop=F], fw[index,,drop=F])
   
   # Check that the files still line up correctly
   check.files.match(FWtable = conflicting[,9:16,drop=F], GGtable = conflicting[,1:8,drop=F])
@@ -316,8 +315,9 @@ check.files.match(FWtable = fw.fw.only, GGtable = gg.fw.only)
   # File written afer loop: the "conflicts_summary.csv" that lists how many conflicts were at each level, and how many seqs were classified by FW
 num.mismatches <- create.summary.vector()
 for (t in 1:5){
-  num.mismatches <- find.conflicting.names(FWtable = fw.fw.only, GGtable = gg.fw.only, FWtable_percents = fw.percents.fw.only, 
-                                           GGtable_percents = gg.percents.fw.only, TaxaLevel = t, tracker = num.mismatches)
+  num.mismatches <- find.conflicting.names(FWtable = fw.fw.only, GGtable = gg.fw.only,
+                                           GGtable_percents = gg.percents.fw.only, 
+                                           TaxaLevel = t, tracker = num.mismatches)
 }
 export.summary.stats(SummaryVector = num.mismatches)
 

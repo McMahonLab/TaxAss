@@ -14,7 +14,7 @@ Summary of Steps and Commands (all commands entered in terminal window):
 	makeblastdb -dbtype nucl -in custom.fasta -input_type fasta -parse_seqids -out custom.db
 
 2. run BLAST (blast)
-	blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 1
+	blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 5
 
 3. reformat blast results (blast)
 	blast_formatter -archive otus.custom.blast -outfmt "6 qseqid pident length qlen qstart qend" -out otus.custom.blast.table
@@ -38,7 +38,7 @@ Summary of Steps and Commands (all commands entered in terminal window):
 	quit()
 
 8. combine taxonomy files (terminal)
-	cat otus.above.98.custom.wang.taxonomy otus.below.98.general.wang.taxonomy > otus.taxonomy
+	cat otus.above.98.custom.wang.taxonomy otus.below.98.general.wang.taxonomy > otus.98.taxonomy
 
 9. assign taxonomy without custom database (mothur, bash)
 	~/mothur/mothur
@@ -47,10 +47,14 @@ Summary of Steps and Commands (all commands entered in terminal window):
 	cat otus.general.wang.taxonomy > otus.general.taxonomy
 
 10. reformat taxonomy files (textwrangler or bash)
-	find tab, replace semicolon
+	sed 's/[[:blank:]]/\;/' <otus.98.taxonomy >otus.98.taxonomy.reformatted
+	mv otus.98.taxonomy.reformatted otus.98.taxonomy
+	sed 's/[[:blank:]]/\;/' <otus.general.taxonomy >otus.general.taxonomy.reformatted
+	mv otus.general.taxonomy.reformatted otus.general.taxonomy
 
 11. compare taxonomy files (R)
-	Rscript find_classification_disagreements.R custom.plus.general.tax.file.path general.only.tax.file.path results.folder.path taxonomy.bootstrap.cutoff
+	mkdir conflicts_98
+	Rscript find_classification_disagreements.R otus.98.taxonomy otus.gg.taxonomy conflicts_98 60 ids.above.98
 
 
 Detailed explanations of commands and inputs are below:
@@ -590,4 +594,9 @@ What the generated files in your folder are:
 
 ****need a finishing touch script that lets people convert their taxonomy table to using their desired cutoff.
 And has uniform unclassified names.  ie, just that part of this script for the final file.
+
+
+__________________________________________________________________________________________
+
+12. generate plots to visualize classification disagreements and chosen cutoffs (R)
 

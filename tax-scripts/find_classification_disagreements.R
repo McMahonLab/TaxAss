@@ -22,11 +22,11 @@
 # taxonomy.bootstrap.cutoff <- userprefs[4]
 # fw.seq.ids.file.path <- userprefs[5]
 
-fw.plus.gg.tax.file.path <- "../../take4/otus.100.taxonomy"
-gg.only.tax.file.path <- "../../take4/otus.gg.taxonomy"
-results.folder.path <- "../../take4/compare_percID-100_to_gg-only/"
+fw.plus.gg.tax.file.path <- "../../take5/otus.100.taxonomy"
+gg.only.tax.file.path <- "../../take5/otus.gg.taxonomy"
+results.folder.path <- "../../take5/compare_percID-100_to_gg-only/"
 taxonomy.bootstrap.cutoff <- 60
-fw.seq.ids.file.path <- "../../take4/ids.above.100"
+fw.seq.ids.file.path <- "../../take5/ids.above.100"
 
 #####
 # Define Functions for Import and Formatting
@@ -60,6 +60,9 @@ reformat.fw <- function(FWtable){
   # Remove strain and empty 10th column
   fw <- fw[,-c(9,10)]
   
+  # convert seqIDs to characters in case they are numeric b/c as.matrix on numbers adds spaces but as.character doesn't
+  fw[,1] <- as.character(fw[,1])
+  
   # Rename columns
   colnames(fw) <- c("seqID.fw","kingdom.fw","phylum.fw","class.fw","order.fw","linege.fw","clade.fw","tribe.fw")
   
@@ -83,6 +86,9 @@ reformat.gg <- function(GGtable){
   
   # Remove empty 9th column
   gg <- gg[,1:8]
+  
+  # convert seqIDs to characters in case they are numeric b/c as.matrix() on numbers adds spaces but as.character() doesn't
+  gg[,1] <- as.character(gg[,1])
   
   # Rename columns
   colnames(gg) <- c("seqID.gg","kingdom.gg","phylum.gg","class.gg","order.gg","family.gg","genus.gg","species.gg")
@@ -134,6 +140,9 @@ remove.parentheses <- function(x){
 find.fw.indeces <- function(TaxonomyTable, SeqIDs){
   tax <- TaxonomyTable
   ids <- SeqIDs
+  
+  # when seqIDs are numbers written as characters, sometimes one file could have whitespace placeholders for
+  # for the shorter characters.  But can't just change to numeric, in case some files have non-number seqIDs
   
   index <- NULL
   for (e in 1:length(ids)){

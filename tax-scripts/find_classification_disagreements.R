@@ -239,7 +239,7 @@ find.conflicting.names <- function(FWtable, GGtable, GGtable_percents, TaxaLevel
   check.files.match(FWtable = conflicting[,9:16,drop=F], GGtable = conflicting[,1:8,drop=F])
   
   # Export a file with the conflicting rows side by side.
-  write.csv(conflicting, file = paste(results.folder.path, "/", taxa.names[t],"_conflicts.csv", sep=""))
+  write.csv(conflicting, file = paste(results.folder.path, "/", t, "_", taxa.names[t],"_conflicts.csv", sep=""))
   
   #Track the number of mismatches at each level
   return(num.mismatches)

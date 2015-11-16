@@ -28,25 +28,29 @@ if os.path.isfile(outputfile) :
 	os.remove(outputfile)
 	print("Existing file with your chosen output file name was deleted.")
 
-# Generate the output file
+
+# Create hash of all SeqIDs in the idfile
+pidentIDs = {}
+with open(idfile) as ID:
+    for line in ID:
+            pidentIDs[line.strip()] = None
+            
+# Create hash of all SeqIDs and sequences in query fasta file
+allIDs = {}
+with open(fastafile) as fasta:
+    for line in fasta:
+        if str.startswith(line, '>') :
+            key = line.strip()[1:]
+        else :
+            val = line.strip()
+            allIDs[key] = val
+            
+## Generate the output file
 SeqIDsFile = open(idfile,"r")
 
-for SeqID in SeqIDsFile :
-	fastaFile = open(fastafile,"r")
-	LineType = 1	# when LineType=1 it is a >ID line, when LineType=-1 it is an ATGC line
-	
-	for line in fastaFile :
-		if LineType == 1 :
-			IDline = line
-			
-		if LineType == -1 :
-			fastaLine = line
-			if SeqID == IDline[1:] : 	# start with index 1 of ID line b/c index 0 is the "side carat" 
-				with open(outputfile, "a") as ResultFile :
-					ResultFile.write(IDline)
-					ResultFile.write(fastaLine)
-		
-		LineType = LineType * -1
-	fastaFile.close()
+with open(outputfile, "a") as ResultFile :
+    for key in pidentIDs :
+        ResultFile.write('>'+key+'\n')
+        ResultFile.write(allIDs[key]+'\n')
 SeqIDsFile.close()
 

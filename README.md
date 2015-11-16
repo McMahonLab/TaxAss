@@ -11,6 +11,30 @@ Overview
 This workflow assigns taxonomy to a fasta file of OTU sequences using both a
 small, custom taxonomy database and a large general database. The workflow was developed specifically for the classification of freshwater OTUs against the McMahonLab's [curated freshwater database](https://github.com/mcmahon-uw/FWMFG). Your mileage may vary.
 
+Repo Structure
+---
+This section provides an overview of the repository struture. Due to the size of some files, not all of them are included in the repo. I have tried to indicate this.
+
+    project
+    |- README                                 # Everything you want to know about this project. And some stuff you probably don't.
+    |- databases                              # Databases used by this Repo
+    | |- FWonly_7Sept2015.fasta               #
+    | |- FWonly_7Sept2015.taxonomy            #
+    | |- gg_13_5.fasta                        # Not included in the repo.
+    | |- gg_13_5.taxonomy                     # Not included in the repo.
+    | |- README                               # More info about the databases
+    |- processedData                          # Not included in the repo.
+    |- rawData                                # Folder to store raw data
+    | |- otus.fasta                           # File of sequences to be classified. Replace this empty file with your sequences.
+    |- tax-scripts                            # Scripts associated with this project.
+    | |- fetch_fastas_with_seqIDs.py          #
+    | |- fetch_seqIDs_blast_removed.py        #
+    | |- wrapperFunction.py                   # Function which will run the entire pipeline with default parameters.
+    | |- find_classification_disagreements.R  #
+    | |- find_seqIDs_with_pident.R            #
+    | |- plot_blast_hit_stats.R               #
+    | |- README                               # Info about all the scripts
+
 Background
 ---
 
@@ -114,6 +138,8 @@ Workflow Summary
         `cat otus.above.cutoff.custom.wang.taxonomy otus.below.cutoff.general.wang.taxonomy > otus.taxonomy`
 
 10. Reformat taxonomy files. The R script in step 11 requires semicolon delimited taxonomy files.  The mothur taxonomy files are delimited with both tabs and semicolons. In the output of Steps 8 and 9, replace the tabs with semi-colons.
+
+**The included script `wrapperFunction` will perform all of these steps using default parameters. Run it at your own risk.**
 
 Detailed Workflow Instructions and Notes
 ---
@@ -479,4 +505,4 @@ Detailed Workflow Instructions and Notes
     | find | Character string to be found |
     | replace | Character string to replace it with |
     | input | The file to be searched, either `otus.taxonomy` or   				`otus.general.taxonomy` |
-    | output | The file `sed` creates. Must have a different name than the input. | 
+    | output | The file `sed` creates. Must have a different name than the input. |

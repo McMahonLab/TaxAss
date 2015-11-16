@@ -21,7 +21,11 @@ databases/*.prob
 databases/*.sum
 databases/*.train
 
+# Data Directories
+processedData
 
 # Other files
 Taxonomy_Assignment_Scripts.Rproj
 tax-scripts/tax-scripts.Rproj
+Rplot*.pdf
+mothur.*

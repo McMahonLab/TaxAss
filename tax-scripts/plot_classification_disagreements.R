@@ -10,33 +10,46 @@
 # userprefs <- commandArgs(trailingOnly = TRUE)
 # fw.plus.gg.tax.file.path <- userprefs[1]
 # gg.only.tax.file.path <- userprefs[2]
+# fw.seq.ids.file.path <- userprefs[5]
 # results.folder.path <- userprefs[3]
 # taxonomy.bootstrap.cutoff <- userprefs[4]
-# fw.seq.ids.file.path <- userprefs[5]
 
 # Do some sort of loop, the user enters all the folder paths, and then 
 # for (p in 1:length(supplied arguments)) {create variables for each path name}
 
-example.user.args <- c("../../take4/compare_percID-93_to_gg-only/conflicts_summary.csv", 93, 
-                       "../../take4/compare_percID-94_to_gg-only/conflicts_summary.csv", 94,
-                       "../../take4/compare_percID-95_to_gg-only/conflicts_summary.csv", 95,
-                       "../../take4/compare_percID-96_to_gg-only/conflicts_summary.csv", 96,
-                       "../../take4/compare_percID-97_to_gg-only/conflicts_summary.csv", 97,
-                       "../../take4/compare_percID-98_to_gg-only/conflicts_summary.csv", 98,
-                       "../../take4/compare_percID-99_to_gg-only/conflicts_summary.csv", 99,
-                       "../../take4/compare_percID-100_to_gg-only/conflicts_summary.csv", 100)
-
+userprefs <- c("../../take5/",
+               "../../take5/",
+               "../../take5/",
+               "../../take5/",
+               
+               "../../take5/conflicts_70", 70,
+               "../../take5/conflicts_80", 80,
+               "../../take5/conflicts_85", 85,
+               "../../take5/conflicts_90", 90,
+               "../../take5/conflicts_91", 91,
+               "../../take5/conflicts_92", 92,
+               "../../take5/conflicts_93", 93,
+               "../../take5/conflicts_94", 94,
+               "../../take5/conflicts_95", 95,
+               "../../take5/conflicts_96", 96,
+               "../../take5/conflicts_97", 97,
+               "../../take5/conflicts_98", 98,
+               "../../take5/conflicts_99", 99,
+               "../../take5/conflicts_100", 100)
+counter <- 1
+index <- 1
+for (p in 5:length(userprefs)){
+  if (counter == 1){
+    folder.path[index] <- userprefs[p]
+  }
+  counter <- counter * -1
+  index <- index + 1
+}
 
 
 #####
 # Define functions to import the data
 #####
-
-import.conflict.nums.data <- function(FilePath){
-  nums <- read.csv(FilePath)
-  nums <- nums[,2:3]
-  return(nums)
-}
 
 import.all.conflict.summaries.into.list <- function(UserArgs){
   example.user.args <- UserArgs
@@ -113,6 +126,7 @@ plot.num.classified.outs <- function(ConflictsSummaryTables){
   points(x = pidents, y = perc.fw, col = "lightsalmon", pch = 19, cex = 1.3)
 }
   
+
 #####
 # Use Functions
 #####

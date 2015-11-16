@@ -22,11 +22,11 @@ results.folder.path <- userprefs[3]
 taxonomy.bootstrap.cutoff <- userprefs[4]
 fw.seq.ids.file.path <- userprefs[5]
 
-# fw.plus.gg.tax.file.path <- "../../take4/otus.94.taxonomy"
-# gg.only.tax.file.path <- "../../take4/otus.gg.taxonomy"
-# results.folder.path <- "../../take4/compare_percID-94_to_gg-only/"
+# fw.plus.gg.tax.file.path <- "../../take5/otus.100.taxonomy"
+# gg.only.tax.file.path <- "../../take5/otus.gg.taxonomy"
+# results.folder.path <- "../../take5/conflicts_100"
 # taxonomy.bootstrap.cutoff <- 60
-# fw.seq.ids.file.path <- "../../take4/ids.above.94"
+# fw.seq.ids.file.path <- "../../take5/ids.above.100"
 
 #####
 # Define Functions for Import and Formatting
@@ -60,6 +60,9 @@ reformat.fw <- function(FWtable){
   # Remove strain and empty 10th column
   fw <- fw[,-c(9,10)]
   
+  # convert seqIDs to characters in case they are numeric b/c as.matrix on numbers adds spaces but as.character doesn't
+  fw[,1] <- as.character(fw[,1])
+  
   # Rename columns
   colnames(fw) <- c("seqID.fw","kingdom.fw","phylum.fw","class.fw","order.fw","linege.fw","clade.fw","tribe.fw")
   
@@ -83,6 +86,9 @@ reformat.gg <- function(GGtable){
   
   # Remove empty 9th column
   gg <- gg[,1:8]
+  
+  # convert seqIDs to characters in case they are numeric b/c as.matrix() on numbers adds spaces but as.character() doesn't
+  gg[,1] <- as.character(gg[,1])
   
   # Rename columns
   colnames(gg) <- c("seqID.gg","kingdom.gg","phylum.gg","class.gg","order.gg","family.gg","genus.gg","species.gg")
@@ -134,6 +140,9 @@ remove.parentheses <- function(x){
 find.fw.indeces <- function(TaxonomyTable, SeqIDs){
   tax <- TaxonomyTable
   ids <- SeqIDs
+  
+  # when seqIDs are numbers written as characters, sometimes one file could have whitespace placeholders for
+  # for the shorter characters.  But can't just change to numeric, in case some files have non-number seqIDs
   
   index <- NULL
   for (e in 1:length(ids)){
@@ -208,10 +217,9 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
 }
 
 # Find seqs misclassified at a given phylogenetic level, t
-find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_percents, TaxaLevel, tracker){
+find.conflicting.names <- function(FWtable, GGtable, GGtable_percents, TaxaLevel, tracker){
   fw <- FWtable
   gg <- GGtable
-  fw.percents <- FWtable_percents
   gg.percents <- GGtable_percents
   t <- TaxaLevel
   num.mismatches <- tracker
@@ -225,16 +233,32 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
   num.mismatches[t] <- length(index)
   
   # Compare the conflicting tables in entirety, use the original files with percents still in it
-  conflicting <- cbind(gg.percents[index,,drop=F], fw.percents[index,,drop=F])
+  conflicting <- cbind(gg.percents[index,,drop=F], fw[index,,drop=F])
   
   # Check that the files still line up correctly
   check.files.match(FWtable = conflicting[,9:16,drop=F], GGtable = conflicting[,1:8,drop=F])
   
   # Export a file with the conflicting rows side by side.
-  write.csv(conflicting, file = paste(results.folder.path, "/", taxa.names[t],"_conflicts.csv", sep=""))
+  write.csv(conflicting, file = paste(results.folder.path, "/", t, "_", taxa.names[t],"_conflicts.csv", sep=""))
   
   #Track the number of mismatches at each level
   return(num.mismatches)
+}
+
+# Set up a summary vector to fill
+create.summary.vector <- function(){
+  num.mismatches <- vector(mode = "numeric", length = 5)
+  names(num.mismatches) <- c("kingdom","phylum","class","order","lineage")
+  return(num.mismatches)
+}
+
+# Format and export the summary vector
+export.summary.stats <- function(SummaryVector){
+  num.mismatches <- SummaryVector
+  num.mismatches <- c(num.mismatches,"numFWseqs" = nrow(fw.fw.only))
+  num.mismatches <- c(num.mismatches, "numALLseqs" = nrow(fw.percents))
+  num.mismatches <- data.frame("TaxaLevel" = names(num.mismatches),"NumConflicts" = num.mismatches, row.names = NULL)
+  write.csv(num.mismatches, file = paste(results.folder.path, "/", "conflicts_summary.csv", sep=""))
 }
 
 # Check how high the freshwater bootstrap values end up given your cutoff.
@@ -287,20 +311,26 @@ check.files.match(FWtable = fw.fw.only, GGtable = gg.fw.only)
 
 # Generate the files comparing classifications made by fw to those of gg
 # Generate a summary file listing the total number of classification disagreements at each level
-num.mismatches <- vector(mode = "numeric", length = 5)
-names(num.mismatches) <- c("kingdom","phylum","class","order","lineage")
+  # Files written in find.conflicting.names() loop: the "TaxaLevel_conflicts.csv" that puts taxonomy tables side by side
+  # File written afer loop: the "conflicts_summary.csv" that lists how many conflicts were at each level, and how many seqs were classified by FW
+num.mismatches <- create.summary.vector()
 for (t in 1:5){
-  num.mismatches <- find.conflicting.names(FWtable = fw.fw.only, GGtable = gg.fw.only, FWtable_percents = fw.percents.fw.only, 
-                                           GGtable_percents = gg.percents.fw.only, TaxaLevel = t, tracker = num.mismatches)
+  num.mismatches <- find.conflicting.names(FWtable = fw.fw.only, GGtable = gg.fw.only,
+                                           GGtable_percents = gg.percents.fw.only, 
+                                           TaxaLevel = t, tracker = num.mismatches)
 }
-write.csv(num.mismatches, file = paste(results.folder.path, "/", "conflicts_summary.csv", sep=""))
+export.summary.stats(SummaryVector = num.mismatches)
 
 # Generate a file of the fw-assigned taxonomies, and a matching table of just their bootstrap values
+  # File written: the "fw_classified_bootstraps.csv" that lists the bootstrap of all sequences classified by freshwater
+  # File written: the "fw_classified_taxonomies.csv" that lists the taxonomy of all sequences classified by freshwater
 fw.bootstraps <- view.bootstraps(TaxonomyTable = fw.percents.fw.only)
 write.csv(fw.bootstraps, file = paste(results.folder.path, "/", "fw_classified_bootstraps.csv", sep=""))
 write.csv(fw.percents.fw.only, file = paste(results.folder.path, "/", "fw_classified_taxonomies.csv", sep=""))
 
 # Generate a file of the gg taxonomies for the fw-assigned sequences, and a matching table of gg bootstraps
+  # File written: the "gg_classified_bootstraps.csv" that lists the bootstrap of all sequences classified by freshwater
+  # File written: the "gg_classified_taxonomies.csv" that lists the taxonomy of all sequences classified by freshwater
 gg.bootstraps <- view.bootstraps(TaxonomyTable = gg.percents.fw.only)
 write.csv(fw.bootstraps, file = paste(results.folder.path, "/", "gg_classified_bootstraps.csv", sep=""))
 write.csv(fw.percents.fw.only, file = paste(results.folder.path, "/", "gg_classified_taxonomies.csv", sep=""))

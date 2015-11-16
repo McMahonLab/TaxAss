@@ -23,9 +23,13 @@ databases/*.train
 
 # Data Directories
 processedData
+rawData
 
 # Other files
 Taxonomy_Assignment_Scripts.Rproj
 tax-scripts/tax-scripts.Rproj
+workflow-flowchart.pptx
 Rplot*.pdf
 mothur.*
+
+

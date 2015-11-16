@@ -27,6 +27,7 @@ fetch_seqIDs_blast_removed.py
 
 Script that takes the list of sequence IDs that BLAST returns and finds all the seqIDs BLAST didn't report because they were not good enough hits. Then it creates a .fasta file of these sequences that can be concatenated to the .fasta file of BLAST seqIDs under the pident cutoff.
 
+
 plot_blast_hit_stats.R
 ---
 
@@ -35,3 +36,4 @@ Script which plots frequency at which BLAST hits give the best `pident`. Can be 
 wrapperFunction.py
 ---
 A single function which will run the entire pipeline with default parameters: `pident` = 90 and `numSeqs` = 5. This can be used when performing diagnostics on your chosen `pident` value but should not be used otherwise. It can be run directly from this folder. **Be sure to examine the code to make sure your paths are all correct.**
+

@@ -14,8 +14,9 @@
 # users.cutoff <- as.numeric(userprefs[3])
 # user.wants.matches <- as.logical(userprefs[4])
 
-blast.file.path <- "~/Desktop/hitstats.csv"
-pident.cutoff <- 94
+userprefs <- commandArgs(trailingOnly = TRUE)
+blast.file.path <- userprefs[1]
+pident.cutoff <- as.numeric(userprefs[2])
 
 #####
 # Install Necessary Packages

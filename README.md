@@ -11,6 +11,30 @@ Overview
 This workflow assigns taxonomy to a fasta file of OTU sequences using both a
 small, custom taxonomy database and a large general database. The workflow was developed specifically for the classification of freshwater OTUs against the McMahonLab's [curated freshwater database](https://github.com/mcmahon-uw/FWMFG). Your mileage may vary.
 
+Repo Structure
+---
+This section provides an overview of the repository struture. Due to the size of some files, not all of them are included in the repo. I have tried to indicate this.
+
+    project
+    |- README                                 # Everything you want to know about this project. And some stuff you probably don't.
+    |- databases                              # Databases used by this Repo
+    | |- FWonly_7Sept2015.fasta               #
+    | |- FWonly_7Sept2015.taxonomy            #
+    | |- gg_13_5.fasta                        # Not included in the repo.
+    | |- gg_13_5.taxonomy                     # Not included in the repo.
+    | |- README                               # More info about the databases
+    |- processedData                          # Not included in the repo.
+    |- rawData                                # Folder to store raw data
+    | |- otus.fasta                           # File of sequences to be classified. Replace this empty file with your sequences.
+    |- tax-scripts                            # Scripts associated with this project.
+    | |- fetch_fastas_with_seqIDs.py          #
+    | |- fetch_seqIDs_blast_removed.py        #
+    | |- wrapperFunction.py                   # Function which will run the entire pipeline with default parameters.
+    | |- find_classification_disagreements.R  #
+    | |- find_seqIDs_with_pident.R            #
+    | |- plot_blast_hit_stats.R               #
+    | |- README                               # Info about all the scripts
+
 Background
 ---
 
@@ -70,7 +94,7 @@ Workflow Summary
 
 2. Run BLAST
 
-    `blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 1`
+    `blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs maxSeqs`
 
 3. Reformat BLAST Database
 
@@ -78,9 +102,44 @@ Workflow Summary
 
 4. Filter BLAST Results (Run one script twice)
 
-    `Rscript find_seqIDs_with_pident.R otus.custom.blast.table outputfile cutoff TRUE`
+    `Rscript find_seqIDs_with_pident.R otus.custom.blast.table ids.above.cutoff hits.above.cutoff cutoff TRUE`
 
-    `Rscript find_seqIDs_with_pident.R otus.custom.blast.table outputfile cutoff FALSE`
+    `Rscript find_seqIDs_with_pident.R otus.custom.blast.table ids.below.cutoff hits.below.cutoff cutoff FALSE`
+
+5. Recover sequence IDs with no BLAST hit
+
+    `python fetch_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table otus.below.cutoff`
+
+6. Create FASTA files of sequences above and below the cutoff
+
+  	`python fetch_fastas_with_seqIDs.py ids.above.cutoff otus.fasta otus.above.cutoff.fasta`
+
+    `python fetch_fastas_with_seqIDs.py ids.below.cutoff.all otus.fasta otus.below.cutoff.fasta`
+
+7. Assign taxonomy using `mothur` using our proposed two-step workflow
+
+    `mothur`
+
+    `classify.seqs(fasta=otus.above.cutoff.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2)`
+
+    `classify.seqs(fasta=otus.below.cutoff.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)`
+
+    `quit()`
+
+8. Combine taxonomy files (terminal)
+
+    `cat otus.above.cutoff.custom.wang.taxonomy otus.below.cutoff.general.wang.taxonomy > otus.taxonomy`
+
+***Steps 9 to 11 are optional***. These steps enable the user to assess their chosen pident (and boostrap?) cutoofs.
+
+
+9. Assign taxonomy using `mothur` using the general database
+
+        `cat otus.above.cutoff.custom.wang.taxonomy otus.below.cutoff.general.wang.taxonomy > otus.taxonomy`
+
+10. Reformat taxonomy files. The R script in step 11 requires semicolon delimited taxonomy files.  The mothur taxonomy files are delimited with both tabs and semicolons. In the output of Steps 8 and 9, replace the tabs with semi-colons.
+
+**The included script `wrapperFunction` will perform all of these steps using default parameters. Run it at your own risk.**
 
 Detailed Workflow Instructions and Notes
 ---
@@ -150,7 +209,7 @@ Detailed Workflow Instructions and Notes
 
     Full Command (type in terminal):
 
-    `blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 1`
+    `blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs maxSeqs`
 
 
     What the filenames are:
@@ -170,7 +229,7 @@ Detailed Workflow Instructions and Notes
     | -db custom.db | Name of the blast database created previously (without the additional file extensions).|
     | -out otus.custom.blast | Location of the BLAST output file to be created. |
     | -outfmt 11 | Format to be used with `blast_formatter`. ASN.1 format. |
-    |	-max_target_seqs 1 | Only keep the best hit for each query sequence. ]
+    |	-max_target_seqs maxSeqs | Keep the top maxSeqs hits for each query sequence. |
 
     __Note__.
       * We would like to find the longest matching sequence with a percent ID which still matches the cutoff. However, it's possible that the best hit is a shorter sequence with a higher percent ID.
@@ -224,9 +283,9 @@ Detailed Workflow Instructions and Notes
 
       Full Two Commands (type in terminal):
 
-      `Rscript find_seqIDs_with_pident.R otus.custom.blast.table outputfile cutoff TRUE`
+      `Rscript find_seqIDs_with_pident.R otus.custom.blast.table ids.above.cutoff hits.above.cutoff cutoff TRUE`
 
-      `Rscript find_seqIDs_with_pident.R otus.custom.blast.table outputfile cutoff FALSE`
+      `Rscript find_seqIDs_with_pident.R otus.custom.blast.table ids.below.cutoff hits.below.cutoff cutoff FALSE`
 
       __Note__: Rscript requires R v 3.2 or higher. The path to the R executable must be added to your `PATH` variable.
 
@@ -238,9 +297,10 @@ Detailed Workflow Instructions and Notes
       |--------|------|-------------|
       | 1 | script.R | Path to `find_seqIDs_with_pident.R` |
       | 2 | otus.custom.blast.table | Path to `otus.custom.blast.table`from Step 3 |
-      |	3 | outputfile | Path the to file you are creating, the list of sequence ID's matching your criteria (T or F for meeting the cutoff). |
-      | 4 | Cutoff | Numeric representing the "corrected pident" to use for matches. |
-      | 5 | Matches | TRUE or FALSE. TRUE: return seqID's >= cutoff, FALSE: return seqID's < cutoff |
+      |	3 | ids.above.cutoff / ids.below.cutoff | Path the to file you are creating, the list of sequence ID's matching your criteria (T or F for meeting the cutoff). |
+      |	4 | hits.above.cutoff / hits.below.cutoff | Path to a secondary file. This will (optinally) be used to create plot to assess the pident. |
+      | 5 | Cutoff | Numeric representing the "corrected pident" to use for matches. |
+      | 6 | Matches | TRUE or FALSE. TRUE: return seqID's >= cutoff, FALSE: return seqID's < cutoff |
 
       What each file is:
 
@@ -248,6 +308,201 @@ Detailed Workflow Instructions and Notes
       |------|-------------|
       | find_seqIDs_with_pident.R	| Script for this step. |
       | otus.custom.blast.table	| The formatted blast output from step 3
-      | outputfile | Path the to file you are creating, the list of sequence ID's matching your criteria (T or F for meeting the cutoff). These files are newline \n delimited seqIDs. |
+      | ids.above.cutoff / ids.below.cutoff | Path the to file you are creating, the list of sequence ID's matching your criteria (T or F for meeting the cutoff). These files are newline \n delimited seqIDs. |
+      | hits.above.cutoff / hits.below.cutoff | Path the to file you are creating, the list of BLAST hits for each sequence. |
 
       __Note__: You may need to choose a different "corrected pident" cutoff for your sequence data. We selected a pident that gave classifications consistent to the class level between the small and large databases.
+
+
+5. Recover sequence IDs with no BLAST hit
+
+    Blast has a built in reporting cutoff based on e-values. The e-value depends on the length of the hit and the size of the database, and it reflects how frequently you would see a hit of that quality by chance. The default e-value cutoff is 10, which means BLAST does not report a match that you'd see 10 or more times by chance.  For more about the e-value statistics, click [here](http://www.ncbi.nlm.nih.gov/BLAST/tutorial/Altschul-1.html).
+
+    The python script `fetch_seqIDs_blast_removed.py` is used to find all of the sequence IDs in the original `fasta` file that do not appear in the BLAST output.  The python script then appends these ids with the ids below the chosen cutoff pident.  That is because the ids blast didn't report hits for had even worse pidents than the ones that didn't make the R script cutoff. All of these sequences will be classified using the large database.
+
+    Full Two Commands (type in terminal):
+
+    `python fetch_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table otus.below.cutoff`
+
+    What each argument is (1st command):
+
+    | Number | Name | Description |
+    |--------|------|-------------|
+    | 1 | fetch_seqIDs_blast_removed.py | Path to the script fetch_seqIDs_blast_removed.py |
+    | 2 | otus.fasta | Path to the fasta file containing all the seqIDs |
+    | 3 | otus.custom.blast.table | Path to the formatted BLAST output from Step 3 |
+    | 4 | ids.missing | Desired path to the output file of missing sequence IDs |
+
+
+    What the syntax is (2nd command):
+
+    `cat file1 >> file2`		means "append file1 on file2"
+
+    What each file is:
+
+    | File | Description |
+    |------|-------------|
+    | fetch_seqIDs_blast_removed.py | Python script you're running |
+    | otus.fasta | Original fasta file of sequences from step 0 |
+    | otus.custom.blast.table | Reformatted blast results from step 3 |
+    | ids.missing | File of missing seqIDs created in this step|
+    | ids.below.cutoff | seqIDs below the specified cutoff, as identified in Step 4 |
+
+    __Note__: It's a little concerning that so many sequences were not reported by BLAST.  They are 16S sequences so shouldn't they all be pretty close?? This may mean we should tweak the penalty values.  It definitely deserves another look. Note that these sequences are already curated to remove bad reads using `mothur` & Alex's pipeline.
+
+
+6. Create FASTA files of sequences above and below the cutoff
+
+    The fetch_fastas_with_seqIDs.py takes the sequence IDs selected from the BLAST output  and finds them in the original query fasta file. It then creates a new fasta file containing just the desired sequences. Run the command twice to generate sequences above and below the pident cutoff. These will be classified using the custom and general taxonomic databases, respectively.
+
+    Full Two Commands (type in terminal):
+
+    `python fetch_fastas_with_seqIDs.py ids.above.cutoff otus.fasta otus.above.cutoff.fasta`
+
+    `python fetch_fastas_with_seqIDs.py ids.below.cutoff.all otus.fasta otus.below.cutoff.fasta`
+
+    These arguments must be in the correct order. Python sources the .py script using the arguments supplied after it in the terminal. Separate all arguments with a space.
+
+    What each argument is:
+
+    | Number | Name | Description |
+    |--------|------|-------------|
+    | 1 | fetch_fastas_with_seqIDs.py | The path to this script. |
+    | 2 | ids.above.cutoff | the path to the file with newline-separated seqIDs that was generated in Step 4 |
+    | 3 | otus.fasta | The path to the otu fasta file containing all the seqIDs from Step 0 |
+    | 4 | otus.above.cutoff.fasta | Desired path to the new fasta file the script generates. __Note__: If this file already exist the script will delete it before starting. |
+
+    What each file is:
+
+    | File | Description |
+    |------|-------------|
+    | fetch_fastas_with_seqIDs.py | The python script you're sourcing |
+    | ids.below.cutoff | The file of seqIDs at or above your cutoff from Step 4 |
+    | ids.below.cutoff.all| The file of seqIDs below your cutoff from Step 5 |
+    | otus.fasta | The original fasta file of otu sequences to be classified |
+    | otus.below.cutoff.fasta | The output file with fasta sequences at or above the cutoff |
+    | otus.above.cutoff.fasta | The output file with fasta sequences below the cutoff |
+
+
+7. Assign taxonomy using `mothur`
+
+    The classify.seqs() command in mothur classifies sequences using a specified algorithm and a provided taxonomy database. The output file is a list of sequence ID's next to their assigned taxonomy.
+
+    Full Four Commands (type in terminal):
+
+      `mothur`
+
+      `classify.seqs(fasta=otus.above.cutoff.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2)`
+
+      `classify.seqs(fasta=otus.below.cutoff.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)`
+
+      `quit()`
+
+      What the first and last commands do:
+
+      | Command | Description |
+      |------|-------------|
+      | mothur | Path to the `mothur` installation on your computer. Or type `mothur` directly if it has been added to your path. You must open `mothur` to use the command `classify.seqs()`. |
+      |	quit() | Exits `mothur` |
+
+      What the filenames are:
+
+      | File | Description |
+      |------|-------------|
+      | otus.above.cutoff.cutoff.fast | Fasta file containing only seqIDs >= the  cutoff, from step 5 |
+      | otus.below.cutoff.fasta | Fasta file containing only seqIDs < the  cutoff, from step 5 |
+      | custom.fasta | Fasta file for the small custom taxonomy database |
+      | general.fasta	| Fasta file for the general taxonomy database |
+      | custom.taxonomy |	Taxonomy file for the small custom taxonomy database |
+      | general.taxonomy |	Taxonomy file for the general taxonomy database |
+
+      What each flag does:
+
+      | Flag | Description |
+      |------|-------------|
+      | fasta= | Path to the .fasta file to be classified |
+      | template= | Path to the .fasta file of the taxonomy database |
+      | taxonomy=	| Path to the taxonomy file of the taxonomy database |
+      | method= | Algorithm for assigning taxonomy. Default is `wang`. |
+      | probs= | T or F, show the bootstrap support values or not? |
+      | cutoff= | Minimum bootstrap value for getting a name instead of unclassified. A typical minimum is 60%, and the default is no cutoff, full reporting. In this workflow, a subsequent R script applies a cutoff after the fact. |
+      | processors=	| The number of processors to use |
+
+      What the output files are (note you have no control over the name extensions added):
+
+      * otus.above.cutoff.custom.wang.taxonomy  
+      * otus.above.cutoff.custom.wang.tax.summary  
+      * otus.below.cutoff.general.wang.taxonomy
+      * otus.below.cutoff.general.wang.tax.summary
+
+      **Note**: These bootstrap percent confidence values are NOT the confidence that the taxonomy assignment is *correct*, just that it is *repeatable* in that database. This is another paremeter that we could explore changing more in the future. I left cutoff out in this command so that you can explore the different results of it later, in step 11.
+
+8. Combine taxonomy files
+
+    Concatenate the two taxonomy files to create one complete one using the `cat` command.
+
+    Full Command (type in terminal):
+
+    `cat otus.above.cutoff.custom.wang.taxonomy otus.below.cutoff.general.wang.taxonomy > otus.taxonomy`
+
+    Command syntax:
+
+    `cat file1 file2 > file3` means "combine file1 and file2 into file 3"
+
+    What the filenames are:
+
+    | File | Description |
+    |------|-------------|
+    | otus.above.cutoff.custom.wang.taxonomy | Taxonomy file for sequences classified with custom database |
+    | otus.below.cutoff.general.wang.taxonomy | Taxonomy file for sequences classified with general database |
+    | otus.taxonomy	| Name for the concatenated taxonomy file|
+
+9. Assign taxonomy with general database only
+
+    Get a large, general database classification of your `otus.fasta` file to compare to. These databases (such as GreenGenes) are huge, so the taxonomy assignment clustering algorithm is likely to only settle on a given taxonomic assignment if it is unambiguously correct.  Therefore, we trust the upper level Green Genes assignments more than our custom database, even though we trust the lower level taxonomic assignments using our custom database more.
+
+    In this step, taxonomies are assigned with the general database using `mothur`. The assignments will later be compared to the results using a custom classification.
+
+    Full Four Commands (type in terminal):
+
+    `mothur`
+
+    `classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)`
+
+    `quit()`
+
+    What the commands do: See step 7 for a detailed explanation of these four commands and their arguments.
+
+    What the filenames are:
+
+    | File | Description |
+    |------|-------------|
+    | otus.fasta | Fasta file of sequences to be classified |
+    | general.fasta | Fasta file of the large general database |
+    | general.taxonomy |  Taxonomy file of the large, general database |
+
+
+10. Reformat taxonomy files.
+
+    The R script in step 11 requires semicolon delimited taxonomy files.  The mothur taxonomy files are delimited with both tabs and semicolons. In the output of Steps 8 and 9, replace the tabs with semi-colons.
+
+    One way of doing on in bash is described below.
+
+    `sed 's/[[:blank:]]/\;/' <otus.taxonomy >otus.taxonomy.reformatted`
+
+    `mv otus.taxonomy.reformatted otus.taxonomy`
+
+    `sed 's/[[:blank:]]/\;/' <otus.general.taxonomy  >otus.genearl.taxonomy.reformatted`
+
+    `mv otus.general.taxonomy.reformatted otus.general.taxonomy`
+
+    Syntax of the command `sed 's/find/replace/ <input >output`:
+
+    | Command/Argument | Function |
+    |------------------|----------|
+    | sed | A "stream editor," a function for editing streams of text in the terminal |
+    | 's | Perform a substition |
+    | find | Character string to be found |
+    | replace | Character string to replace it with |
+    | input | The file to be searched, either `otus.taxonomy` or   				`otus.general.taxonomy` |
+    | output | The file `sed` creates. Must have a different name than the input. |

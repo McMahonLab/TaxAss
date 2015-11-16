@@ -22,4 +22,6 @@ The global database is the May 2013 release of GreenGenes, downloaded from the [
 * gg_13_5_taxonomy
 * gg_13_5.fasta
 
+The mothur developers recommend a different version of this database, corresponding to the August 2013 release. This version is available from the [mothur website](http://mothur.org/wiki/Greengenes-formatted_databases).
+
 Because these files are large, they are not stored in this repo.

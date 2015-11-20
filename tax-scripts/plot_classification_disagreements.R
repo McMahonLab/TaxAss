@@ -1,6 +1,5 @@
 # Make a plot comparing the classification conflicts between pidents
 # Make a plot showing the proportion of sequences classified in FW database
-# Do this for the "take4" results (this used a new database version from Trina)
 # compare pidents based on # OTUs and # reads impacted.
 
 #####
@@ -17,11 +16,7 @@
 # Do some sort of loop, the user enters all the folder paths, and then 
 # for (p in 1:length(supplied arguments)) {create variables for each path name}
 
-userprefs <- c("../../take5/",
-               "../../take5/",
-               "../../take5/",
-               "../../take5/",
-               
+userprefs <- c("../../take5/otus.abund",
                "../../take5/conflicts_70", 70,
                "../../take5/conflicts_80", 80,
                "../../take5/conflicts_85", 85,
@@ -36,29 +31,20 @@ userprefs <- c("../../take5/",
                "../../take5/conflicts_98", 98,
                "../../take5/conflicts_99", 99,
                "../../take5/conflicts_100", 100)
-counter <- 1
-index <- 1
-for (p in 5:length(userprefs)){
-  if (counter == 1){
-    folder.path[index] <- userprefs[p]
-  }
-  counter <- counter * -1
-  index <- index + 1
-}
-
 
 #####
 # Define functions to import the data
 #####
 
-import.all.conflict.summaries.into.list <- function(UserArgs){
-  example.user.args <- UserArgs
+import.all.conflict.summaries <- function(UserArgs){
+  # the first argument is the otu rel abund table, so ignore that here
+  user.args <- UserArgs[-1]
   
   # Import them into a list format
   mismatches.list <- list(NULL)
   counter <- 1
-  for (p in seq(from = 1, to = length(example.user.args), by = 2)){
-    mismatches.list[[counter]] <- import.conflict.nums.data(FilePath = example.user.args[p])
+  for (p in seq(from = 1, to = length(user.args), by = 2)){
+    mismatches.list[[counter]] <- import.conflict.nums.data(FilePath = user.args[p])
     names(mismatches.list)[counter] <- example.user.args[p+1]
     counter <- counter + 1
   }

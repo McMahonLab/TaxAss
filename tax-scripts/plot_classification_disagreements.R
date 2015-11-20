@@ -36,6 +36,13 @@ userprefs <- c("../../take5/otus.abund",
 # Define functions to import the data
 #####
 
+# This funciton is used inside the import.all.conflict.summariers function
+import.conflict.nums.data <- function(FilePath){
+  nums <- read.csv(FilePath)
+  nums <- nums[,2:3]
+  return(nums)
+}
+
 import.all.conflict.summaries <- function(UserArgs){
   # the first argument is the otu rel abund table, so ignore that here
   user.args <- UserArgs[-1]

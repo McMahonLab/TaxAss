@@ -38,7 +38,7 @@ userprefs <- c("../../take5/otus.abund",
 
 # This funciton is used inside the import.all.conflict.summariers function
 import.conflict.nums.data <- function(FilePath){
-  nums <- read.csv(FilePath)
+  nums <- read.csv(paste(FilePath, "/conflicts_summary.csv", sep = ""))
   nums <- nums[,2:3]
   return(nums)
 }

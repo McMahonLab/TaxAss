@@ -239,7 +239,7 @@ find.conflicting.names <- function(FWtable, GGtable, GGtable_percents, TaxaLevel
   check.files.match(FWtable = conflicting[,9:16,drop=F], GGtable = conflicting[,1:8,drop=F])
   
   # Export a file with the conflicting rows side by side.
-  write.csv(conflicting, file = paste(results.folder.path, "/", t, "_", taxa.names[t],"_conflicts.csv", sep=""))
+  write.csv(conflicting, file = paste(results.folder.path, "/", t, "_", taxa.names[t],"_conflicts.csv", sep=""), row.names = FALSE)
   
   #Track the number of mismatches at each level
   return(num.mismatches)
@@ -258,7 +258,7 @@ export.summary.stats <- function(SummaryVector){
   num.mismatches <- c(num.mismatches,"numFWseqs" = nrow(fw.fw.only))
   num.mismatches <- c(num.mismatches, "numALLseqs" = nrow(fw.percents))
   num.mismatches <- data.frame("TaxaLevel" = names(num.mismatches),"NumConflicts" = num.mismatches, row.names = NULL)
-  write.csv(num.mismatches, file = paste(results.folder.path, "/", "conflicts_summary.csv", sep=""))
+  write.csv(num.mismatches, file = paste(results.folder.path, "/", "conflicts_summary.csv", sep=""), row.names = FALSE)
 }
 
 # Check how high the freshwater bootstrap values end up given your cutoff.
@@ -325,12 +325,12 @@ export.summary.stats(SummaryVector = num.mismatches)
   # File written: the "fw_classified_bootstraps.csv" that lists the bootstrap of all sequences classified by freshwater
   # File written: the "fw_classified_taxonomies.csv" that lists the taxonomy of all sequences classified by freshwater
 fw.bootstraps <- view.bootstraps(TaxonomyTable = fw.percents.fw.only)
-write.csv(fw.bootstraps, file = paste(results.folder.path, "/", "fw_classified_bootstraps.csv", sep=""))
-write.csv(fw.percents.fw.only, file = paste(results.folder.path, "/", "fw_classified_taxonomies.csv", sep=""))
+write.csv(fw.bootstraps, file = paste(results.folder.path, "/", "fw_classified_bootstraps.csv", sep=""), row.names = FALSE)
+write.csv(fw.percents.fw.only, file = paste(results.folder.path, "/", "fw_classified_taxonomies.csv", sep=""), row.names = FALSE)
 
 # Generate a file of the gg taxonomies for the fw-assigned sequences, and a matching table of gg bootstraps
   # File written: the "gg_classified_bootstraps.csv" that lists the bootstrap of all sequences classified by freshwater
   # File written: the "gg_classified_taxonomies.csv" that lists the taxonomy of all sequences classified by freshwater
 gg.bootstraps <- view.bootstraps(TaxonomyTable = gg.percents.fw.only)
-write.csv(fw.bootstraps, file = paste(results.folder.path, "/", "gg_classified_bootstraps.csv", sep=""))
-write.csv(fw.percents.fw.only, file = paste(results.folder.path, "/", "gg_classified_taxonomies.csv", sep=""))
+write.csv(fw.bootstraps, file = paste(results.folder.path, "/", "gg_classified_bootstraps.csv", sep=""), row.names = FALSE)
+write.csv(fw.percents.fw.only, file = paste(results.folder.path, "/", "gg_classified_taxonomies.csv", sep=""), row.names = FALSE)

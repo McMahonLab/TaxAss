@@ -37,7 +37,8 @@ userprefs <- c("../../take5/otus.abund",
 #####
 
 import.all.conflict.summaries <- function(UserArgs){
-  # the first argument is the otu rel abund table, so ignore that here
+  
+  # the first command line argument is the otu rel abund table, so ignore that here
   user.args <- UserArgs[-1]
   
   # Import them into a list format
@@ -117,10 +118,10 @@ plot.num.classified.outs <- function(ConflictsSummaryTables){
 # Use Functions
 #####
 
-all.summaries <- import.all.conflict.summaries.into.list(UserArgs = example.user.args)
+all.summaries <- import.all.conflict.summaries(UserArgs = userprefs)
 
 plot.num.forced.otus(ConflictsSummaryTables = all.summaries)
-plot.num.forced.otus(ConflictsSummaryTables = all.summaries, y.axis.limit = 5)
+plot.num.forced.otus(ConflictsSummaryTables = all.summaries, y.axis.limit = 10)
 
 plot.num.classified.outs(ConflictsSummaryTables = all.summaries)
 

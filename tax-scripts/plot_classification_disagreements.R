@@ -36,13 +36,6 @@ userprefs <- c("../../take5/otus.abund",
 # Define functions to import the data
 #####
 
-# This funciton is used inside the import.all.conflict.summariers function
-import.conflict.nums.data <- function(FilePath){
-  nums <- read.csv(paste(FilePath, "/conflicts_summary.csv", sep = ""))
-  nums <- nums[,2:3]
-  return(nums)
-}
-
 import.all.conflict.summaries <- function(UserArgs){
   # the first argument is the otu rel abund table, so ignore that here
   user.args <- UserArgs[-1]
@@ -51,8 +44,8 @@ import.all.conflict.summaries <- function(UserArgs){
   mismatches.list <- list(NULL)
   counter <- 1
   for (p in seq(from = 1, to = length(user.args), by = 2)){
-    mismatches.list[[counter]] <- import.conflict.nums.data(FilePath = user.args[p])
-    names(mismatches.list)[counter] <- example.user.args[p+1]
+    mismatches.list[[counter]] <- read.csv(file = paste(user.args[p], "/conflicts_summary.csv", sep = ""))
+    names(mismatches.list)[counter] <- user.args[p+1]
     counter <- counter + 1
   }
   

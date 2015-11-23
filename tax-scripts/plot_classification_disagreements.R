@@ -151,6 +151,43 @@ generate.summary.table.of.reads <- function(ReadsList){
   return(reads.summary)
 }
 
+# add to the read.summaries the overall totals to match the otu.summaries structure
+# this involves importing the fw_classified_taxonomies.csv file to get the list of fw seqIDs
+add.totals.to.read.summaries <- function(ReadSummaryTable, AbundanceTable, UserArgs){
+  seqID.reads <- AbundanceTable
+  reads.summary <- ReadSummaryTable
+  userprefs <- UserArgs
+  user.args <- userprefs[-1]
+  pident.folders <- user.args[seq(from = 1, to = length(user.args), by = 2)]
+  pident.values <- user.args[seq(from = 1, to = length(user.args), by = 2)+1]
+  
+  fw.reads <- NULL
+  # for each pident tried
+  for (p in 1:length(pident.folders)){
+    all.files <- list.files(pident.folders[p])
+    fw.classified <- read.csv(file = paste(pident.folders[p], "/", all.files[8], sep=""))
+    fw.seqIDs <- fw.classified[ ,1]
+    
+    # for each seqID classified with FW
+    fw.reads[p] <- 0
+    if (length(fw.seqIDs) > 0){
+      for (s in 1:length(fw.seqIDs)){
+        index <- which(seqID.reads[,1] == fw.seqIDs[s])
+        fw.reads[p] <- fw.reads[p] + seqID.reads[index,2]
+      } 
+    } # no else b/c it's already zero at start 
+    names(fw.reads)[p] <- paste("pident", pident.values[p], sep = "")
+  }
+  
+  # Add the total reads classified by FW at each pident to the summary table
+  reads.summary <- rbind(reads.summary, fw.reads)
+  
+  # Add the total reads to the summary table
+  tot.reads <- sum(seqID.reads[ ,2])
+  reads.summary <- rbind(reads.summary, tot.reads)
+  
+  return(reads.summary)
+}
 
 #####
 # Define functions to plot the data
@@ -217,3 +254,5 @@ conflict.seqIDs <- get.conflict.seqIDs(UserArgs = userprefs)
 conflict.seqID.reads <- find.reads.per.seqID(ReadsTable = seqID.reads, ConflictsList = conflict.seqIDs)
 
 read.summaries <- generate.summary.table.of.reads(ReadsList = conflict.seqID.reads)
+
+read.summaries <- add.totals.to.read.summaries(ReadSummaryTable = read.summaries, AbundanceTable = seqID.reads, UserArgs = userprefs)

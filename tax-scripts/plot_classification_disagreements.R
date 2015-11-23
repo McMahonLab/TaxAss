@@ -133,17 +133,22 @@ find.reads.per.seqID <- function(ReadsTable, ConflictsList){
 generate.summary.table.of.reads <- function(ReadsList){
   reads.list <- ReadsList
   
-  reads.summary <- matrix(0, )
+  # Set up empty matrix to fill
+  reads.summary <- matrix(0, nrow = 5, ncol = length(reads.list))
+  row.names(reads.summary) <- names(reads.list[[1]])
+  colnames(reads.summary) <- names(reads.list)
   
   #For each outer list's list (pident)
   for (p in 1:length(reads.list)){
     
     # For each inner list's vector (taxa level)
+    taxa.sum <- NULL
     for (t in 1:5){
-      
-      
+      taxa.sum[t] <- sum(reads.list[[p]][[t]])
     }
+    reads.summary[,p] <- taxa.sum
   }
+  return(reads.summary)
 }
 
 
@@ -211,4 +216,4 @@ conflict.seqIDs <- get.conflict.seqIDs(UserArgs = userprefs)
 
 conflict.seqID.reads <- find.reads.per.seqID(ReadsTable = seqID.reads, ConflictsList = conflict.seqIDs)
 
-read.summaries <- 
+read.summaries <- generate.summary.table.of.reads(ReadsList = conflict.seqID.reads)

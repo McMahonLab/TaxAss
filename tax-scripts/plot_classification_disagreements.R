@@ -124,9 +124,28 @@ find.reads.per.seqID <- function(ReadsTable, ConflictsList){
     }
     # assign element p of the outer list the inner list it contains
     pidents.list[[p]] <- taxa.list
+    names(pidents.list)[p] <- names(conflict.ids)[p]
   }
   return(pidents.list)
 }
+
+# collapse the list of total reads per seqID into a table of total reads: taxa level x pident
+generate.summary.table.of.reads <- function(ReadsList){
+  reads.list <- ReadsList
+  
+  reads.summary <- matrix(0, )
+  
+  #For each outer list's list (pident)
+  for (p in 1:length(reads.list)){
+    
+    # For each inner list's vector (taxa level)
+    for (t in 1:5){
+      
+      
+    }
+  }
+}
+
 
 #####
 # Define functions to plot the data
@@ -192,4 +211,4 @@ conflict.seqIDs <- get.conflict.seqIDs(UserArgs = userprefs)
 
 conflict.seqID.reads <- find.reads.per.seqID(ReadsTable = seqID.reads, ConflictsList = conflict.seqIDs)
 
-
+read.summaries <- 

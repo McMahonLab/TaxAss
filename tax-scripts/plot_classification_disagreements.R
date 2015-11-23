@@ -7,14 +7,6 @@
 #####
 
 # userprefs <- commandArgs(trailingOnly = TRUE)
-# fw.plus.gg.tax.file.path <- userprefs[1]
-# gg.only.tax.file.path <- userprefs[2]
-# fw.seq.ids.file.path <- userprefs[5]
-# results.folder.path <- userprefs[3]
-# taxonomy.bootstrap.cutoff <- userprefs[4]
-
-# Do some sort of loop, the user enters all the folder paths, and then 
-# for (p in 1:length(supplied arguments)) {create variables for each path name}
 
 userprefs <- c("../../take5/otus.abund",
                "../../take5/conflicts_70", 70,
@@ -33,7 +25,7 @@ userprefs <- c("../../take5/otus.abund",
                "../../take5/conflicts_100", 100)
 
 #####
-# Define functions to import the data
+# Define functions to import and process the data
 #####
 
 # import all the conflict summary files from each folder and compile them into a matrix
@@ -97,7 +89,7 @@ get.conflict.seqIDs <- function(UserArgs){
     }
     
     all.pidents[[p]] <- conflict.ids
-    names(all.pidents)[p] <- paste("pident", pident.values[p], sep = "")
+    names(all.pidents)[p] <- pident.values[p]
   }
   return(all.pidents)
 }
@@ -151,7 +143,7 @@ generate.summary.table.of.reads <- function(ReadsList){
   return(reads.summary)
 }
 
-# add to the read.summaries the overall totals to match the otu.summaries structure
+# add to the read.summaries table the overall totals to match the otu.summaries structure
 # this involves importing the fw_classified_taxonomies.csv file to get the list of fw seqIDs
 add.totals.to.read.summaries <- function(ReadSummaryTable, AbundanceTable, UserArgs){
   seqID.reads <- AbundanceTable
@@ -193,9 +185,11 @@ add.totals.to.read.summaries <- function(ReadSummaryTable, AbundanceTable, UserA
 # Define functions to plot the data
 #####
 
-plot.num.forced.otus <- function(ConflictsSummaryTables, y.axis.limit=0){
+plot.num.forced.otus <- function(ConflictSummaryTable, ByReads = FALSE, y.axis.limit = 0){
+  sum.table <- ConflictSummaryTable
+  
   # remove the last row of number FW sequences, that's not needed for this plot.
-  mismatches <- ConflictsSummaryTables[1:(nrow(ConflictsSummaryTables)-2),]
+  mismatches <- sum.table[1:(nrow(sum.table)-2),]
   pidents <- colnames(mismatches)
   pidents <- as.numeric(pidents)
   if (y.axis.limit == 0){
@@ -242,8 +236,8 @@ plot.num.classified.outs <- function(ConflictsSummaryTables){
 
 otu.summaries <- import.all.conflict.summaries(UserArgs = userprefs)
 
-plot.num.forced.otus(ConflictsSummaryTables = otu.summaries)
-plot.num.forced.otus(ConflictsSummaryTables = otu.summaries, y.axis.limit = 10)
+plot.num.forced.otus(ConflictSummaryTable = otu.summaries)
+plot.num.forced.otus(ConflictSummaryTable = otu.summaries, y.axis.limit = 10)
 
 plot.num.classified.outs(ConflictsSummaryTables = otu.summaries)
 

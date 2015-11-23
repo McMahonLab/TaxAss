@@ -77,8 +77,7 @@ import.and.reformat.otu.table <- function(UserArgs){
 
 # import files comparing conflicts at each level, record the seqIDs into a list of lists
 # structure: outer list- each pident, inner lists- seqIDs at each taxa level
-get.conflict.seqIDs <- function(ReadsTable, UserArgs){
-  seqID.reads <- ReadsTable
+get.conflict.seqIDs <- function(UserArgs){
   userprefs <- UserArgs
   user.args <- userprefs[-1]
   pident.folders <- user.args[seq(from = 1, to = length(user.args), by = 2)]
@@ -101,6 +100,32 @@ get.conflict.seqIDs <- function(ReadsTable, UserArgs){
     names(all.pidents)[p] <- paste("pident", pident.values[p], sep = "")
   }
   return(all.pidents)
+}
+
+# create a list of total reads that matches the structure of the list of conflicting seqIDs
+find.reads.per.seqID <- function(ReadsTable, ConflictsList){
+  otu.reads <- ReadsTable
+  conflict.ids <- ConflictsList
+  
+  # for each upper list level (pident folder)
+  pidents.list <- list(NULL)
+  for (p in 1:length(conflict.ids)){
+  
+    # for each inner list level (taxonomy level)
+    taxa.list <- list(Kingdom = NULL, Phylum = NULL, Class = NULL, Order = NULL, Lineage = NULL)
+    for (t in 1:5){
+      # for each seqID
+      if (length(conflict.ids[[p]][[t]]) > 0){
+        for (s in 1:length(conflict.ids[[p]][[t]])){
+          index <- which(otu.reads$seqID == conflict.ids[[p]][[t]][s])
+          taxa.list[[t]] <- c(taxa.list[[t]], otu.reads[index,2])
+        }
+      }else taxa.list[[t]] <- 0
+    }
+    # assign element p of the outer list the inner list it contains
+    pidents.list[[p]] <- taxa.list
+  }
+  return(pidents.list)
 }
 
 #####
@@ -163,8 +188,8 @@ plot.num.classified.outs(ConflictsSummaryTables = otu.summaries)
 
 seqID.reads <- import.and.reformat.otu.table(UserArgs = userprefs)
 
-conflict.seqIDs <- get.conflict.seqIDs(ReadsTable = seqID.reads, UserArgs = userprefs)
+conflict.seqIDs <- get.conflict.seqIDs(UserArgs = userprefs)
 
-
+conflict.seqID.reads <- find.reads.per.seqID(ReadsTable = seqID.reads, ConflictsList = conflict.seqIDs)
 
 

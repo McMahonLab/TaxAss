@@ -36,10 +36,12 @@ userprefs <- c("../../take5/otus.abund",
 # Define functions to import the data
 #####
 
+# import all the conflict summary files from each folder and compile them into a matrix
 import.all.conflict.summaries <- function(UserArgs){
+  userprefs <- UserArgs
   
   # the first command line argument is the otu rel abund table, so ignore that here
-  user.args <- UserArgs[-1]
+  user.args <- userprefs[-1]
   
   # Import them into a list format
   mismatches.list <- list(NULL)
@@ -55,17 +57,51 @@ import.all.conflict.summaries <- function(UserArgs){
   row.names(mismatches.matrix) <- mismatches.list[[1]]$TaxaLevel
   colnames(mismatches.matrix) <- names(mismatches.list)
   for (c in 1:ncol(mismatches.matrix)){
-    mismatches.matrix[,c] <- mismatches.list[[c]][,2]
+    mismatches.matrix[ ,c] <- mismatches.list[[c]][ ,2]
   }
   
   return(mismatches.matrix)
 }
 
+# import the OTU table and then pull out just the total reads for each seqID
+import.and.reformat.otu.table <- function(UserArgs){
+  userprefs <- UserArgs
+  
+  otu.table.file.path <- userprefs[1]
+  
+  otus <- read.table(file = otu.table.file.path, header = TRUE, stringsAsFactors = FALSE)
+  seqID.reads <- data.frame(seqID = otus[ ,1], reads = rowSums(otus[ ,-1]))
+  
+  return(seqID.reads)
+}
 
-#####
-# Define functions to analyze the data
-#####
-
+# import files comparing conflicts at each level, record the seqIDs into a list of lists
+# structure: outer list- each pident, inner lists- seqIDs at each taxa level
+get.conflict.seqIDs <- function(ReadsTable, UserArgs){
+  seqID.reads <- ReadsTable
+  userprefs <- UserArgs
+  user.args <- userprefs[-1]
+  pident.folders <- user.args[seq(from = 1, to = length(user.args), by = 2)]
+  pident.values <- user.args[seq(from = 1, to = length(user.args), by = 2)+1]
+  
+  all.pidents <- list(NULL)
+  # for each pident folder
+  for (p in 1:length(pident.values)){
+    all.files <- list.files(pident.folders[p])
+    conflict.ids <- list(Kingdom = NULL, Phylum = NULL, Class = NULL, Order = NULL, Lineage = NULL)
+    
+    # for each taxonomy file
+    for (t in 1:5){
+      conflict.ids[[t]] <- read.csv(file = paste(pident.folders[p], "/", all.files[t], sep = ""), header = TRUE, stringsAsFactors = FALSE)
+      # first column is the seqID vector
+      conflict.ids[[t]] <- conflict.ids[[t]][,1]
+    }
+    
+    all.pidents[[p]] <- conflict.ids
+    names(all.pidents)[p] <- paste("pident", pident.values[p], sep = "")
+  }
+  return(all.pidents)
+}
 
 #####
 # Define functions to plot the data
@@ -118,16 +154,16 @@ plot.num.classified.outs <- function(ConflictsSummaryTables){
 # Use Functions
 #####
 
-all.summaries <- import.all.conflict.summaries(UserArgs = userprefs)
+otu.summaries <- import.all.conflict.summaries(UserArgs = userprefs)
 
-plot.num.forced.otus(ConflictsSummaryTables = all.summaries)
-plot.num.forced.otus(ConflictsSummaryTables = all.summaries, y.axis.limit = 10)
+plot.num.forced.otus(ConflictsSummaryTables = otu.summaries)
+plot.num.forced.otus(ConflictsSummaryTables = otu.summaries, y.axis.limit = 10)
 
-plot.num.classified.outs(ConflictsSummaryTables = all.summaries)
+plot.num.classified.outs(ConflictsSummaryTables = otu.summaries)
 
+seqID.reads <- import.and.reformat.otu.table(UserArgs = userprefs)
 
-
-
+conflict.seqIDs <- get.conflict.seqIDs(ReadsTable = seqID.reads, UserArgs = userprefs)
 
 
 

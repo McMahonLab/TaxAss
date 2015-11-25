@@ -239,21 +239,43 @@ plot.num.forced <- function(ConflictSummaryTable, ByReads = FALSE, AsPercent = F
   dev.off()
 }
 
-plot.num.classified.outs <- function(ConflictsSummaryTables){
-  num.fw <- ConflictsSummaryTables[nrow(ConflictsSummaryTables)-1,]
-  tot.seq <- ConflictsSummaryTables[nrow(ConflictsSummaryTables),1]
-  perc.fw <- num.fw / tot.seq * 100
-  pidents <- colnames(ConflictsSummaryTables)
+plot.num.classified.outs <- function(ConflictSummaryTable, ByReads = FALSE, AsPercent = TRUE){
+  sum.table <- ConflictSummaryTable
+  
+  # pull out data needed for this plot
+  num.fw <- sum.table[nrow(sum.table)-1,]
+  tot.seq <- sum.table[nrow(sum.table),1]
+  pidents <- colnames(sum.table)
   pidents <- as.numeric(pidents)
   
+  if (ByReads == FALSE){
+    plot.of <- "OTU"
+  }else{
+    plot.of <- "read"
+  }
+  
+  if (AsPercent == FALSE){
+    plot.as <- "Total"
+  }else{
+    plot.as <- "Percent"
+    num.fw <- num.fw / tot.seq * 100
+  }
+  
+  # Save plot as .png file
+  png(filename = paste(results.file.path, "/Custom_db_contributions_by_", plot.of, "_", plot.as, "s", sep = ""), 
+      width = 5, height = 5, units = "in", res = 100)
+  
   # Set up and empty plot
-  plot(x = pidents, y = perc.fw, type = "n", main = "Contribution of FW Taxonomy to Total Classifications
-       (How many of the OTUs are we calling freshwater?)",
-       xlab = "\"Full Length\" percent identity (similar to ANI)", ylab = "Percent total OTUs Classified by FW (%)")
+  plot(x = pidents, y = num.fw, type = "n", 
+       main = "Contribution of Custom Taxonomy \n to Total Classifications", cex.main = 1,
+       xlab = "\"Full Length\" percent identity (similar to ANI)", 
+       ylab = paste("OTUs Classified by Custom Taxonomy (", plot.as, " ", plot.of, "s)", sep = ""))
   
   # Fill plot with beautiful data
-  lines(x = pidents, y = perc.fw, col = "lightsalmon", lwd = 1.5)
-  points(x = pidents, y = perc.fw, col = "lightsalmon", pch = 19, cex = 1.3)
+  lines(x = pidents, y = num.fw, col = "lightsalmon", lwd = 1.5)
+  points(x = pidents, y = num.fw, col = "lightsalmon", pch = 19, cex = 1.3)
+  
+  dev.off()
 }
   
 
@@ -268,7 +290,8 @@ plot.num.forced(ConflictSummaryTable = otu.summaries, y.axis.limit = 10)
 plot.num.forced(ConflictSummaryTable = otu.summaries, AsPercent = TRUE)
 plot.num.forced(ConflictSummaryTable = otu.summaries, AsPercent = TRUE, y.axis.limit = 1)
 
-plot.num.classified.outs(ConflictsSummaryTables = otu.summaries)
+plot.num.classified.outs(ConflictSummaryTable = otu.summaries, AsPercent = FALSE)
+plot.num.classified.outs(ConflictSummaryTable = otu.summaries, AsPercent = TRUE)
 
 seqID.reads <- import.and.reformat.otu.table(UserArgs = userprefs)
 
@@ -284,3 +307,6 @@ plot.num.forced(ConflictSummaryTable = read.summaries, ByReads = TRUE)
 plot.num.forced(ConflictSummaryTable = read.summaries, ByReads = TRUE, y.axis.limit = 10000)
 plot.num.forced(ConflictSummaryTable = read.summaries, ByReads = TRUE, AsPercent = TRUE)
 plot.num.forced(ConflictSummaryTable = read.summaries, ByReads = TRUE, AsPercent = TRUE, y.axis.limit = 1)
+
+plot.num.classified.outs(ConflictSummaryTable = read.summaries, ByReads = TRUE, AsPercent = FALSE)
+plot.num.classified.outs(ConflictSummaryTable = read.summaries, ByReads = TRUE, AsPercent = TRUE)

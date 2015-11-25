@@ -195,22 +195,28 @@ plot.num.forced.otus <- function(ConflictSummaryTable, ByReads = FALSE, AsPercen
   mismatches <- sum.table[1:(nrow(sum.table)-2),]
   pidents <- colnames(mismatches)
   pidents <- as.numeric(pidents)
+  total.seqs.or.reads <- sum.table[7,1]
+  
+  # modify plot based on type specified in function calls
+  if (ByReads == FALSE){
+    plot.of <- "OTU"
+  }else{
+    plot.of <- "read"
+  }
+  
+  if (AsPercent == FALSE){
+    plot.as <- "Total"
+  }else{
+    plot.as <- "Percent"
+    mismatches <- mismatches / total.seqs.or.reads * 100
+  }
+  
   if (y.axis.limit == 0){
     ymax <- max(mismatches)
     yplotlabel <- ""
   }else{
     ymax <- y.axis.limit
     yplotlabel <- paste("_y-axis_cutoff_",ymax, sep = "")
-  }
-  if (ByReads == FALSE){
-    plot.of <- "OTU"
-  }else{
-    plot.of <- "read"
-  }
-  if (AsPercent == FALSE){
-    plot.as <- "Total"
-  }else{
-    plot.as <- "Percent"
   }
   
   # Save plot as .png file
@@ -259,7 +265,8 @@ otu.summaries <- import.all.conflict.summaries(UserArgs = userprefs)
 
 plot.num.forced.otus(ConflictSummaryTable = otu.summaries)
 plot.num.forced.otus(ConflictSummaryTable = otu.summaries, y.axis.limit = 10)
-
+plot.num.forced.otus(ConflictSummaryTable = otu.summaries, AsPercent = TRUE)
+plot.num.forced.otus(ConflictSummaryTable = otu.summaries, AsPercent = TRUE, y.axis.limit = 1)
 
 plot.num.classified.outs(ConflictsSummaryTables = otu.summaries)
 

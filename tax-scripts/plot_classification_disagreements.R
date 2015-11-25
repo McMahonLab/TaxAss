@@ -24,6 +24,9 @@ userprefs <- c("../../take5/otus.abund",
                "../../take5/conflicts_99", 99,
                "../../take5/conflicts_100", 100)
 
+# will need to incorporate this into the userprefs- make corresponding changes in indexing args for import!!
+results.file.path <- "../../take5/plots/"
+
 #####
 # Define functions to import and process the data
 #####
@@ -185,23 +188,40 @@ add.totals.to.read.summaries <- function(ReadSummaryTable, AbundanceTable, UserA
 # Define functions to plot the data
 #####
 
-plot.num.forced.otus <- function(ConflictSummaryTable, ByReads = FALSE, y.axis.limit = 0){
+plot.num.forced.otus <- function(ConflictSummaryTable, ByReads = FALSE, AsPercent = FALSE, y.axis.limit = 0){
   sum.table <- ConflictSummaryTable
   
-  # remove the last row of number FW sequences, that's not needed for this plot.
+  # remove the last 2 rows of number FW sequences- totals info not needed for this plot.
   mismatches <- sum.table[1:(nrow(sum.table)-2),]
   pidents <- colnames(mismatches)
   pidents <- as.numeric(pidents)
   if (y.axis.limit == 0){
     ymax <- max(mismatches)
+    yplotlabel <- ""
   }else{
     ymax <- y.axis.limit
+    yplotlabel <- paste("_y-axis_cutoff_",ymax, sep = "")
   }
+  if (ByReads == FALSE){
+    plot.of <- "OTU"
+  }else{
+    plot.of <- "read"
+  }
+  if (AsPercent == FALSE){
+    plot.as <- "Total"
+  }else{
+    plot.as <- "Percent"
+  }
+  
+  # Save plot as .png file
+  png(filename = paste(results.file.path, "/Classification_Disagreements_of_", plot.of, "_", plot.as, "s", yplotlabel, sep = ""), 
+      width = 5, height = 5, units = "in", res = 100)
   
   # Set up an empty plot
   plot(x = 0, type = "n", ylim = c(0,ymax), xlim = c(min(pidents),max(pidents)),
-       main = "Classification Disagreements Between FW and GG\n(Are we forcing OTUs into our favorite FW groups?)",
-       ylab = "Classification Disagreements- Total number of OTUs", xlab = "\"full length\" pident cutoff (similar to ANI)")
+       main = "Disagreements Between Custom and General Taxonomy Classifications\n(Are we forcing OTUs into our favorite groups?)", cex.main = .8,
+       ylab = paste("Classification Disagreements (", plot.as, " ", plot.of, "s)", sep = ""), cex.lab = .8, 
+       xlab = "\"full length\" pident cutoff (similar to ANI of read to custom database)")
   
   # Fill Plot with beautiful data
   color <- rainbow(nrow(mismatches))
@@ -209,7 +229,8 @@ plot.num.forced.otus <- function(ConflictSummaryTable, ByReads = FALSE, y.axis.l
     lines(x = pidents, y = mismatches[r,], col = color[r], lwd = 4)
     points(x = pidents, y = mismatches[r,], col = color[r], pch = 19, cex =1.3)
   }
-  legend("center",legend = row.names(mismatches), text.col = color, cex=1.3)
+  legend("center", legend = row.names(mismatches), text.col = color, cex=1.3)
+  dev.off()
 }
 
 plot.num.classified.outs <- function(ConflictsSummaryTables){
@@ -239,6 +260,7 @@ otu.summaries <- import.all.conflict.summaries(UserArgs = userprefs)
 plot.num.forced.otus(ConflictSummaryTable = otu.summaries)
 plot.num.forced.otus(ConflictSummaryTable = otu.summaries, y.axis.limit = 10)
 
+
 plot.num.classified.outs(ConflictsSummaryTables = otu.summaries)
 
 seqID.reads <- import.and.reformat.otu.table(UserArgs = userprefs)
@@ -250,3 +272,4 @@ conflict.seqID.reads <- find.reads.per.seqID(ReadsTable = seqID.reads, Conflicts
 read.summaries <- generate.summary.table.of.reads(ReadsList = conflict.seqID.reads)
 
 read.summaries <- add.totals.to.read.summaries(ReadSummaryTable = read.summaries, AbundanceTable = seqID.reads, UserArgs = userprefs)
+

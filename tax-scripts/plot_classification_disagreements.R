@@ -188,7 +188,7 @@ add.totals.to.read.summaries <- function(ReadSummaryTable, AbundanceTable, UserA
 # Define functions to plot the data
 #####
 
-plot.num.forced.otus <- function(ConflictSummaryTable, ByReads = FALSE, AsPercent = FALSE, y.axis.limit = 0){
+plot.num.forced <- function(ConflictSummaryTable, ByReads = FALSE, AsPercent = FALSE, y.axis.limit = 0){
   sum.table <- ConflictSummaryTable
   
   # remove the last 2 rows of number FW sequences- totals info not needed for this plot.
@@ -263,10 +263,10 @@ plot.num.classified.outs <- function(ConflictsSummaryTables){
 
 otu.summaries <- import.all.conflict.summaries(UserArgs = userprefs)
 
-plot.num.forced.otus(ConflictSummaryTable = otu.summaries)
-plot.num.forced.otus(ConflictSummaryTable = otu.summaries, y.axis.limit = 10)
-plot.num.forced.otus(ConflictSummaryTable = otu.summaries, AsPercent = TRUE)
-plot.num.forced.otus(ConflictSummaryTable = otu.summaries, AsPercent = TRUE, y.axis.limit = 1)
+plot.num.forced(ConflictSummaryTable = otu.summaries)
+plot.num.forced(ConflictSummaryTable = otu.summaries, y.axis.limit = 10)
+plot.num.forced(ConflictSummaryTable = otu.summaries, AsPercent = TRUE)
+plot.num.forced(ConflictSummaryTable = otu.summaries, AsPercent = TRUE, y.axis.limit = 1)
 
 plot.num.classified.outs(ConflictsSummaryTables = otu.summaries)
 
@@ -280,3 +280,7 @@ read.summaries <- generate.summary.table.of.reads(ReadsList = conflict.seqID.rea
 
 read.summaries <- add.totals.to.read.summaries(ReadSummaryTable = read.summaries, AbundanceTable = seqID.reads, UserArgs = userprefs)
 
+plot.num.forced(ConflictSummaryTable = read.summaries, ByReads = TRUE)
+plot.num.forced(ConflictSummaryTable = read.summaries, ByReads = TRUE, y.axis.limit = 10000)
+plot.num.forced(ConflictSummaryTable = read.summaries, ByReads = TRUE, AsPercent = TRUE)
+plot.num.forced(ConflictSummaryTable = read.summaries, ByReads = TRUE, AsPercent = TRUE, y.axis.limit = 1)

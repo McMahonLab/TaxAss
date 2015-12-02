@@ -15,18 +15,18 @@
 # Receive arguments from terminal command line
 #####
 
-userprefs <- commandArgs(trailingOnly = TRUE)
-fw.plus.gg.tax.file.path <- userprefs[1]
-gg.only.tax.file.path <- userprefs[2]
-results.folder.path <- userprefs[3]
-taxonomy.bootstrap.cutoff <- userprefs[4]
-fw.seq.ids.file.path <- userprefs[5]
+# userprefs <- commandArgs(trailingOnly = TRUE)
+# fw.plus.gg.tax.file.path <- userprefs[1]
+# gg.only.tax.file.path <- userprefs[2]
+# results.folder.path <- userprefs[3]
+# taxonomy.bootstrap.cutoff <- userprefs[4]
+# fw.seq.ids.file.path <- userprefs[5]
 
-# fw.plus.gg.tax.file.path <- "../../take5/otus.100.taxonomy"
-# gg.only.tax.file.path <- "../../take5/otus.gg.taxonomy"
-# results.folder.path <- "../../take5/conflicts_100"
-# taxonomy.bootstrap.cutoff <- 60
-# fw.seq.ids.file.path <- "../../take5/ids.above.100"
+fw.plus.gg.tax.file.path <- "../../take5/otus.100.taxonomy"
+gg.only.tax.file.path <- "../../take5/otus.gg.taxonomy"
+results.folder.path <- "../../take5/conflicts_100"
+taxonomy.bootstrap.cutoff <- 60
+fw.seq.ids.file.path <- "../../take5/ids.above.100"
 
 #####
 # Define Functions for Import and Formatting
@@ -332,5 +332,5 @@ write.csv(fw.percents.fw.only, file = paste(results.folder.path, "/", "fw_classi
   # File written: the "gg_classified_bootstraps.csv" that lists the bootstrap of all sequences classified by freshwater
   # File written: the "gg_classified_taxonomies.csv" that lists the taxonomy of all sequences classified by freshwater
 gg.bootstraps <- view.bootstraps(TaxonomyTable = gg.percents.fw.only)
-write.csv(fw.bootstraps, file = paste(results.folder.path, "/", "gg_classified_bootstraps.csv", sep=""), row.names = FALSE)
-write.csv(fw.percents.fw.only, file = paste(results.folder.path, "/", "gg_classified_taxonomies.csv", sep=""), row.names = FALSE)
+write.csv(gg.bootstraps, file = paste(results.folder.path, "/", "gg_classified_bootstraps.csv", sep=""), row.names = FALSE)
+write.csv(gg.percents.fw.only, file = paste(results.folder.path, "/", "gg_classified_taxonomies.csv", sep=""), row.names = FALSE)

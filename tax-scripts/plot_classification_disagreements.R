@@ -218,8 +218,8 @@ import.bootstrap.pvalues <- function(UserArgs, FW = TRUE){
   return(bootstraps.taxa)
 }
 
-# find seqIDs added at each lower p-value cutoff
-find.seqIDs.added.by.pident <- function(UserArgs)
+# # find seqIDs added at each lower p-value cutoff
+# find.seqIDs.added.by.pident <- function(UserArgs)
 
 #####
 # Define functions to plot the data
@@ -369,13 +369,13 @@ plot.bootstrap.percents <- function(FWpValues, GGpValues, UserArgs){
 
 otu.summaries <- import.all.conflict.summaries(UserArgs = userprefs)
 
-plot.num.forced(ConflictSummaryTable = otu.summaries)
-plot.num.forced(ConflictSummaryTable = otu.summaries, y.axis.limit = 10)
-plot.num.forced(ConflictSummaryTable = otu.summaries, AsPercent = TRUE)
-plot.num.forced(ConflictSummaryTable = otu.summaries, AsPercent = TRUE, y.axis.limit = 1)
+plot.num.forced(ConflictSummaryTable = otu.summaries, UserArgs = userprefs)
+plot.num.forced(ConflictSummaryTable = otu.summaries, UserArgs = userprefs, y.axis.limit = 10)
+plot.num.forced(ConflictSummaryTable = otu.summaries, UserArgs = userprefs, AsPercent = TRUE)
+plot.num.forced(ConflictSummaryTable = otu.summaries, UserArgs = userprefs, AsPercent = TRUE, y.axis.limit = 1)
 
-plot.num.classified.outs(ConflictSummaryTable = otu.summaries, AsPercent = FALSE)
-plot.num.classified.outs(ConflictSummaryTable = otu.summaries, AsPercent = TRUE)
+plot.num.classified.outs(ConflictSummaryTable = otu.summaries, UserArgs = userprefs, AsPercent = FALSE)
+plot.num.classified.outs(ConflictSummaryTable = otu.summaries, UserArgs = userprefs, AsPercent = TRUE)
 
 
 # examine custom taxonomy disagreements and contribution by number reads
@@ -390,13 +390,13 @@ read.summaries <- generate.summary.table.of.reads(ReadsList = conflict.seqID.rea
 
 read.summaries <- add.totals.to.read.summaries(ReadSummaryTable = read.summaries, AbundanceTable = seqID.reads, UserArgs = userprefs)
 
-plot.num.forced(ConflictSummaryTable = read.summaries, ByReads = TRUE)
-plot.num.forced(ConflictSummaryTable = read.summaries, ByReads = TRUE, y.axis.limit = 10000)
-plot.num.forced(ConflictSummaryTable = read.summaries, ByReads = TRUE, AsPercent = TRUE)
-plot.num.forced(ConflictSummaryTable = read.summaries, ByReads = TRUE, AsPercent = TRUE, y.axis.limit = 1)
+plot.num.forced(ConflictSummaryTable = read.summaries, UserArgs = userprefs, ByReads = TRUE)
+plot.num.forced(ConflictSummaryTable = read.summaries, UserArgs = userprefs, ByReads = TRUE, y.axis.limit = 10000)
+plot.num.forced(ConflictSummaryTable = read.summaries, UserArgs = userprefs, ByReads = TRUE, AsPercent = TRUE)
+plot.num.forced(ConflictSummaryTable = read.summaries, UserArgs = userprefs, ByReads = TRUE, AsPercent = TRUE, y.axis.limit = 1)
 
-plot.num.classified.outs(ConflictSummaryTable = read.summaries, ByReads = TRUE, AsPercent = FALSE)
-plot.num.classified.outs(ConflictSummaryTable = read.summaries, ByReads = TRUE, AsPercent = TRUE)
+plot.num.classified.outs(ConflictSummaryTable = read.summaries, UserArgs = userprefs, ByReads = TRUE, AsPercent = FALSE)
+plot.num.classified.outs(ConflictSummaryTable = read.summaries, UserArgs = userprefs, ByReads = TRUE, AsPercent = TRUE)
 
 
 # examine pident cutoff relationship to bootstrap p-values
@@ -404,6 +404,6 @@ plot.num.classified.outs(ConflictSummaryTable = read.summaries, ByReads = TRUE, 
 fw.pvalues <- import.bootstrap.pvalues(UserArgs = userprefs, FW = TRUE)
 gg.pvalues <- import.bootstrap.pvalues(UserArgs = userprefs, FW = FALSE)
 
-plot.bootstrap.percents(FWpValues = fw.pvalues, GGpValues = gg.pvalues)
+plot.bootstrap.percents(FWpValues = fw.pvalues, GGpValues = gg.pvalues, UserArgs = userprefs)
 
 

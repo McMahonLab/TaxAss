@@ -25,7 +25,7 @@ userprefs <- c("../../take5/otus.abund",
                "../../take5/conflicts_100", 100)
 
 # will need to incorporate this into the userprefs- make corresponding changes in indexing args for import!!
-results.file.path <- "../../take5/plots/"
+results.file.path <- "../../take5/plots"
 
 #####
 # Define functions to import and process the data
@@ -184,6 +184,42 @@ add.totals.to.read.summaries <- function(ReadSummaryTable, AbundanceTable, UserA
   return(reads.summary)
 }
 
+# import bootstrap p-values to compare
+import.bootstrap.pvalues <- function(UserArgs, FW = TRUE){
+  userprefs <- UserArgs
+  user.args <- userprefs[-1]
+  pident.folders <- user.args[seq(from = 1, to = length(user.args), by = 2)]
+  pident.values <- user.args[seq(from = 1, to = length(user.args), by = 2)+1]
+  if (FW == TRUE){
+    db <- "fw"
+  }else{
+    db <- "gg"
+  }
+  
+  # first import all the files into one list
+  pvalues.list <- NULL
+  for (p in 1:length(pident.folders)){
+    pvalues.list[[p]] <- read.csv(file = paste(pident.folders[p], "/", db, "_classified_bootstraps.csv", sep = ""))
+    names(pvalues.list)[p] <- pident.values[p]
+  }
+  
+  # second reformat that list into a new list amenable to box plots
+  pident.values <- names(pvalues.list)
+  taxa.levels <- c("Kingdom", "Phylum", "Class", "Order", "Lineage", "Clade", "Tribe")
+  bootstraps.taxa <- list(NULL)
+  for (t in 1:7){
+    bootstraps.pidents <- list(NULL)
+    for (p in 1:length(pvalues.list)){
+      bootstraps.pidents[[p]] <- pvalues.list[[p]][,t]
+      names(bootstraps.pidents)[p] <- pident.values[p]
+    }
+    bootstraps.taxa[[t]] <- bootstraps.pidents
+    names(bootstraps.taxa)[t] <- taxa.levels[t]
+  }
+  
+  return(bootstraps.taxa)
+}
+
 #####
 # Define functions to plot the data
 #####
@@ -278,10 +314,52 @@ plot.num.classified.outs <- function(ConflictSummaryTable, ByReads = FALSE, AsPe
   dev.off()
 }
   
+plot.bootstrap.percents <- function(FWpValues, GGpValues){
+  fw.pvalues <- FWpValues
+  gg.pvalues <- GGpValues
+  
+  # set up a new file for the plot
+  png(filename = paste(results.file.path, "/Taxonomy_Assignment_Confidences", sep = ""), 
+      width = 8, height = 10, units = "in", res = 100)
+  
+  # set up stacked boxplots, left column FW, right column GG
+  par(mfcol = c(7,2), xpd = T, omi = c(.6,.9,.6,.1), mai = c(.1,.01,.1,.01))
+  
+  # plot the FW side
+  for (t in 1:7){
+    boxplot(fw.pvalues[[t]], range = 0, whisklty = "solid", ylim = c(0,100),axes = F)
+    axis(side = 2, at = c(0,100), cex.axis = 1)
+    mtext(text = names(fw.pvalues)[t], side = 2, line = 2.2, cex = 1.5)
+  }
+  axis(side = 1, at = 1:length(fw.pvalues[[1]]), labels = rep(x = "", times = length(fw.pvalues[[1]])),
+       cex.axis = .7, outer = T)
+  mtext(side = 1, at = 1:length(fw.pvalues[[1]]), text = names(fw.pvalues[[1]]), cex = .7, line = 1.5)
+  
+  # plot the GG side
+  for (t in 1:7){
+    boxplot(gg.pvalues[[t]], range = 0, whisklty = "solid", ylim = c(0,100),axes = F)
+  }
+  axis(side = 1, at = 1:length(gg.pvalues[[1]]), labels = rep(x = "", times = length(gg.pvalues[[1]])),
+       cex.axis = .7, outer = T)
+  mtext(side = 1, at = 1:length(gg.pvalues[[1]]), text = names(gg.pvalues[[1]]), cex = .7, line = 1.5)
+  
+  # add titles
+  mtext("Effect of Cutoff on Assignment Repeatability", side = 3, outer = T, line = 2.5, cex = 1.8)
+  mtext(side = 3, at = c(.2,.8), text = c("Custom Classified", "General Classified"), outer = T, line = 0, cex = 1.5)
+  mtext("BLAST Full Length pident cutoff (%)", side = 1, outer = T, line = 2.8, cex = 1.2)
+  mtext("RDP Classifier Repeatability (that number after your taxonomy name)", side = 2, outer = T, line = 4.9, cex = 1.2)
+  
+  # finish plotting and create the file
+  dev.off()
+}
+
+
 
 #####
 # Use Functions
 #####
+
+# examine custom taxonomy disagreements and contribution by number OTUs
 
 otu.summaries <- import.all.conflict.summaries(UserArgs = userprefs)
 
@@ -292,6 +370,9 @@ plot.num.forced(ConflictSummaryTable = otu.summaries, AsPercent = TRUE, y.axis.l
 
 plot.num.classified.outs(ConflictSummaryTable = otu.summaries, AsPercent = FALSE)
 plot.num.classified.outs(ConflictSummaryTable = otu.summaries, AsPercent = TRUE)
+
+
+# examine custom taxonomy disagreements and contribution by number reads
 
 seqID.reads <- import.and.reformat.otu.table(UserArgs = userprefs)
 
@@ -310,3 +391,13 @@ plot.num.forced(ConflictSummaryTable = read.summaries, ByReads = TRUE, AsPercent
 
 plot.num.classified.outs(ConflictSummaryTable = read.summaries, ByReads = TRUE, AsPercent = FALSE)
 plot.num.classified.outs(ConflictSummaryTable = read.summaries, ByReads = TRUE, AsPercent = TRUE)
+
+
+# examine pident cutoff relationship to bootstrap p-values
+
+fw.pvalues <- import.bootstrap.pvalues(UserArgs = userprefs, FW = TRUE)
+gg.pvalues <- import.bootstrap.pvalues(UserArgs = userprefs, FW = FALSE)
+
+plot.bootstrap.percents(FWpValues = fw.pvalues, GGpValues = gg.pvalues)
+
+

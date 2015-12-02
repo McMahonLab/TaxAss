@@ -323,13 +323,14 @@ plot.bootstrap.percents <- function(FWpValues, GGpValues){
       width = 8, height = 10, units = "in", res = 100)
   
   # set up stacked boxplots, left column FW, right column GG
-  par(mfcol = c(7,2), xpd = T, omi = c(.6,.9,.6,.1), mai = c(.1,.01,.1,.01))
+  par(mfcol = c(7,2), omi = c(.6,.9,.6,.1), mai = c(.1,.01,.1,.01))
   
   # plot the FW side
   for (t in 1:7){
     boxplot(fw.pvalues[[t]], range = 0, whisklty = "solid", ylim = c(0,100),axes = F)
     axis(side = 2, at = c(0,100), cex.axis = 1)
     mtext(text = names(fw.pvalues)[t], side = 2, line = 2.2, cex = 1.5)
+    # rect(xleft = .5, ybottom = -10, xright = length(fw.pvalues[[1]]) + .5, ytop = 60, col = adjustcolor(col = "grey", alpha.f = .2), border = NA)
   }
   axis(side = 1, at = 1:length(fw.pvalues[[1]]), labels = rep(x = "", times = length(fw.pvalues[[1]])),
        cex.axis = .7, outer = T)
@@ -338,6 +339,7 @@ plot.bootstrap.percents <- function(FWpValues, GGpValues){
   # plot the GG side
   for (t in 1:7){
     boxplot(gg.pvalues[[t]], range = 0, whisklty = "solid", ylim = c(0,100),axes = F)
+    # rect(xleft = .5, ybottom = -10, xright = length(fw.pvalues[[1]]) + .5, ytop = 60, col = adjustcolor(col = "grey", alpha.f = .2), border = NA)
   }
   axis(side = 1, at = 1:length(gg.pvalues[[1]]), labels = rep(x = "", times = length(gg.pvalues[[1]])),
        cex.axis = .7, outer = T)

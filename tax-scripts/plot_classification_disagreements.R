@@ -9,6 +9,7 @@
 # userprefs <- commandArgs(trailingOnly = TRUE)
 
 userprefs <- c("../../take5/otus.abund",
+               "../../take5/plots",
                "../../take5/conflicts_70", 70,
                "../../take5/conflicts_80", 80,
                "../../take5/conflicts_85", 85,
@@ -24,9 +25,6 @@ userprefs <- c("../../take5/otus.abund",
                "../../take5/conflicts_99", 99,
                "../../take5/conflicts_100", 100)
 
-# will need to incorporate this into the userprefs- make corresponding changes in indexing args for import!!
-results.file.path <- "../../take5/plots"
-
 #####
 # Define functions to import and process the data
 #####
@@ -36,7 +34,7 @@ import.all.conflict.summaries <- function(UserArgs){
   userprefs <- UserArgs
   
   # the first command line argument is the otu rel abund table, so ignore that here
-  user.args <- userprefs[-1]
+  user.args <- userprefs[-c(1,2)]
   
   # Import them into a list format
   mismatches.list <- list(NULL)
@@ -74,7 +72,7 @@ import.and.reformat.otu.table <- function(UserArgs){
 # structure: outer list- each pident, inner lists- seqIDs at each taxa level
 get.conflict.seqIDs <- function(UserArgs){
   userprefs <- UserArgs
-  user.args <- userprefs[-1]
+  user.args <- userprefs[-c(1,2)]
   pident.folders <- user.args[seq(from = 1, to = length(user.args), by = 2)]
   pident.values <- user.args[seq(from = 1, to = length(user.args), by = 2)+1]
   
@@ -152,7 +150,7 @@ add.totals.to.read.summaries <- function(ReadSummaryTable, AbundanceTable, UserA
   seqID.reads <- AbundanceTable
   reads.summary <- ReadSummaryTable
   userprefs <- UserArgs
-  user.args <- userprefs[-1]
+  user.args <- userprefs[-c(1,2)]
   pident.folders <- user.args[seq(from = 1, to = length(user.args), by = 2)]
   pident.values <- user.args[seq(from = 1, to = length(user.args), by = 2)+1]
   
@@ -187,7 +185,7 @@ add.totals.to.read.summaries <- function(ReadSummaryTable, AbundanceTable, UserA
 # import bootstrap p-values to compare
 import.bootstrap.pvalues <- function(UserArgs, FW = TRUE){
   userprefs <- UserArgs
-  user.args <- userprefs[-1]
+  user.args <- userprefs[-c(1,2)]
   pident.folders <- user.args[seq(from = 1, to = length(user.args), by = 2)]
   pident.values <- user.args[seq(from = 1, to = length(user.args), by = 2)+1]
   if (FW == TRUE){
@@ -220,12 +218,16 @@ import.bootstrap.pvalues <- function(UserArgs, FW = TRUE){
   return(bootstraps.taxa)
 }
 
+# find seqIDs added at each lower p-value cutoff
+find.seqIDs.added.by.pident <- function(UserArgs)
+
 #####
 # Define functions to plot the data
 #####
 
-plot.num.forced <- function(ConflictSummaryTable, ByReads = FALSE, AsPercent = FALSE, y.axis.limit = 0){
+plot.num.forced <- function(ConflictSummaryTable, UserArgs, ByReads = FALSE, AsPercent = FALSE, y.axis.limit = 0){
   sum.table <- ConflictSummaryTable
+  results.file.path <- UserArgs[2]
   
   # remove the last 2 rows of number FW sequences- totals info not needed for this plot.
   mismatches <- sum.table[1:(nrow(sum.table)-2),]
@@ -275,8 +277,9 @@ plot.num.forced <- function(ConflictSummaryTable, ByReads = FALSE, AsPercent = F
   dev.off()
 }
 
-plot.num.classified.outs <- function(ConflictSummaryTable, ByReads = FALSE, AsPercent = TRUE){
+plot.num.classified.outs <- function(ConflictSummaryTable, UserArgs, ByReads = FALSE, AsPercent = TRUE){
   sum.table <- ConflictSummaryTable
+  results.file.path <- UserArgs[2]
   
   # pull out data needed for this plot
   num.fw <- sum.table[nrow(sum.table)-1,]
@@ -314,9 +317,10 @@ plot.num.classified.outs <- function(ConflictSummaryTable, ByReads = FALSE, AsPe
   dev.off()
 }
   
-plot.bootstrap.percents <- function(FWpValues, GGpValues){
+plot.bootstrap.percents <- function(FWpValues, GGpValues, UserArgs){
   fw.pvalues <- FWpValues
   gg.pvalues <- GGpValues
+  results.file.path <- UserArgs[2]
   
   # set up a new file for the plot
   png(filename = paste(results.file.path, "/Taxonomy_Assignment_Confidences", sep = ""), 

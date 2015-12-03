@@ -218,8 +218,6 @@ import.bootstrap.pvalues <- function(UserArgs, FW = TRUE){
   return(bootstraps.taxa)
 }
 
-# # find seqIDs added at each lower p-value cutoff
-# find.seqIDs.added.by.pident <- function(UserArgs)
 
 #####
 # Define functions to plot the data

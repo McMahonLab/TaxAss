@@ -20,8 +20,8 @@ Summary of Steps and Commands (all commands entered in terminal window):
 	blast_formatter -archive otus.custom.blast -outfmt "6 qseqid pident length qlen qstart qend" -out otus.custom.blast.table
 
 4. filter BLAST results (R)
-	Rscript find_seqIDs_with_pident.R otus.custom.blast.table ids.above.98 98 TRUE
-	Rscript find_seqIDs_with_pident.R otus.custom.blast.table ids.below.98 98 FALSE
+	Rscript filter_seqIDs_by_pident.R otus.custom.blast.table ids.above.98 98 TRUE
+	Rscript filter_seqIDs_by_pident.R otus.custom.blast.table ids.below.98 98 FALSE
 
 5. 
 
@@ -279,6 +279,7 @@ What each flag does:
 	-outfmt 11 				need this format in order to use blast_formatter command
 	-max_target_seqs 5		only keep the best 5 hits for each query sequence
 							you will compare how good these are to check if BLAST settings are appropriate in step 5
+							you can choose more or less target seqs if you want to.
 
 __________________________________________________________________________________________
 
@@ -315,7 +316,7 @@ ________________________________________________________________________________
 
 4. filter BLAST results (R)
 
-The find_seqIDs_with_pident.R script takes the formatted blast file and 
+The filter_seqIDs_by_pident.R script takes the formatted blast file and 
 calculates a "true" pident value that corrects the value for the entire length of the query.
 I could not find any command that forces blast use the entire query sequence. 
 The "true" pident is a worst case scenario that assumes any edge gaps are mismatches.
@@ -328,15 +329,15 @@ in the large general database.
 
 Full Two Commands (type in terminal):
 
-Rscript find_seqIDs_with_pident.R otus.custom.blast.table ids.above.98 98 TRUE
-Rscript find_seqIDs_with_pident.R otus.custom.blast.table ids.below.98 98 FALSE
+Rscript filter_seqIDs_by_pident.R otus.custom.blast.table ids.above.98 98 TRUE
+Rscript filter_seqIDs_by_pident.R otus.custom.blast.table ids.below.98 98 FALSE
 
 These arguments must be in the correct order.
 Rscript sources the .R script using the arguments supplied after it in the terminal.
 Separate all arguments with a space.
 
 What each argument is:
-	1st: script.R	the path to this script.  The script is called find_seqIDs_with_pident.R
+	1st: script.R	the path to this script.  The script is called filter_seqIDs_by_pident.R
 	2nd: blastfile	the path to the formatted blast file. This is the otus.custom.blast.table file from step 3
 	3rd: outputfile	the path the to file you are creating. This is the list of sequence ID's matching your criteria.
 	4th: cutoff#	the cutoff percent identity to use. Note this is the calculated "true" full length percent identity,
@@ -344,7 +345,7 @@ What each argument is:
 	5th: matches	want matches? TRUE or FALSE. TRUE: return seqID's >= cutoff, FALSE: return seqID's < cutoff
 
 What each file is:
-	find_seqIDs_with_pident.R	the r script.  source from the command line by typing
+	filter_seqIDs_by_pident.R	the r script.  source from the command line by typing
 								Rscript, not R.  Rscript accepts arguments after the script.
 	otus.custom.blast.table		the formatted blast output from step 3
 	ids.above.98				the output file containing seqIDs at or above your cutoff value

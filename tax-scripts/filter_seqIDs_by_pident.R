@@ -6,17 +6,21 @@
 # 1st		the path to the r script.  The script is called 8-24-15_Filter_BLAST_for_tax_assignment.R
 # 2nd		the path to the formatted blast file. This is the otus.taxonomy.blast.table file from step 3
 # 3rd		the path the to file you are creating. This is the list of sequence ID's matching your criteria.
-# 4th		the cutoff percent identity to use. Note this is the calculated "true" full length percent identity
-# 5th		want matches? TRUE or FALSE. TRUE: return seqID's >= cutoff, FALSE: return seqID's < cutoff
+# 4th   the path to the other file you're creating.  This is used to assess the appropriateness of BLAST settings.
+# 5th		the cutoff percent identity to use. Note this is the calculated "true" full length percent identity
+# 6th		want matches? TRUE or FALSE. TRUE: return seqID's >= cutoff, FALSE: return seqID's < cutoff
 # Example syntax in terminal:
-# Rscript scriptname.R blastfilename outputfilename cutoff# TRUE/FALSE
+# Rscript scriptname.R blastfilename outputfilename statsfilename cutoff# TRUE/FALSE
 
 # The format of the blast file is -outfmt "6 qseqid pident length qlen qstart qend" 
 # The format of the output file is \n separated qseqids
+# The format of the stats file is very similar to the blast.table file, but the headings are 
+# qseqid, pident, length, qlen, q.align, true.pids, hit.num.best.ids
 
 # This script caclulates the full-length query's percent ID (BLAST may leave gaps at the ends).
-# Then it finds all the query IDs >= OR < the specified (full-length) percent ID cutoff.
+# Then it finds all the query IDs >= OR < the specified (full-length) percent ID cutoff, depending which you ask for.
 # The output of this script can be fed into the fetch_fastas_with_seqIDs.py python script.
+# The stats file output can be fed into the plot_blast_hit_stats.R R script.
 
 #####
 # Receive arguments from terminal command line
@@ -24,22 +28,24 @@
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 blast.file.path <- userprefs[1]
-output.file.path <- userprefs[2]
-hit.stats.path <- userprefs[3]
+hit.stats.path <- userprefs[2]
+output.file.path <- userprefs[3]
 users.cutoff <- as.numeric(userprefs[4])
 user.wants.matches <- as.logical(userprefs[5])
 
-#blast.file.path <- "../../take4/otus.fw.blast.table"
-#output.file.path <- "~/Desktop/test"
-#users.cutoff <- 94
-#user.wants.matches <- TRUE
+# blast.file.path <- "../../take6/otus.custom.blast.table"
+# output.file.path <- "../../take6/ids.above.98"
+# hit.stats.path <- "../../take6/hit.stats.98"
+# users.cutoff <- 98
+# user.wants.matches <- TRUE
 
 #####
 # Define Functions
 #####
 
 # Import the blast output
-import.BLAST.data <- function(){
+import.BLAST.data <- function(File){
+  blast.file.path <- File
   blast <- read.table(file = blast.file.path, sep = "\t", stringsAsFactors = F)
   colnames(blast) <- c("qseqid","pident","length","qlen","qstart","qend")
   return(blast)
@@ -60,8 +66,8 @@ format.BLAST.data <- function(BlastTable){
   blast <- blast[,-(5:6)]
   
   # are most of the alignments full length?
-  cat("\nalignment length \tmean:", mean(blast$length), "\t\tmin:", min(blast$length), "\t\tmax:",max(blast$length),
-      "\nthe query length \tmean:", mean(blast$qlen), "\t\tmin:", min(blast$qlen), "\t\tmax:",max(blast$qlen),"\n")
+#   cat("\nalignment length \tmean:", mean(blast$length), "\t\tmin:", min(blast$length), "\t\tmax:",max(blast$length),
+#       "\nthe query length \tmean:", mean(blast$qlen), "\t\tmin:", min(blast$qlen), "\t\tmax:",max(blast$qlen),"\n")
   
   return(blast)
 }
@@ -91,8 +97,9 @@ calc.full.pIDs <- function(BlastTable){
 }
 
 # choose the hit with the best "full length" pident- report which # hit it is.
-choose.best.hit <- function(BlastTable){
+choose.best.hit <- function(BlastTable, OutputFile){
   blast <- BlastTable
+  hit.stats.path <- OutputFile
   
   # get a list of all the unique id names, and set up blank vectors to record which are best
   unique.qids <- unique(blast$qseqid)
@@ -129,17 +136,17 @@ choose.best.hit <- function(BlastTable){
   blast <- cbind(blast, hit.num.best.ids)
   
   # save this table to feed into a plotting/analysis script
-  write.csv(x = blast, file = hit.stats.path)
+  write.csv(x = blast, file = hit.stats.path, row.names = F)
   
   return(blast)
 }
 
-
 # select qseqids that are above or below the true.percent.id cutoff
-find.FW.seqIDs <- function(BlastTable, cutoff.perc.id, want.matches){
+filter.seqIDs <- function(BlastTable, cutoff.perc.id, want.matches, File){
   blast <- BlastTable
   cutoff <- cutoff.perc.id
   hits <- want.matches
+  output.file.path <- File
   
   if (hits == TRUE){
     index <- which(blast$true.pids >= cutoff)
@@ -169,12 +176,12 @@ find.FW.seqIDs <- function(BlastTable, cutoff.perc.id, want.matches){
 # Use Functions
 #####
 
-blast <- import.BLAST.data()
+blast <- import.BLAST.data(File = blast.file.path)
 
 blast <- format.BLAST.data(BlastTable = blast)
 
 blast <- calc.full.pIDs(BlastTable = blast)
 
-blast <- choose.best.hit(BlastTable = blast)
+blast <- choose.best.hit(BlastTable = blast, OutputFile = hit.stats.path)
 
-find.FW.seqIDs(BlastTable = blast, cutoff.perc.id = users.cutoff, want.matches = user.wants.matches)
+filter.seqIDs(BlastTable = blast, cutoff.perc.id = users.cutoff, want.matches = user.wants.matches, File = output.file.path)

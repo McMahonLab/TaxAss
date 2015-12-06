@@ -20,8 +20,8 @@ Summary of Steps and Commands (all commands entered in terminal window):
 	blast_formatter -archive otus.custom.blast -outfmt "6 qseqid pident length qlen qstart qend" -out otus.custom.blast.table
 
 4. filter BLAST results (R)
-	Rscript filter_seqIDs_by_pident.R otus.custom.blast.table ids.above.98 98 TRUE
-	Rscript filter_seqIDs_by_pident.R otus.custom.blast.table ids.below.98 98 FALSE
+	Rscript filter_seqIDs_by_pident.R otus.custom.blast.table hit.stats.98 ids.above.98 98 TRUE 
+	Rscript filter_seqIDs_by_pident.R otus.custom.blast.table hit.stats.98 ids.below.98 98 FALSE
 
 5. 
 
@@ -317,8 +317,8 @@ ________________________________________________________________________________
 4. filter BLAST results (R)
 
 The filter_seqIDs_by_pident.R script takes the formatted blast file and 
-calculates a "true" pident value that corrects the value for the entire length of the query.
-I could not find any command that forces blast use the entire query sequence. 
+calculates a "true" pident value that corrects the pident value for the entire length of the query.
+I could not find any command that forces blast use the entire query sequence, so this is the workaround. 
 The "true" pident is a worst case scenario that assumes any edge gaps are mismatches.
 Calculation:
 	"true pident" = pident * length / (length - (qend - qstart) + qlen)
@@ -329,8 +329,8 @@ in the large general database.
 
 Full Two Commands (type in terminal):
 
-Rscript filter_seqIDs_by_pident.R otus.custom.blast.table ids.above.98 98 TRUE
-Rscript filter_seqIDs_by_pident.R otus.custom.blast.table ids.below.98 98 FALSE
+Rscript filter_seqIDs_by_pident.R otus.custom.blast.table hit.stats.98 ids.above.98 98 TRUE 
+Rscript filter_seqIDs_by_pident.R otus.custom.blast.table hit.stats.98 ids.below.98 98 FALSE
 
 These arguments must be in the correct order.
 Rscript sources the .R script using the arguments supplied after it in the terminal.
@@ -339,25 +339,21 @@ Separate all arguments with a space.
 What each argument is:
 	1st: script.R	the path to this script.  The script is called filter_seqIDs_by_pident.R
 	2nd: blastfile	the path to the formatted blast file. This is the otus.custom.blast.table file from step 3
-	3rd: outputfile	the path the to file you are creating. This is the list of sequence ID's matching your criteria.
-	4th: cutoff#	the cutoff percent identity to use. Note this is the calculated "true" full length percent identity,
+	3rd: statsfile	the path to the modified blast table you create.  This is used in step 5 to analyze the BLAST settings.
+	4rd: outputfile	the path to the seqID file you are creating. This is the list of sequence ID's matching your criteria.
+	5th: cutoff#	the cutoff percent identity to use. Note this is the calculated "true" full length percent identity,
 					not necessarily the value blast returns for the match.  this is a number.
-	5th: matches	want matches? TRUE or FALSE. TRUE: return seqID's >= cutoff, FALSE: return seqID's < cutoff
+	6th: matches	want matches? TRUE or FALSE. TRUE: return seqID's >= cutoff, FALSE: return seqID's < cutoff
 
 What each file is:
 	filter_seqIDs_by_pident.R	the r script.  source from the command line by typing
 								Rscript, not R.  Rscript accepts arguments after the script.
 	otus.custom.blast.table		the formatted blast output from step 3
-	ids.above.98				the output file containing seqIDs at or above your cutoff value
-	ids.below.98				the output file containing seqIDs below your cutoff value
-								the format of these output files are \n delimited seqIDs.
+	hit.stats.98				the output file containing the modified BLAST hit table, used in step 5
+	ids.above.98				the output file containing seqIDs at or above your cutoff value, used in step 7
+	ids.below.98				the output file containing seqIDs below your cutoff value, used in step 6
+								the format of these seqID output files are \n delimited seqIDs.
 								
-Note: You may need to choose a different "true pident" cutoff for your sequence data.
-I chose mine based on values that gave me classifications consistent to the class level 
-between the small and large databases. You can use a supplementary R script & workflow to 
-repeat this.  One thing that might affect this choice is the length of your sequences.
-
-
 __________________________________________________________________________________________
 
 5. check BLAST settings are appropriate (R)
@@ -368,6 +364,11 @@ However, we are only keeping very similar sequences anyway, and these sequences 
 megablast is optimized with complicated statistics to find closely related sequences which we want. 
 The R script in step 4 will tell you alignment length vs. query length stats so keep an eye out for this.
 If many alignments are shorter then this should be examined more carefully.
+
+Note: You may need to choose a different "true pident" cutoff for your sequence data.
+I chose mine based on values that gave me classifications consistent to the class level 
+between the small and large databases. You can use a supplementary R script & workflow to 
+repeat this.  One thing that might affect this choice is the length of your sequences.
 
 __________________________________________________________________________________________
 

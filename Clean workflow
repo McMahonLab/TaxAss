@@ -23,6 +23,8 @@ Summary of Steps and Commands (all commands entered in terminal window):
 	Rscript find_seqIDs_with_pident.R otus.custom.blast.table ids.above.98 98 TRUE
 	Rscript find_seqIDs_with_pident.R otus.custom.blast.table ids.below.98 98 FALSE
 
+5. 
+
 5. recover sequence IDs left out of blast (python, bash)
 	python fetch_seqIDs_blast_removed.py otus.fasta otus.FW.blast.table ids.missing
 	cat ids.below.98 ids.missing > ids.below.98.all
@@ -255,7 +257,7 @@ for sequences of different lengths.
 
 Full Command (type in terminal):
 
-blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 1
+blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 5
 
 What the filenames are:
 	otus.fasta				the query file. the fasta file of your OTU sequences you want classified
@@ -263,7 +265,7 @@ What the filenames are:
 	custom.db				the subject file. the blast database file you made from the taxonomy 
 							database fasta sequences in step 1.
 	otus.custom.blast		the BLAST output file. Its format is unreadable by you,
-							but it's the detailed BLAST format the blast_formatter accepts.
+							but it's the detailed BLAST format that blast_formatter accepts.
 							filename example here is query.subject.blast 
 
 What each flag does:						
@@ -274,7 +276,8 @@ What each flag does:
 	-db custom.db 			the name of the blast database created previously (without the additional file extensions)
 	-out otus.custom.blast	specify path of the blast output file (this is the file you're creating)
 	-outfmt 11 				need this format in order to use blast_formatter command
-	-max_target_seqs 1		only keep the best hit for each query sequence
+	-max_target_seqs 5		only keep the best 5 hits for each query sequence
+							you will compare how good these are to check if BLAST settings are appropriate in step 5
 
 Note: Not good if high %id shorter sequences are being chosen over lower%id longer sequences that still meet %id cutoff.
 This is something that could be examined to decide if blastn custom scoring should be used instead of megablast.
@@ -358,6 +361,12 @@ Note: You may need to choose a different "true pident" cutoff for your sequence 
 I chose mine based on values that gave me classifications consistent to the class level 
 between the small and large databases. You can use a supplementary R script & workflow to 
 repeat this.  One thing that might affect this choice is the length of your sequences.
+
+
+__________________________________________________________________________________________
+
+5. check BLAST settings are appropriate (R)
+
 
 
 __________________________________________________________________________________________

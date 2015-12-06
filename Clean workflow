@@ -356,9 +356,36 @@ What each file is:
 								
 __________________________________________________________________________________________
 
-5. check BLAST settings are appropriate (R)
+5. check that BLAST settings are appropriate (R)
 
-Note: Not good if high %id shorter sequences are being chosen over lower%id longer sequences that still meet %id cutoff.
+There is no way to force BLAST to return only full-length hits, it will always return the 
+best "High Scoring Pair (HSP)" it finds, based on it's scoring that weights both the quality
+and length of the hit.  However, for this use we are only interested in full length matches
+because the entire OTU sequences are matched to the reference 16S sequences when assigning 
+taxonomy.
+
+High pident short HSPs will be converted to low pident "full length" HSPs because all missing
+basepairs are considered a mismatch by my conservative script in step 4.  Therefore, if high 
+pident short HSPs are being reported by BLAST instead of lower pident long HSPs you could 
+get incorrect results.  However, the pident cutoff you will choose for taxonomy assignment 
+using 16S sequences is pretty high, so while it's likely that some of the short BLAST HSPs
+may have longer HSPs with better full-length pidents, it's unlikely that any of those would
+still meet your pident criteria. 
+
+The likelihood of incorrect results because of BLAST chooseing HSPs that are too short increases
+as the length of your OTU sequences goes up.  This analysis is designed to check if this might
+be a problem.  Generate some plots with the R script plot_blast_hit_stats.R.
+
+Full Commands (type in the terminal)
+mkdir plots
+RScript ugh. too tired...
+
+
+
+old description... my new description is not very good.  come back to this.
+
+are being chosen over lower %id longer HSPs that would have still 
+met %id cutoff.
 This is something that could be examined to decide if blastn custom scoring should be used instead of megablast.
 However, we are only keeping very similar sequences anyway, and these sequences are very short, and
 megablast is optimized with complicated statistics to find closely related sequences which we want. 

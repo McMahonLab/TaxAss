@@ -171,10 +171,26 @@ filter.seqIDs <- function(BlastTable, cutoff.perc.id, want.matches, File){
   
 }
 
+# print poem to enrich the user experience
+print.poem <- function(){
+  # Tomas Tranströmer won the nobel prizer in literature in 2011
+  # I like this poem because of it's central metaphor of a snow covered lake being like a blank page
+  cat("\nFrom March 1979\n",
+      "   by Tomas Tranströmer\n",
+      "   translated to english by _______\n",
+      "\nTired of all who come with words, words but no language\n",
+      "I went to the snow-covered island.\n",
+      "The wild does not have words.\n",
+      "The unwritten pages spread out on all sides!\n",
+      "I come upon the tracks of roe deer in the snow.\n",
+      "Language but no words.\n\n", sep = "")
+}
 
 #####
 # Use Functions
 #####
+
+print.poem()
 
 blast <- import.BLAST.data(File = blast.file.path)
 

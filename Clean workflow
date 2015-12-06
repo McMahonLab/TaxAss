@@ -1,4 +1,4 @@
-RRR 9-28-15
+RRR 12-5-15
 
 This workflow assigns taxonomy to a fasta file of otu sequences using both a 
 small, custom taxonomy database and a large general database.
@@ -128,26 +128,83 @@ ________________________________________________________________________________
 
 0. format files (textwrangler or bash)
 
-Reformat fasta file of your sequences to have no whitespace in the seqID line.
-BLAST will call some parts the seqID and some parts comments if they're separated.
-Having BLAST seqIDs that don't match the full >comment line of the fasta file will 
-throw off the python script that fetches the chosen sequences.
+These are the files you supply as input into the workflow:
+	custom.fasta		fasta sequences in your small, specific taxonomy database
+	custom.taxonomy		taxonomy names in your small, specific taxonomy database
+	general.fasta		fasta sequences in your large, general taxonomy database
+	general.taxonomy	taxonomy names in your large, general taxonomy database
+	otus.fasta			fasta sequences for each of your OTUs
+	otus.abund			relative abundance of each OTU (i.e. the OTU table)
 
-In this workflow I will refer to this file as otus.fasta
+I recommend you move all of these files into a new folder that also contains the workflow scripts, 
+and rename them to match the above names so that you can copy and paste commands from this workflow.
+Then make that folder your working directory for the entirety of this workflow.
 
-Reformat your taxonomy files to be compatible with mothur.  mothur requires 
-seqID tab level;level;level;level;
-no white space except the tab between ID and taxonomy, and the semicolon on the end too!
+Reformat your files so that:
 
-In this workflow I will call the taxonomy files:
-	custom.fasta		
-	custom.taxonomy
-	general.fasta
-	general.taxonomy
-custom is the small specific database you want to use before the large general database.
-(For me custom is our freshwater database and general is the green genes database.)
-the .fasta are the sequences w/ IDs, the .taxonomy are the IDs w/ taxonomic names.
+1. .taxonomy files: 
+		-must be compatible with mothur, example format:
+		
+			seqID tab kingdom;phylum;class;order;family;genus;species;
+		
+		-no whitespace except for the tab between seqID and taxonomy
+		-taxonomy level names separated by semicolons
+		-must have a semicolon at the end of each line, too!
+		
+		-If you are using the Green Genes taxonomy database, you can reformat it this way: 
 
+			Full 4 Commands (type in terminal) when general.taxonomy is the green genes taxonomy file:
+
+			sed 's/ //g' <general.taxonomy >NoSpaces
+			sed 's/$/;/' <NoSpaces >EndLineSemicolons
+			mv EndLineSemicolons general.taxonomy
+			rm NoSpaces
+
+			Syntax of commands and what each argument does:
+				sed 's/find/replace/ <input >output
+					sed		is a "stream editor," a function for editing streams of text in the terminal
+					s		tells it you are doing a substitution
+							in the first sed command that was simply a typed space
+				in the second sed command the $ means 'end of line'
+					replace	this is what you are replacing with
+							in the first sed command it was left blank, to simply remove spaces
+							in the second sed command it is a semicolon
+					g		this means "global" find/replace all occurances, not just the first per line
+					input	this is the file sed searches through, here it is general.taxonomy (if that is green genes!)
+					output	this is the file sed creates (note it must have a different name than input)
+	
+				mv filename1 filename2
+					mv		this is a function to move (aka rename) a file from name1 to name2
+							simply keeping the edited file the same name  
+				rm filename
+					rm		this removes (aka deletes) the file named filename
+		
+
+			-If you are using the Silva database... no fucking clue, what does this look like??
+			*************
+
+2. OTU seqID's:
+			-must match between the otus.fasta file and the otus.abund file,
+			 though consistent ordering is not necessary.
+			-cannot contain any whitespace
+			 BLAST will call some parts the seqID and some parts comments if they're separated.
+			 Having BLAST seqIDs that don't match the full >comment line of the fasta file will 
+		 	 throw off the python script that finds the chosen sequences.
+
+3. OTU files:
+		-format of the OTU table otus.abund is tab delimited, seqIDs in 1st column, abundances in rest of columns:
+			seqID	Abundance	Abundance	Abundance	Abundance
+			seqID	Abundance	Abundance	Abundance	Abundance
+			seqID	Abundance	Abundance	Abundance	Abundance
+		
+		-QC of your OTU sequences should be performed before you start assigning taxonomy.
+		
+		If you did QC in mothur, the starting files are called:
+		***************
+		
+		If you did QC in qiime, the starting files are called:
+		***************
+		
 __________________________________________________________________________________________
 
 1. make BLAST database file (blast)

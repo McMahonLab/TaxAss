@@ -8,15 +8,15 @@
 # Receive arguments from terminal command line
 #####
 
-# userprefs <- commandArgs(trailingOnly = TRUE)
-# blast.file.path <- userprefs[1]
-# output.file.path <- userprefs[2]
-# users.cutoff <- as.numeric(userprefs[3])
-# user.wants.matches <- as.logical(userprefs[4])
-
+# Accept arguments from the command line:
 userprefs <- commandArgs(trailingOnly = TRUE)
 blast.file.path <- userprefs[1]
 pident.cutoff <- as.numeric(userprefs[2])
+plots.folder.path <- userprefs[3]
+
+# blast.file.path <- "../../take7/otus.custom.blast.table.modified"
+# pident.cutoff <- 98
+# plots.folder.path <- "../../take7/plots"
 
 #####
 # Install Necessary Packages
@@ -39,8 +39,8 @@ get.necessary.packages <- function(){
 
 # import the blast table generated in find_seqIDs_with_pident
 import.BLAST.hits.table <- function(FilePath){
-  blast.file.path <- FilePath
-  blast <- read.csv(blast.file.path)
+  blast.file <- FilePath
+  blast <- read.csv(blast.file)
   return(blast)
 }
 
@@ -60,7 +60,7 @@ reformat.fract.ids.vs.hit.num <- function(BlastTable){
   blast <- BlastTable
   
   # Only look at pident and hit.num
-  blast <- blast[,c(2,8)]
+  blast <- blast[,c(1,7)]
   colnames(blast) <- c("qseqid","hit.num")
   blast <- apply(X = blast, MARGIN = 2, FUN = as.numeric)
   
@@ -82,23 +82,32 @@ reformat.fract.ids.vs.hit.num <- function(BlastTable){
 #####
  
 # bar plot blast hit number results
-bar.plot.blast.results <- function(BlastHitsTable, Cutoff = 0){
+bar.plot.blast.results <- function(BlastHitsTable, Cutoff = 0, OutputFolder){
   hits <- BlastHitsTable
+  plot.folder <- OutputFolder
+  
   if (Cutoff == 0){
+    png(filename = paste(plot.folder, "/BLAST_hits_used_overall.png", sep=""), 
+        width = 5.5, height = 5, units = "in", res = 100)
     barplot(height = hits$perc.ids, names.arg = hits$hit.num, ylim = c(0,100),
             main = "Which BLAST hit gave the best \"full length\" pident?\n(no cutoff pident applied)",
             xlab = "Hit Number", ylab = "Percent of Best Hits (%)", col = "lightsalmon")
+    dev.off()
   }else{
-    barplot(height = hits$perc.ids, names.arg = hits$hit.num,
+    png(filename = paste(plot.folder, "/BLAST_hits_used_for_pident_", Cutoff, ".png", sep=""), 
+        width = 5.5, height = 5, units = "in", res = 100)
+    barplot(height = hits$perc.ids, names.arg = hits$hit.num, ylim = c(0,100),
             main = paste("Which BLAST hit gave the best \"full length\" pident?\n(results with full length pident >=",Cutoff,")",sep=""),
             xlab = "Hit Number", ylab = "Percent of Best Hits (%)", col = "lightsalmon")
+    dev.off()
   }
 }
 
 # Make a stacked bar chart showing how the proportions change with different pidents
-bar.plot.stacked.blast.results <- function(BlastTable, CutoffVector){
+bar.plot.stacked.blast.results <- function(BlastTable, CutoffVector, OutputFolder){
   blast <- BlastTable
   cutoffs <- CutoffVector
+  plot.folder <- OutputFolder
   num.hits.reported <- length(unique(blast$hit.num.best.ids)) # the highest blast hit number output into the table
   
   # create a matrix from which to plot a stacked bar chart
@@ -111,7 +120,7 @@ bar.plot.stacked.blast.results <- function(BlastTable, CutoffVector){
     trimmed.blast <- apply.pident.cutoff(BlastTable = blast, PidentCutoff = cutoffs[c])
     hits <- reformat.fract.ids.vs.hit.num(BlastTable = trimmed.blast)
     
-    # at higher cutoffs some hits apear unreported, make sure these say zero so they fit in the matrix
+    # at higher cutoffs some hits appear unreported, make sure these say zero so they fit in the matrix
     for (h in 1:num.hits.reported){
       index <- which(hits[,1] == h)
       if (length(index) > 0){
@@ -122,22 +131,26 @@ bar.plot.stacked.blast.results <- function(BlastTable, CutoffVector){
     }
   }
   
+  png(filename = paste(plot.folder, "/BLAST_hits_used_for_pidents_", min(CutoffVector), "-", max(CutoffVector), ".png", sep = ""), 
+      width = 8, height = 5, units = "in", res = 100)
   barplot(hits.matrix, ylim = c(0,100), col=rainbow(num.hits.reported),
           main = "Which BLAST hit gave the best \"full length\" pident?\n(remember blast reports hits in order of its \"alignment length\" pident",
           xlab = "Full length percent identity cutoff applied to blast results", 
-          ylab = "Percent of best pidents resulting from each blast hit numbers (%)")
+          ylab = "Percent of best pidents resulting from each blast hit number (%)")
+  dev.off()
   
 #   legend(x = num.hits.reported+1, y = 100, legend = row.names(hits.matrix), 
 #          text.col = rainbow(length(num.hits.reported)))
 }
 
-
 # plot number of seqIDs at each hit #
-line.plot.overlay.blast.results <- function(BlastTable, CutoffVector){
+line.plot.overlay.blast.results <- function(BlastTable, CutoffVector, OutputFolder){
   blast <- BlastTable
   cutoffs <- CutoffVector
+  plots.folder <- OutputFolder
   
   # Set up a blank plot: 
+  png(filename = paste(plots.folder, "/BLAST_hits_line_plot.png", sep = ""), width = 5.5, height = 5, units = "in", res = 100)
   plot(0, type = "n", xlim = c(1,5), ylim = c(0,100), main = "Which BLAST hit gave the best \"full length\" pident?", 
        xlab = "Hit Number", ylab = "Percent of Best Hits (%)" )
   
@@ -151,6 +164,7 @@ line.plot.overlay.blast.results <- function(BlastTable, CutoffVector){
   
   # Add a legend:
   legend(x = 4, y = 100, legend = sort(cutoffs, decreasing=T), text.col = rainbow(length(cutoffs))[length(cutoffs):1])
+  dev.off()
 }
  
 #####
@@ -163,20 +177,20 @@ blast <- import.BLAST.hits.table(FilePath = blast.file.path)
 
 # View a table, 'hit.stats', that shows the percent of times each hit was best
 hit.stats <- reformat.fract.ids.vs.hit.num(BlastTable = blast)
-bar.plot.blast.results(BlastHitsTable = hit.stats)
+bar.plot.blast.results(BlastHitsTable = hit.stats, OutputFolder = plots.folder.path)
 
 # View a table, 'cutoff.hit.stats', that shows the percent of time each hit was best 
-# after the blast results have been sorted for a given cutoff
-pident.cutoff <- 97
+# after the blast results have been sorted for users chosen cutoff (the one supplied in command line)
 blast.cutoff <- apply.pident.cutoff(BlastTable = blast, PidentCutoff = pident.cutoff)
 cutoff.hit.stats <- reformat.fract.ids.vs.hit.num(BlastTable = blast.cutoff)
-bar.plot.blast.results(BlastHitsTable = cutoff.hit.stats, Cutoff = pident.cutoff)
+bar.plot.blast.results(BlastHitsTable = cutoff.hit.stats, Cutoff = pident.cutoff, OutputFolder = plots.folder.path)
 
 # View a plot of overlayed lines showing how the proportion of best hits changes with different cutoffs
-line.plot.overlay.blast.results(BlastTable = blast, CutoffVector = 90:100)
+line.plot.overlay.blast.results(BlastTable = blast, CutoffVector = 90:100, OutputFolder = plots.folder.path)
 
 # View stacked bar chart to see how the proportion of best hits changes with different cutoffs
-bar.plot.stacked.blast.results(BlastTable = blast, CutoffVector = 50:100)
+bar.plot.stacked.blast.results(BlastTable = blast, CutoffVector = 90:100, OutputFolder = plots.folder.path)
+bar.plot.stacked.blast.results(BlastTable = blast, CutoffVector = 70:100, OutputFolder = plots.folder.path)
 
 # Note how that plot levels off as you look way lower on the pidents.
 # That's probably because that's where blast's built-in e-value cutoff

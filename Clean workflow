@@ -56,7 +56,7 @@ Summary of Steps and Commands (all commands entered in terminal window):
 	mv otus.98.taxonomy.reformatted otus.98.taxonomy
 	sed 's/[[:blank:]]/\;/' <otus.general.taxonomy >otus.general.taxonomy.reformatted
 	mv otus.general.taxonomy.reformatted otus.general.taxonomy
-
+	
 12. compare taxonomy files (R)
 	mkdir conflicts_98
 	Rscript find_classification_disagreements.R otus.98.taxonomy otus.gg.taxonomy conflicts_98 60 ids.above.98
@@ -574,7 +574,7 @@ concatenates two files into one.  You also choose your final file name here.
 
 Full Command (type in terminal):
 
-cat otus.above.98.custom.wang.taxonomy otus.below.98.general.wang.taxonomy > otus.taxonomy
+cat otus.above.98.custom.wang.taxonomy otus.below.98.general.wang.taxonomy > otus.98.taxonomy
 
 Command syntax:
 	cat file1 file2 > file3		means "combine file1 and file2 into file 3"
@@ -633,13 +633,11 @@ Reformat both files you will compare:
 Find: tab
 Replace: semicolon
 
-You can do this in a text editor, or using bash.
+Full Four Commands (Type in Terminal):
 
-For bash, Full Four Commands (Type in Terminal):
-
-sed 's/[[:blank:]]/\;/' <otus.taxonomy >otus.taxonomy.reformatted
-mv otus.taxonomy.reformatted otus.taxonomy
-sed 's/[[:blank:]]/\;/' <otus.general.taxonomy >otus.genearl.taxonomy.reformatted
+sed 's/[[:blank:]]/\;/' <otus.98.taxonomy >otus.98.taxonomy.reformatted
+mv otus.98.taxonomy.reformatted otus.98.taxonomy
+sed 's/[[:blank:]]/\;/' <otus.general.taxonomy >otus.general.taxonomy.reformatted
 mv otus.general.taxonomy.reformatted otus.general.taxonomy
 
 Syntax of commands and what each argument does:
@@ -686,7 +684,7 @@ Note: you must create a new folder to save these results in before running the s
 
 Full Command (type in terminal):
 
-Rscript find_classification_disagreements.R fw.plus.gg.tax.file.path gg.only.tax.file.path results.folder.path taxonomy.bootstrap.cutoff seq.ids.above.cutoff.file.path
+Rscript find_classification_disagreements.R otus.taxonomy otus.general.taxonomy results.folder.path taxonomy.bootstrap.cutoff seq.ids.above.cutoff.file.path
 
 Note: you must enter all the arguments in this order.
 
@@ -722,3 +720,14 @@ ________________________________________________________________________________
 
 13. generate plots to visualize classification disagreements and chosen cutoffs (R)
 
+
+__________________________________________________________________________________________
+
+14. generate final taxonomy file (R)
+
+The only think left to do to get your final version is to apply the bootstrap cutoffs you chose.
+This will be exactly the same file as generated in step 9, but names below the clustering % confidence 
+cutoff will be called unclassified.  You could have had mothur do this the first time around,
+but I preferred to to see all the data when analyzing the results in steps 10-13.
+
+*****write this script!!****

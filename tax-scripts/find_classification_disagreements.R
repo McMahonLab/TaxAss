@@ -18,9 +18,11 @@
 userprefs <- commandArgs(trailingOnly = TRUE)
 fw.plus.gg.tax.file.path <- userprefs[1]
 gg.only.tax.file.path <- userprefs[2]
-results.folder.path <- userprefs[3]
-taxonomy.bootstrap.cutoff <- userprefs[4]
-fw.seq.ids.file.path <- userprefs[5]
+fw.seq.ids.file.path <- userprefs[3]
+results.folder.path <- userprefs[4]
+blast.pident.cutoff <- userprefs[5]
+taxonomy.bootstrap.cutoff <- userprefs[6]
+
 
 # fw.plus.gg.tax.file.path <- "../../take5/otus.100.taxonomy"
 # gg.only.tax.file.path <- "../../take5/otus.gg.taxonomy"
@@ -134,8 +136,7 @@ remove.parentheses <- function(x){
 # Define Functions for Data Analysis
 #####
 
-# Find index of sequences that were classified by the freshwater database, not green genes
-# note this returns indeces that match the gg and fw tables, so a vector of indeces, not a tax table
+# Find index of sequences that were classified by the freshwater database. returns a vector of indeces.
 find.fw.indeces <- function(TaxonomyTable, SeqIDs){
   tax <- TaxonomyTable
   ids <- SeqIDs
@@ -150,8 +151,8 @@ find.fw.indeces <- function(TaxonomyTable, SeqIDs){
   return(index)
 }
 
-# this makes all the unclassified/unknown/any other word for it names be uniformly called "unclassified"
-# finds them b/c those names do not have bootstrap percents in parentheses, i.e. the (70)
+# makes all the unclassified/unknown/any other word for it names be uniformly called "unclassified"
+  # finds them b/c those names do not have bootstrap percents in parentheses, i.e. the (70)
 uniform.unclass.names <- function(TaxonomyTable){
   tax <- TaxonomyTable
   
@@ -173,7 +174,7 @@ uniform.unclass.names <- function(TaxonomyTable){
 }
 
 # Given a single taxonomy name, pull out the bootstrap percent.
-# text = k__Bacteria(100) returns (as character) 100, But text = "unclassified" returns (as character) "unclassified"
+  # text = k__Bacteria(100) returns (as character) 100, But text = "unclassified" returns (as character) "unclassified"
 pull.out.percent <- function(text){
   text <- sub(pattern = '.*\\(', replacement = '\\(', x = text)
   text <- sub(pattern = '\\(', replacement = '', x = text)
@@ -182,7 +183,7 @@ pull.out.percent <- function(text){
 }
 
 # When the value supplied is FALSE, the text is changed to "unclassified"
-# This is used in do.bootstrap.cutoff()
+  # This is used in do.bootstrap.cutoff()
 make.unclassified <- function(text,val){
   if (val == F){
     text <- "unclassified"
@@ -191,8 +192,8 @@ make.unclassified <- function(text,val){
 }
 
 # Apply classification bootstrap value cutoff 
-# Everything below the supplied cutoff value is changed to "unclassified"
-# (this stat is the % of times it got classified into that taxonomy cluster)
+  # Everything below the supplied cutoff value is changed to "unclassified"
+  # (by bootstrap cutoff I mean the stat that's the % of times it got classified into that taxonomy cluster)
 do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   tax <- as.matrix(TaxonomyTable)
   cutoff <- BootstrapCutoff
@@ -204,8 +205,7 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   tax.nums <- apply(X = tax.nums, MARGIN = 2, FUN = as.numeric)
   tax.TF <- tax.nums >= cutoff
   
-  # could you do this faster with sweep() ?  I think so...
-  # ehh, but sweep requires stats calculated from itself, and this is a separate matrix
+  # make all names in the taxonomy table unclassified if they're below the bootstrap cutoff
   for (r in 1:nrow(tax)){
     for (c in 2:ncol(tax)){
       tax[r,c] <- make.unclassified(text = tax[r,c], val = tax.TF[r,c-1])
@@ -287,6 +287,8 @@ gg.percents <- reformat.gg(GGtable = gg.percents)
 fw.percents <- reformat.fw(FWtable = fw.percents)
 
 check.files.match(FWtable = fw.percents, GGtable = gg.percents)
+
+# Generate a final taxonomy file:
 
 # Only compare the classifications made by the fw database to the gg classifications, not full tax tables
 fw.seq.ids <- import.FW.seq.IDs()

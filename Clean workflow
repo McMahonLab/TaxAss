@@ -20,10 +20,12 @@ Summary of Steps and Commands (all commands entered in terminal window):
 	blast_formatter -archive otus.custom.blast -outfmt "6 qseqid pident length qlen qstart qend" -out otus.custom.blast.table
 
 4. filter BLAST results (R)
-	Rscript filter_seqIDs_by_pident.R otus.custom.blast.table hit.stats.98 ids.above.98 98 TRUE 
-	Rscript filter_seqIDs_by_pident.R otus.custom.blast.table hit.stats.98 ids.below.98 98 FALSE
+	Rscript filter_seqIDs_by_pident.R otus.custom.blast.table otus.custom.blast.table.modified ids.above.98 98 TRUE 
+	Rscript filter_seqIDs_by_pident.R otus.custom.blast.table otus.custom.blast.table.modified ids.below.98 98 FALSE
 
-5. 
+5. check that BLAST settings are appropriate (R)
+	mkdir plots
+	RScript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
 
 6. recover sequence IDs left out of blast (python, bash)
 	python fetch_seqIDs_blast_removed.py otus.fasta otus.FW.blast.table ids.missing
@@ -141,6 +143,7 @@ These are the files you supply as input into the workflow:
 
 I recommend you move all of these files into a new folder that also contains the workflow scripts, 
 and rename them to match the above names so that you can copy and paste commands from this workflow.
+Also put the script files in this workflow into that same folder.
 Then make that folder your working directory for the entirety of this workflow.
 
 Reformat your files so that:
@@ -156,19 +159,19 @@ Reformat your files so that:
 		
 		-If you are using the Green Genes taxonomy database, you can reformat it this way: 
 
-			Full 4 Commands (type in terminal) when general.taxonomy is the green genes taxonomy file:
+Full 4 Commands (type in terminal) when general.taxonomy is the green genes taxonomy file:
 
-			sed 's/ //g' <general.taxonomy >NoSpaces
-			sed 's/$/;/' <NoSpaces >EndLineSemicolons
-			mv EndLineSemicolons general.taxonomy
-			rm NoSpaces
+sed 's/ //g' <general.taxonomy >NoSpaces
+sed 's/$/;/' <NoSpaces >EndLineSemicolons
+mv EndLineSemicolons general.taxonomy
+rm NoSpaces
 
 			Syntax of commands and what each argument does:
 				sed 's/find/replace/ <input >output
 					sed		is a "stream editor," a function for editing streams of text in the terminal
 					s		tells it you are doing a substitution
 							in the first sed command that was simply a typed space
-				in the second sed command the $ means 'end of line'
+							in the second sed command the $ means 'end of line'
 					replace	this is what you are replacing with
 							in the first sed command it was left blank, to simply remove spaces
 							in the second sed command it is a semicolon
@@ -258,7 +261,7 @@ for sequences of different lengths.
 
 Full Command (type in terminal):
 
-blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 5
+blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 5 
 
 What the filenames are:
 	otus.fasta				the query file. the fasta file of your OTU sequences you want classified
@@ -329,8 +332,8 @@ in the large general database.
 
 Full Two Commands (type in terminal):
 
-Rscript filter_seqIDs_by_pident.R otus.custom.blast.table hit.stats.98 ids.above.98 98 TRUE 
-Rscript filter_seqIDs_by_pident.R otus.custom.blast.table hit.stats.98 ids.below.98 98 FALSE
+Rscript filter_seqIDs_by_pident.R otus.custom.blast.table otus.custom.blast.table.modified ids.above.98 98 TRUE 
+Rscript filter_seqIDs_by_pident.R otus.custom.blast.table otus.custom.blast.table.modified ids.below.98 98 FALSE
 
 These arguments must be in the correct order.
 Rscript sources the .R script using the arguments supplied after it in the terminal.
@@ -346,14 +349,15 @@ What each argument is:
 	6th: matches	want matches? TRUE or FALSE. TRUE: return seqID's >= cutoff, FALSE: return seqID's < cutoff
 
 What each file is:
-	filter_seqIDs_by_pident.R	the r script.  source from the command line by typing
-								Rscript, not R.  Rscript accepts arguments after the script.
-	otus.custom.blast.table		the formatted blast output from step 3
-	hit.stats.98				the output file containing the modified BLAST hit table, used in step 5
-	ids.above.98				the output file containing seqIDs at or above your cutoff value, used in step 7
-	ids.below.98				the output file containing seqIDs below your cutoff value, used in step 6
-								the format of these seqID output files are \n delimited seqIDs.
-								
+	filter_seqIDs_by_pident.R			the r script.  source from the command line by typing
+										Rscript, not R.  Rscript accepts arguments after the script.
+	otus.custom.blast.table				the formatted blast output from step 3
+	otus.custom.blast.table.modified	the output file containing the modified BLAST hit table, used in step 5
+										note: this is the same regardless of the cutoff chosen
+	ids.above.98						the output file containing seqIDs at or above your cutoff value, used in step 7
+	ids.below.98						the output file containing seqIDs below your cutoff value, used in step 6
+										the format of these seqID output files are \n delimited seqIDs.
+	
 __________________________________________________________________________________________
 
 5. check that BLAST settings are appropriate (R)
@@ -369,19 +373,37 @@ basepairs are considered a mismatch by my conservative script in step 4.  Theref
 pident short HSPs are being reported by BLAST instead of lower pident long HSPs you could 
 get incorrect results.  However, the pident cutoff you will choose for taxonomy assignment 
 using 16S sequences is pretty high, so while it's likely that some of the short BLAST HSPs
-may have longer HSPs with better full-length pidents, it's unlikely that any of those would
-still meet your pident criteria. 
+may have longer HSPs with better full-length pidents, it's unlikely that any of those better
+ones would be good enough to meet your pident criteria. 
 
 The likelihood of incorrect results because of BLAST chooseing HSPs that are too short increases
-as the length of your OTU sequences goes up.  This analysis is designed to check if this might
+as the length of your OTU sequences goes up.  This step tries to check if this might
 be a problem.  Generate some plots with the R script plot_blast_hit_stats.R.
 
-Full Commands (type in the terminal)
+Full Two Commands (type in the terminal)
 mkdir plots
-RScript ugh. too tired...
+RScript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
 
+What mkdir command does:
+	mkdir		stands for "make directory", this creates a new folder
+	plots		the name of the new folder you are creating
+				this is where step 5 and step 13 will save plots generated for checking the cutoff
 
+What each argument in the RScript is (keep in order and separate with a space):
+	RScript								sources an R script and allows it to accept arguments from the command line
+	plot_blast_hit_stats.R				the script you are sourcing
+	otus.custom.blast.table.modified	the modified blast table produced in step 4.
+	98									the pident cutoff used to create this BLAST table
+	plots								the folder your generated plots will be saved in
 
+What each generated file is:
+	BLAST_hits_line_plot.png
+	BLAST_hits_used_for_pident_98.png
+	BLAST_hits_used_for_pidents_70-100.png
+	BLAST_hits_used_for_pidents_90-100.png
+	BLAST_hits_used_overall.png
+	
+*******fix all the file descriptions.  as in, add some descriptions of the plots.
 old description... my new description is not very good.  come back to this.
 
 are being chosen over lower %id longer HSPs that would have still 

@@ -51,7 +51,7 @@ Summary of Steps and Commands (all commands entered in terminal window):
 	quit()
 	cat otus.general.wang.taxonomy > otus.general.taxonomy
 
-11. reformat taxonomy files (textwrangler or bash)
+11. reformat taxonomy files (bash)
 	sed 's/[[:blank:]]/\;/' <otus.98.taxonomy >otus.98.taxonomy.reformatted
 	mv otus.98.taxonomy.reformatted otus.98.taxonomy
 	sed 's/[[:blank:]]/\;/' <otus.general.taxonomy >otus.general.taxonomy.reformatted
@@ -621,7 +621,7 @@ What the filenames are:
 
 __________________________________________________________________________________________
 
-11. reformat taxonomy files (textwrangler or bash)
+11. reformat taxonomy files (bash)
 
 The R script in step 12 requires semicolon delimited taxonomy files.  The mothur output
 .taxonomy files are delimited with both tabs and semicolons.

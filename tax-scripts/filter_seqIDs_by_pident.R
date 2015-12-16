@@ -168,7 +168,6 @@ filter.seqIDs <- function(BlastTable, cutoff.perc.id, want.matches, File){
     "\nAssign taxonomy to these sequences using the Large General database\n\n")
   }
   
-  
 }
 
 # print poem to enrich the user experience

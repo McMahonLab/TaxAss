@@ -77,7 +77,6 @@ reformat.fw <- function(FWtable){
   row.names(fw) <- NULL
   
   return(fw)
-  
 }
 
 # Reformat the green genes taxonomy table

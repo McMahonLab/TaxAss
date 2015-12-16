@@ -59,7 +59,7 @@ Summary of Steps and Commands (all commands entered in terminal window):
 	
 12. compare taxonomy files (R)
 	mkdir conflicts_98
-	Rscript find_classification_disagreements.R otus.98.taxonomy otus.gg.taxonomy conflicts_98 60 ids.above.98
+	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy conflicts_98 60 ids.above.98
 
 13. plotting (R)
 
@@ -662,7 +662,7 @@ instead of cat that I think leaves the old file there still too...
 
 __________________________________________________________________________________________
 
-12. compare taxonomy files (R)
+12. compare taxonomy files (bash, R)
 
 
 The R script find_classification_disagreements.R  creates a folder containing a file for 
@@ -682,9 +682,10 @@ considered the minimum cutoff you should use.)
 Note: you must create a new folder to save these results in before running the script.
 	include the pident cutoff in your folder name, b/c the file names will not include that.
 
-Full Command (type in terminal):
+Full Two Commands (type in terminal):
 
-Rscript find_classification_disagreements.R otus.taxonomy otus.general.taxonomy results.folder.path taxonomy.bootstrap.cutoff seq.ids.above.cutoff.file.path
+mkdir conflicts_98
+Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy conflicts_98 60 ids.above.98
 
 Note: you must enter all the arguments in this order.
 
@@ -731,3 +732,50 @@ cutoff will be called unclassified.  You could have had mothur do this the first
 but I preferred to to see all the data when analyzing the results in steps 10-13.
 
 *****write this script!!****
+
+
+__________________________________________________________________________________________
+
+15. Clean up folder by removing intermediate files (bash)
+
+To tidy up, remove all the intermediate files you'll never look at again:
+(In parentheses are the reasons one might want to keep them, you decide.)
+
+The blast database files (saves time if you want to re-run blast on the same taxonomy database)
+rm custom.db.*
+
+The mothur database files (saves time if you want to re-run classify seqs with the same taxonomy database)
+rm custom.8mer
+rm custom.custom*
+rm custom.tree*
+rm general.8mer
+rm general.general*
+rm general.tree*
+
+The mothur classify seqs output files (these can be regenerated quickly if you save mothur db files)
+rm *wang*
+rm mothur.*.logfile
+
+The blast results (these are quick to regenerate if you have the blast database)
+rm otus.custom.blast*
+
+lists of seqIDs (not needed once you have the fasta files)
+rm ids*
+
+separate fasta files (not needed post-classification.)
+rm otus.below*.fasta
+rm otus.above*.fasta
+
+move all the scripts into a scripts folder (keep them out of the way)
+mkdir scripts
+mv *.py scripts/
+mv *.R scripts/
+
+OK, now all intermediate files are not taking up space, but everything you'd need to repeat 
+the workflow and regenerate all the files is saved.
+
+
+
+
+
+

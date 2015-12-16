@@ -59,7 +59,7 @@ Summary of Steps and Commands (all commands entered in terminal window):
 	
 12. compare taxonomy files (R)
 	mkdir conflicts_98
-	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy conflicts_98 60 ids.above.98
+	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 70 
 
 13. plotting (R)
 
@@ -685,25 +685,27 @@ Note: you must create a new folder to save these results in before running the s
 Full Two Commands (type in terminal):
 
 mkdir conflicts_98
-Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy conflicts_98 60 ids.above.98
+Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 70 
 
 Note: you must enter all the arguments in this order.
 
 What the arguments are:
-	Rscript									this open R to accept arguments from the command line
+	Rscript									this opens R to accept arguments from the command line
 	find_classification_disagreements.R		this is the R script you're calling
 	fw.plus.gg.tax.file.path				this is the path to your custom taxonomy file
 											i.e. the path to otus.taxonomy created in step 9
 	gg.only.tax.file.path					this is the path to the general-only taxonomy file
 											i.e. the path to otus.general.taxonomy
-	results.folder.path						this is the path to the folder you want the R script
-											to save the .csv results files in.
-											NOTE: you must create this folder before running script!
-	taxonomy.bootstrap.cutoff				this is the % confidence cutoff you want to use 
-											on the general database assignments
 	seq.ids.above.cutoff.file.path			this is the path to the file created in step 4 that
 											contains all of the sequence IDs above or equal to 
 											your BLAST cutoff. i.e. the path to ids.above.98
+	results.folder.path						this is the path to the folder you want the R script
+											to save the .csv results files in.
+											NOTE: you must create this folder before running script!
+	blast.pident.cutoff						this is the pident you're using.
+	taxonomy.bootstrap.cutoff				this is the % confidence cutoff you want to use 
+											on the general database assignments
+	
 											
 
 What the generated files in your folder are:
@@ -721,7 +723,10 @@ ________________________________________________________________________________
 
 13. generate plots to visualize classification disagreements and chosen cutoffs (R)
 
+Rscript plot_classification_disagreements.R otus.abund plots conflicts_94 94 conflicts_96 96 conflicts_98 98
 
+it worked!!  omg it worked it worked!!  
+**** ok, add in the descriptions*****
 __________________________________________________________________________________________
 
 14. generate final taxonomy file (R)
@@ -739,7 +744,7 @@ ________________________________________________________________________________
 15. Clean up folder by removing intermediate files (bash)
 
 To tidy up, remove all the intermediate files you'll never look at again:
-(In parentheses are the reasons one might want to keep them, you decide.)
+(In parentheses are the reasons you might want to keep them, you decide.)
 
 The blast database files (saves time if you want to re-run blast on the same taxonomy database)
 rm custom.db.*

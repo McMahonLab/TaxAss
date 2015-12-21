@@ -61,7 +61,9 @@ Summary of Steps and Commands (all commands entered in terminal window):
 	mkdir conflicts_98
 	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 70 
 
-13. plotting (R)
+13. check that pident cutoff is appropriate (R)
+	Rscript plot_classification_disagreements.R otus.abund plots conflicts_94 94 conflicts_96 96 conflicts_98 98
+
 
 Detailed explanations of commands and inputs are below:
 
@@ -664,7 +666,6 @@ ________________________________________________________________________________
 
 12. compare taxonomy files (bash, R)
 
-
 The R script find_classification_disagreements.R  creates a folder containing a file for 
 each upper taxonomic level (kingdom, phylum, class, order, lineage) that lists all of the 
 classification disagreements at that taxonomic level between the custom + general taxonomy
@@ -721,12 +722,36 @@ And has uniform unclassified names.  ie, just that part of this script for the f
 
 __________________________________________________________________________________________
 
-13. generate plots to visualize classification disagreements and chosen cutoffs (R)
+13. check that pident cutoff is appropriate (R)
+
+This step generates some plots that you can use to double check that your chosen cutoff is 
+appropriate.  The plots are saved into the "plots" folder that you created in step 5.  In
+order to examine the cutoff sensitivity, you may want to run steps 4-9 & 11-12 multiple times
+with different pident cutoffs.  Note that the slowest step, classify.seqs() in mothur, will
+be much faster as long as the mothur database files are still saved.
 
 Rscript plot_classification_disagreements.R otus.abund plots conflicts_94 94 conflicts_96 96 conflicts_98 98
 
-it worked!!  omg it worked it worked!!  
-**** ok, add in the descriptions*****
+What the arguments are:
+	Rscript									Calls program R in a way that accepts command line arguments
+	plot_classification_disagreements.R		name of the script you are calling
+	otus.abund								OTU relative abundance table
+	plots									path to folder you are saving the plots into.
+											note: this folder must already exist. you made it in step 5.
+	conflicts_94							path to folder containing taxonomy disagreements between
+											the workflow and the general database alone.
+											You made this folder in step 12.
+	94										pident cutoff for the previous folder
+	conflicts_96							folder of taxonomy disagreements
+	96										pident cutoff for previous folder
+	conflicts_98							folder of taxonomy disagreements
+	98										pident cutoff for previous folder
+	...										you can have as many pident cutoffs compared as you
+											want.  List them all as arguments in this form:
+											folder_path pident folder_path pident ...
+
+What the generated plots are:
+	***choose which ones to export***
 __________________________________________________________________________________________
 
 14. generate final taxonomy file (R)

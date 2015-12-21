@@ -15,20 +15,21 @@
 # Receive arguments from terminal command line
 #####
 
-userprefs <- commandArgs(trailingOnly = TRUE)
-fw.plus.gg.tax.file.path <- userprefs[1]
-gg.only.tax.file.path <- userprefs[2]
-fw.seq.ids.file.path <- userprefs[3]
-results.folder.path <- userprefs[4]
-blast.pident.cutoff <- userprefs[5]
-taxonomy.bootstrap.cutoff <- userprefs[6]
+# userprefs <- commandArgs(trailingOnly = TRUE)
+# fw.plus.gg.tax.file.path <- userprefs[1]
+# gg.only.tax.file.path <- userprefs[2]
+# fw.seq.ids.file.path <- userprefs[3]
+# results.folder.path <- userprefs[4]
+# blast.pident.cutoff <- userprefs[5]
+# taxonomy.bootstrap.cutoff <- userprefs[6]
 
 
-# fw.plus.gg.tax.file.path <- "../../take5/otus.100.taxonomy"
-# gg.only.tax.file.path <- "../../take5/otus.gg.taxonomy"
-# results.folder.path <- "../../take5/conflicts_100"
-# taxonomy.bootstrap.cutoff <- 60
-# fw.seq.ids.file.path <- "../../take5/ids.above.100"
+fw.plus.gg.tax.file.path <- "../../take7/otus.98.taxonomy"
+gg.only.tax.file.path <- "../../take7/otus.general.taxonomy"
+fw.seq.ids.file.path <- "../../take7/ids.above.98"
+results.folder.path <- "../../take7/conflicts_98/"
+blast.pident.cutoff <- 98
+taxonomy.bootstrap.cutoff <- 70
 
 #####
 # Define Functions for Import and Formatting
@@ -289,6 +290,10 @@ fw.percents <- reformat.fw(FWtable = fw.percents)
 check.files.match(FWtable = fw.percents, GGtable = gg.percents)
 
 # Generate a final taxonomy file:
+final.taxonomy <- do.bootstrap.cutoff(TaxonomyTable = fw.percents, BootstrapCutoff = taxonomy.bootstrap.cutoff)
+colnames(final.taxonomy) <- c("seqID","kingdom","phylum","class","order","lineage","clade","tribe")
+write.table(x = final.taxonomy, file = paste("otus.", blast.pident.cutoff, ".", taxonomy.bootstrap.cutoff, ".taxonomy", sep = ""), 
+            sep = ";", row.names = FALSE)
 
 # Only compare the classifications made by the fw database to the gg classifications, not full tax tables
 fw.seq.ids <- import.FW.seq.IDs()

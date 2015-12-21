@@ -664,7 +664,7 @@ instead of cat that I think leaves the old file there still too...
 
 __________________________________________________________________________________________
 
-12. compare taxonomy files (bash, R)
+12. compare taxonomy files, generate final taxonomy file (bash, R)
 
 The R script find_classification_disagreements.R  creates a folder containing a file for 
 each upper taxonomic level (kingdom, phylum, class, order, lineage) that lists all of the 
@@ -680,8 +680,16 @@ its reporting of disagreements.  This allows you ignore taxonomy assignment conf
 you don't trust the assignment anyway, and you can decide what you trust (60% is generally
 considered the minimum cutoff you should use.)
 
+Additionally, this script generates a final version of your taxonomy file with the applied 
+bootstrap cutoff implemented.  The version made in step 9 contains all the taxonomy assignments,
+even ones with very low bootstrap p-values.  This generates a .taxonomy file with the cutoff
+applied, so that everything under that cutoff is named "unclassified."  Note that you can 
+apply this cutoff in step 8 using the "cutoff = #" flag with the mothur command classify.seqs().
+I didn't do it there though to make these analysis steps more flexible.
+
 Note: you must create a new folder to save these results in before running the script.
 	include the pident cutoff in your folder name, b/c the file names will not include that.
+	(Suggested folder name and creation is below.)
 
 Full Two Commands (type in terminal):
 

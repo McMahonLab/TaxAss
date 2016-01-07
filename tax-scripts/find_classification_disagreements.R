@@ -15,21 +15,21 @@
 # Receive arguments from terminal command line
 #####
 
-# userprefs <- commandArgs(trailingOnly = TRUE)
-# fw.plus.gg.tax.file.path <- userprefs[1]
-# gg.only.tax.file.path <- userprefs[2]
-# fw.seq.ids.file.path <- userprefs[3]
-# results.folder.path <- userprefs[4]
-# blast.pident.cutoff <- userprefs[5]
-# taxonomy.bootstrap.cutoff <- userprefs[6]
+userprefs <- commandArgs(trailingOnly = TRUE)
+fw.plus.gg.tax.file.path <- userprefs[1]
+gg.only.tax.file.path <- userprefs[2]
+fw.seq.ids.file.path <- userprefs[3]
+results.folder.path <- userprefs[4]
+blast.pident.cutoff <- userprefs[5]
+taxonomy.bootstrap.cutoff <- userprefs[6]
 
 
-fw.plus.gg.tax.file.path <- "../../take7/otus.98.taxonomy"
-gg.only.tax.file.path <- "../../take7/otus.general.taxonomy"
-fw.seq.ids.file.path <- "../../take7/ids.above.98"
-results.folder.path <- "../../take7/conflicts_98/"
-blast.pident.cutoff <- 98
-taxonomy.bootstrap.cutoff <- 70
+# fw.plus.gg.tax.file.path <- "../../take7/otus.98.taxonomy"
+# gg.only.tax.file.path <- "../../take7/otus.general.taxonomy"
+# fw.seq.ids.file.path <- "../../take7/ids.above.98"
+# results.folder.path <- "../../take7/conflicts_98/"
+# blast.pident.cutoff <- 98
+# taxonomy.bootstrap.cutoff <- 70
 
 #####
 # Define Functions for Import and Formatting

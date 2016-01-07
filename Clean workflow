@@ -685,7 +685,10 @@ bootstrap cutoff implemented.  The version made in step 9 contains all the taxon
 even ones with very low bootstrap p-values.  This generates a .taxonomy file with the cutoff
 applied, so that everything under that cutoff is named "unclassified."  Note that you can 
 apply this cutoff in step 8 using the "cutoff = #" flag with the mothur command classify.seqs().
-I didn't do it there though to make these analysis steps more flexible.
+I didn't do it there though to make these analysis steps more flexible. The format of this file
+is semicolon delimited, which is slightly different than the mothur output files that are tab 
+semicolon deliminited between taxonomy levels but tab delimited between the seqID column and
+the taxonomy names.
 
 Note: you must create a new folder to save these results in before running the script.
 	include the pident cutoff in your folder name, b/c the file names will not include that.
@@ -723,6 +726,8 @@ What the generated files in your folder are:
 	class_conflicts.csv
 	order_conflicts.csv
 	lineage_conflicts.csv
+What the generated file in your working directory is:
+	otus.98.70.taxonomy
 
 ****need a finishing touch script that lets people convert their taxonomy table to using their desired cutoff.
 And has uniform unclassified names.  ie, just that part of this script for the final file.

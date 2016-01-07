@@ -6,24 +6,24 @@
 # Receive arguments from terminal command line
 #####
 
-# userprefs <- commandArgs(trailingOnly = TRUE)
+userprefs <- commandArgs(trailingOnly = TRUE)
 
-userprefs <- c("../../take5/otus.abund",
-               "../../take5/plots",
-               "../../take5/conflicts_70", 70,
-               "../../take5/conflicts_80", 80,
-               "../../take5/conflicts_85", 85,
-               "../../take5/conflicts_90", 90,
-               "../../take5/conflicts_91", 91,
-               "../../take5/conflicts_92", 92,
-               "../../take5/conflicts_93", 93,
-               "../../take5/conflicts_94", 94,
-               "../../take5/conflicts_95", 95,
-               "../../take5/conflicts_96", 96,
-               "../../take5/conflicts_97", 97,
-               "../../take5/conflicts_98", 98,
-               "../../take5/conflicts_99", 99,
-               "../../take5/conflicts_100", 100)
+# userprefs <- c("../../take5/otus.abund",
+#                "../../take5/plots",
+#                "../../take5/conflicts_70", 70,
+#                "../../take5/conflicts_80", 80,
+#                "../../take5/conflicts_85", 85,
+#                "../../take5/conflicts_90", 90,
+#                "../../take5/conflicts_91", 91,
+#                "../../take5/conflicts_92", 92,
+#                "../../take5/conflicts_93", 93,
+#                "../../take5/conflicts_94", 94,
+#                "../../take5/conflicts_95", 95,
+#                "../../take5/conflicts_96", 96,
+#                "../../take5/conflicts_97", 97,
+#                "../../take5/conflicts_98", 98,
+#                "../../take5/conflicts_99", 99,
+#                "../../take5/conflicts_100", 100)
 
 #####
 # Define functions to import and process the data

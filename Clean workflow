@@ -30,7 +30,6 @@ Summary of Steps and Commands (all commands entered in terminal window):
 6. recover sequence IDs left out of blast (python, bash)
 	python find_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table ids.missing
 	cat ids.below.98 ids.missing > ids.below.98.all
-	rm ids.below.98 ids.missing
 	
 7. create fasta files of desired sequence IDs (python)
 	python create_fastas_given_seqIDs.py ids.above.98 otus.fasta otus.above.98.fasta
@@ -441,11 +440,10 @@ The bash command cat concatenates these missing ids with the ids below the chose
 pident.  That is because the ids blast didn't report hits for had even worse pidents than 
 the ones that didn't make the R script cutoff.
 
-Full Three Commands (type in terminal):
+Full Two Commands (type in terminal):
 
 python find_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table ids.missing
 cat ids.below.98 ids.missing > ids.below.98.all
-rm ids.below.98 ids.missing
 
 These arguments in the python script must be in the correct order.
 python sources the .py script using the arguments supplied after it in the terminal.
@@ -459,10 +457,6 @@ What each argument is- 1st command (python):
 
 What the syntax is- 2nd command (bash):
 	cat file1 file2 > file3		means "combine file1 and file2 into file 3"
-
-What the syntax is- 3rd command (bash):
-	rm file1 file2		means remove (delete) the files file1 and file2
-						this is just to tidy up the working directory, you won't need those again
 						
 What each file is:
 	find_seqIDs_blast_removed.py	python script you're sourcing
@@ -769,10 +763,13 @@ What the generated plots are:
 
 __________________________________________________________________________________________
 
-15. Clean up folder by removing intermediate files (bash)
+15. Tidy up (bash)
 
-To tidy up, remove all the intermediate files you'll never look at again:
-(In parentheses are the reasons you might want to keep them, you decide.)
+To tidy up your folder, remove all the intermediate files you don't need anymore.
+Note: if for some reason you want to keep these files, you can either skip this step
+or make a new "intermediate_files" directory (mkdir intermediate_files)
+and replace "rm filename" with "mv filename intermediate_files"
+(In parentheses are possible reasons you might want to keep skip deleting the files.)
 
 The blast database files (saves time if you want to re-run blast on the same taxonomy database)
 rm custom.db.*
@@ -795,7 +792,7 @@ rm otus.custom.blast*
 lists of seqIDs (not needed once you have the fasta files)
 rm ids*
 
-separate fasta files (not needed post-classification.)
+separated fasta files (not needed post-classification.)
 rm otus.below*.fasta
 rm otus.above*.fasta
 

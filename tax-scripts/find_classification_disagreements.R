@@ -22,6 +22,8 @@ fw.seq.ids.file.path <- userprefs[3]
 results.folder.path <- userprefs[4]
 blast.pident.cutoff <- userprefs[5]
 taxonomy.bootstrap.cutoff <- userprefs[6]
+check.or.final <- userprefs[7]
+if (length(userprefs) < 7){check.or.final <- "check"}
 
 
 # fw.plus.gg.tax.file.path <- "../../take7/otus.98.taxonomy"
@@ -30,6 +32,7 @@ taxonomy.bootstrap.cutoff <- userprefs[6]
 # results.folder.path <- "../../take7/conflicts_98/"
 # blast.pident.cutoff <- 98
 # taxonomy.bootstrap.cutoff <- 70
+# check.or.final <- "final"
 
 #####
 # Define Functions for Import and Formatting
@@ -290,10 +293,12 @@ fw.percents <- reformat.fw(FWtable = fw.percents)
 check.files.match(FWtable = fw.percents, GGtable = gg.percents)
 
 # Generate a final taxonomy file:
-final.taxonomy <- do.bootstrap.cutoff(TaxonomyTable = fw.percents, BootstrapCutoff = taxonomy.bootstrap.cutoff)
-colnames(final.taxonomy) <- c("seqID","kingdom","phylum","class","order","lineage","clade","tribe")
-write.table(x = final.taxonomy, file = paste("otus.", blast.pident.cutoff, ".", taxonomy.bootstrap.cutoff, ".taxonomy", sep = ""), 
-            sep = ";", row.names = FALSE)
+if (check.or.final == "final" | check.or.final == "Final" | check.or.final == "FINAL"){
+  final.taxonomy <- do.bootstrap.cutoff(TaxonomyTable = fw.percents, BootstrapCutoff = taxonomy.bootstrap.cutoff)
+  colnames(final.taxonomy) <- c("seqID","kingdom","phylum","class","order","lineage","clade","tribe")
+  write.table(x = final.taxonomy, file = paste("otus.", blast.pident.cutoff, ".", taxonomy.bootstrap.cutoff, ".taxonomy", sep = ""), 
+              sep = ";", row.names = FALSE)
+}
 
 # Only compare the classifications made by the fw database to the gg classifications, not full tax tables
 fw.seq.ids <- import.FW.seq.IDs()

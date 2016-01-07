@@ -658,7 +658,7 @@ instead of cat that I think leaves the old file there still too...
 
 __________________________________________________________________________________________
 
-12. compare taxonomy files, generate final taxonomy file (bash, R)
+12. compare taxonomy files (bash, R)
 
 The R script find_classification_disagreements.R  creates a folder containing a file for 
 each upper taxonomic level (kingdom, phylum, class, order, lineage) that lists all of the 
@@ -691,7 +691,7 @@ Note: you must create a new folder to save these results in before running the s
 Full Two Commands (type in terminal):
 
 mkdir conflicts_98
-Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 70 
+Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 70
 
 Note: you must enter all the arguments in this order.
 
@@ -720,8 +720,6 @@ What the generated files in your plots folder are:
 	class_conflicts.csv
 	order_conflicts.csv
 	lineage_conflicts.csv
-What the generated file in your working directory is:
-	otus.98.70.taxonomy
 
 
 __________________________________________________________________________________________
@@ -759,12 +757,20 @@ What the generated plots are:
 
 __________________________________________________________________________________________
 
-14. finalize pident cutoff choice (in your brain)
+14. generate final taxonomy file (R)
 
-Based on your results from step 13, choose which pident cutoff to use.  All of these files
-were generated when you repeated step 12 with different cutoffs.  Use the best one for
-your future data analysis.  enjoy!
+Based on your results from step 13, choose which pident cutoff to use.  Use the same script 
+from step 12, except this time specify "final."  This final taxonomy file is different from 
+files created in step 9 because it applies your clustering bootstrap pvalue cutoff, calling
+everything below that cutoff "unclassified."  
 
+Recall that choosing that cutoff was left out of the mothur command to allow flexibility in
+analyzing results.  The "final" argument to this script is left out in step 12 because it takes
+longer when it is included.  This is because in finding the classification disagreements, the
+script only compares classifications assigned by the custom database, which is a small subset 
+of all of the classifications.
+
+Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 70 final
 __________________________________________________________________________________________
 
 15. tidy up (bash)

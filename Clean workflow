@@ -765,16 +765,6 @@ What the arguments are:
 
 What the generated plots are:
 	***choose which ones to export***
-__________________________________________________________________________________________
-
-14. generate final taxonomy file (R)
-
-The only think left to do to get your final version is to apply the bootstrap cutoffs you chose.
-This will be exactly the same file as generated in step 9, but names below the clustering % confidence 
-cutoff will be called unclassified.  You could have had mothur do this the first time around,
-but I preferred to to see all the data when analyzing the results in steps 10-13.
-
-*****write this script!!****
 
 
 __________________________________________________________________________________________

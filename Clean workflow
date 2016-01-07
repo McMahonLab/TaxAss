@@ -714,7 +714,7 @@ What the arguments are:
 	
 											
 
-What the generated files in your folder are:
+What the generated files in your plots folder are:
 	kingdom_conflicts.csv
 	phylum_conflicts.csv
 	class_conflicts.csv
@@ -722,9 +722,6 @@ What the generated files in your folder are:
 	lineage_conflicts.csv
 What the generated file in your working directory is:
 	otus.98.70.taxonomy
-
-****need a finishing touch script that lets people convert their taxonomy table to using their desired cutoff.
-And has uniform unclassified names.  ie, just that part of this script for the final file.
 
 
 __________________________________________________________________________________________
@@ -760,10 +757,17 @@ What the arguments are:
 What the generated plots are:
 	***choose which ones to export***
 
+__________________________________________________________________________________________
+
+14. finalize pident cutoff choice (in your brain)
+
+Based on your results from step 13, choose which pident cutoff to use.  All of these files
+were generated when you repeated step 12 with different cutoffs.  Use the best one for
+your future data analysis.  enjoy!
 
 __________________________________________________________________________________________
 
-15. Tidy up (bash)
+15. tidy up (bash)
 
 To tidy up your folder, remove all the intermediate files you don't need anymore.
 Note: if for some reason you want to keep these files, you can either skip this step

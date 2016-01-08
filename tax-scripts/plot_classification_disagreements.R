@@ -256,7 +256,7 @@ plot.num.forced <- function(ConflictSummaryTable, UserArgs, ByReads = FALSE, AsP
   }
   
   # Save plot as .png file
-  png(filename = paste(results.file.path, "/Classification_Disagreements_of_", plot.of, "_", plot.as, "s", yplotlabel, sep = ""), 
+  png(filename = paste(results.file.path, "/Classification_Disagreements_of_", plot.of, "_", plot.as, "s", yplotlabel, ".png", sep = ""), 
       width = 5, height = 5, units = "in", res = 100)
   
   # Set up an empty plot
@@ -299,7 +299,7 @@ plot.num.classified.outs <- function(ConflictSummaryTable, UserArgs, ByReads = F
   }
   
   # Save plot as .png file
-  png(filename = paste(results.file.path, "/Custom_db_contributions_by_", plot.of, "_", plot.as, "s", sep = ""), 
+  png(filename = paste(results.file.path, "/Custom_db_contributions_by_", plot.of, "_", plot.as, "s.png", sep = ""), 
       width = 5, height = 5, units = "in", res = 100)
   
   # Set up and empty plot
@@ -321,7 +321,7 @@ plot.bootstrap.percents <- function(FWpValues, GGpValues, UserArgs){
   results.file.path <- UserArgs[2]
   
   # set up a new file for the plot
-  png(filename = paste(results.file.path, "/Taxonomy_Assignment_Confidences", sep = ""), 
+  png(filename = paste(results.file.path, "/Taxonomy_Assignment_Confidences.png", sep = ""), 
       width = 8, height = 10, units = "in", res = 100)
   
   # set up stacked boxplots, left column FW, right column GG

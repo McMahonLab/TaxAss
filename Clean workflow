@@ -63,7 +63,20 @@ Summary of Steps and Commands (all commands entered in terminal window):
 13. check that pident cutoff is appropriate (R)
 	Rscript plot_classification_disagreements.R otus.abund plots conflicts_94 94 conflicts_96 96 conflicts_98 98
 
+14. generate final taxonomy file (R)
+	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 70 final
 
+15. tidy up (bash)
+	rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy
+	mkdir scripts
+	mv *.py *.R scripts/
+	mkdir analysis/
+	mv conflicts* plots/ analysis/
+	mkdir data
+	mv otus* data/
+	mkdir databases
+	mv *.taxonomy *.fasta databases
+	
 Detailed explanations of commands and inputs are below:
 
 
@@ -771,51 +784,91 @@ script only compares classifications assigned by the custom database, which is a
 of all of the classifications.
 
 Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 70 final
+
+
 __________________________________________________________________________________________
 
 15. tidy up (bash)
 
-To tidy up your folder, remove all the intermediate files you don't need anymore.
+This step tidies up your working directory folder by removing intermediate files you don't 
+need anymore and moving remaining files into orgainized folders.
+Note: these bash commands only work if you've been using the same names as the workflow.
+Note: go through these commands in order.
+
+
+15.1 remove intermediate files
+
+Full Command (Type in Terminal):
+
+rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy
+
+What each of these intermediate files is and why you might want to keep them:
+custom.db.*		The blast database files (saves time if you want to re-run blast on the same taxonomy database)
+custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree*
+				The mothur database files (saves time if you want to re-run classify seqs with the same taxonomy database)
+*wang* mothur.*.logfile
+				The mothur classify seqs output files (these can be regenerated quickly if you save mothur db files)
+otus.custom.blast*
+				The blast results (these are quick to regenerate if you have the blast database)
+ids*			lists of seqIDs (not needed once you have the fasta files)
+rm otus.below*.fasta otus.above*.fasta
+				separated fasta files (not needed post-classification.)
+otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy
+				the classifications at different pident cutoffs and from green genes alone
+				note: these files don't have p-value cutoffs applied (i.e. nothing's called unclassified). 
+				If you want to save files like these for additional analysis, 
+					re-run step 14 to get additional "final" versions.
+					re-run step 10 with an additional "cutoff=" flag.
+
 Note: if for some reason you want to keep these files, you can either skip this step
-or make a new "intermediate_files" directory (mkdir intermediate_files)
-and replace "rm filename" with "mv filename intermediate_files"
-(In parentheses are possible reasons you might want to keep skip deleting the files.)
+or type in the terminal:
 
-The blast database files (saves time if you want to re-run blast on the same taxonomy database)
-rm custom.db.*
+mkdir intermediate
+mv custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta intermediate/
 
-The mothur database files (saves time if you want to re-run classify seqs with the same taxonomy database)
-rm custom.8mer
-rm custom.custom*
-rm custom.tree*
-rm general.8mer
-rm general.general*
-rm general.tree*
 
-The mothur classify seqs output files (these can be regenerated quickly if you save mothur db files)
-rm *wang*
-rm mothur.*.logfile
+15.2 move scripts into scripts folder
 
-The blast results (these are quick to regenerate if you have the blast database)
-rm otus.custom.blast*
+Full 2 commands (Type in Terminal):
 
-lists of seqIDs (not needed once you have the fasta files)
-rm ids*
-
-separated fasta files (not needed post-classification.)
-rm otus.below*.fasta
-rm otus.above*.fasta
-
-move all the scripts into a scripts folder (keep them out of the way)
 mkdir scripts
-mv *.py scripts/
-mv *.R scripts/
+mv *.py *.R scripts/
 
-OK, now all intermediate files are not taking up space, but everything you'd need to repeat 
-the workflow and regenerate all the files is saved.
+Note: I recommend saving all the script versions you used to create your data so you could reproduce it.
 
 
+15.3 save files used in analyzing your results in analysis folder
+
+Full 2 commands (Type in Terminal):
+
+mkdir analysis/
+mv conflicts* plots/ analysis/
+
+Note: You can delete this instead if you're all done analyzing. Instead of the two commands, type:
+
+rm conflicts* plots/
+
+15.4 save your actual data files in a folder called data
+
+Full Two commands (Type in Terminal):
+
+mkdir data
+mv otus* data/
+
+Note: Yeyy!  This is what you're gonna use to actually do stuff now!!
 
 
+15.5 save the version of the taxonomy databases you used in a databases folder
+
+Full Two Commands (type in terminal):
+
+mkdir databases
+mv *.taxonomy *.fasta databases
+
+Note: I highly recommend you keep these versions of the databases you used so you can reproduce your data.
 
 
+__________________________________________________________________________________________
+
+~The end~
+__________________________________________________________________________________________

@@ -9,7 +9,12 @@ Summary of Steps and Commands (all commands entered in terminal window):
 
 0. format files (textwrangler or bash)
 	depends on your starting file formats
-
+	for Green Genes database as general.taxonomy:
+		sed 's/ //g' <general.taxonomy >NoSpaces
+		sed 's/$/;/' <NoSpaces >EndLineSemicolons
+		mv EndLineSemicolons general.taxonomy
+		rm NoSpaces
+		
 1. make BLAST database file (blast)
 	makeblastdb -dbtype nucl -in custom.fasta -input_type fasta -parse_seqids -out custom.db
 

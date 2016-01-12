@@ -80,6 +80,7 @@ done
 
 Rscript plot_classification_disagreements.R otus.abund plots $args_string
 
-echo Steps 1-13 have finished running.  Now analysze the plots from step 13 to choose your final pident and generate your final taxonomy file in step 14.  Then tidy up your working directory with step 15.
+printf 'Steps 1-13 have finished running.  Now analysze the plots from step 13 to choose your final pident and generate your final taxonomy file in step 14.  Then tidy up your working directory with step 15. \n \a'
+sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; 
 
 exit 0

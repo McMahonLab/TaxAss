@@ -25,8 +25,9 @@ Summary of Steps and Commands (all commands entered in terminal window):
 	blast_formatter -archive otus.custom.blast -outfmt "6 qseqid pident length qlen qstart qend" -out otus.custom.blast.table
 
 4. filter BLAST results (R)
-	Rscript filter_seqIDs_by_pident.R otus.custom.blast.table otus.custom.blast.table.modified ids.above.98 98 TRUE 
-	Rscript filter_seqIDs_by_pident.R otus.custom.blast.table otus.custom.blast.table.modified ids.below.98 98 FALSE
+	Rscript calc_full_length_pident.R otus.custom.blast.table otus.custom.blast.table.modified
+	Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.above.98 98 TRUE 
+	Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.below.98 98 FALSE
 
 5. check that BLAST settings are appropriate (R)
 	mkdir plots
@@ -346,10 +347,11 @@ cutoff that are destined for taxonomy assignment in the small custom database, o
 the sequence ID's below the "true pident" cutoff that are destined for taxonomy assignment
 in the large general database.
 
-Full Two Commands (type in terminal):
+Full Three Commands (type in terminal):
 
-Rscript filter_seqIDs_by_pident.R otus.custom.blast.table otus.custom.blast.table.modified ids.above.98 98 TRUE 
-Rscript filter_seqIDs_by_pident.R otus.custom.blast.table otus.custom.blast.table.modified ids.below.98 98 FALSE
+Rscript calc_full_length_pident.R otus.custom.blast.table otus.custom.blast.table.modified
+Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.above.98 98 TRUE 
+Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.below.98 98 FALSE
 
 These arguments must be in the correct order.
 Rscript sources the .R script using the arguments supplied after it in the terminal.

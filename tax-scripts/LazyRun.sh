@@ -18,8 +18,9 @@ pident=("100" "98" "96")
 makeblastdb -dbtype nucl -in custom.fasta -input_type fasta -parse_seqids -out custom.db
 blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 5
 blast_formatter -archive otus.custom.blast -outfmt "6 qseqid pident length qlen qstart qend" -out otus.custom.blast.table
-Rscript filter_seqIDs_by_pident.R otus.custom.blast.table otus.custom.blast.table.modified ids.above.${pident[0]} ${pident[0]} TRUE 
-Rscript filter_seqIDs_by_pident.R otus.custom.blast.table otus.custom.blast.table.modified ids.below.${pident[0]} ${pident[0]} FALSE
+Rscript calc_full_length_pident.R otus.custom.blast.table otus.custom.blast.table.modified
+Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.above.${pident[0]} ${pident[0]} TRUE 
+Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.below.${pident[0]} ${pident[0]} FALSE
 mkdir plots
 RScript plot_blast_hit_stats.R otus.custom.blast.table.modified ${pident[0]} plots
 python find_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table ids.missing
@@ -42,8 +43,8 @@ Rscript find_classification_disagreements.R otus.${pident[0]}.taxonomy otus.gene
 # Define a function called pident since you repeat this part many times
 
 runagain () {
-   Rscript filter_seqIDs_by_pident.R otus.custom.blast.table otus.custom.blast.table.modified ids.above.$1 $1 TRUE 
-   Rscript filter_seqIDs_by_pident.R otus.custom.blast.table otus.custom.blast.table.modified ids.below.$1 $1 FALSE
+   Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.above.$1 $1 TRUE 
+   Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.below.$1 $1 FALSE
    RScript plot_blast_hit_stats.R otus.custom.blast.table.modified $1 plots
    cat ids.below.$1 ids.missing > ids.below.$1.all
    python create_fastas_given_seqIDs.py ids.above.$1 otus.fasta otus.above.$1.fasta

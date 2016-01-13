@@ -22,16 +22,16 @@
 # Receive arguments from terminal command line
 #####
 
-# userprefs <- commandArgs(trailingOnly = TRUE)
-# blast.file.path <- userprefs[1]
-# output.file.path <- userprefs[2]
-# users.cutoff <- as.numeric(userprefs[3])
-# user.wants.matches <- as.logical(userprefs[4])
+userprefs <- commandArgs(trailingOnly = TRUE)
+blast.file.path <- userprefs[1]
+output.file.path <- userprefs[2]
+users.cutoff <- as.numeric(userprefs[3])
+user.wants.matches <- as.logical(userprefs[4])
 
-blast.file.path <- "../../take8/otus.custom.blast.table.modified"
-output.file.path <- "../../take8/ids.above.98"
-users.cutoff <- as.numeric(98)
-user.wants.matches <- as.logical(TRUE)
+# blast.file.path <- "../../take8/otus.custom.blast.table.modified"
+# output.file.path <- "../../take8/ids.above.98"
+# users.cutoff <- as.numeric(98)
+# user.wants.matches <- as.logical(TRUE)
 
 #####
 # Define Functions

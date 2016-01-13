@@ -10,7 +10,7 @@
 
 # Choose pidents to test over.
 
-pident=("100" "98" "96")
+pident=("100" "98" "96" "94")
 
 # First Run steps 1-12 to generate databases and folders exactly following workflow
 # Note: still gotta do the reformatting on your own (step 0)

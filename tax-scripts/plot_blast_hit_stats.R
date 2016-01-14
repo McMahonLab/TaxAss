@@ -45,7 +45,7 @@ get.necessary.packages <- function(){
 import.BLAST.hits.table <- function(FilePath){
   blast.file <- FilePath
   blast <- read.table(file = blast.file, header = F, sep = "")
-  colnames(blast) <- c("qseqid", "pident", "length", "qlen", "q.align", "true.pids", "hit.num.best.ids")
+  colnames(blast) <- c("qseqid", "pident", "length", "qlen", "q.align", "true.pids", "hit.num")
   return(blast)
 }
 
@@ -64,9 +64,8 @@ apply.pident.cutoff <- function(BlastTable, PidentCutoff){
 reformat.fract.ids.vs.hit.num <- function(BlastTable){
   blast <- BlastTable
   
-  # Only look at pident and hit.num
+  # Only look at seqID and hit.num
   blast <- blast[,c(1,7)]
-  colnames(blast) <- c("qseqid","hit.num")
   blast <- apply(X = blast, MARGIN = 2, FUN = as.numeric)
   
   # Use the reshape package to rearrange your data tables
@@ -78,7 +77,7 @@ reformat.fract.ids.vs.hit.num <- function(BlastTable){
   
   # Convert the qseqid length column to % total length/numbers
   blast.casted$qseqid <- blast.casted$qseqid / sum(blast.casted$qseqid) * 100
-  colnames(blast.casted)[2] <- "perc.ids"
+  colnames(blast.casted)[2] <- "perc.of.qseqids"
   return(blast.casted)
 }
 
@@ -94,14 +93,14 @@ bar.plot.blast.results <- function(BlastHitsTable, Cutoff = 0, OutputFolder){
   if (Cutoff == 0){
     png(filename = paste(plot.folder, "/BLAST_hits_used_overall.png", sep=""), 
         width = 5.5, height = 5, units = "in", res = 100)
-    barplot(height = hits$perc.ids, names.arg = hits$hit.num, ylim = c(0,100),
+    barplot(height = hits$perc.of.qseqids, names.arg = hits$hit.num, ylim = c(0,100),
             main = "Which BLAST hit gave the best \"full length\" pident?\n(no cutoff pident applied)",
             xlab = "Hit Number", ylab = "Percent of Best Hits (%)", col = "lightsalmon")
     dev.off()
   }else{
     png(filename = paste(plot.folder, "/BLAST_hits_used_for_pident_", Cutoff, ".png", sep=""), 
         width = 5.5, height = 5, units = "in", res = 100)
-    barplot(height = hits$perc.ids, names.arg = hits$hit.num, ylim = c(0,100),
+    barplot(height = hits$perc.of.qseqids, names.arg = hits$hit.num, ylim = c(0,100),
             main = paste("Which BLAST hit gave the best \"full length\" pident?\n(results with full length pident >=",Cutoff,")",sep=""),
             xlab = "Hit Number", ylab = "Percent of Best Hits (%)", col = "lightsalmon")
     dev.off()
@@ -113,10 +112,10 @@ bar.plot.stacked.blast.results <- function(BlastTable, CutoffVector, OutputFolde
   blast <- BlastTable
   cutoffs <- CutoffVector
   plot.folder <- OutputFolder
-  num.hits.reported <- length(unique(blast$hit.num.best.ids)) # the highest blast hit number output into the table
+  num.hits.reported <- length(unique(blast$hit.num)) # the highest blast hit number output into the table
   
   # create a matrix from which to plot a stacked bar chart
-  hits.matrix <- matrix(data = 0,nrow = length(unique(blast$hit.num.best.ids)), ncol = length(cutoffs))
+  hits.matrix <- matrix(data = 0,nrow = length(unique(blast$hit.num)), ncol = length(cutoffs))
   colnames(hits.matrix) <- paste("pident", cutoffs, sep="")
   row.names(hits.matrix) <- paste("hit",1:num.hits.reported, sep="")
   

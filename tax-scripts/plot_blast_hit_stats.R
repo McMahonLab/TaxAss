@@ -9,6 +9,9 @@
 # This script accepts arguments from the terminal command line using syntax:
 # RScript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
 
+# Note: it will make plots with data for other cutoffs not supplied by the user.
+# The script is calculating those for the given table, it's not a hard-coding mistake.
+
 #####
 # Receive arguments from terminal command line
 #####
@@ -86,22 +89,38 @@ reformat.fract.ids.vs.hit.num <- function(BlastTable){
 #####
  
 # bar plot blast hit number results
-bar.plot.blast.results <- function(BlastHitsTable, Cutoff = 0, OutputFolder){
+bar.plot.blast.results <- function(BlastHitsTable, OutputFolder, NumBars, Cutoff = 0){
   hits <- BlastHitsTable
   plot.folder <- OutputFolder
+  hits.reported <- NumBars
+  
+  # at higher cutoffs some hits appear unreported, make sure these say zero so the bars don't disappear
+  hits.matrix <- matrix(data = 0,nrow = hits.reported, ncol = 2)
+  colnames(hits.matrix) <- c("hit.num", "perc.of.qseqids")
+  row.names(hits.matrix) <- paste("hit",1:hits.reported, sep="")
+  hits.matrix[,1] <- 1:hits.reported
+  
+  for (h in 1:hits.reported){
+    index <- which(hits[,1] == h)
+    if (length(index) > 0){
+      hits.matrix[h,2] <- hits[index,2]
+    }else{
+      hits.matrix[h,2] <- 0
+    }
+  }
   
   if (Cutoff == 0){
     png(filename = paste(plot.folder, "/BLAST_hits_used_overall.png", sep=""), 
         width = 5.5, height = 5, units = "in", res = 100)
-    barplot(height = hits$perc.of.qseqids, names.arg = hits$hit.num, ylim = c(0,100),
+    barplot(height = hits.matrix[,2], names.arg = hits.matrix[,1], ylim = c(0,100),
             main = "Which BLAST hit gave the best \"full length\" pident?\n(no cutoff pident applied)",
             xlab = "Hit Number", ylab = "Percent of Best Hits (%)", col = "lightsalmon")
     dev.off()
   }else{
     png(filename = paste(plot.folder, "/BLAST_hits_used_for_pident_", Cutoff, ".png", sep=""), 
         width = 5.5, height = 5, units = "in", res = 100)
-    barplot(height = hits$perc.of.qseqids, names.arg = hits$hit.num, ylim = c(0,100),
-            main = paste("Which BLAST hit gave the best \"full length\" pident?\n(results with full length pident >=",Cutoff,")",sep=""),
+    barplot(height = hits.matrix[,2], names.arg = hits.matrix[,1], ylim = c(0,100),
+            main = paste("Which BLAST hit gave the best \"full length\" pident?\n(out of seqIDs above cutoff: >=",Cutoff,")",sep=""),
             xlab = "Hit Number", ylab = "Percent of Best Hits (%)", col = "lightsalmon")
     dev.off()
   }
@@ -115,7 +134,7 @@ bar.plot.stacked.blast.results <- function(BlastTable, CutoffVector, OutputFolde
   num.hits.reported <- length(unique(blast$hit.num)) # the highest blast hit number output into the table
   
   # create a matrix from which to plot a stacked bar chart
-  hits.matrix <- matrix(data = 0,nrow = length(unique(blast$hit.num)), ncol = length(cutoffs))
+  hits.matrix <- matrix(data = 0,nrow = num.hits.reported, ncol = length(cutoffs))
   colnames(hits.matrix) <- paste("pident", cutoffs, sep="")
   row.names(hits.matrix) <- paste("hit",1:num.hits.reported, sep="")
   
@@ -178,19 +197,20 @@ line.plot.overlay.blast.results <- function(BlastTable, CutoffVector, OutputFold
 get.necessary.packages()
 
 blast <- import.BLAST.hits.table(FilePath = blast.file.path)
+hits.reported <- length(unique(blast$hit.num))
 
 # View a table, 'hit.stats', that shows the percent of times each hit was best
 hit.stats <- reformat.fract.ids.vs.hit.num(BlastTable = blast)
-bar.plot.blast.results(BlastHitsTable = hit.stats, OutputFolder = plots.folder.path)
+bar.plot.blast.results(BlastHitsTable = hit.stats, OutputFolder = plots.folder.path, NumBars = hits.reported)
 
 # View a table, 'cutoff.hit.stats', that shows the percent of time each hit was best 
 # after the blast results have been sorted for users chosen cutoff (the one supplied in command line)
 blast.cutoff <- apply.pident.cutoff(BlastTable = blast, PidentCutoff = pident.cutoff)
 cutoff.hit.stats <- reformat.fract.ids.vs.hit.num(BlastTable = blast.cutoff)
-bar.plot.blast.results(BlastHitsTable = cutoff.hit.stats, Cutoff = pident.cutoff, OutputFolder = plots.folder.path)
+bar.plot.blast.results(BlastHitsTable = cutoff.hit.stats, Cutoff = pident.cutoff, OutputFolder = plots.folder.path, NumBars = hits.reported)
 
-# View a plot of overlayed lines showing how the proportion of best hits changes with different cutoffs
-line.plot.overlay.blast.results(BlastTable = blast, CutoffVector = 90:100, OutputFolder = plots.folder.path)
+# # View a plot of overlayed lines showing how the proportion of best hits changes with different cutoffs
+# line.plot.overlay.blast.results(BlastTable = blast, CutoffVector = 90:100, OutputFolder = plots.folder.path)
 
 # View stacked bar chart to see how the proportion of best hits changes with different cutoffs
 bar.plot.stacked.blast.results(BlastTable = blast, CutoffVector = 90:100, OutputFolder = plots.folder.path)

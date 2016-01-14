@@ -128,7 +128,7 @@ choose.best.hit <- function(BlastTable, OutputFile){
   blast <- cbind(blast, hit.num.best.ids)
   
   # save this table to feed into a plotting/analysis script
-  write.csv(x = blast, file = hit.stats.path, row.names = F, col.names = F, sep = "\t" )
+  write.table(x = blast, file = hit.stats.path, row.names = F, col.names = F, sep = "\t" )
   
   return(blast)
 }

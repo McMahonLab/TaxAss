@@ -1,6 +1,15 @@
+# Script written by Robin Rohwer
+
 # Make a plot comparing the classification conflicts between pidents
 # Make a plot showing the proportion of sequences classified in FW database
 # compare pidents based on # OTUs and # reads impacted.
+
+# This script is step 13 of the taxonomy assignment workflow. It takes arguments from the command line.
+# The number of arguments can be variable, but they must be in order and .
+# The variable part is that more pidents can be added, as long as they continue the pattern folder number folder number
+
+# Terminal command line syntax:
+# Rscript plot_classification_disagreements.R otus.abund plots conflicts_94 94 conflicts_96 96 conflicts_98 98 ...
 
 #####
 # Receive arguments from terminal command line
@@ -8,22 +17,12 @@
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 
-# userprefs <- c("../../take5/otus.abund",
-#                "../../take5/plots",
-#                "../../take5/conflicts_70", 70,
-#                "../../take5/conflicts_80", 80,
-#                "../../take5/conflicts_85", 85,
-#                "../../take5/conflicts_90", 90,
-#                "../../take5/conflicts_91", 91,
-#                "../../take5/conflicts_92", 92,
-#                "../../take5/conflicts_93", 93,
-#                "../../take5/conflicts_94", 94,
-#                "../../take5/conflicts_95", 95,
-#                "../../take5/conflicts_96", 96,
-#                "../../take5/conflicts_97", 97,
-#                "../../take5/conflicts_98", 98,
-#                "../../take5/conflicts_99", 99,
-#                "../../take5/conflicts_100", 100)
+# userprefs <- c("../../take8/otus.abund",
+#                "../../take8/plots",
+#                "../../take8/conflicts_94", 94,
+#                "../../take8/conflicts_96", 96,
+#                "../../take8/conflicts_98", 98,
+#                "../../take8/conflicts_100", 100)
 
 #####
 # Define functions to import and process the data

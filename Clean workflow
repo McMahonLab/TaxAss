@@ -9,7 +9,12 @@ Summary of Steps and Commands (all commands entered in terminal window):
 
 0. format files (textwrangler or bash)
 	depends on your starting file formats
-
+	for Green Genes database as general.taxonomy:
+		sed 's/ //g' <general.taxonomy >NoSpaces
+		sed 's/$/;/' <NoSpaces >EndLineSemicolons
+		mv EndLineSemicolons general.taxonomy
+		rm NoSpaces
+		
 1. make BLAST database file (blast)
 	makeblastdb -dbtype nucl -in custom.fasta -input_type fasta -parse_seqids -out custom.db
 
@@ -20,8 +25,9 @@ Summary of Steps and Commands (all commands entered in terminal window):
 	blast_formatter -archive otus.custom.blast -outfmt "6 qseqid pident length qlen qstart qend" -out otus.custom.blast.table
 
 4. filter BLAST results (R)
-	Rscript filter_seqIDs_by_pident.R otus.custom.blast.table otus.custom.blast.table.modified ids.above.98 98 TRUE 
-	Rscript filter_seqIDs_by_pident.R otus.custom.blast.table otus.custom.blast.table.modified ids.below.98 98 FALSE
+	Rscript calc_full_length_pident.R otus.custom.blast.table otus.custom.blast.table.modified
+	Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.above.98 98 TRUE 
+	Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.below.98 98 FALSE
 
 5. check that BLAST settings are appropriate (R)
 	mkdir plots
@@ -36,18 +42,14 @@ Summary of Steps and Commands (all commands entered in terminal window):
 	python create_fastas_given_seqIDs.py ids.below.98.all otus.fasta otus.below.98.fasta
 
 8. assign taxonomy (mothur)
-	~/mothur/mothur
-	classify.seqs(fasta=otus.above.98.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2)
-	classify.seqs(fasta=otus.below.98.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)
-	quit()
+	mothur "#classify.seqs(fasta=otus.above.98.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2)"
+	mothur "#classify.seqs(fasta=otus.below.98.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
 
 9. combine taxonomy files (terminal)
 	cat otus.above.98.custom.wang.taxonomy otus.below.98.general.wang.taxonomy > otus.98.taxonomy
 
 10. assign taxonomy without custom database (mothur, bash)
-	~/mothur/mothur
-	classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)
-	quit()
+	mothur "#classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
 	cat otus.general.wang.taxonomy > otus.general.taxonomy
 
 11. reformat taxonomy files (bash)
@@ -276,7 +278,7 @@ for sequences of different lengths.
 
 Full Command (type in terminal):
 
-blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 5 
+blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 5
 
 What the filenames are:
 	otus.fasta				the query file. the fasta file of your OTU sequences you want classified
@@ -345,10 +347,11 @@ cutoff that are destined for taxonomy assignment in the small custom database, o
 the sequence ID's below the "true pident" cutoff that are destined for taxonomy assignment
 in the large general database.
 
-Full Two Commands (type in terminal):
+Full Three Commands (type in terminal):
 
-Rscript filter_seqIDs_by_pident.R otus.custom.blast.table otus.custom.blast.table.modified ids.above.98 98 TRUE 
-Rscript filter_seqIDs_by_pident.R otus.custom.blast.table otus.custom.blast.table.modified ids.below.98 98 FALSE
+Rscript calc_full_length_pident.R otus.custom.blast.table otus.custom.blast.table.modified
+Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.above.98 98 TRUE 
+Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.below.98 98 FALSE
 
 These arguments must be in the correct order.
 Rscript sources the .R script using the arguments supplied after it in the terminal.
@@ -525,12 +528,10 @@ and a provided taxonomy database.  I use the default algorithm (wang with kmer s
 and ask it to show bootstrap values. The output file is a list of sequence ID's next to
 their assigned taxonomy.
 
-Full Four Commands (type in terminal):
+Full Two Commands (type in terminal):
 
-~/mothur/mothur
-classify.seqs(fasta=otus.above.98.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2)
-classify.seqs(fasta=otus.below.98.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)
-quit()
+mothur "#classify.seqs(fasta=otus.above.98.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2)"
+mothur "#classify.seqs(fasta=otus.below.98.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
 
 What the first and last commands do:
 	~/mothur/mothur		this is the path to the mothur program installed on your computer.
@@ -612,11 +613,9 @@ assignments using our custom database more.
 So in this step you assign taxonomy with the general database using mothur, and then
 rename the output file something easy to work with using bash.
 
-Full Four Commands (type in terminal):
+Full Two Commands (type in terminal):
 
-~/mothur/mothur
-classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)
-quit()
+mothur "#classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
 cat otus.general.wang.taxonomy > otus.general.taxonomy
 
 What the commands do:
@@ -846,7 +845,7 @@ mv conflicts* plots/ analysis/
 
 Note: You can delete this instead if you're all done analyzing. Instead of the two commands, type:
 
-rm conflicts* plots/
+rm -r conflicts* plots/
 
 15.4 save your actual data files in a folder called data
 

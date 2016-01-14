@@ -16,8 +16,8 @@
 # Rscript scriptname.R blastfilename outputfilename
 
 # The format of the blast table is -outfmt "6 qseqid pident length qlen qstart qend" 
-# The format of the output file is very similar to the blast.table file, but the headings are 
-# qseqid, pident, length, qlen, q.align, true.pids, hit.num.best.ids
+# The format of the output file is very similar to the blast.table file: tab delimited and no column names, 
+# but the columns are qseqid, pident, length, qlen, q.align, true.pids, hit.num.best.ids
 
 
 #####
@@ -128,7 +128,7 @@ choose.best.hit <- function(BlastTable, OutputFile){
   blast <- cbind(blast, hit.num.best.ids)
   
   # save this table to feed into a plotting/analysis script
-  write.csv(x = blast, file = hit.stats.path, row.names = F)
+  write.csv(x = blast, file = hit.stats.path, row.names = F, col.names = F, sep = "\t" )
   
   return(blast)
 }

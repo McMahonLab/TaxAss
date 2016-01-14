@@ -28,10 +28,10 @@ output.file.path <- userprefs[2]
 users.cutoff <- as.numeric(userprefs[3])
 user.wants.matches <- as.logical(userprefs[4])
 
-# blast.file.path <- "../../take8/otus.custom.blast.table.modified"
-# output.file.path <- "../../take8/ids.above.98"
+# blast.file.path <- "../../take9c/otus.custom.blast.table.modified"
+# output.file.path <- "../../take9c/ids.below.98"
 # users.cutoff <- as.numeric(98)
-# user.wants.matches <- as.logical(TRUE)
+# user.wants.matches <- as.logical(FALSE)
 
 #####
 # Define Functions
@@ -40,7 +40,7 @@ user.wants.matches <- as.logical(userprefs[4])
 # Import the modified blast table
 import.BLAST.data <- function(File){
   blast.file.path <- File
-  blast <- read.table(file = blast.file.path, sep = ",", stringsAsFactors = F)
+  blast <- read.table(file = blast.file.path, sep = "\t", header = F, stringsAsFactors = F)
   colnames(blast) <- c("qseqid","pident","length","qlen","q.align","true.pids","hit.num.best.ids")
   return(blast)
 }

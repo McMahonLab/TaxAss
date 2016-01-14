@@ -16,14 +16,14 @@
 # Receive arguments from terminal command line
 #####
 
-# userprefs <- commandArgs(trailingOnly = TRUE)
-# blast.file.path <- userprefs[1]
-# pident.cutoff <- as.numeric(userprefs[2])
-# plots.folder.path <- userprefs[3]
+userprefs <- commandArgs(trailingOnly = TRUE)
+blast.file.path <- userprefs[1]
+pident.cutoff <- as.numeric(userprefs[2])
+plots.folder.path <- userprefs[3]
 
-blast.file.path <- "../../take9c/otus.custom.blast.table.modified"
-pident.cutoff <- 98
-plots.folder.path <- "../../take9c/plots"
+# blast.file.path <- "../../take9c/otus.custom.blast.table.modified"
+# pident.cutoff <- 98
+# plots.folder.path <- "../../take9c/plots"
 
 #####
 # Install Necessary Packages
@@ -214,7 +214,7 @@ bar.plot.blast.results(BlastHitsTable = cutoff.hit.stats, Cutoff = pident.cutoff
 
 # View stacked bar chart to see how the proportion of best hits changes with different cutoffs
 bar.plot.stacked.blast.results(BlastTable = blast, CutoffVector = 90:100, OutputFolder = plots.folder.path)
-bar.plot.stacked.blast.results(BlastTable = blast, CutoffVector = 70:100, OutputFolder = plots.folder.path)
+# bar.plot.stacked.blast.results(BlastTable = blast, CutoffVector = 70:100, OutputFolder = plots.folder.path)
 
 # Note how that plot levels off as you look way lower on the pidents.
 # That's probably because that's where blast's built-in e-value cutoff

@@ -16,19 +16,20 @@
 # Receive arguments from terminal command line
 #####
 
-userprefs <- commandArgs(trailingOnly = TRUE)
-blast.file.path <- userprefs[1]
-pident.cutoff <- as.numeric(userprefs[2])
-plots.folder.path <- userprefs[3]
-if (length(userprefs) > 3){
-  mirror.location <- userprefs[4]
-}else{
-  mirror.location <- "https://cran.mtu.edu"
-}
+# userprefs <- commandArgs(trailingOnly = TRUE)
+# blast.file.path <- userprefs[1]
+# pident.cutoff <- as.numeric(userprefs[2])
+# plots.folder.path <- userprefs[3]
+# if (length(userprefs) > 3){
+#   mirror.location <- userprefs[4]
+# }else{
+#   mirror.location <- "https://cran.mtu.edu"
+# }
 
-# blast.file.path <- "../../take9c/otus.custom.blast.table.modified"
-# pident.cutoff <- 98
-# plots.folder.path <- "../../take9c/plots"
+blast.file.path <- "../../take9c/otus.custom.blast.table.modified"
+pident.cutoff <- 98
+plots.folder.path <- "../../take9c/plots"
+mirror.location <- "https://cran.mtu.edu"
 
 #####
 # Install Necessary Packages
@@ -140,7 +141,7 @@ bar.plot.stacked.blast.results <- function(BlastTable, CutoffVector, OutputFolde
   
   # create a matrix from which to plot a stacked bar chart
   hits.matrix <- matrix(data = 0,nrow = num.hits.reported, ncol = length(cutoffs))
-  colnames(hits.matrix) <- paste("pident", cutoffs, sep="")
+  colnames(hits.matrix) <- paste("", cutoffs, sep="")
   row.names(hits.matrix) <- paste("hit",1:num.hits.reported, sep="")
   
   # get hit stats for each cutoff
@@ -161,10 +162,17 @@ bar.plot.stacked.blast.results <- function(BlastTable, CutoffVector, OutputFolde
   
   png(filename = paste(plot.folder, "/BLAST_hits_used_for_pidents_", min(CutoffVector), "-", max(CutoffVector), ".png", sep = ""), 
       width = 8, height = 5, units = "in", res = 100)
-  barplot(hits.matrix, ylim = c(0,100), col=rainbow(num.hits.reported),
-          main = "Which BLAST hit gave the best \"full length\" pident?\n(remember blast reports hits in order of its \"alignment length\" pident",
-          xlab = "Full length percent identity cutoff applied to blast results", 
-          ylab = "Percent of best pidents resulting from each blast hit number (%)")
+  par(mar = c(8.5,5,4,.4))
+  barplot(hits.matrix, ylim = c(0,100), col=c("grey",rainbow(num.hits.reported-1)),
+          main = "Which BLAST hit gave the best \"full length\" pident?",
+          xlab = "Full length pident cutoff used to filter seqIDs (%)", 
+          ylab = "SeqIDs corresponding to each blast hit number (%)")
+  description <- paste("The grey bar is blast hit #1. These are the percent of seqIDs where both you and blast calculated the same hit to have the best pident.\n",
+                       "The colored bars are blast hits #2 - ", num.hits.reported, ". These are the percent of seqIDs where the calculated full length pident was better for a different hit.\n",
+                       "At a more stringent pident filter (x axis), fewer poor matches exist so BLAST reports longer matches leading to fewer discrepancies.\n",
+                       "However, if there is a lot of color in your chosen pident's bar you must adjust the BLAST settings to correct that!\n",
+                       sep = "")
+  mtext(text = description, side = 1, line = 7.5, at = -2, cex = .75, adj = 0)
   dev.off()
   
 #   legend(x = num.hits.reported+1, y = 100, legend = row.names(hits.matrix), 

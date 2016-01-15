@@ -20,6 +20,11 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 blast.file.path <- userprefs[1]
 pident.cutoff <- as.numeric(userprefs[2])
 plots.folder.path <- userprefs[3]
+if (length(userprefs) > 3){
+  mirror.location <- userprefs[4]
+}else{
+  mirror.location <- "https://cran.mtu.edu"
+}
 
 # blast.file.path <- "../../take9c/otus.custom.blast.table.modified"
 # pident.cutoff <- 98
@@ -29,14 +34,14 @@ plots.folder.path <- userprefs[3]
 # Install Necessary Packages
 #####
 
-# The package reshape is needed
-#****CAN'T SUPPRESS ALL THESE STUPID WARNING MESSAGES!!!****
+# The package reshape is needed, must specify cran mirror and library path with Rscript
+library.path <- cat(.libPaths()) # this is the default installation path
 get.necessary.packages <- function(){
-  if (library(package = "reshape", logical.return = TRUE) == FALSE){
-    install.packages("reshape")
-    library("reshape")
+  if (library(package = "reshape", logical.return = TRUE, lib.loc = library.path) == FALSE){
+    install.packages("reshape", repos = mirror.location)
+    library("reshape", lib.loc = library.path)
   }else{
-    library("reshape")
+    library("reshape", lib.loc = library.path)
   }
 }
 

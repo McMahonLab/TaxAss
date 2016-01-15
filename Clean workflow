@@ -413,6 +413,12 @@ What each argument in the RScript is (keep in order and separate with a space):
 	otus.custom.blast.table.modified	the modified blast table produced in step 4.
 	98									the pident cutoff used to create this BLAST table
 	plots								the folder your generated plots will be saved in
+	https://cran.mtu.edu				this is an OPTIONAL argument for those who
+										1. don't have the "reshape" R package installed already
+										2. live far away from the midwestern USA
+										It's the web address to the cran mirror you use, choosing
+										one close to you could make it slightly faster but
+										this honestly doesn't matter much.   
 
 What each generated file is:
 	BLAST_hits_line_plot.png

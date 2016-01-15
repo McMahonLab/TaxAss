@@ -16,20 +16,20 @@
 # Receive arguments from terminal command line
 #####
 
-# userprefs <- commandArgs(trailingOnly = TRUE)
-# blast.file.path <- userprefs[1]
-# pident.cutoff <- as.numeric(userprefs[2])
-# plots.folder.path <- userprefs[3]
-# if (length(userprefs) > 3){
-#   mirror.location <- userprefs[4]
-# }else{
-#   mirror.location <- "https://cran.mtu.edu"
-# }
+userprefs <- commandArgs(trailingOnly = TRUE)
+blast.file.path <- userprefs[1]
+pident.cutoff <- as.numeric(userprefs[2])
+plots.folder.path <- userprefs[3]
+if (length(userprefs) > 3){
+  mirror.location <- userprefs[4]
+}else{
+  mirror.location <- "https://cran.mtu.edu"
+}
 
-blast.file.path <- "../../take9c/otus.custom.blast.table.modified"
-pident.cutoff <- 98
-plots.folder.path <- "../../take9c/plots"
-mirror.location <- "https://cran.mtu.edu"
+# blast.file.path <- "../../take9c/otus.custom.blast.table.modified"
+# pident.cutoff <- 98
+# plots.folder.path <- "../../take9c/plots"
+# mirror.location <- "https://cran.mtu.edu"
 
 #####
 # Install Necessary Packages

@@ -15,24 +15,23 @@
 # Receive arguments from terminal command line
 #####
 
-userprefs <- commandArgs(trailingOnly = TRUE)
-fw.plus.gg.tax.file.path <- userprefs[1]
-gg.only.tax.file.path <- userprefs[2]
-fw.seq.ids.file.path <- userprefs[3]
-results.folder.path <- userprefs[4]
-blast.pident.cutoff <- userprefs[5]
-taxonomy.bootstrap.cutoff <- userprefs[6]
-check.or.final <- userprefs[7]
-if (length(userprefs) < 7){check.or.final <- "check"}
+# userprefs <- commandArgs(trailingOnly = TRUE)
+# fw.plus.gg.tax.file.path <- userprefs[1]
+# gg.only.tax.file.path <- userprefs[2]
+# fw.seq.ids.file.path <- userprefs[3]
+# results.folder.path <- userprefs[4]
+# blast.pident.cutoff <- userprefs[5]
+# taxonomy.bootstrap.cutoff <- userprefs[6]
+# final.or.database <- userprefs[7]
+# if (length(userprefs) < 7){final.or.database <- "non-empty string"}
 
-
-# fw.plus.gg.tax.file.path <- "../../take7/otus.98.taxonomy"
-# gg.only.tax.file.path <- "../../take7/otus.general.taxonomy"
-# fw.seq.ids.file.path <- "../../take7/ids.above.98"
-# results.folder.path <- "../../take7/conflicts_98/"
-# blast.pident.cutoff <- 98
-# taxonomy.bootstrap.cutoff <- 70
-# check.or.final <- "final"
+fw.plus.gg.tax.file.path <- "../../take9c/custom.custom.taxonomy"
+gg.only.tax.file.path <- "../../take9c/custom.general.taxonomy"
+fw.seq.ids.file.path <- NA
+results.folder.path <- "../../take9c/conflicts_98/"
+blast.pident.cutoff <- NA
+taxonomy.bootstrap.cutoff <- 70
+final.or.database <- "database"
 
 #####
 # Define Functions for Import and Formatting
@@ -177,6 +176,20 @@ uniform.unclass.names <- function(TaxonomyTable){
   return(tax)
 }
 
+# makes empty spots in the database be called unclassified.  more error prone b/c have to guess odd names!
+uniform.unclass.names.database <- function(TaxonomyDatabase){
+  tax <- TaxonomyDatabase
+  
+  # There's a lot of ways to guess that the database might have weird blanks....
+  index <- which(tax[,-1] == "" | tax[,-1] == 0 | tax[,-1] == "0" | is.null(tax[,-1]) | tax[,-1] == "NULL" | is.na(tax[,-1])| tax[,-1] == "NA" |
+                 tax[,-1] == "unknown" | tax[,-1] == "Unknown" | tax[,-1] == "UnKnown" | tax[,-1] == "UNKNOWN" | 
+                 tax[,-1] == "Unclassified" | tax[,-1] == "UnClassified" | tax[,-1] == "UNCLASSIFIED" |
+                 tax[,-1] == "Unidentified" | tax[,-1] == "UnIdentified" | tax[,-1] == "UNIDENTIFIED")
+  tax[,-1][index] <- "unclassified"
+  
+  return(tax)
+}
+
 # Given a single taxonomy name, pull out the bootstrap percent.
   # text = k__Bacteria(100) returns (as character) 100, But text = "unclassified" returns (as character) "unclassified"
 pull.out.percent <- function(text){
@@ -293,12 +306,20 @@ fw.percents <- reformat.fw(FWtable = fw.percents)
 check.files.match(FWtable = fw.percents, GGtable = gg.percents)
 
 # Generate a final taxonomy file:
-if (check.or.final == "final" | check.or.final == "Final" | check.or.final == "FINAL"){
+if (final.or.database == "final" | final.or.database == "Final" | final.or.database == "FINAL"){
   final.taxonomy <- do.bootstrap.cutoff(TaxonomyTable = fw.percents, BootstrapCutoff = taxonomy.bootstrap.cutoff)
   colnames(final.taxonomy) <- c("seqID","kingdom","phylum","class","order","lineage","clade","tribe")
   write.table(x = final.taxonomy, file = paste("otus.", blast.pident.cutoff, ".", taxonomy.bootstrap.cutoff, ".taxonomy", sep = ""), 
               sep = ";", row.names = FALSE)
 }
+
+# Compare databases by looking at how GG classifies the FW representative sequences
+if (final.or.database == "database"){
+  fw <- fw.percents # database only has names
+  fw <- uniform.unclass.names.database(TaxonomyDatabase = fw)
+  gg <- do.bootstrap.cutoff(TaxonomyTable = gg.percents, BootstrapCutoff = taxonomy.bootstrap.cutoff)
+}
+
 
 # Only compare the classifications made by the fw database to the gg classifications, not full tax tables
 fw.seq.ids <- import.FW.seq.IDs()
@@ -332,16 +353,30 @@ for (t in 1:5){
 }
 export.summary.stats(SummaryVector = num.mismatches)
 
-# Generate a file of the fw-assigned taxonomies, and a matching table of just their bootstrap values
-  # File written: the "fw_classified_bootstraps.csv" that lists the bootstrap of all sequences classified by freshwater
-  # File written: the "fw_classified_taxonomies.csv" that lists the taxonomy of all sequences classified by freshwater
-fw.bootstraps <- view.bootstraps(TaxonomyTable = fw.percents.fw.only)
-write.csv(fw.bootstraps, file = paste(results.folder.path, "/", "fw_classified_bootstraps.csv", sep=""), row.names = FALSE)
-write.csv(fw.percents.fw.only, file = paste(results.folder.path, "/", "fw_classified_taxonomies.csv", sep=""), row.names = FALSE)
 
-# Generate a file of the gg taxonomies for the fw-assigned sequences, and a matching table of gg bootstraps
-  # File written: the "gg_classified_bootstraps.csv" that lists the bootstrap of all sequences classified by freshwater
-  # File written: the "gg_classified_taxonomies.csv" that lists the taxonomy of all sequences classified by freshwater
-gg.bootstraps <- view.bootstraps(TaxonomyTable = gg.percents.fw.only)
-write.csv(gg.bootstraps, file = paste(results.folder.path, "/", "gg_classified_bootstraps.csv", sep=""), row.names = FALSE)
-write.csv(gg.percents.fw.only, file = paste(results.folder.path, "/", "gg_classified_taxonomies.csv", sep=""), row.names = FALSE)
+
+
+
+
+
+
+
+
+
+
+
+
+
+# # Generate a file of the fw-assigned taxonomies, and a matching table of just their bootstrap values
+#   # File written: the "fw_classified_bootstraps.csv" that lists the bootstrap of all sequences classified by freshwater
+#   # File written: the "fw_classified_taxonomies.csv" that lists the taxonomy of all sequences classified by freshwater
+# fw.bootstraps <- view.bootstraps(TaxonomyTable = fw.percents.fw.only)
+# write.csv(fw.bootstraps, file = paste(results.folder.path, "/", "fw_classified_bootstraps.csv", sep=""), row.names = FALSE)
+# write.csv(fw.percents.fw.only, file = paste(results.folder.path, "/", "fw_classified_taxonomies.csv", sep=""), row.names = FALSE)
+# 
+# # Generate a file of the gg taxonomies for the fw-assigned sequences, and a matching table of gg bootstraps
+#   # File written: the "gg_classified_bootstraps.csv" that lists the bootstrap of all sequences classified by freshwater
+#   # File written: the "gg_classified_taxonomies.csv" that lists the taxonomy of all sequences classified by freshwater
+# gg.bootstraps <- view.bootstraps(TaxonomyTable = gg.percents.fw.only)
+# write.csv(gg.bootstraps, file = paste(results.folder.path, "/", "gg_classified_bootstraps.csv", sep=""), row.names = FALSE)
+# write.csv(gg.percents.fw.only, file = paste(results.folder.path, "/", "gg_classified_taxonomies.csv", sep=""), row.names = FALSE)

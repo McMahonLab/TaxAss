@@ -246,9 +246,10 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
 }
 
 # Find seqs misclassified at a given phylogenetic level, t
-find.conflicting.names <- function(FWtable, GGtable, GGtable_percents, TaxaLevel, tracker){
+find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_percents, TaxaLevel, tracker){
   fw <- FWtable
   gg <- GGtable
+  fw.percents <- FWtable_percents
   gg.percents <- GGtable_percents
   t <- TaxaLevel
   num.mismatches <- tracker
@@ -262,7 +263,7 @@ find.conflicting.names <- function(FWtable, GGtable, GGtable_percents, TaxaLevel
   num.mismatches[t] <- length(index)
   
   # Compare the conflicting tables in entirety, use the original files with percents still in it
-  conflicting <- cbind(gg.percents[index,,drop=F], fw[index,,drop=F])
+  conflicting <- cbind(gg.percents[index,,drop=F], fw.percents[index,,drop=F])
   
   # Check that the files still line up correctly
   check.files.match(FWtable = conflicting[,9:16,drop=F], GGtable = conflicting[,1:8,drop=F])
@@ -282,8 +283,10 @@ create.summary.vector <- function(){
 }
 
 # Format and export the summary vector
-export.summary.stats <- function(SummaryVector){
+export.summary.stats <- function(SummaryVector, FW_seqs, ALL_seqs){
   num.mismatches <- SummaryVector
+  fw.fw.only <- FW_seqs
+  fw.percents <- ALL_seqs
   num.mismatches <- c(num.mismatches,"numFWseqs" = nrow(fw.fw.only))
   num.mismatches <- c(num.mismatches, "numALLseqs" = nrow(fw.percents))
   num.mismatches <- data.frame("TaxaLevel" = names(num.mismatches),"NumConflicts" = num.mismatches, row.names = NULL)
@@ -331,9 +334,20 @@ if (final.or.database == "database"){
   fw <- fw.percents # database only has names
   fw <- uniform.unclass.names.database(TaxonomyDatabase = fw)
   gg <- do.bootstrap.cutoff(TaxonomyTable = gg.percents, BootstrapCutoff = taxonomy.bootstrap.cutoff)
+  gg <- apply(gg, 2, remove.parentheses)
+  
   check.files.match(FWtable = fw, GGtable = gg)
-  gg <- apply(gg.percents, 2, remove.parentheses)
-
+  
+  # Files written in find.conflicting.names() loop: the "TaxaLevel_conflicts.csv" that puts taxonomy tables side by side
+  # File written afer loop: the "conflicts_summary.csv" that lists how many conflicts were at each level, and how many seqs were classified by FW
+  num.mismatches <- create.summary.vector()
+  for (t in 1:5){
+    num.mismatches <- find.conflicting.names(FWtable = fw, GGtable = gg,
+                                             FWtable_percents = fw.percents, 
+                                             GGtable_percents = gg.percents, 
+                                             TaxaLevel = t, tracker = num.mismatches)
+  }
+  export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw, ALL_seqs = fw)
 }
 
 
@@ -362,10 +376,11 @@ check.files.match(FWtable = fw.fw.only, GGtable = gg.fw.only)
 num.mismatches <- create.summary.vector()
 for (t in 1:5){
   num.mismatches <- find.conflicting.names(FWtable = fw.fw.only, GGtable = gg.fw.only,
+                                           FWtable_percents = fw.percents.fw.only
                                            GGtable_percents = gg.percents.fw.only, 
                                            TaxaLevel = t, tracker = num.mismatches)
 }
-export.summary.stats(SummaryVector = num.mismatches)
+export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw.fw.only, ALL_seqs = fw.percents)
 
 
 

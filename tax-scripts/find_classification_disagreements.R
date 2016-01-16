@@ -192,6 +192,10 @@ uniform.unclass.names.database <- function(TaxonomyDatabase){
                  tax[,-1] == "Unidentified" | tax[,-1] == "UnIdentified" | tax[,-1] == "UNIDENTIFIED")
   tax[,-1][index] <- "unclassified"
   
+  # Also change any empty names to "unclassified" for ex. GG will say c__(100) for an unknown class it sorted into.
+  index2 <- grep(pattern = '.{1}__\\(\\d{0,3}\\)', x = tax[,-1], value = FALSE, invert = FALSE)
+  tax[,-1][index2] <- "unclassified" 
+  
   return(tax)
 }
 

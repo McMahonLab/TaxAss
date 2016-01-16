@@ -157,6 +157,7 @@ find.fw.indeces <- function(TaxonomyTable, SeqIDs){
 # makes all the unclassified/unknown/any other word for it names be uniformly called "unclassified"
   # finds them b/c those names do not have bootstrap percents in parentheses, i.e. the (70)
   # also changes k__(100) etc to unclassified
+  # this is used in the function do.bootstrap.cutoff()
 uniform.unclass.names <- function(TaxonomyTable){
   tax <- TaxonomyTable
   
@@ -223,6 +224,9 @@ make.unclassified <- function(text,val){
 do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   tax <- as.matrix(TaxonomyTable)
   cutoff <- BootstrapCutoff
+  
+  # make all unclassified things uniformly called "unclassified"
+  tax <- uniform.unclass.names(TaxonomyTable = tax)
   
   # create a matrix of bootstrap numbers and then a T/F matrix
   tax.nums <- apply(tax[,2:ncol(tax)],2,pull.out.percent)
@@ -329,8 +333,7 @@ if (final.or.database == "database"){
   gg <- do.bootstrap.cutoff(TaxonomyTable = gg.percents, BootstrapCutoff = taxonomy.bootstrap.cutoff)
   check.files.match(FWtable = fw, GGtable = gg)
   gg <- apply(gg.percents, 2, remove.parentheses)
-  
-  #it's not callin g__() unc;assified! uh oh
+
 }
 
 

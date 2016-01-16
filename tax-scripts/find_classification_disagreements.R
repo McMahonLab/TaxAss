@@ -174,7 +174,7 @@ uniform.unclass.names <- function(TaxonomyTable){
       odd.entries,
       "\n\nThese names will be renamed as \"unclassified\". If that seems incorrect",
       "then you have to figure out why the parentheses are missing from them.", 
-      "\nHave ALL your names here? Check that in the step 8 mothur command probs=T\n")
+      "\nHave ALL your names here? Check that in the step 8 mothur command probs=T\n\n")
   }
   
   # Change all those names to unclassified (sometimes, for example, they might be "unknown")

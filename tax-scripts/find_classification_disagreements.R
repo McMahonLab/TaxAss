@@ -28,7 +28,7 @@
 fw.plus.gg.tax.file.path <- "../../take9c/custom.custom.taxonomy"
 gg.only.tax.file.path <- "../../take9c/custom.general.taxonomy"
 fw.seq.ids.file.path <- NA
-results.folder.path <- "../../take9c/conflicts_98/"
+results.folder.path <- "../../take9c/conflicts_database"
 blast.pident.cutoff <- NA
 taxonomy.bootstrap.cutoff <- 70
 final.or.database <- "database"
@@ -156,6 +156,7 @@ find.fw.indeces <- function(TaxonomyTable, SeqIDs){
 
 # makes all the unclassified/unknown/any other word for it names be uniformly called "unclassified"
   # finds them b/c those names do not have bootstrap percents in parentheses, i.e. the (70)
+  # also changes k__(100) etc to unclassified
 uniform.unclass.names <- function(TaxonomyTable){
   tax <- TaxonomyTable
   
@@ -166,12 +167,16 @@ uniform.unclass.names <- function(TaxonomyTable){
       odd.entries,
       "\n\nThese names will be renamed as \"unclassified\". If that seems incorrect",
       "then you have to figure out why the parentheses are missing from them.", 
-      "\nHave ALL your names here? Check that in the step 7 mothur command probs=T\n")
+      "\nHave ALL your names here? Check that in the step 8 mothur command probs=T\n")
   }
   
   # Change all those names to unclassified (sometimes, for example, they might be "unknown")
-  index <- grep(pattern = '.*\\(', x <- tax[,2:8], value = FALSE, invert=T)
-  tax[,2:8][index] <- "unclassified"
+  index <- grep(pattern = '.*\\(', x = tax[,-1], value = FALSE, invert = TRUE)
+  tax[,-1][index] <- "unclassified"
+  
+  # Also change any empty names to "unclassified" for ex. GG will say c__(100) for an unknown class it sorted into.
+  index2 <- grep(pattern = '.{1}__\\(\\d{0,3}\\)', x = tax[,-1], value = FALSE, invert = FALSE)
+  tax[,-1][index2] <- "unclassified"  
   
   return(tax)
 }
@@ -318,6 +323,10 @@ if (final.or.database == "database"){
   fw <- fw.percents # database only has names
   fw <- uniform.unclass.names.database(TaxonomyDatabase = fw)
   gg <- do.bootstrap.cutoff(TaxonomyTable = gg.percents, BootstrapCutoff = taxonomy.bootstrap.cutoff)
+  check.files.match(FWtable = fw, GGtable = gg)
+  gg <- apply(gg.percents, 2, remove.parentheses)
+  
+  #it's not callin g__() unc;assified! uh oh
 }
 
 
@@ -330,9 +339,7 @@ gg.percents.fw.only <- gg.percents[fw.indeces,]
 check.files.match(FWtable = fw.percents.fw.only, GGtable = gg.percents.fw.only)
 
 fw.fw.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.fw.only, BootstrapCutoff = taxonomy.bootstrap.cutoff)
-cat("\nFinished bootstrap value cutoff on workflow's taxonomy file.\n")
 gg.fw.only <- do.bootstrap.cutoff(TaxonomyTable = gg.percents.fw.only, BootstrapCutoff = taxonomy.bootstrap.cutoff)
-cat("Finished bootstrap cutoff on comparison taxonomy file.\n\n")
 
 check.files.match(FWtable = fw.fw.only, GGtable = gg.fw.only)
 

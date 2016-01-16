@@ -15,23 +15,29 @@
 # Receive arguments from terminal command line
 #####
 
-# userprefs <- commandArgs(trailingOnly = TRUE)
-# fw.plus.gg.tax.file.path <- userprefs[1]
-# gg.only.tax.file.path <- userprefs[2]
-# fw.seq.ids.file.path <- userprefs[3]
-# results.folder.path <- userprefs[4]
-# blast.pident.cutoff <- userprefs[5]
-# taxonomy.bootstrap.cutoff <- userprefs[6]
-# final.or.database <- userprefs[7]
-# if (length(userprefs) < 7){final.or.database <- "non-empty string"}
+# Example syntax for pident comparison, final taxonomy generation, and database comparison, respectively:
 
-fw.plus.gg.tax.file.path <- "../../take9c/custom.custom.taxonomy"
-gg.only.tax.file.path <- "../../take9c/custom.general.taxonomy"
-fw.seq.ids.file.path <- NA
-results.folder.path <- "../../take9c/conflicts_database"
-blast.pident.cutoff <- NA
-taxonomy.bootstrap.cutoff <- 70
-final.or.database <- "database"
+# Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 70 
+# Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 70 final
+# Rscript find_classification_disagreements.R custom.taxonomy custom.general.taxonomy NA conflicts_98 NA 70 database
+
+userprefs <- commandArgs(trailingOnly = TRUE)
+fw.plus.gg.tax.file.path <- userprefs[1]
+gg.only.tax.file.path <- userprefs[2]
+fw.seq.ids.file.path <- userprefs[3]
+results.folder.path <- userprefs[4]
+blast.pident.cutoff <- userprefs[5]
+taxonomy.bootstrap.cutoff <- userprefs[6]
+final.or.database <- userprefs[7]
+if (length(userprefs) < 7){final.or.database <- "non-empty string"}
+
+# fw.plus.gg.tax.file.path <- "../../take9c/custom.custom.taxonomy"
+# gg.only.tax.file.path <- "../../take9c/custom.general.taxonomy"
+# fw.seq.ids.file.path <- 98
+# results.folder.path <- "../../take9c/conflicts_98"
+# blast.pident.cutoff <- NA
+# taxonomy.bootstrap.cutoff <- 70
+# final.or.database <- "database"
 
 #####
 # Define Functions for Import and Formatting
@@ -321,16 +327,19 @@ fw.percents <- reformat.fw(FWtable = fw.percents)
 
 check.files.match(FWtable = fw.percents, GGtable = gg.percents)
 
+
 # Generate a final taxonomy file:
 if (final.or.database == "final" | final.or.database == "Final" | final.or.database == "FINAL"){
+  
   final.taxonomy <- do.bootstrap.cutoff(TaxonomyTable = fw.percents, BootstrapCutoff = taxonomy.bootstrap.cutoff)
   colnames(final.taxonomy) <- c("seqID","kingdom","phylum","class","order","lineage","clade","tribe")
   write.table(x = final.taxonomy, file = paste("otus.", blast.pident.cutoff, ".", taxonomy.bootstrap.cutoff, ".taxonomy", sep = ""), 
               sep = ";", row.names = FALSE)
-}
+
 
 # Compare databases by looking at how GG classifies the FW representative sequences
-if (final.or.database == "database"){
+}else if (final.or.database == "database"){
+
   fw <- fw.percents # database only has names
   fw <- uniform.unclass.names.database(TaxonomyDatabase = fw)
   gg <- do.bootstrap.cutoff(TaxonomyTable = gg.percents, BootstrapCutoff = taxonomy.bootstrap.cutoff)
@@ -348,39 +357,48 @@ if (final.or.database == "database"){
                                              TaxaLevel = t, tracker = num.mismatches)
   }
   export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw, ALL_seqs = fw)
-}
-
+  
 
 # Only compare the classifications made by the fw database to the gg classifications, not full tax tables
-fw.seq.ids <- import.FW.seq.IDs()
-fw.indeces <- find.fw.indeces(TaxonomyTable = fw.percents, SeqIDs = fw.seq.ids)
-fw.percents.fw.only <- fw.percents[fw.indeces,]
-gg.percents.fw.only <- gg.percents[fw.indeces,]
-
-check.files.match(FWtable = fw.percents.fw.only, GGtable = gg.percents.fw.only)
-
-fw.fw.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.fw.only, BootstrapCutoff = taxonomy.bootstrap.cutoff)
-gg.fw.only <- do.bootstrap.cutoff(TaxonomyTable = gg.percents.fw.only, BootstrapCutoff = taxonomy.bootstrap.cutoff)
-
-check.files.match(FWtable = fw.fw.only, GGtable = gg.fw.only)
-
-fw.fw.only <- apply(fw.fw.only, 2, remove.parentheses)
-gg.fw.only <- apply(gg.fw.only, 2, remove.parentheses)
-
-check.files.match(FWtable = fw.fw.only, GGtable = gg.fw.only)
-
-# Generate the files comparing classifications made by fw to those of gg
-# Generate a summary file listing the total number of classification disagreements at each level
+}else{
+  
+  fw.seq.ids <- import.FW.seq.IDs()
+  fw.indeces <- find.fw.indeces(TaxonomyTable = fw.percents, SeqIDs = fw.seq.ids)
+  fw.percents.fw.only <- fw.percents[fw.indeces,]
+  gg.percents.fw.only <- gg.percents[fw.indeces,]
+  
+  check.files.match(FWtable = fw.percents.fw.only, GGtable = gg.percents.fw.only)
+  
+  fw.fw.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.fw.only, BootstrapCutoff = taxonomy.bootstrap.cutoff)
+  gg.fw.only <- do.bootstrap.cutoff(TaxonomyTable = gg.percents.fw.only, BootstrapCutoff = taxonomy.bootstrap.cutoff)
+  
+  check.files.match(FWtable = fw.fw.only, GGtable = gg.fw.only)
+  
+  fw.fw.only <- apply(fw.fw.only, 2, remove.parentheses)
+  gg.fw.only <- apply(gg.fw.only, 2, remove.parentheses)
+  
+  check.files.match(FWtable = fw.fw.only, GGtable = gg.fw.only)
+  
+  # Generate the files comparing classifications made by fw to those of gg
+  # Generate a summary file listing the total number of classification disagreements at each level
   # Files written in find.conflicting.names() loop: the "TaxaLevel_conflicts.csv" that puts taxonomy tables side by side
   # File written afer loop: the "conflicts_summary.csv" that lists how many conflicts were at each level, and how many seqs were classified by FW
-num.mismatches <- create.summary.vector()
-for (t in 1:5){
-  num.mismatches <- find.conflicting.names(FWtable = fw.fw.only, GGtable = gg.fw.only,
-                                           FWtable_percents = fw.percents.fw.only
-                                           GGtable_percents = gg.percents.fw.only, 
-                                           TaxaLevel = t, tracker = num.mismatches)
+  num.mismatches <- create.summary.vector()
+  for (t in 1:5){
+    num.mismatches <- find.conflicting.names(FWtable = fw.fw.only, GGtable = gg.fw.only,
+                                             FWtable_percents = fw.percents.fw.only,
+                                             GGtable_percents = gg.percents.fw.only, 
+                                             TaxaLevel = t, tracker = num.mismatches)
+  }
+  export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw.fw.only, ALL_seqs = fw.percents)
 }
-export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw.fw.only, ALL_seqs = fw.percents)
+
+
+
+
+
+
+
 
 
 

@@ -15,6 +15,12 @@
 # Receive arguments from terminal command line
 #####
 
+# Example syntax for pident comparison, final taxonomy generation, and database comparison, respectively:
+
+# Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 70 
+# Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 70 final
+# Rscript find_classification_disagreements.R custom.taxonomy custom.general.taxonomy NA conflicts_98 NA 70 database
+
 userprefs <- commandArgs(trailingOnly = TRUE)
 fw.plus.gg.tax.file.path <- userprefs[1]
 gg.only.tax.file.path <- userprefs[2]
@@ -22,17 +28,16 @@ fw.seq.ids.file.path <- userprefs[3]
 results.folder.path <- userprefs[4]
 blast.pident.cutoff <- userprefs[5]
 taxonomy.bootstrap.cutoff <- userprefs[6]
-check.or.final <- userprefs[7]
-if (length(userprefs) < 7){check.or.final <- "check"}
+final.or.database <- userprefs[7]
+if (length(userprefs) < 7){final.or.database <- "non-empty string"}
 
-
-# fw.plus.gg.tax.file.path <- "../../take7/otus.98.taxonomy"
-# gg.only.tax.file.path <- "../../take7/otus.general.taxonomy"
-# fw.seq.ids.file.path <- "../../take7/ids.above.98"
-# results.folder.path <- "../../take7/conflicts_98/"
-# blast.pident.cutoff <- 98
+# fw.plus.gg.tax.file.path <- "../../take9c/custom.custom.taxonomy"
+# gg.only.tax.file.path <- "../../take9c/custom.general.taxonomy"
+# fw.seq.ids.file.path <- 98
+# results.folder.path <- "../../take9c/conflicts_98"
+# blast.pident.cutoff <- NA
 # taxonomy.bootstrap.cutoff <- 70
-# check.or.final <- "final"
+# final.or.database <- "database"
 
 #####
 # Define Functions for Import and Formatting
@@ -157,6 +162,8 @@ find.fw.indeces <- function(TaxonomyTable, SeqIDs){
 
 # makes all the unclassified/unknown/any other word for it names be uniformly called "unclassified"
   # finds them b/c those names do not have bootstrap percents in parentheses, i.e. the (70)
+  # also changes k__(100) etc to unclassified
+  # this is used in the function do.bootstrap.cutoff()
 uniform.unclass.names <- function(TaxonomyTable){
   tax <- TaxonomyTable
   
@@ -167,12 +174,34 @@ uniform.unclass.names <- function(TaxonomyTable){
       odd.entries,
       "\n\nThese names will be renamed as \"unclassified\". If that seems incorrect",
       "then you have to figure out why the parentheses are missing from them.", 
-      "\nHave ALL your names here? Check that in the step 7 mothur command probs=T\n")
+      "\nHave ALL your names here? Check that in the step 8 mothur command probs=T\n\n")
   }
   
   # Change all those names to unclassified (sometimes, for example, they might be "unknown")
-  index <- grep(pattern = '.*\\(', x <- tax[,2:8], value = FALSE, invert=T)
-  tax[,2:8][index] <- "unclassified"
+  index <- grep(pattern = '.*\\(', x = tax[,-1], value = FALSE, invert = TRUE)
+  tax[,-1][index] <- "unclassified"
+  
+  # Also change any empty names to "unclassified" for ex. GG will say c__(100) for an unknown class it sorted into.
+  index2 <- grep(pattern = '.{1}__\\(\\d{0,3}\\)', x = tax[,-1], value = FALSE, invert = FALSE)
+  tax[,-1][index2] <- "unclassified"  
+  
+  return(tax)
+}
+
+# makes empty spots in the database be called unclassified.  more error prone b/c have to guess odd names!
+uniform.unclass.names.database <- function(TaxonomyDatabase){
+  tax <- TaxonomyDatabase
+  
+  # There's a lot of ways to guess that the database might have weird blanks....
+  index <- which(tax[,-1] == "" | tax[,-1] == 0 | tax[,-1] == "0" | is.null(tax[,-1]) | tax[,-1] == "NULL" | is.na(tax[,-1])| tax[,-1] == "NA" |
+                 tax[,-1] == "unknown" | tax[,-1] == "Unknown" | tax[,-1] == "UnKnown" | tax[,-1] == "UNKNOWN" | 
+                 tax[,-1] == "Unclassified" | tax[,-1] == "UnClassified" | tax[,-1] == "UNCLASSIFIED" |
+                 tax[,-1] == "Unidentified" | tax[,-1] == "UnIdentified" | tax[,-1] == "UNIDENTIFIED")
+  tax[,-1][index] <- "unclassified"
+  
+  # Also change any empty names to "unclassified" for ex. GG will say c__(100) for an unknown class it sorted into.
+  index2 <- grep(pattern = '.{1}__\\(\\d{0,3}\\)', x = tax[,-1], value = FALSE, invert = FALSE)
+  tax[,-1][index2] <- "unclassified" 
   
   return(tax)
 }
@@ -202,6 +231,9 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   tax <- as.matrix(TaxonomyTable)
   cutoff <- BootstrapCutoff
   
+  # make all unclassified things uniformly called "unclassified"
+  tax <- uniform.unclass.names(TaxonomyTable = tax)
+  
   # create a matrix of bootstrap numbers and then a T/F matrix
   tax.nums <- apply(tax[,2:ncol(tax)],2,pull.out.percent)
   index <- which(tax.nums == "unclassified")
@@ -220,9 +252,10 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
 }
 
 # Find seqs misclassified at a given phylogenetic level, t
-find.conflicting.names <- function(FWtable, GGtable, GGtable_percents, TaxaLevel, tracker){
+find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_percents, TaxaLevel, tracker){
   fw <- FWtable
   gg <- GGtable
+  fw.percents <- FWtable_percents
   gg.percents <- GGtable_percents
   t <- TaxaLevel
   num.mismatches <- tracker
@@ -236,7 +269,7 @@ find.conflicting.names <- function(FWtable, GGtable, GGtable_percents, TaxaLevel
   num.mismatches[t] <- length(index)
   
   # Compare the conflicting tables in entirety, use the original files with percents still in it
-  conflicting <- cbind(gg.percents[index,,drop=F], fw[index,,drop=F])
+  conflicting <- cbind(gg.percents[index,,drop=F], fw.percents[index,,drop=F])
   
   # Check that the files still line up correctly
   check.files.match(FWtable = conflicting[,9:16,drop=F], GGtable = conflicting[,1:8,drop=F])
@@ -256,8 +289,10 @@ create.summary.vector <- function(){
 }
 
 # Format and export the summary vector
-export.summary.stats <- function(SummaryVector){
+export.summary.stats <- function(SummaryVector, FW_seqs, ALL_seqs){
   num.mismatches <- SummaryVector
+  fw.fw.only <- FW_seqs
+  fw.percents <- ALL_seqs
   num.mismatches <- c(num.mismatches,"numFWseqs" = nrow(fw.fw.only))
   num.mismatches <- c(num.mismatches, "numALLseqs" = nrow(fw.percents))
   num.mismatches <- data.frame("TaxaLevel" = names(num.mismatches),"NumConflicts" = num.mismatches, row.names = NULL)
@@ -292,56 +327,103 @@ fw.percents <- reformat.fw(FWtable = fw.percents)
 
 check.files.match(FWtable = fw.percents, GGtable = gg.percents)
 
+
 # Generate a final taxonomy file:
-if (check.or.final == "final" | check.or.final == "Final" | check.or.final == "FINAL"){
+if (final.or.database == "final" | final.or.database == "Final" | final.or.database == "FINAL"){
+  
   final.taxonomy <- do.bootstrap.cutoff(TaxonomyTable = fw.percents, BootstrapCutoff = taxonomy.bootstrap.cutoff)
   colnames(final.taxonomy) <- c("seqID","kingdom","phylum","class","order","lineage","clade","tribe")
   write.table(x = final.taxonomy, file = paste("otus.", blast.pident.cutoff, ".", taxonomy.bootstrap.cutoff, ".taxonomy", sep = ""), 
               sep = ";", row.names = FALSE)
-}
 
-# Only compare the classifications made by the fw database to the gg classifications, not full tax tables
-fw.seq.ids <- import.FW.seq.IDs()
-fw.indeces <- find.fw.indeces(TaxonomyTable = fw.percents, SeqIDs = fw.seq.ids)
-fw.percents.fw.only <- fw.percents[fw.indeces,]
-gg.percents.fw.only <- gg.percents[fw.indeces,]
 
-check.files.match(FWtable = fw.percents.fw.only, GGtable = gg.percents.fw.only)
+# Compare databases by looking at how GG classifies the FW representative sequences
+}else if (final.or.database == "database"){
 
-fw.fw.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.fw.only, BootstrapCutoff = taxonomy.bootstrap.cutoff)
-cat("\nFinished bootstrap value cutoff on workflow's taxonomy file.\n")
-gg.fw.only <- do.bootstrap.cutoff(TaxonomyTable = gg.percents.fw.only, BootstrapCutoff = taxonomy.bootstrap.cutoff)
-cat("Finished bootstrap cutoff on comparison taxonomy file.\n\n")
-
-check.files.match(FWtable = fw.fw.only, GGtable = gg.fw.only)
-
-fw.fw.only <- apply(fw.fw.only, 2, remove.parentheses)
-gg.fw.only <- apply(gg.fw.only, 2, remove.parentheses)
-
-check.files.match(FWtable = fw.fw.only, GGtable = gg.fw.only)
-
-# Generate the files comparing classifications made by fw to those of gg
-# Generate a summary file listing the total number of classification disagreements at each level
+  fw <- fw.percents # database only has names
+  fw <- uniform.unclass.names.database(TaxonomyDatabase = fw)
+  gg <- do.bootstrap.cutoff(TaxonomyTable = gg.percents, BootstrapCutoff = taxonomy.bootstrap.cutoff)
+  gg <- apply(gg, 2, remove.parentheses)
+  
+  check.files.match(FWtable = fw, GGtable = gg)
+  
   # Files written in find.conflicting.names() loop: the "TaxaLevel_conflicts.csv" that puts taxonomy tables side by side
   # File written afer loop: the "conflicts_summary.csv" that lists how many conflicts were at each level, and how many seqs were classified by FW
-num.mismatches <- create.summary.vector()
-for (t in 1:5){
-  num.mismatches <- find.conflicting.names(FWtable = fw.fw.only, GGtable = gg.fw.only,
-                                           GGtable_percents = gg.percents.fw.only, 
-                                           TaxaLevel = t, tracker = num.mismatches)
+  num.mismatches <- create.summary.vector()
+  for (t in 1:5){
+    num.mismatches <- find.conflicting.names(FWtable = fw, GGtable = gg,
+                                             FWtable_percents = fw.percents, 
+                                             GGtable_percents = gg.percents, 
+                                             TaxaLevel = t, tracker = num.mismatches)
+  }
+  export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw, ALL_seqs = fw)
+  
+
+# Only compare the classifications made by the fw database to the gg classifications, not full tax tables
+}else{
+  
+  fw.seq.ids <- import.FW.seq.IDs()
+  fw.indeces <- find.fw.indeces(TaxonomyTable = fw.percents, SeqIDs = fw.seq.ids)
+  fw.percents.fw.only <- fw.percents[fw.indeces,]
+  gg.percents.fw.only <- gg.percents[fw.indeces,]
+  
+  check.files.match(FWtable = fw.percents.fw.only, GGtable = gg.percents.fw.only)
+  
+  fw.fw.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.fw.only, BootstrapCutoff = taxonomy.bootstrap.cutoff)
+  gg.fw.only <- do.bootstrap.cutoff(TaxonomyTable = gg.percents.fw.only, BootstrapCutoff = taxonomy.bootstrap.cutoff)
+  
+  check.files.match(FWtable = fw.fw.only, GGtable = gg.fw.only)
+  
+  fw.fw.only <- apply(fw.fw.only, 2, remove.parentheses)
+  gg.fw.only <- apply(gg.fw.only, 2, remove.parentheses)
+  
+  check.files.match(FWtable = fw.fw.only, GGtable = gg.fw.only)
+  
+  # Generate the files comparing classifications made by fw to those of gg
+  # Generate a summary file listing the total number of classification disagreements at each level
+  # Files written in find.conflicting.names() loop: the "TaxaLevel_conflicts.csv" that puts taxonomy tables side by side
+  # File written afer loop: the "conflicts_summary.csv" that lists how many conflicts were at each level, and how many seqs were classified by FW
+  num.mismatches <- create.summary.vector()
+  for (t in 1:5){
+    num.mismatches <- find.conflicting.names(FWtable = fw.fw.only, GGtable = gg.fw.only,
+                                             FWtable_percents = fw.percents.fw.only,
+                                             GGtable_percents = gg.percents.fw.only, 
+                                             TaxaLevel = t, tracker = num.mismatches)
+  }
+  export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw.fw.only, ALL_seqs = fw.percents)
 }
-export.summary.stats(SummaryVector = num.mismatches)
 
-# Generate a file of the fw-assigned taxonomies, and a matching table of just their bootstrap values
-  # File written: the "fw_classified_bootstraps.csv" that lists the bootstrap of all sequences classified by freshwater
-  # File written: the "fw_classified_taxonomies.csv" that lists the taxonomy of all sequences classified by freshwater
-fw.bootstraps <- view.bootstraps(TaxonomyTable = fw.percents.fw.only)
-write.csv(fw.bootstraps, file = paste(results.folder.path, "/", "fw_classified_bootstraps.csv", sep=""), row.names = FALSE)
-write.csv(fw.percents.fw.only, file = paste(results.folder.path, "/", "fw_classified_taxonomies.csv", sep=""), row.names = FALSE)
 
-# Generate a file of the gg taxonomies for the fw-assigned sequences, and a matching table of gg bootstraps
-  # File written: the "gg_classified_bootstraps.csv" that lists the bootstrap of all sequences classified by freshwater
-  # File written: the "gg_classified_taxonomies.csv" that lists the taxonomy of all sequences classified by freshwater
-gg.bootstraps <- view.bootstraps(TaxonomyTable = gg.percents.fw.only)
-write.csv(gg.bootstraps, file = paste(results.folder.path, "/", "gg_classified_bootstraps.csv", sep=""), row.names = FALSE)
-write.csv(gg.percents.fw.only, file = paste(results.folder.path, "/", "gg_classified_taxonomies.csv", sep=""), row.names = FALSE)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# # Generate a file of the fw-assigned taxonomies, and a matching table of just their bootstrap values
+#   # File written: the "fw_classified_bootstraps.csv" that lists the bootstrap of all sequences classified by freshwater
+#   # File written: the "fw_classified_taxonomies.csv" that lists the taxonomy of all sequences classified by freshwater
+# fw.bootstraps <- view.bootstraps(TaxonomyTable = fw.percents.fw.only)
+# write.csv(fw.bootstraps, file = paste(results.folder.path, "/", "fw_classified_bootstraps.csv", sep=""), row.names = FALSE)
+# write.csv(fw.percents.fw.only, file = paste(results.folder.path, "/", "fw_classified_taxonomies.csv", sep=""), row.names = FALSE)
+# 
+# # Generate a file of the gg taxonomies for the fw-assigned sequences, and a matching table of gg bootstraps
+#   # File written: the "gg_classified_bootstraps.csv" that lists the bootstrap of all sequences classified by freshwater
+#   # File written: the "gg_classified_taxonomies.csv" that lists the taxonomy of all sequences classified by freshwater
+# gg.bootstraps <- view.bootstraps(TaxonomyTable = gg.percents.fw.only)
+# write.csv(gg.bootstraps, file = paste(results.folder.path, "/", "gg_classified_bootstraps.csv", sep=""), row.names = FALSE)
+# write.csv(gg.percents.fw.only, file = paste(results.folder.path, "/", "gg_classified_taxonomies.csv", sep=""), row.names = FALSE)

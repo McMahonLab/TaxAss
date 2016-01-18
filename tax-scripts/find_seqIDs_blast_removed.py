@@ -62,6 +62,9 @@ with open(blastFile) as blast:
         blastIDs[line.split()[0]] = None
 
 # Find seqIDs that are missing in blast and append them to the missing IDs output file
+print 'Appending sequences not found by BLAST to '+outputFile
+print 'Assign taxonomy to these sequences using the Large General database'
+
 for key in allIDs:
     if key not in blastIDs:
         with open(outputFile,"a") as missing :

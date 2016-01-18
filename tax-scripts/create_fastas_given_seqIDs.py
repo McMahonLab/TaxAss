@@ -18,6 +18,16 @@
 #		outputFile                       the new fasta file the script generates
 
 #%%#############################################################################
+### Check if BioPython package exists and install if necessary
+################################################################################
+try:
+    import Bio # check if BioPython exists
+except ImportError, e:
+    print 'BioPython not installed. Trying with pip.'
+    import pip
+    pip.main(['install', 'biopython'])
+        
+#%%#############################################################################
 ### Import packages
 ################################################################################
 from Bio import SeqIO

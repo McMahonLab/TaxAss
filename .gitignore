@@ -24,6 +24,7 @@ databases/*.train
 # Data Directories
 processedData
 rawData
+plots
 
 # Other files
 Taxonomy_Assignment_Scripts.Rproj

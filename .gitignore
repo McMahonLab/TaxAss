@@ -9,12 +9,12 @@ databases/gg_13_5.taxonomy
 databases/gg_13_5.fasta
 databases/gg_13_8_99.taxonomy
 databases/gg_13_8_99.fasta
-databases/FWonly_7Sept2015.nhr
-databases/FWonly_7Sept2015.nin
-databases/FWonly_7Sept2015.nog
-databases/FWonly_7Sept2015.nsd
-databases/FWonly_7Sept2015.nsi
-databases/FWonly_7Sept2015.nsq
+databases/*.nhr
+databases/*.nin
+databases/*.nog
+databases/*.nsd
+databases/*.nsi
+databases/*.nsq
 databases/*.8mer
 databases/*.numNonZero
 databases/*.prob
@@ -24,6 +24,7 @@ databases/*.train
 # Data Directories
 processedData
 rawData
+plots
 
 # Other files
 Taxonomy_Assignment_Scripts.Rproj

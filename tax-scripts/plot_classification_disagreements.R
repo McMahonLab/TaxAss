@@ -271,7 +271,7 @@ plot.num.forced <- function(ConflictSummaryTable, UserArgs, ByReads = FALSE, AsP
     points(x = pidents, y = mismatches[r,], col = color[r], pch = 19, cex =1.3)
   }
   legend("center", legend = row.names(mismatches), text.col = color, cex=1.3)
-  dev.off()
+  garbage <- dev.off()
 }
 
 plot.num.classified.outs <- function(ConflictSummaryTable, UserArgs, ByReads = FALSE, AsPercent = TRUE){
@@ -311,7 +311,7 @@ plot.num.classified.outs <- function(ConflictSummaryTable, UserArgs, ByReads = F
   lines(x = pidents, y = num.fw, col = "lightsalmon", lwd = 1.5)
   points(x = pidents, y = num.fw, col = "lightsalmon", pch = 19, cex = 1.3)
   
-  dev.off()
+  garbage <- dev.off()
 }
   
 plot.bootstrap.percents <- function(FWpValues, GGpValues, UserArgs){
@@ -353,7 +353,7 @@ plot.bootstrap.percents <- function(FWpValues, GGpValues, UserArgs){
   mtext("RDP Classifier Repeatability (that number after your taxonomy name)", side = 2, outer = T, line = 4.9, cex = 1.2)
   
   # finish plotting and create the file
-  dev.off()
+  garbage <- dev.off()
 }
 
 

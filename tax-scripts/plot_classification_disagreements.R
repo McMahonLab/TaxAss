@@ -62,6 +62,14 @@ import.all.conflict.summaries <- function(ConflictFolders, PidentsUsed){
   return(mismatches.matrix)
 }
 
+# import the database conflicts summary file
+import.database.conflicts <- function(DatabaseFolder){
+  db.conflicts.folder.path <- DatabaseFolder
+  db.conflicts <- read.csv(file = paste(db.conflicts.folder.path, "/conflicts_summary.csv", sep =""), stringsAsFactors = F)
+  # the sequences totals are not needed here
+  return(db.conflicts[1:5,])
+}
+
 # import the OTU table and then pull out just the total reads for each seqID
 import.and.reformat.otu.table <- function(OTUtable){
   otu.table.path <- OTUtable
@@ -378,6 +386,8 @@ plot.bootstrap.percents <- function(FWpValues, GGpValues, UserArgs){
 # examine custom taxonomy disagreements and contribution by number OTUs
 
 otu.summaries <- import.all.conflict.summaries(ConflictFolders = pident.folders, PidentsUsed = pident.values)
+
+db.summary <- import.database.conflicts(DatabaseFolder = db.conflicts.folder.path)
 
 plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path)
 plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, y.axis.limit = 10)

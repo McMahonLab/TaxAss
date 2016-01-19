@@ -72,6 +72,21 @@ import.and.reformat.otu.table <- function(OTUtable){
   return(seqID.reads)
 }
 
+# import the ids.above. files that list seqIDs above the pident cutoff
+# This is used inside the add.totals.to.read.summaries() function
+import.ids.above <- function(FilePaths, PidentsUsed){
+  ids.file.paths <- FilePaths
+  pident.values <- PidentsUsed
+  
+  fw.ids <- list(NULL)
+  for (p in 1:length(pident.values)){
+    fw.ids[[p]] <- scan(file = ids.file.paths[p])
+    names(fw.ids)[p] <- pident.values[p]
+  }
+  
+  return(fw.ids)
+}
+
 # import files comparing conflicts at each level, record the seqIDs into a list of lists
 # structure: outer list- each pident, inner lists- seqIDs at each taxa level
 get.conflict.seqIDs <- function(ConflictsFolders, PidentsUsed){
@@ -148,12 +163,11 @@ generate.summary.table.of.reads <- function(ReadsList){
 
 # add to the read.summaries table the overall totals to match the otu.summaries structure
 # this involves importing the fw_classified_taxonomies.csv file to get the list of fw seqIDs
-add.totals.to.read.summaries <- function(ReadSummaryTable, AbundanceTable, ConflictsFolders, PidentsUsed, IDsFilePaths){
+add.totals.to.read.summaries <- function(ReadSummaryTable, AbundanceTable, PidentsUsed, CustomSeqIDs){
   seqID.reads <- AbundanceTable
   reads.summary <- ReadSummaryTable
-  pident.folders <- ConflictsFolders
   pident.values <- PidentsUsed
-  fw.seqIDs <- IDsFilePaths
+  fw.ids <- CustomSeqIDs
   
   fw.reads <- NULL
   # for each pident tried
@@ -161,12 +175,12 @@ add.totals.to.read.summaries <- function(ReadSummaryTable, AbundanceTable, Confl
     
     # for each seqID classified with FW
     fw.reads[p] <- 0
-    if (length(fw.seqIDs) > 0){
-      for (s in 1:length(fw.seqIDs)){
-        index <- which(seqID.reads[,1] == fw.seqIDs[s])
+    if (length(fw.ids[[p]]) > 0){
+      for (s in 1:length(fw.ids[[p]])){
+        index <- which(seqID.reads[,1] == fw.ids[[p]][s])
         fw.reads[p] <- fw.reads[p] + seqID.reads[index,2]
       } 
-    } # no else b/c it's already zero at start 
+    }
     names(fw.reads)[p] <- paste("pident", pident.values[p], sep = "")
   }
   
@@ -384,15 +398,18 @@ conflict.seqID.reads <- find.reads.per.seqID(ReadsTable = seqID.reads, Conflicts
 
 read.summaries <- generate.summary.table.of.reads(ReadsList = conflict.seqID.reads)
 
-read.summaries <- add.totals.to.read.summaries(ReadSummaryTable = read.summaries, AbundanceTable = seqID.reads, UserArgs = userprefs)
+custom.seqIDs <- import.ids.above(FilePaths = ids.file.paths, PidentsUsed = pident.values)
 
-plot.num.forced(ConflictSummaryTable = read.summaries, UserArgs = userprefs, ByReads = TRUE)
-plot.num.forced(ConflictSummaryTable = read.summaries, UserArgs = userprefs, ByReads = TRUE, y.axis.limit = 10000)
-plot.num.forced(ConflictSummaryTable = read.summaries, UserArgs = userprefs, ByReads = TRUE, AsPercent = TRUE)
-plot.num.forced(ConflictSummaryTable = read.summaries, UserArgs = userprefs, ByReads = TRUE, AsPercent = TRUE, y.axis.limit = 1)
+read.summaries <- add.totals.to.read.summaries(ReadSummaryTable = read.summaries, AbundanceTable = seqID.reads, 
+                                               PidentsUsed = pident.values, CustomSeqIDs = custom.seqIDs)
 
-plot.num.classified.outs(ConflictSummaryTable = read.summaries, UserArgs = userprefs, ByReads = TRUE, AsPercent = FALSE)
-plot.num.classified.outs(ConflictSummaryTable = read.summaries, UserArgs = userprefs, ByReads = TRUE, AsPercent = TRUE)
+# plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE)
+# plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, y.axis.limit = 10000)
+plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE)
+plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE, y.axis.limit = .1)
+
+# plot.num.classified.outs(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = FALSE)
+plot.num.classified.outs(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE)
 
 
 # examine pident cutoff relationship to bootstrap p-values

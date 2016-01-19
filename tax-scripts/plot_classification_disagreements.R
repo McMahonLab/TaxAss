@@ -243,9 +243,10 @@ import.bootstrap.pvalues <- function(UserArgs, FW = TRUE){
 # Define functions to plot the data
 #####
 
-plot.num.forced <- function(ConflictSummaryTable, ResultsFolder, ByReads = FALSE, AsPercent = FALSE, y.axis.limit = 0){
+plot.num.forced <- function(ConflictSummaryTable, ResultsFolder, DBconflicts = FALSE, ByReads = FALSE, AsPercent = FALSE, y.axis.limit = 0){
   sum.table <- ConflictSummaryTable
   results.file.path <- ResultsFolder
+  db.conflicts <- DBconflicts
   
   # remove the last 2 rows of number FW sequences- totals info not needed for this plot.
   mismatches <- sum.table[1:(nrow(sum.table)-2),]
@@ -291,7 +292,16 @@ plot.num.forced <- function(ConflictSummaryTable, ResultsFolder, ByReads = FALSE
     lines(x = pidents, y = mismatches[r,], col = color[r], lwd = 4)
     points(x = pidents, y = mismatches[r,], col = color[r], pch = 19, cex =1.3)
   }
-  legend("center", legend = row.names(mismatches), text.col = color, cex=1.3)
+  
+  # Add database conflicts for baseline, if desired:
+  if (db.conflicts != FALSE){
+    for (r in 1:nrow(db.conflicts)){
+      abline(h = db.conflicts[r,2], col = color[r])
+    }
+  }
+  
+  legend("topright", legend = row.names(mismatches), text.col = color, cex=1)
+  
   dev.off()
 }
 
@@ -393,6 +403,7 @@ plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.fold
 plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, y.axis.limit = 10)
 # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE)
 # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE, y.axis.limit = 1)
+plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, DBconflicts = db.summary, y.axis.limit = 20)
 
 # plot.num.classified.outs(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = FALSE)
 plot.num.classified.outs(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE)

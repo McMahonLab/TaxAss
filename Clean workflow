@@ -80,7 +80,7 @@ Summary of Steps and Commands (all commands entered in terminal window):
 16. tidy up (bash)
 	rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy
 	mkdir scripts
-	mv *.py *.R scripts/
+	mv *.py *.R *.sh scripts/
 	mkdir analysis/
 	mv conflicts* plots/ analysis/
 	mkdir data
@@ -902,7 +902,7 @@ mv custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.gene
 Full 2 commands (Type in Terminal):
 
 mkdir scripts
-mv *.py *.R scripts/
+mv *.py *.R *.sh scripts/
 
 Note: I recommend saving all the script versions you used to create your data so you could reproduce it.
 

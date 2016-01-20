@@ -243,7 +243,7 @@ import.bootstrap.pvalues <- function(UserArgs, FW = TRUE){
 # Define functions to plot the data
 #####
 
-plot.num.forced <- function(ConflictSummaryTable, ResultsFolder, DBconflicts = FALSE, ByReads = FALSE, AsPercent = FALSE, y.axis.limit = 0){
+plot.num.forced <- function(ConflictSummaryTable, ResultsFolder, DBconflicts = as.data.frame(FALSE), ByReads = FALSE, AsPercent = FALSE, y.axis.limit = 0){
   sum.table <- ConflictSummaryTable
   results.file.path <- ResultsFolder
   db.conflicts <- DBconflicts
@@ -276,25 +276,34 @@ plot.num.forced <- function(ConflictSummaryTable, ResultsFolder, DBconflicts = F
     yplotlabel <- paste("_y-axis_cutoff_",ymax, sep = "")
   }
   
+  if (db.conflicts[1,1] == FALSE){
+    db.label <- ""
+    db.plot.label <- ""
+  }else{
+    db.label <- "-DBs_included"
+    db.plot.label <- "\nHorizonal lines show the conflicts between the databases"
+  }
+  
   # Save plot as .png file
-  png(filename = paste(results.file.path, "/Classification_Disagreements_of_", plot.of, "_", plot.as, "s", yplotlabel, ".png", sep = ""), 
+  png(filename = paste(results.file.path, "/Classification_Disagreements_of_", plot.of, "_", plot.as, "s", yplotlabel, db.label, ".png", sep = ""), 
       width = 5, height = 5, units = "in", res = 100)
   
   # Set up an empty plot
   plot(x = 0, type = "n", ylim = c(0,ymax), xlim = c(min(pidents),max(pidents)),
-       main = "Disagreements Between Custom and General Taxonomy Classifications\n(Are we forcing OTUs into our favorite groups?)", cex.main = .8,
+       main = paste("Disagreements Between Custom and General Taxonomy Classifications\n(Are we forcing OTUs into our favorite groups?)", db.plot.label, sep = ""),
+       cex.main = .8,
        ylab = paste("Classification Disagreements (", plot.as, " ", plot.of, "s)", sep = ""), cex.lab = .8, 
        xlab = "\"full length\" pident cutoff (similar to ANI of read to custom database)")
   
   # Fill Plot with beautiful data
   color <- rainbow(nrow(mismatches))
   for (r in 1:nrow(mismatches)){
-    lines(x = pidents, y = mismatches[r,], col = color[r], lwd = 4)
+    lines(x = pidents, y = mismatches[r,], col = color[r], lwd = 2)
     points(x = pidents, y = mismatches[r,], col = color[r], pch = 19, cex =1.3)
   }
   
   # Add database conflicts for baseline, if desired:
-  if (db.conflicts != FALSE){
+  if (db.conflicts[1,1] != FALSE){
     for (r in 1:nrow(db.conflicts)){
       abline(h = db.conflicts[r,2], col = color[r])
     }
@@ -403,7 +412,7 @@ plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.fold
 plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, y.axis.limit = 10)
 # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE)
 # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE, y.axis.limit = 1)
-plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, DBconflicts = db.summary, y.axis.limit = 20)
+plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, DBconflicts = db.summary, y.axis.limit = max(db.summary[,2]))
 
 # plot.num.classified.outs(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = FALSE)
 plot.num.classified.outs(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE)

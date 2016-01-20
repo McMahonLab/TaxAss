@@ -9,21 +9,21 @@
 # The variable part is that more pidents can be added, as long as they continue the pattern folder number folder number
 
 # Terminal command line syntax:
-# Rscript plot_classification_disagreements.R otus.abund plots conflicts_94 94 conflicts_96 96 conflicts_98 98 ...
+# Rscript plot_classification_disagreements.R otus.abund plots conflicts_database conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98 ...
 
 #####
 # Receive arguments from terminal command line
 #####
 
-# userprefs <- commandArgs(trailingOnly = TRUE)
+userprefs <- commandArgs(trailingOnly = TRUE)
 
-userprefs <- c("../../take9c/otus.abund",
-               "../../take9c/plots",
-               "../../take9c/conflicts_database",
-               "../../take9c/conflicts_94", "../../take9c/ids.above.94", 94,
-               "../../take9c/conflicts_96", "../../take9c/ids.above.96", 96,
-               "../../take9c/conflicts_98", "../../take9c/ids.above.98", 98,
-               "../../take9c/conflicts_100", "../../take9c/ids.above.100", 100)
+# userprefs <- c("../../take9c/otus.abund",
+#                "../../take9c/plots",
+#                "../../take9c/conflicts_database",
+#                "../../take9c/conflicts_94", "../../take9c/ids.above.94", 94,
+#                "../../take9c/conflicts_96", "../../take9c/ids.above.96", 96,
+#                "../../take9c/conflicts_98", "../../take9c/ids.above.98", 98,
+#                "../../take9c/conflicts_100", "../../take9c/ids.above.100", 100)
 
 otu.table.path <- userprefs[1]
 plots.folder.path <- userprefs[2]
@@ -203,11 +203,10 @@ add.totals.to.read.summaries <- function(ReadSummaryTable, AbundanceTable, Piden
 }
 
 # import bootstrap p-values to compare
-import.bootstrap.pvalues <- function(UserArgs, FW = TRUE){
-  userprefs <- UserArgs
-  user.args <- userprefs[-c(1,2)]
-  pident.folders <- user.args[seq(from = 1, to = length(user.args), by = 2)]
-  pident.values <- user.args[seq(from = 1, to = length(user.args), by = 2)+1]
+import.bootstrap.pvalues <- function(ConflictFolders, PidentsUsed, FW = TRUE){
+  pident.folders <- ConflictFolders
+  pident.values <- PidentsUsed
+  
   if (FW == TRUE){
     db <- "fw"
   }else{
@@ -354,10 +353,10 @@ plot.num.classified.outs <- function(ConflictSummaryTable, ResultsFolder, ByRead
   dev.off()
 }
   
-plot.bootstrap.percents <- function(FWpValues, GGpValues, UserArgs){
+plot.bootstrap.percents <- function(FWpValues, GGpValues, ResultsFolder){
   fw.pvalues <- FWpValues
   gg.pvalues <- GGpValues
-  results.file.path <- UserArgs[2]
+  results.file.path <- ResultsFolder
   
   # set up a new file for the plot
   png(filename = paste(results.file.path, "/Taxonomy_Assignment_Confidences.png", sep = ""), 
@@ -444,9 +443,9 @@ plot.num.classified.outs(ConflictSummaryTable = read.summaries, ResultsFolder = 
 
 # examine pident cutoff relationship to bootstrap p-values
 
-fw.pvalues <- import.bootstrap.pvalues(UserArgs = userprefs, FW = TRUE)
-gg.pvalues <- import.bootstrap.pvalues(UserArgs = userprefs, FW = FALSE)
-
-plot.bootstrap.percents(FWpValues = fw.pvalues, GGpValues = gg.pvalues, UserArgs = userprefs)
+# fw.pvalues <- import.bootstrap.pvalues(ConflictFolders = pident.folders, PidentsUsed = pident.values, FW = TRUE)
+# gg.pvalues <- import.bootstrap.pvalues(ConflictFolders = pident.folders, PidentsUsed = pident.values, FW = FALSE)
+# 
+# plot.bootstrap.percents(FWpValues = fw.pvalues, GGpValues = gg.pvalues, ResultsFolder = plots.folder.path)
 
 

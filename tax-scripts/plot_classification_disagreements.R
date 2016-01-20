@@ -9,7 +9,7 @@
 # The variable part is that more pidents can be added, as long as they continue the pattern folder number folder number
 
 # Terminal command line syntax:
-# Rscript plot_classification_disagreements.R otus.abund plots conflicts_94 94 conflicts_96 96 conflicts_98 98 ...
+# Rscript plot_classification_disagreements.R otus.abund plots conflicts_database conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98 ...
 
 #####
 # Receive arguments from terminal command line
@@ -17,30 +17,37 @@
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 
-# userprefs <- c("../../take8/otus.abund",
-#                "../../take8/plots",
-#                "../../take8/conflicts_94", 94,
-#                "../../take8/conflicts_96", 96,
-#                "../../take8/conflicts_98", 98,
-#                "../../take8/conflicts_100", 100)
+# userprefs <- c("../../take9c/otus.abund",
+#                "../../take9c/plots",
+#                "../../take9c/conflicts_database",
+#                "../../take9c/conflicts_94", "../../take9c/ids.above.94", 94,
+#                "../../take9c/conflicts_96", "../../take9c/ids.above.96", 96,
+#                "../../take9c/conflicts_98", "../../take9c/ids.above.98", 98,
+#                "../../take9c/conflicts_100", "../../take9c/ids.above.100", 100)
+
+otu.table.path <- userprefs[1]
+plots.folder.path <- userprefs[2]
+db.conflicts.folder.path <- userprefs[3]
+rest.of.arguments <- userprefs[-(1:3)]
+pident.folders <- rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)]
+ids.file.paths <- rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)+1]
+pident.values <- as.numeric(rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)+2])
 
 #####
 # Define functions to import and process the data
 #####
 
 # import all the conflict summary files from each folder and compile them into a matrix
-import.all.conflict.summaries <- function(UserArgs){
-  userprefs <- UserArgs
+import.all.conflict.summaries <- function(ConflictFolders, PidentsUsed){
+  pident.folders <- ConflictFolders
+  pident.values <- PidentsUsed
   
-  # the first command line argument is the otu rel abund table, so ignore that here
-  user.args <- userprefs[-c(1,2)]
-  
-  # Import them into a list format
+  # Import conflict summary files into a list format
   mismatches.list <- list(NULL)
   counter <- 1
-  for (p in seq(from = 1, to = length(user.args), by = 2)){
-    mismatches.list[[counter]] <- read.csv(file = paste(user.args[p], "/conflicts_summary.csv", sep = ""))
-    names(mismatches.list)[counter] <- user.args[p+1]
+  for (p in 1:length(pident.folders)){
+    mismatches.list[[counter]] <- read.csv(file = paste(pident.folders[p], "/conflicts_summary.csv", sep = ""))
+    names(mismatches.list)[counter] <- as.character(pident.values[p])
     counter <- counter + 1
   }
   
@@ -55,25 +62,44 @@ import.all.conflict.summaries <- function(UserArgs){
   return(mismatches.matrix)
 }
 
+# import the database conflicts summary file
+import.database.conflicts <- function(DatabaseFolder){
+  db.conflicts.folder.path <- DatabaseFolder
+  db.conflicts <- read.csv(file = paste(db.conflicts.folder.path, "/conflicts_summary.csv", sep =""), stringsAsFactors = F)
+  # the sequences totals are not needed here
+  return(db.conflicts[1:5,])
+}
+
 # import the OTU table and then pull out just the total reads for each seqID
-import.and.reformat.otu.table <- function(UserArgs){
-  userprefs <- UserArgs
+import.and.reformat.otu.table <- function(OTUtable){
+  otu.table.path <- OTUtable
   
-  otu.table.file.path <- userprefs[1]
-  
-  otus <- read.table(file = otu.table.file.path, header = TRUE, stringsAsFactors = FALSE)
+  otus <- read.table(file = otu.table.path, header = TRUE, stringsAsFactors = FALSE)
   seqID.reads <- data.frame(seqID = otus[ ,1], reads = rowSums(otus[ ,-1]))
   
   return(seqID.reads)
 }
 
+# import the ids.above. files that list seqIDs above the pident cutoff
+# This is used inside the add.totals.to.read.summaries() function
+import.ids.above <- function(FilePaths, PidentsUsed){
+  ids.file.paths <- FilePaths
+  pident.values <- PidentsUsed
+  
+  fw.ids <- list(NULL)
+  for (p in 1:length(pident.values)){
+    fw.ids[[p]] <- scan(file = ids.file.paths[p])
+    names(fw.ids)[p] <- pident.values[p]
+  }
+  
+  return(fw.ids)
+}
+
 # import files comparing conflicts at each level, record the seqIDs into a list of lists
 # structure: outer list- each pident, inner lists- seqIDs at each taxa level
-get.conflict.seqIDs <- function(UserArgs){
-  userprefs <- UserArgs
-  user.args <- userprefs[-c(1,2)]
-  pident.folders <- user.args[seq(from = 1, to = length(user.args), by = 2)]
-  pident.values <- user.args[seq(from = 1, to = length(user.args), by = 2)+1]
+get.conflict.seqIDs <- function(ConflictsFolders, PidentsUsed){
+  pident.folders <- ConflictsFolders
+  pident.values <- PidentsUsed
   
   all.pidents <- list(NULL)
   # for each pident folder
@@ -145,29 +171,24 @@ generate.summary.table.of.reads <- function(ReadsList){
 
 # add to the read.summaries table the overall totals to match the otu.summaries structure
 # this involves importing the fw_classified_taxonomies.csv file to get the list of fw seqIDs
-add.totals.to.read.summaries <- function(ReadSummaryTable, AbundanceTable, UserArgs){
+add.totals.to.read.summaries <- function(ReadSummaryTable, AbundanceTable, PidentsUsed, CustomSeqIDs){
   seqID.reads <- AbundanceTable
   reads.summary <- ReadSummaryTable
-  userprefs <- UserArgs
-  user.args <- userprefs[-c(1,2)]
-  pident.folders <- user.args[seq(from = 1, to = length(user.args), by = 2)]
-  pident.values <- user.args[seq(from = 1, to = length(user.args), by = 2)+1]
+  pident.values <- PidentsUsed
+  fw.ids <- CustomSeqIDs
   
   fw.reads <- NULL
   # for each pident tried
-  for (p in 1:length(pident.folders)){
-    all.files <- list.files(pident.folders[p])
-    fw.classified <- read.csv(file = paste(pident.folders[p], "/", all.files[8], sep=""))
-    fw.seqIDs <- fw.classified[ ,1]
+  for (p in 1:length(pident.values)){
     
     # for each seqID classified with FW
     fw.reads[p] <- 0
-    if (length(fw.seqIDs) > 0){
-      for (s in 1:length(fw.seqIDs)){
-        index <- which(seqID.reads[,1] == fw.seqIDs[s])
+    if (length(fw.ids[[p]]) > 0){
+      for (s in 1:length(fw.ids[[p]])){
+        index <- which(seqID.reads[,1] == fw.ids[[p]][s])
         fw.reads[p] <- fw.reads[p] + seqID.reads[index,2]
       } 
-    } # no else b/c it's already zero at start 
+    }
     names(fw.reads)[p] <- paste("pident", pident.values[p], sep = "")
   }
   
@@ -182,11 +203,10 @@ add.totals.to.read.summaries <- function(ReadSummaryTable, AbundanceTable, UserA
 }
 
 # import bootstrap p-values to compare
-import.bootstrap.pvalues <- function(UserArgs, FW = TRUE){
-  userprefs <- UserArgs
-  user.args <- userprefs[-c(1,2)]
-  pident.folders <- user.args[seq(from = 1, to = length(user.args), by = 2)]
-  pident.values <- user.args[seq(from = 1, to = length(user.args), by = 2)+1]
+import.bootstrap.pvalues <- function(ConflictFolders, PidentsUsed, FW = TRUE){
+  pident.folders <- ConflictFolders
+  pident.values <- PidentsUsed
+  
   if (FW == TRUE){
     db <- "fw"
   }else{
@@ -222,9 +242,10 @@ import.bootstrap.pvalues <- function(UserArgs, FW = TRUE){
 # Define functions to plot the data
 #####
 
-plot.num.forced <- function(ConflictSummaryTable, UserArgs, ByReads = FALSE, AsPercent = FALSE, y.axis.limit = 0){
+plot.num.forced <- function(ConflictSummaryTable, ResultsFolder, DBconflicts = as.data.frame(FALSE), ByReads = FALSE, AsPercent = FALSE, y.axis.limit = 0){
   sum.table <- ConflictSummaryTable
-  results.file.path <- UserArgs[2]
+  results.file.path <- ResultsFolder
+  db.conflicts <- DBconflicts
   
   # remove the last 2 rows of number FW sequences- totals info not needed for this plot.
   mismatches <- sum.table[1:(nrow(sum.table)-2),]
@@ -254,29 +275,47 @@ plot.num.forced <- function(ConflictSummaryTable, UserArgs, ByReads = FALSE, AsP
     yplotlabel <- paste("_y-axis_cutoff_",ymax, sep = "")
   }
   
+  if (db.conflicts[1,1] == FALSE){
+    db.label <- ""
+    db.plot.label <- ""
+  }else{
+    db.label <- "-DBs_included"
+    db.plot.label <- "\nHorizonal lines show the conflicts between the databases"
+  }
+  
   # Save plot as .png file
-  png(filename = paste(results.file.path, "/Classification_Disagreements_of_", plot.of, "_", plot.as, "s", yplotlabel, ".png", sep = ""), 
+  png(filename = paste(results.file.path, "/Classification_Disagreements_of_", plot.of, "_", plot.as, "s", yplotlabel, db.label, ".png", sep = ""), 
       width = 5, height = 5, units = "in", res = 100)
   
   # Set up an empty plot
   plot(x = 0, type = "n", ylim = c(0,ymax), xlim = c(min(pidents),max(pidents)),
-       main = "Disagreements Between Custom and General Taxonomy Classifications\n(Are we forcing OTUs into our favorite groups?)", cex.main = .8,
+       main = paste("Disagreements Between Custom and General Taxonomy Classifications\n(Are we forcing OTUs into our favorite groups?)", db.plot.label, sep = ""),
+       cex.main = .8,
        ylab = paste("Classification Disagreements (", plot.as, " ", plot.of, "s)", sep = ""), cex.lab = .8, 
        xlab = "\"full length\" pident cutoff (similar to ANI of read to custom database)")
   
   # Fill Plot with beautiful data
   color <- rainbow(nrow(mismatches))
   for (r in 1:nrow(mismatches)){
-    lines(x = pidents, y = mismatches[r,], col = color[r], lwd = 4)
+    lines(x = pidents, y = mismatches[r,], col = color[r], lwd = 2)
     points(x = pidents, y = mismatches[r,], col = color[r], pch = 19, cex =1.3)
   }
-  legend("center", legend = row.names(mismatches), text.col = color, cex=1.3)
+  
+  # Add database conflicts for baseline, if desired:
+  if (db.conflicts[1,1] != FALSE){
+    for (r in 1:nrow(db.conflicts)){
+      abline(h = db.conflicts[r,2], col = color[r])
+    }
+  }
+  
+  legend("topright", legend = row.names(mismatches), text.col = color, cex=1)
+  
   dev.off()
 }
 
-plot.num.classified.outs <- function(ConflictSummaryTable, UserArgs, ByReads = FALSE, AsPercent = TRUE){
+plot.num.classified.outs <- function(ConflictSummaryTable, ResultsFolder, ByReads = FALSE, AsPercent = TRUE){
   sum.table <- ConflictSummaryTable
-  results.file.path <- UserArgs[2]
+  results.file.path <- ResultsFolder
   
   # pull out data needed for this plot
   num.fw <- sum.table[nrow(sum.table)-1,]
@@ -314,10 +353,10 @@ plot.num.classified.outs <- function(ConflictSummaryTable, UserArgs, ByReads = F
   dev.off()
 }
   
-plot.bootstrap.percents <- function(FWpValues, GGpValues, UserArgs){
+plot.bootstrap.percents <- function(FWpValues, GGpValues, ResultsFolder){
   fw.pvalues <- FWpValues
   gg.pvalues <- GGpValues
-  results.file.path <- UserArgs[2]
+  results.file.path <- ResultsFolder
   
   # set up a new file for the plot
   png(filename = paste(results.file.path, "/Taxonomy_Assignment_Confidences.png", sep = ""), 
@@ -364,43 +403,49 @@ plot.bootstrap.percents <- function(FWpValues, GGpValues, UserArgs){
 
 # examine custom taxonomy disagreements and contribution by number OTUs
 
-otu.summaries <- import.all.conflict.summaries(UserArgs = userprefs)
+otu.summaries <- import.all.conflict.summaries(ConflictFolders = pident.folders, PidentsUsed = pident.values)
 
-plot.num.forced(ConflictSummaryTable = otu.summaries, UserArgs = userprefs)
-plot.num.forced(ConflictSummaryTable = otu.summaries, UserArgs = userprefs, y.axis.limit = 10)
-plot.num.forced(ConflictSummaryTable = otu.summaries, UserArgs = userprefs, AsPercent = TRUE)
-plot.num.forced(ConflictSummaryTable = otu.summaries, UserArgs = userprefs, AsPercent = TRUE, y.axis.limit = 1)
+db.summary <- import.database.conflicts(DatabaseFolder = db.conflicts.folder.path)
 
-plot.num.classified.outs(ConflictSummaryTable = otu.summaries, UserArgs = userprefs, AsPercent = FALSE)
-plot.num.classified.outs(ConflictSummaryTable = otu.summaries, UserArgs = userprefs, AsPercent = TRUE)
+plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path)
+plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, y.axis.limit = 10)
+# plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE)
+# plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE, y.axis.limit = 1)
+plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, DBconflicts = db.summary, y.axis.limit = max(db.summary[,2]))
+
+# plot.num.classified.outs(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = FALSE)
+plot.num.classified.outs(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE)
 
 
 # examine custom taxonomy disagreements and contribution by number reads
 
-seqID.reads <- import.and.reformat.otu.table(UserArgs = userprefs)
+seqID.reads <- import.and.reformat.otu.table(OTUtable = otu.table.path)
 
-conflict.seqIDs <- get.conflict.seqIDs(UserArgs = userprefs)
+conflict.seqIDs <- get.conflict.seqIDs(ConflictsFolders = pident.folders, PidentsUsed = pident.values)
 
 conflict.seqID.reads <- find.reads.per.seqID(ReadsTable = seqID.reads, ConflictsList = conflict.seqIDs)
 
 read.summaries <- generate.summary.table.of.reads(ReadsList = conflict.seqID.reads)
 
-read.summaries <- add.totals.to.read.summaries(ReadSummaryTable = read.summaries, AbundanceTable = seqID.reads, UserArgs = userprefs)
+custom.seqIDs <- import.ids.above(FilePaths = ids.file.paths, PidentsUsed = pident.values)
 
-plot.num.forced(ConflictSummaryTable = read.summaries, UserArgs = userprefs, ByReads = TRUE)
-plot.num.forced(ConflictSummaryTable = read.summaries, UserArgs = userprefs, ByReads = TRUE, y.axis.limit = 10000)
-plot.num.forced(ConflictSummaryTable = read.summaries, UserArgs = userprefs, ByReads = TRUE, AsPercent = TRUE)
-plot.num.forced(ConflictSummaryTable = read.summaries, UserArgs = userprefs, ByReads = TRUE, AsPercent = TRUE, y.axis.limit = 1)
+read.summaries <- add.totals.to.read.summaries(ReadSummaryTable = read.summaries, AbundanceTable = seqID.reads, 
+                                               PidentsUsed = pident.values, CustomSeqIDs = custom.seqIDs)
 
-plot.num.classified.outs(ConflictSummaryTable = read.summaries, UserArgs = userprefs, ByReads = TRUE, AsPercent = FALSE)
-plot.num.classified.outs(ConflictSummaryTable = read.summaries, UserArgs = userprefs, ByReads = TRUE, AsPercent = TRUE)
+# plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE)
+# plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, y.axis.limit = 10000)
+plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE)
+plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE, y.axis.limit = .1)
+
+# plot.num.classified.outs(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = FALSE)
+plot.num.classified.outs(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE)
 
 
 # examine pident cutoff relationship to bootstrap p-values
 
-fw.pvalues <- import.bootstrap.pvalues(UserArgs = userprefs, FW = TRUE)
-gg.pvalues <- import.bootstrap.pvalues(UserArgs = userprefs, FW = FALSE)
-
-plot.bootstrap.percents(FWpValues = fw.pvalues, GGpValues = gg.pvalues, UserArgs = userprefs)
+# fw.pvalues <- import.bootstrap.pvalues(ConflictFolders = pident.folders, PidentsUsed = pident.values, FW = TRUE)
+# gg.pvalues <- import.bootstrap.pvalues(ConflictFolders = pident.folders, PidentsUsed = pident.values, FW = FALSE)
+# 
+# plot.bootstrap.percents(FWpValues = fw.pvalues, GGpValues = gg.pvalues, ResultsFolder = plots.folder.path)
 
 

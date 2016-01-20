@@ -48,30 +48,39 @@ Summary of Steps and Commands (all commands entered in terminal window):
 9. combine taxonomy files (terminal)
 	cat otus.above.98.custom.wang.taxonomy otus.below.98.general.wang.taxonomy > otus.98.taxonomy
 
-10. assign taxonomy without custom database (mothur, bash)
+10. assign taxonomy with general database only (mothur, bash)
 	mothur "#classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
 	cat otus.general.wang.taxonomy > otus.general.taxonomy
 
-11. reformat taxonomy files (bash)
+11. assign taxonomy to custom database with general database (mothur, bash)
+	mothur "#classify.seqs(fasta=custom.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
+	mv custom.general.wang.taxonomy custom.general.taxonomy
+
+12. reformat taxonomy files (bash)
 	sed 's/[[:blank:]]/\;/' <otus.98.taxonomy >otus.98.taxonomy.reformatted
 	mv otus.98.taxonomy.reformatted otus.98.taxonomy
 	sed 's/[[:blank:]]/\;/' <otus.general.taxonomy >otus.general.taxonomy.reformatted
 	mv otus.general.taxonomy.reformatted otus.general.taxonomy
+	sed 's/[[:blank:]]/\;/' <custom.general.taxonomy >custom.general.taxonomy.reformatted
+	mv custom.general.taxonomy.reformatted custom.general.taxonomy
+	sed 's/[[:blank:]]/\;/' <custom.taxonomy >custom.custom.taxonomy
 	
-12. compare taxonomy files (R)
+13. compare taxonomy files (R)
 	mkdir conflicts_98
-	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 70 
+	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 70
+	mkdir conflicts_database
+	Rscript find_classification_disagreements.R custom.custom.taxonomy custom.general.taxonomy NA conflicts_database NA 70 database 
 
-13. check that pident cutoff is appropriate (R)
-	Rscript plot_classification_disagreements.R otus.abund plots conflicts_94 94 conflicts_96 96 conflicts_98 98
+14. choose appropriate pident cutoff (R)
+	Rscript plot_classification_disagreements.R otus.abund plots conflicts_database conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98
 
-14. generate final taxonomy file (R)
+15. generate final taxonomy file (R)
 	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 70 final
 
-15. tidy up (bash)
+16. tidy up (bash)
 	rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy
 	mkdir scripts
-	mv *.py *.R scripts/
+	mv *.py *.R *.sh scripts/
 	mkdir analysis/
 	mv conflicts* plots/ analysis/
 	mkdir data
@@ -405,7 +414,7 @@ RScript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
 What mkdir command does:
 	mkdir		stands for "make directory", this creates a new folder
 	plots		the name of the new folder you are creating
-				this is where step 5 and step 13 will save plots generated for checking the cutoff
+				this is where step 5 and step 14 will save plots generated for checking the cutoff
 
 What each argument in the RScript is (keep in order and separate with a space):
 	RScript								sources an R script and allows it to accept arguments from the command line
@@ -577,7 +586,7 @@ NOTE: these bootstrap percent confidence values are NOT the confidence that the 
 assignment is *correct*, just that it is *repeatable* in that database.  This is another 
 paremeter that we could explore changing more in the future.  It likely should be different
 in the different databases also because of the different database sizes.  I left cutoff out
-in this command so that you can explore the different results of it later, in steps 12-13.
+in this command so that you can explore the different results of it later, in steps 13-14.
 
 
 __________________________________________________________________________________________
@@ -604,7 +613,7 @@ What the filenames are:
 
 __________________________________________________________________________________________
 
-Steps 10-13 are an optional check.
+Steps 10-14 are an optional check.
 __________________________________________________________________________________________
 
 10. assign taxonomy with general database only (mothur, bash)
@@ -625,19 +634,52 @@ mothur "#classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=genera
 cat otus.general.wang.taxonomy > otus.general.taxonomy
 
 What the commands do:
-	See step 8 for a detailed explanation of these four commands and their arguments.
+	See step 8 for a detailed explanation of these two commands and their arguments.
 
 What the filenames are:
-	otus.fasta			the original fasta file of your OTU sequences
-	general.fasta		the fasta file of the large, general database
-	general.taxonomy	the taxonomy file of the large, general database
+	otus.fasta					the original fasta file of your OTU sequences
+	general.fasta				the fasta file of the large, general database
+	general.taxonomy			the taxonomy file of the large, general database
+	otus.general.wang.taxonomy	the taxonomy of your OTUs assigned by the general database
+								this is the default name created by mothur
+	otus.general.taxonomy		the otus.general.wang.taxonomy file renamed
 
 
 __________________________________________________________________________________________
 
-11. reformat taxonomy files (bash)
+11. assign taxonomy to custom database with general database (mothur, bash)
 
-The R script in step 12 requires semicolon delimited taxonomy files.  The mothur output
+This allows you to compare your two databases to get an idea of the baseline level of 
+disagreement you can expect from their taxonomy classifications.  Also, in step 13 you
+will generate a list of these disagreements that you can use to update your custom
+database classifications to better match your general database, if desired.  When you 
+choose an appropriate pident cutoff the goal is to avoid forcing OTUs into the custom
+database, which can be seen when the general database gives a very different 
+classification. Knowing the level of disagreement between the databases themselves can
+give you an idea of how much disagreement is acceptable.
+
+Full Two Commands (Type in Terminal):
+
+mothur "#classify.seqs(fasta=custom.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
+cat custom.general.wang.taxonomy custom.general.taxonomy
+
+
+What the commands do:
+	See step 8 for a detailed explanation of these two commands and their arguments.
+
+What the filenames are:
+	custom.fasta					the fasta file of the small, custom database
+	general.fasta					the fasta file of the large, general database
+	custom.general.wang.taxonomy	the taxonomy of your custom database assigned by the general database
+									this is the default name created by mothur
+	custom.general.taxonomy			the custom.general.wang.taxonomy file renamed
+	
+	
+__________________________________________________________________________________________
+
+12. reformat taxonomy files (bash)
+
+The R script in step 13 requires semicolon delimited taxonomy files.  The mothur output
 .taxonomy files are delimited with both tabs and semicolons.
 
 Reformat both files you will compare:
@@ -647,12 +689,15 @@ Reformat both files you will compare:
 Find: tab
 Replace: semicolon
 
-Full Four Commands (Type in Terminal):
+Full Seven Commands (Type in Terminal):
 
 sed 's/[[:blank:]]/\;/' <otus.98.taxonomy >otus.98.taxonomy.reformatted
 mv otus.98.taxonomy.reformatted otus.98.taxonomy
 sed 's/[[:blank:]]/\;/' <otus.general.taxonomy >otus.general.taxonomy.reformatted
 mv otus.general.taxonomy.reformatted otus.general.taxonomy
+sed 's/[[:blank:]]/\;/' <custom.general.taxonomy >custom.general.taxonomy.reformatted
+mv custom.general.taxonomy.reformatted custom.general.taxonomy
+sed 's/[[:blank:]]/\;/' <custom.taxonomy >custom.custom.taxonomy
 
 Syntax of commands and what each argument does:
 	sed 's/find/replace/ <input >output
@@ -670,13 +715,9 @@ Syntax of commands and what each argument does:
 				simply keeping the edited file the same name  
 		
 
-***I should use mv above when I rename files too, to keep the total # of crap down
-instead of cat that I think leaves the old file there still too...
-
-
 __________________________________________________________________________________________
 
-12. compare taxonomy files (bash, R)
+13. compare taxonomy files (bash, R)
 
 The R script find_classification_disagreements.R  creates a folder containing a file for 
 each upper taxonomic level (kingdom, phylum, class, order, lineage) that lists all of the 
@@ -710,80 +751,104 @@ Full Two Commands (type in terminal):
 
 mkdir conflicts_98
 Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 70
+mkdir conflicts_database
+Rscript find_classification_disagreements.R custom.custom.taxonomy custom.general.taxonomy NA conflicts_database NA 70 database 
 
 Note: you must enter all the arguments in this order.
 
-What the arguments are:
-	Rscript									this opens R to accept arguments from the command line
-	find_classification_disagreements.R		this is the R script you're calling
-	fw.plus.gg.tax.file.path				this is the path to your custom taxonomy file
-											i.e. the path to otus.taxonomy created in step 9
-	gg.only.tax.file.path					this is the path to the general-only taxonomy file
-											i.e. the path to otus.general.taxonomy
-	seq.ids.above.cutoff.file.path			this is the path to the file created in step 4 that
+What the arguments are the first time you source the script:
+1.	Rscript									this opens R to accept arguments from the command line
+2.	find_classification_disagreements.R		this is the R script you're sourcing
+3.	otus.98.taxonomy						this is the path to your otu taxonomy file 
+											created using both databases in step 9
+4.	otus.general.taxonomy					this is the path to your otu taxonomy file
+											created using only the general database in step 10
+5.	ids.above.98							this is the path to the file created in step 4 that
 											contains all of the sequence IDs above or equal to 
-											your BLAST cutoff. i.e. the path to ids.above.98
-	results.folder.path						this is the path to the folder you want the R script
-											to save the .csv results files in.
-											NOTE: you must create this folder before running script!
-	blast.pident.cutoff						this is the pident you're using.
-	taxonomy.bootstrap.cutoff				this is the % confidence cutoff you want to use 
-											on the general database assignments
+											your pident cutoff
+6.	conflicts_98							this is the path to the folder you want the R script
+											to save the .csv results files in. You create this
+											folder in this step with the mkdir command.
+7.	98										this is the pident you're using.
+8.	70										this is the p-value cutoff you want to use to decide
+											if a classification is good enough to be named or 
+											should be left as unclassified. 
 	
-											
+What the arguments are the second time you source the script:
+1.	Rscript									this opens R to accept arguments from the command line
+2.	find_classification_disagreements.R		this is the R script you're sourcing
+3.	custom.custom.taxonomy					this is the path to your custom taxonomy database 
+											after re-formatting it in step 12.
+4.	custom.general.taxonomy					this is the path to your custom taxonomy database
+											classified using the general database in step 11.
+5.	NA										NA is typed as a placeholder here
+6.	conflicts_database						this is the path to the folder you want the R script
+											to save the .csv results files in. You create this
+											folder in this step with the mkdir command.
+7.	NA										NA is typed as a placeholder here
+8.	70										this is the p-value cutoff you want to use to decide
+											if a classification is good enough to be named or 
+											should be left as unclassified. 			
 
-What the generated files in your plots folder are:
+What the generated files in your conflicts folders are:
 	kingdom_conflicts.csv
 	phylum_conflicts.csv
 	class_conflicts.csv
 	order_conflicts.csv
 	lineage_conflicts.csv
+	conflicts_summary.csv
 
 
 __________________________________________________________________________________________
 
-13. check that pident cutoff is appropriate (R)
+14. choose appropriate pident cutoff (R)
 
 This step generates some plots that you can use to double check that your chosen cutoff is 
 appropriate.  The plots are saved into the "plots" folder that you created in step 5.  In
-order to examine the cutoff sensitivity, you may want to run steps 4-9 & 11-12 multiple times
+order to examine the cutoff sensitivity, you may want to run steps 4-9 & 12-14 multiple times
 with different pident cutoffs.  Note that the slowest step, classify.seqs() in mothur, will
-be much faster as long as the mothur database files are still saved.
+be much faster because the mothur database files are not re-made.
 
-Rscript plot_classification_disagreements.R otus.abund plots conflicts_94 94 conflicts_96 96 conflicts_98 98
+Rscript plot_classification_disagreements.R otus.abund plots conflicts_database conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98
 
 What the arguments are:
-	Rscript									Calls program R in a way that accepts command line arguments
-	plot_classification_disagreements.R		name of the script you are calling
-	otus.abund								OTU relative abundance table
-	plots									path to folder you are saving the plots into.
-											note: this folder must already exist. you made it in step 5.
-	conflicts_94							path to folder containing taxonomy disagreements between
-											the workflow and the general database alone.
-											You made this folder in step 12.
-	94										pident cutoff for the previous folder
-	conflicts_96							folder of taxonomy disagreements
-	96										pident cutoff for previous folder
-	conflicts_98							folder of taxonomy disagreements
-	98										pident cutoff for previous folder
-	...										you can have as many pident cutoffs compared as you
-											want.  List them all as arguments in this form:
-											folder_path pident folder_path pident ...
+1.		Rscript									Calls program R in a way that accepts command line arguments
+2.		plot_classification_disagreements.R		name of the script you are calling
+3.		otus.abund								OTU relative abundance table
+4.		plots									path to folder you are saving the plots into.
+												note: this folder must already exist. you made it in step 5.
+5.		conflicts_database						path to folder containing taxonomy disagreements between
+												the custom and the general database.
+												You made this folder in step 13.
+6.		conflicts_94							path to folder containing taxonomy disagreements between
+												this cutom+general workflow and the general database alone.
+												You made this folder in step 13.
+7.		ids.above.94							path to the file that lists all the seqIDs meeting your
+												pident cutoff that were therefore classified with your
+												custom databse. You made this file in step 4.
+8.		94										pident cutoff used in the previous two arguments
+8.		conflicts_96							folder of taxonomy disagreements
+9.		ids.above.94							file of custom-classified seqIDs	
+10.		96										pident cutoff for previous two arguments
+n.		...										additional arguments
+												you can have as many pident cutoffs compared as you
+												want.  Just keep listing them in this format:
+												folder_path ids.file pident folder_path ids.file pident ...
 
 What the generated plots are:
 	***choose which ones to export***
 
 __________________________________________________________________________________________
 
-14. generate final taxonomy file (R)
+15. generate final taxonomy file (R)
 
-Based on your results from step 13, choose which pident cutoff to use.  Use the same script 
-from step 12, except this time specify "final."  This final taxonomy file is different from 
+Based on your results from step 14, choose which pident cutoff to use.  Use the same script 
+from step 13, except this time specify "final."  This final taxonomy file is different from 
 files created in step 9 because it applies your clustering bootstrap pvalue cutoff, calling
 everything below that cutoff "unclassified."  
 
 Recall that choosing that cutoff was left out of the mothur command to allow flexibility in
-analyzing results.  The "final" argument to this script is left out in step 12 because it takes
+analyzing results.  The "final" argument to this script is left out in step 13 because it takes
 longer when it is included.  This is because in finding the classification disagreements, the
 script only compares classifications assigned by the custom database, which is a small subset 
 of all of the classifications.
@@ -793,7 +858,7 @@ Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxono
 
 __________________________________________________________________________________________
 
-15. tidy up (bash)
+16. tidy up (bash)
 
 This step tidies up your working directory folder by removing intermediate files you don't 
 need anymore and moving remaining files into orgainized folders.
@@ -801,7 +866,7 @@ Note: these bash commands only work if you've been using the same names as the w
 Note: go through these commands in order.
 
 
-15.1 remove intermediate files
+16.1 remove intermediate files
 
 Full Command (Type in Terminal):
 
@@ -822,7 +887,7 @@ otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy
 				the classifications at different pident cutoffs and from green genes alone
 				note: these files don't have p-value cutoffs applied (i.e. nothing's called unclassified). 
 				If you want to save files like these for additional analysis, 
-					re-run step 14 to get additional "final" versions.
+					re-run step 15 to get additional "final" versions.
 					re-run step 10 with an additional "cutoff=" flag.
 
 Note: if for some reason you want to keep these files, you can either skip this step
@@ -832,17 +897,17 @@ mkdir intermediate
 mv custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta intermediate/
 
 
-15.2 move scripts into scripts folder
+16.2 move scripts into scripts folder
 
 Full 2 commands (Type in Terminal):
 
 mkdir scripts
-mv *.py *.R scripts/
+mv *.py *.R *.sh scripts/
 
 Note: I recommend saving all the script versions you used to create your data so you could reproduce it.
 
 
-15.3 save files used in analyzing your results in analysis folder
+16.3 save files used in analyzing your results in analysis folder
 
 Full 2 commands (Type in Terminal):
 
@@ -853,7 +918,7 @@ Note: You can delete this instead if you're all done analyzing. Instead of the t
 
 rm -r conflicts* plots/
 
-15.4 save your actual data files in a folder called data
+16.4 save your actual data files in a folder called data
 
 Full Two commands (Type in Terminal):
 
@@ -863,7 +928,7 @@ mv otus* data/
 Note: Yeyy!  This is what you're gonna use to actually do stuff now!!
 
 
-15.5 save the version of the taxonomy databases you used in a databases folder
+16.5 save the version of the taxonomy databases you used in a databases folder
 
 Full Two Commands (type in terminal):
 

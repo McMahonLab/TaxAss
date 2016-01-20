@@ -10,7 +10,7 @@
 
 # Choose pidents to test over.
 
-pident=("100" "98" "96" "94")
+pident=("100" "99" "98" "97" "96" "95" "94")
 
 # First Run steps 1-12 to generate databases and folders exactly following workflow
 # Note: still gotta do the reformatting on your own (step 0)
@@ -32,15 +32,22 @@ mothur "#classify.seqs(fasta=otus.below.${pident[0]}.fasta, template=general.fas
 cat otus.above.${pident[0]}.custom.wang.taxonomy otus.below.${pident[0]}.general.wang.taxonomy > otus.${pident[0]}.taxonomy
 mothur "#classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
 cat otus.general.wang.taxonomy > otus.general.taxonomy
+mothur "#classify.seqs(fasta=custom.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
+mv custom.general.wang.taxonomy custom.general.taxonomy
 sed 's/[[:blank:]]/\;/' <otus.${pident[0]}.taxonomy >otus.${pident[0]}.taxonomy.reformatted
 mv otus.${pident[0]}.taxonomy.reformatted otus.${pident[0]}.taxonomy
 sed 's/[[:blank:]]/\;/' <otus.general.taxonomy >otus.general.taxonomy.reformatted
 mv otus.general.taxonomy.reformatted otus.general.taxonomy
+sed 's/[[:blank:]]/\;/' <custom.general.taxonomy >custom.general.taxonomy.reformatted
+mv custom.general.taxonomy.reformatted custom.general.taxonomy
+sed 's/[[:blank:]]/\;/' <custom.taxonomy >custom.custom.taxonomy
 mkdir conflicts_${pident[0]}
 Rscript find_classification_disagreements.R otus.${pident[0]}.taxonomy otus.general.taxonomy ids.above.${pident[0]} conflicts_${pident[0]} ${pident[0]} 70
+mkdir conflicts_database
+Rscript find_classification_disagreements.R custom.custom.taxonomy custom.general.taxonomy NA conflicts_database NA 70 database 
 
 # Next Run steps 4-9, the first half of 11, and 12 with different pident cutoffs
-# Define a function called pident since you repeat this part many times
+# Define a function called runagain since you repeat this part many times
 
 runagain () {
    Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.above.$1 $1 TRUE 
@@ -76,10 +83,10 @@ wait
 args_string=""
 for p in ${pident[*]}
 do
-   args_string+=" conflicts_$p $p"
+   args_string+=" conflicts_$p ids.above.$p $p"
 done
 
-Rscript plot_classification_disagreements.R otus.abund plots $args_string
+Rscript plot_classification_disagreements.R otus.abund plots conflicts_database $args_string
 
 printf 'Steps 1-13 have finished running.  Now analysze the plots from step 13 to choose your final pident and generate your final taxonomy file in step 14.  Then tidy up your working directory with step 15. \n \a'
 sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; 

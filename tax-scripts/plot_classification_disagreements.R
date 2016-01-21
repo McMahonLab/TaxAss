@@ -310,7 +310,7 @@ plot.num.forced <- function(ConflictSummaryTable, ResultsFolder, DBconflicts = a
   
   legend("topright", legend = row.names(mismatches), text.col = color, cex=1)
   
-  dev.off()
+  unnecessary.message <- dev.off()
 }
 
 plot.num.classified.outs <- function(ConflictSummaryTable, ResultsFolder, ByReads = FALSE, AsPercent = TRUE){
@@ -350,7 +350,7 @@ plot.num.classified.outs <- function(ConflictSummaryTable, ResultsFolder, ByRead
   lines(x = pidents, y = num.fw, col = "lightsalmon", lwd = 1.5)
   points(x = pidents, y = num.fw, col = "lightsalmon", pch = 19, cex = 1.3)
   
-  dev.off()
+  unnecessary.message <- dev.off()
 }
   
 plot.bootstrap.percents <- function(FWpValues, GGpValues, ResultsFolder){
@@ -392,7 +392,7 @@ plot.bootstrap.percents <- function(FWpValues, GGpValues, ResultsFolder){
   mtext("RDP Classifier Repeatability (that number after your taxonomy name)", side = 2, outer = T, line = 4.9, cex = 1.2)
   
   # finish plotting and create the file
-  dev.off()
+  unnecessary.message <- dev.off()
 }
 
 

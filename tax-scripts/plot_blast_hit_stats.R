@@ -121,14 +121,14 @@ bar.plot.blast.results <- function(BlastHitsTable, OutputFolder, NumBars, Cutoff
     barplot(height = hits.matrix[,2], names.arg = hits.matrix[,1], ylim = c(0,100),
             main = "Which BLAST hit gave the best \"full length\" pident?\n(no cutoff pident applied)",
             xlab = "Hit Number", ylab = "Percent of Best Hits (%)", col = "lightsalmon")
-    dev.off()
+    unnecessary.comment <- dev.off()
   }else{
     png(filename = paste(plot.folder, "/BLAST_hits_used_for_pident_", Cutoff, ".png", sep=""), 
         width = 5.5, height = 5, units = "in", res = 100)
     barplot(height = hits.matrix[,2], names.arg = hits.matrix[,1], ylim = c(0,100),
             main = paste("Which BLAST hit gave the best \"full length\" pident?\n(out of seqIDs above cutoff: >=",Cutoff,")",sep=""),
             xlab = "Hit Number", ylab = "Percent of Best Hits (%)", col = "lightsalmon")
-    dev.off()
+    unnecessary.comment <- dev.off()
   }
 }
 
@@ -173,7 +173,7 @@ bar.plot.stacked.blast.results <- function(BlastTable, CutoffVector, OutputFolde
                        "However, if there is a lot of color in your chosen pident's bar you must adjust the BLAST settings to correct that!\n",
                        sep = "")
   mtext(text = description, side = 1, line = 7.5, at = -2, cex = .75, adj = 0)
-  dev.off()
+  unnecessary.comment <- dev.off()
   
 #   legend(x = num.hits.reported+1, y = 100, legend = row.names(hits.matrix), 
 #          text.col = rainbow(length(num.hits.reported)))
@@ -200,7 +200,7 @@ line.plot.overlay.blast.results <- function(BlastTable, CutoffVector, OutputFold
   
   # Add a legend:
   legend(x = 4, y = 100, legend = sort(cutoffs, decreasing=T), text.col = rainbow(length(cutoffs))[length(cutoffs):1])
-  dev.off()
+  unnecessary.comment <- dev.off()
 }
  
 #####

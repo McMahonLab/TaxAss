@@ -35,7 +35,6 @@ Summary of Steps and Commands (all commands entered in terminal window):
 
 6. recover sequence IDs left out of blast (python, bash)
 	python find_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table ids.missing
-	cat ids.below.98 ids.missing > ids.below.98.all
 	
 7. create fasta files of desired sequence IDs (python)
 	python create_fastas_given_seqIDs.py ids.above.98 otus.fasta otus.above.98.fasta
@@ -471,10 +470,9 @@ The bash command cat concatenates these missing ids with the ids below the chose
 pident.  That is because the ids blast didn't report hits for had even worse pidents than 
 the ones that didn't make the R script cutoff.
 
-Full Two Commands (type in terminal):
+Full Command (type in terminal):
 
 python find_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table ids.missing
-cat ids.below.98 ids.missing > ids.below.98.all
 
 These arguments in the python script must be in the correct order.
 python sources the .py script using the arguments supplied after it in the terminal.
@@ -485,17 +483,12 @@ What each argument is- 1st command (python):
 	2nd: fastafile		path to the fasta file containing all the seqIDs
 	3rd: blastfile		path to the blast results in table format (col1 = seqID)				
 	4th: outputfile		path to the file with \n delimited seqIDs the script creates
-
-What the syntax is- 2nd command (bash):
-	cat file1 file2 > file3		means "combine file1 and file2 into file 3"
 						
 What each file is:
 	find_seqIDs_blast_removed.py	python script you're sourcing
 	otus.fasta						original fasta file of your sequences from step 0
 	otus.FW.blast.table				reformatted blast results from step 3
-	ids.missing						missing seqIDs file created in this step with python
-	ids.below.98					seqIDs below your cutoff from R script in step 4
-	ids.below.98.all				all seqIDs below your cutoff created in this step with bash
+	ids.below.98					seqIDs below your cutoff from R script in step 4 as well as those missing from the BLAST results
 
 Note: It's a little concerning that so many sequences were not reported by blast.  They are
 16S sequences so shouldn't they all be pretty close?? This may mean we should tweak the 

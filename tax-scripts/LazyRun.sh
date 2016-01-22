@@ -41,9 +41,9 @@ sed 's/[[:blank:]]/\;/' <custom.general.taxonomy >custom.general.taxonomy.reform
 mv custom.general.taxonomy.reformatted custom.general.taxonomy
 sed 's/[[:blank:]]/\;/' <custom.taxonomy >custom.custom.taxonomy
 mkdir conflicts_${pident[0]}
-Rscript find_classification_disagreements.R otus.${pident[0]}.taxonomy otus.general.taxonomy ids.above.${pident[0]} conflicts_${pident[0]} ${pident[0]} 70
+Rscript find_classification_disagreements.R otus.${pident[0]}.taxonomy otus.general.taxonomy ids.above.${pident[0]} conflicts_${pident[0]} ${pident[0]} 85 70
 mkdir conflicts_database
-Rscript find_classification_disagreements.R custom.custom.taxonomy custom.general.taxonomy NA conflicts_database NA 70 database 
+Rscript find_classification_disagreements.R custom.custom.taxonomy custom.general.taxonomy NA conflicts_database NA NA 70 database 
 
 # Next Run steps 4-9, the first half of 11, and 12 with different pident cutoffs
 # Define a function called runagain since you repeat this part many times
@@ -60,7 +60,7 @@ runagain () {
    sed 's/[[:blank:]]/\;/' <otus.$1.taxonomy >otus.$1.taxonomy.reformatted
    mv otus.$1.taxonomy.reformatted otus.$1.taxonomy
    mkdir conflicts_$1
-   Rscript find_classification_disagreements.R otus.$1.taxonomy otus.general.taxonomy ids.above.$1 conflicts_$1 $1 70
+   Rscript find_classification_disagreements.R otus.$1.taxonomy otus.general.taxonomy ids.above.$1 conflicts_$1 $1 85 70
 }
 
 # Using function runagain run the additional pidents in paralelle

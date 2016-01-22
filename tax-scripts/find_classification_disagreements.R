@@ -11,15 +11,20 @@
 # More details in 8-26-15 Analysis notes, 10-19-15 Analysis Notes, 10-21-15 Analysis Notes
 # This script generates files/data that the next scripts use for plots/stats
 
+# variable names in this script follow this format: fw.percents.fw.only 
+  # the first fw refers to which workflow, the one combining fw + gg ("fw") or gg alone "gg"
+  # the fw.only means that only the seqIDs that the workflow assigned with fw are included in the table
+
+
 #####
 # Receive arguments from terminal command line
 #####
 
 # Example syntax for pident comparison, final taxonomy generation, and database comparison, respectively:
 
-# Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 70 
-# Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 70 final
-# Rscript find_classification_disagreements.R custom.taxonomy custom.general.taxonomy NA conflicts_98 NA 70 database
+# Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 
+# Rscript find_classification_disagreements.R otus.98.taxonomy NA ids.above.98 conflicts_98 98 85 70 final
+# Rscript find_classification_disagreements.R custom.custom.taxonomy custom.general.taxonomy NA conflicts_database NA NA 70 database
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 fw.plus.gg.tax.file.path <- userprefs[1]
@@ -27,17 +32,19 @@ gg.only.tax.file.path <- userprefs[2]
 fw.seq.ids.file.path <- userprefs[3]
 results.folder.path <- userprefs[4]
 blast.pident.cutoff <- userprefs[5]
-taxonomy.bootstrap.cutoff <- userprefs[6]
-final.or.database <- userprefs[7]
+taxonomy.pvalue.cutoff.fw <- userprefs[6]
+taxonomy.pvalue.cutoff.gg <- userprefs[7]
+final.or.database <- userprefs[8]
 if (length(userprefs) < 7){final.or.database <- "non-empty string"}
 
-# fw.plus.gg.tax.file.path <- "../../take9c/custom.custom.taxonomy"
-# gg.only.tax.file.path <- "../../take9c/custom.general.taxonomy"
-# fw.seq.ids.file.path <- 98
+# fw.plus.gg.tax.file.path <- "../../take9c/otus.98.taxonomy"
+# gg.only.tax.file.path <- "../../take9c/otus.general.taxonomy"
+# fw.seq.ids.file.path <- "../../take9c/ids.above.98"
 # results.folder.path <- "../../take9c/conflicts_98"
-# blast.pident.cutoff <- NA
-# taxonomy.bootstrap.cutoff <- 70
-# final.or.database <- "database"
+# blast.pident.cutoff <- 98
+# taxonomy.pvalue.cutoff.fw <- 85
+# taxonomy.pvalue.cutoff.gg <- 70
+# final.or.database <- "non-empty string"
 
 #####
 # Define Functions for Import and Formatting
@@ -289,10 +296,11 @@ create.summary.vector <- function(){
 }
 
 # Format and export the summary vector
-export.summary.stats <- function(SummaryVector, FW_seqs, ALL_seqs){
+export.summary.stats <- function(SummaryVector, FW_seqs, ALL_seqs, FolderPath){
   num.mismatches <- SummaryVector
   fw.fw.only <- FW_seqs
   fw.percents <- ALL_seqs
+  results.folder.path <- FolderPath
   num.mismatches <- c(num.mismatches,"numFWseqs" = nrow(fw.fw.only))
   num.mismatches <- c(num.mismatches, "numALLseqs" = nrow(fw.percents))
   num.mismatches <- data.frame("TaxaLevel" = names(num.mismatches),"NumConflicts" = num.mismatches, row.names = NULL)
@@ -317,32 +325,46 @@ view.bootstraps <- function(TaxonomyTable){
 # Use Functions
 #####
 
-print.poem()
-
-fw.percents <- import.FW.names()
-gg.percents <- import.GG.names()
-
-gg.percents <- reformat.gg(GGtable = gg.percents)
-fw.percents <- reformat.fw(FWtable = fw.percents)
-
-check.files.match(FWtable = fw.percents, GGtable = gg.percents)
-
 
 # Generate a final taxonomy file:
 if (final.or.database == "final" | final.or.database == "Final" | final.or.database == "FINAL"){
   
-  final.taxonomy <- do.bootstrap.cutoff(TaxonomyTable = fw.percents, BootstrapCutoff = taxonomy.bootstrap.cutoff)
+  print.poem()
+  
+  fw.percents <- import.FW.names()
+  fw.percents <- reformat.fw(FWtable = fw.percents)
+  
+  fw.seq.ids <- import.FW.seq.IDs()
+  fw.indeces <- find.fw.indeces(TaxonomyTable = fw.percents, SeqIDs = fw.seq.ids)
+  
+  fw.percents.fw.only <- fw.percents[fw.indeces,]
+  fw.percents.gg.only <- fw.percents[-fw.indeces,]
+  
+  final.taxonomy.fw.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.fw.only, BootstrapCutoff = taxonomy.pvalue.cutoff.fw)
+  final.taxonomy.gg.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.gg.only, BootstrapCutoff = taxonomy.pvalue.cutoff.gg)
+  
+  final.taxonomy <- rbind(final.taxonomy.fw.only, final.taxonomy.gg.only)
   colnames(final.taxonomy) <- c("seqID","kingdom","phylum","class","order","lineage","clade","tribe")
-  write.table(x = final.taxonomy, file = paste("otus.", blast.pident.cutoff, ".", taxonomy.bootstrap.cutoff, ".taxonomy", sep = ""), 
+  
+  write.table(x = final.taxonomy, 
+              file = paste("otus.", blast.pident.cutoff, ".", taxonomy.pvalue.cutoff.fw, ".", taxonomy.pvalue.cutoff.gg, ".taxonomy", sep = ""), 
               sep = ";", row.names = FALSE)
 
 
 # Compare databases by looking at how GG classifies the FW representative sequences
 }else if (final.or.database == "database"){
 
+  fw.percents <- import.FW.names()
+  gg.percents <- import.GG.names()
+  
+  gg.percents <- reformat.gg(GGtable = gg.percents)
+  fw.percents <- reformat.fw(FWtable = fw.percents)
+  
+  check.files.match(FWtable = fw.percents, GGtable = gg.percents)
+  
   fw <- fw.percents # database only has names
   fw <- uniform.unclass.names.database(TaxonomyDatabase = fw)
-  gg <- do.bootstrap.cutoff(TaxonomyTable = gg.percents, BootstrapCutoff = taxonomy.bootstrap.cutoff)
+  gg <- do.bootstrap.cutoff(TaxonomyTable = gg.percents, BootstrapCutoff = taxonomy.pvalue.cutoff.gg)
   gg <- apply(gg, 2, remove.parentheses)
   
   check.files.match(FWtable = fw, GGtable = gg)
@@ -356,21 +378,30 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
                                              GGtable_percents = gg.percents, 
                                              TaxaLevel = t, tracker = num.mismatches)
   }
-  export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw, ALL_seqs = fw)
+  export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw, ALL_seqs = fw, FolderPath = results.folder.path)
   
 
 # Only compare the classifications made by the fw database to the gg classifications, not full tax tables
 }else{
   
+  fw.percents <- import.FW.names()
+  gg.percents <- import.GG.names()
+  
+  gg.percents <- reformat.gg(GGtable = gg.percents)
+  fw.percents <- reformat.fw(FWtable = fw.percents)
+  
+  check.files.match(FWtable = fw.percents, GGtable = gg.percents)
+  
   fw.seq.ids <- import.FW.seq.IDs()
   fw.indeces <- find.fw.indeces(TaxonomyTable = fw.percents, SeqIDs = fw.seq.ids)
+  
   fw.percents.fw.only <- fw.percents[fw.indeces,]
   gg.percents.fw.only <- gg.percents[fw.indeces,]
   
   check.files.match(FWtable = fw.percents.fw.only, GGtable = gg.percents.fw.only)
   
-  fw.fw.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.fw.only, BootstrapCutoff = taxonomy.bootstrap.cutoff)
-  gg.fw.only <- do.bootstrap.cutoff(TaxonomyTable = gg.percents.fw.only, BootstrapCutoff = taxonomy.bootstrap.cutoff)
+  fw.fw.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.fw.only, BootstrapCutoff = taxonomy.pvalue.cutoff.fw)
+  gg.fw.only <- do.bootstrap.cutoff(TaxonomyTable = gg.percents.fw.only, BootstrapCutoff = taxonomy.pvalue.cutoff.gg)
   
   check.files.match(FWtable = fw.fw.only, GGtable = gg.fw.only)
   
@@ -390,7 +421,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
                                              GGtable_percents = gg.percents.fw.only, 
                                              TaxaLevel = t, tracker = num.mismatches)
   }
-  export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw.fw.only, ALL_seqs = fw.percents)
+  export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw.fw.only, ALL_seqs = fw.percents, FolderPath = results.folder.path)
 }
 
 

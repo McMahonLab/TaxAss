@@ -66,15 +66,15 @@ Summary of Steps and Commands (all commands entered in terminal window):
 	
 13. compare taxonomy files (R)
 	mkdir conflicts_98
-	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 70
+	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70
 	mkdir conflicts_database
-	Rscript find_classification_disagreements.R custom.custom.taxonomy custom.general.taxonomy NA conflicts_database NA 70 database 
+	Rscript find_classification_disagreements.R custom.custom.taxonomy custom.general.taxonomy NA conflicts_database NA NA 70 database 
 
 14. choose appropriate pident cutoff (R)
 	Rscript plot_classification_disagreements.R otus.abund plots conflicts_database conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98
 
 15. generate final taxonomy file (R)
-	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 70 final
+	Rscript find_classification_disagreements.R otus.98.taxonomy NA ids.above.98 conflicts_98 98 85 70 final
 
 16. tidy up (bash)
 	rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy
@@ -740,9 +740,9 @@ Note: you must create a new folder to save these results in before running the s
 Full Two Commands (type in terminal):
 
 mkdir conflicts_98
-Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 70
+Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70
 mkdir conflicts_database
-Rscript find_classification_disagreements.R custom.custom.taxonomy custom.general.taxonomy NA conflicts_database NA 70 database 
+Rscript find_classification_disagreements.R custom.custom.taxonomy custom.general.taxonomy NA conflicts_database NA NA 70 database 
 
 Note: you must enter all the arguments in this order.
 
@@ -760,9 +760,12 @@ What the arguments are the first time you source the script:
 											to save the .csv results files in. You create this
 											folder in this step with the mkdir command.
 7.	98										this is the pident you're using.
-8.	70										this is the p-value cutoff you want to use to decide
-											if a classification is good enough to be named or 
-											should be left as unclassified. 
+8.	85										this is the p-value cutoff for the custom database
+											assigned sequences. This determines if a classification
+											is good enough to be named or should be "unclassified." 
+9.	70										this is the p-value cutoff for the general database
+											assigned sequences. This determines if a classification
+											is good enough to be named or should be "unclassified." 
 	
 What the arguments are the second time you source the script:
 1.	Rscript									this opens R to accept arguments from the command line
@@ -776,9 +779,13 @@ What the arguments are the second time you source the script:
 											to save the .csv results files in. You create this
 											folder in this step with the mkdir command.
 7.	NA										NA is typed as a placeholder here
-8.	70										this is the p-value cutoff you want to use to decide
-											if a classification is good enough to be named or 
-											should be left as unclassified. 			
+8.	NA										NA is typed as a placeholder here
+9.	70										this is the p-value cutoff for the general database
+											assignments of the custom database fastas. This 
+											determines if a classification is good enough to be
+											named or should be "unclassified." 	
+10.	database								This flag tells the script you are comparing two
+											databases instead of OTU classifications.
 
 What the generated files in your conflicts folders are:
 	kingdom_conflicts.csv
@@ -843,7 +850,7 @@ longer when it is included.  This is because in finding the classification disag
 script only compares classifications assigned by the custom database, which is a small subset 
 of all of the classifications.
 
-Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 70 final
+Rscript find_classification_disagreements.R otus.98.taxonomy NA ids.above.98 conflicts_98 98 85 70 final
 
 
 __________________________________________________________________________________________

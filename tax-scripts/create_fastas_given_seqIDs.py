@@ -1,92 +1,56 @@
-###############################################################################
-# create_fastas_given_seqIDs
-# Copyright (c) 2016, Joshua J Hamilton, Robin R Rohwer, and Katherine D McMahon
-# Affiliation: Department of Bacteriology
-#              University of Wisconsin-Madison, Madison, Wisconsin, USA
-# URL: http://http://mcmahonlab.wisc.edu/
-# All rights reserved.
-################################################################################
-# This script takes the sequence IDs specified in the input file and finds
-# them in the original query fasta file. It then creates a new fasta file 
-# containing just the desired sequences.
-#
-# The format for typing into the terminal is:
-# $ python fetch_fastas_with_seqIDs.py idFile fastaFile outputFile
-# where 	fetch_fastas_with_seqIDs.py		path to this script
-#		idFile                           the file with \n separated seqIDs
-#		fastaFile                        the fasta file containing all the seqIDs
-#		outputFile                       the new fasta file the script generates
+"""
+RRR 8-25-15
 
-#%%#############################################################################
-### Check if BioPython package exists and install if necessary
-################################################################################
-import subprocess
-import shlex
-import site
-        
-try: # Check if BioPython exists
-    import Bio 
-except ImportError, e: # If it doesnt, install it. 
-    print 'BioPython not installed. Trying with pip.'
-    try:  # Check if pip exists
-        import pip
-        pip.main(['install', 'biopython'])
-    except ImportError, e: # If it doesn't, install it. Then install Biopython.
-        print 'Pip not installed. Attempting to install. Enter your sudo password at the prompt.'
-        # Install pip
-        subprocess.call(shlex.split('sudo easy_install pip'))
-        # Reload sys.path so python knows about pip
-        reload(site)
-    # Import pip and install Biopython
-    import pip
-    subprocess.call(shlex.split('sudo pip install biopython'))
-    # Reload sys.path so python knows about Biopython
-    reload(site)    
-        
-#%%#############################################################################
-### Import packages
-################################################################################
-from Bio import SeqIO
-import os
-import sys
+This script takes the sequence IDs selected from the blast output 
+and finds them in the original query fasta file.  
+It then creates a new fasta file containing just the desired sequences.
 
-#%%#############################################################################
-### Read input arguments from command line into variable names
-################################################################################
-idFile = sys.argv[1]
-fastaFile = sys.argv[2]
-outputFile = sys.argv[3]
+The format for typing into the terminal is:
 
-#%%#############################################################################
-### Process the list of all seqIDs in the input file and retrieve the resulting
-### sequences from the fasta file. Create a new fasta file containing just
-### those sequences.
-################################################################################
+$ python fetch_fastas_with_seqIDs.py idfile fastafile outputfile
 
-# Delete the output file if it already exists so that you append to a blank file
-if os.path.isfile(outputFile) :
-	os.remove(outputFile)
+where 	fetch_fastas_with_seqIDs.py is the path to this script
+		idfile  is the file with \n separated seqIDs
+		fastafile is the fasta file containing all the seqIDs
+		outputfile is the new fasta file the script generates
+"""
+
+import os	# a library for manipulating files on your computer
+import sys	# a library for reading arguments from the command line
+
+# Read input arguments from command line into variable names
+idfile = sys.argv[1]
+fastafile = sys.argv[2]
+outputfile = sys.argv[3]
+
+# delete the output file if it already exists so that you append to a blank file
+if os.path.isfile(outputfile) :
+	os.remove(outputfile)
 	print("Existing file with your chosen output file name was deleted.")
 
 
-# Create hash of all SeqIDs in the idFile
+# Create hash of all SeqIDs in the idfile
 pidentIDs = {}
-with open(idFile) as ID:
+with open(idfile) as ID:
     for line in ID:
-        pidentIDs[line.strip()] = None
+            pidentIDs[line.strip()] = None
             
 # Create hash of all SeqIDs and sequences in query fasta file
 allIDs = {}
-fileHandle = open(fastaFile)
-for record in SeqIO.parse(fileHandle, "fasta") :
-    allIDs[record.id] = record
-fileHandle.close()
+with open(fastafile) as fasta:
+    for line in fasta:
+        if str.startswith(line, '>') :
+            key = line.strip()[1:]
+        else :
+            val = line.strip()
+            allIDs[key] = val
             
-# Generate the output file
-SeqIDsFile = open(outputFile,"w")
-for key in pidentIDs :
-    SeqIO.write(allIDs[key], SeqIDsFile, "fasta")
+## Generate the output file
+SeqIDsFile = open(idfile,"r")
+
+with open(outputfile, "a") as ResultFile :
+    for key in pidentIDs :
+        ResultFile.write('>'+key+'\n')
+        ResultFile.write(allIDs[key]+'\n')
 SeqIDsFile.close()
-
-
 

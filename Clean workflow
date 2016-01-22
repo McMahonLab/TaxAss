@@ -818,7 +818,7 @@ What the arguments are:
 												custom databse. You made this file in step 4.
 8.		94										pident cutoff used in the previous two arguments
 8.		conflicts_96							folder of taxonomy disagreements
-9.		ids.above.94							file of custom-classified seqIDs	
+9.		ids.above.96							file of custom-classified seqIDs	
 10.		96										pident cutoff for previous two arguments
 n.		...										additional arguments
 												you can have as many pident cutoffs compared as you

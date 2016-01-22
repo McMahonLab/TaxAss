@@ -22,12 +22,28 @@
 #%%#############################################################################
 ### Check if BioPython package exists and install if necessary
 ################################################################################
-try:
-    import Bio # check if BioPython exists
-except ImportError, e:
+import subprocess
+import shlex
+import site
+        
+try: # Check if BioPython exists
+    import Bio 
+except ImportError, e: # If it doesnt, install it. 
     print 'BioPython not installed. Trying with pip.'
+    try:  # Check if pip exists
+        import pip
+        pip.main(['install', 'biopython'])
+    except ImportError, e: # If it doesn't, install it. Then install Biopython.
+        print 'Pip not installed. Attempting to install. Enter your sudo password at the prompt.'
+        # Install pip
+        subprocess.call(shlex.split('sudo easy_install pip'))
+        # Reload sys.path so python knows about pip
+        reload(site)
+    # Import pip and install Biopython
     import pip
-    pip.main(['install', 'biopython'])
+    subprocess.call(shlex.split('sudo pip install biopython'))
+    # Reload sys.path so python knows about Biopython
+    reload(site)   
         
 #%%#############################################################################
 ### Import packages

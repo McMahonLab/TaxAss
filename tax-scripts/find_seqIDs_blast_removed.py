@@ -25,11 +25,20 @@ in troubleshooting this script.
 import os	# a library for manipulating files on your computer
 import sys	# a library for reading arguments from the command line
 
+
 # Read input arguments from command line into variable names
 
 fastafile = sys.argv[1]
 blastfile = sys.argv[2]
 outputfile = sys.argv[3]
+
+
+# delete the output file if it already exists so that you append to a blank file
+
+if os.path.isfile(outputfile) :
+	os.remove(outputfile)
+	print("Existing file called " + str(outputfile) + " was deleted.")
+
 
 # Create hash of all SeqIDs in fasta file
 allIDs = {}
@@ -38,11 +47,13 @@ with open(fastafile) as fasta:
         if str.startswith(line, '>') :
             allIDs[line.strip()[1:]] = None
 
+
 # Create List of all SeqIDs in blast output file
 blastIDs = {}
 with open(blastfile) as blast:
     for line in blast:
         blastIDs[line.split()[0]] = None
+
 
 # Find seqIDs that are missing in blast and append them to the missing IDs output file
 for key in allIDs:
@@ -50,8 +61,9 @@ for key in allIDs:
         with open(outputfile,"a") as missing :
             missing.write(key + "\n")
 
+
 # Close all the files you've opened
 
-fasta.close()
-blast.close()
-missing.close()
+# fasta.close() think I don't need this anymore either b/c Josh used 'with as' to open files
+# blast.close()
+# missing.close()

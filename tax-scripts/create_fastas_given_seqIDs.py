@@ -26,7 +26,7 @@ outputfile = sys.argv[3]
 # delete the output file if it already exists so that you append to a blank file
 if os.path.isfile(outputfile) :
 	os.remove(outputfile)
-	print("Existing file with your chosen output file name was deleted.")
+	print("Existing file called " + str(outputfile) + " was deleted.")
 
 
 # Create hash of all SeqIDs in the idfile
@@ -43,14 +43,14 @@ with open(fastafile) as fasta:
             key = line.strip()[1:]
         else :
             val = line.strip()
-            allIDs[key] = val
+            allIDs[key] = allIDs[key] + val  # @joshamilton it said this before but I thought that would end up only including the last line of fasta: allIDs[key] = val
             
 ## Generate the output file
-SeqIDsFile = open(idfile,"r")
+# I think this is not necessary anymore: SeqIDsFile = open(idfile,"r")
 
 with open(outputfile, "a") as ResultFile :
     for key in pidentIDs :
-        ResultFile.write('>'+key+'\n')
-        ResultFile.write(allIDs[key]+'\n')
-SeqIDsFile.close()
+        ResultFile.write('>' + key + '\n')
+        ResultFile.write(allIDs[key] + '\n')
+# nor this one: SeqIDsFile.close()
 

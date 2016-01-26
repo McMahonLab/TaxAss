@@ -78,15 +78,11 @@ Summary of Steps and Commands (all commands entered in terminal window):
 	Rscript find_classification_disagreements.R otus.98.taxonomy NA ids.above.98 conflicts_98 98 85 70 final
 
 16. tidy up (bash)
-	rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy
-	mkdir scripts
-	mv *.py *.R *.sh scripts/
-	mkdir analysis/
-	mv conflicts* plots/ analysis/
-	mkdir data
-	mv otus* data/
-	mkdir databases
-	mv *.taxonomy *.fasta databases
+	rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy *.general.taxonomy
+	mkdir scripts ; mv *.py *.R *.sh scripts
+	mkdir analysis ; mv conflicts* plots analysis
+	mkdir data ; mv otus* data
+	mkdir databases ; mv *.taxonomy *.fasta databases
 	
 Detailed explanations of commands and inputs are below:
 
@@ -869,7 +865,7 @@ Note: go through these commands in order.
 
 Full Command (Type in Terminal):
 
-rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy
+rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy *.general.taxonomy
 
 What each of these intermediate files is and why you might want to keep them:
 custom.db.*		The blast database files (saves time if you want to re-run blast on the same taxonomy database)
@@ -893,7 +889,7 @@ Note: if for some reason you want to keep these files, you can either skip this 
 or type in the terminal:
 
 mkdir intermediate
-mv custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta intermediate/
+mv custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy *.general.taxonomy intermediate/
 
 
 16.2 move scripts into scripts folder

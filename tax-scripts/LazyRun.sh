@@ -23,9 +23,10 @@ Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.above.${p
 Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.below.${pident[0]} ${pident[0]} FALSE
 mkdir plots
 RScript plot_blast_hit_stats.R otus.custom.blast.table.modified ${pident[0]} plots
-python find_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table.modified ids.below.98
+python find_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table.modified ids.missing
+cat ids.below.${pident[0]} ids.missing > ids.below.${pident[0]}.all
 python create_fastas_given_seqIDs.py ids.above.${pident[0]} otus.fasta otus.above.${pident[0]}.fasta
-python create_fastas_given_seqIDs.py ids.below.${pident[0]} otus.fasta otus.below.${pident[0]}.fasta
+python create_fastas_given_seqIDs.py ids.below.${pident[0]}.all otus.fasta otus.below.${pident[0]}.fasta
 mothur "#classify.seqs(fasta=otus.above.${pident[0]}.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2)"
 mothur "#classify.seqs(fasta=otus.below.${pident[0]}.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
 cat otus.above.${pident[0]}.custom.wang.taxonomy otus.below.${pident[0]}.general.wang.taxonomy > otus.${pident[0]}.taxonomy
@@ -52,8 +53,9 @@ runagain () {
    Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.above.$1 $1 TRUE 
    Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.below.$1 $1 FALSE
    RScript plot_blast_hit_stats.R otus.custom.blast.table.modified $1 plots
+   cat ids.below.$1 ids.missing > ids.below.$1.all
    python create_fastas_given_seqIDs.py ids.above.$1 otus.fasta otus.above.$1.fasta
-   python create_fastas_given_seqIDs.py ids.below.$1 otus.fasta otus.below.$1.fasta
+   python create_fastas_given_seqIDs.py ids.below.$1.all otus.fasta otus.below.$1.fasta
    mothur "#classify.seqs(fasta=otus.above.$1.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2)"
    mothur "#classify.seqs(fasta=otus.below.$1.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
    cat otus.above.$1.custom.wang.taxonomy otus.below.$1.general.wang.taxonomy > otus.$1.taxonomy

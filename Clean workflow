@@ -34,11 +34,12 @@ Summary of Steps and Commands (all commands entered in terminal window):
 	RScript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
 
 6. recover sequence IDs left out of blast (python, bash)
-	python find_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table.modified ids.below.98
+	python find_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table.modified ids.missing
+	cat ids.below.98 ids.missing > ids.below.98.all
 	
 7. create fasta files of desired sequence IDs (python)
 	python create_fastas_given_seqIDs.py ids.above.98 otus.fasta otus.above.98.fasta
-	python create_fastas_given_seqIDs.py ids.below.98 otus.fasta otus.below.98.fasta
+	python create_fastas_given_seqIDs.py ids.below.98.all otus.fasta otus.below.98.fasta
 
 8. assign taxonomy (mothur)
 	mothur "#classify.seqs(fasta=otus.above.98.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2)"
@@ -472,7 +473,8 @@ the ones that didn't make the R script cutoff.
 
 Full Command (type in terminal):
 
-python find_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table.modified ids.below.98
+python find_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table.modified ids.missing
+cat ids.below.98 ids.missing > ids.below.98.all
 
 These arguments in the python script must be in the correct order.
 python sources the .py script using the arguments supplied after it in the terminal.
@@ -503,7 +505,7 @@ It then creates a new fasta file containing just the desired sequences.
 Full Two Commands (type in terminal):
 
 python create_fastas_given_seqIDs.py ids.above.98 otus.fasta otus.above.98.fasta
-python create_fastas_given_seqIDs.py ids.below.98 otus.fasta otus.below.98.fasta
+python create_fastas_given_seqIDs.py ids.below.98.all otus.fasta otus.below.98.fasta
 
 These arguments must be in the correct order.
 python sources the .py script using the arguments supplied after it in the terminal.

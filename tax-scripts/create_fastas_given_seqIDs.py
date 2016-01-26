@@ -41,6 +41,7 @@ with open(fastafile) as fasta:
     for line in fasta:
         if str.startswith(line, '>') :
             key = line.strip()[1:]
+            allIDs[key] = ""
         else :
             val = line.strip()
             allIDs[key] = allIDs[key] + val  # @joshamilton it said this before but I thought that would end up only including the last line of fasta: allIDs[key] = val

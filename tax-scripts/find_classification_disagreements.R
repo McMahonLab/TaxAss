@@ -26,25 +26,7 @@
 # Rscript find_classification_disagreements.R otus.98.taxonomy NA ids.above.98 conflicts_98 98 85 70 final
 # Rscript find_classification_disagreements.R custom.custom.taxonomy custom.general.taxonomy NA conflicts_database NA NA 70 database
 
-# userprefs <- commandArgs(trailingOnly = TRUE)
-# fw.plus.gg.tax.file.path <- userprefs[1]
-# gg.only.tax.file.path <- userprefs[2]
-# fw.seq.ids.file.path <- userprefs[3]
-# results.folder.path <- userprefs[4]
-# blast.pident.cutoff <- userprefs[5]
-# taxonomy.pvalue.cutoff.fw <- userprefs[6]
-# taxonomy.pvalue.cutoff.gg <- userprefs[7]
-# final.or.database <- userprefs[8]
-# if (length(userprefs) < 8){final.or.database <- "non-empty string"}
-
-userprefs <- c("../../take9b/otus.98.taxonomy",
-               "../../take9b/otus.general.taxonomy",
-               "../../take9b/ids.above.98",
-               "../../take9b/conflicts_98",
-               98, 
-               85, 
-               70,
-               "final")
+userprefs <- commandArgs(trailingOnly = TRUE)
 fw.plus.gg.tax.file.path <- userprefs[1]
 gg.only.tax.file.path <- userprefs[2]
 fw.seq.ids.file.path <- userprefs[3]
@@ -54,6 +36,24 @@ taxonomy.pvalue.cutoff.fw <- userprefs[6]
 taxonomy.pvalue.cutoff.gg <- userprefs[7]
 final.or.database <- userprefs[8]
 if (length(userprefs) < 8){final.or.database <- "non-empty string"}
+
+# userprefs <- c("../../take9b/otus.98.taxonomy",
+#                "../../take9b/otus.general.taxonomy",
+#                "../../take9b/ids.above.98",
+#                "../../take9b/conflicts_98",
+#                98, 
+#                85, 
+#                70,
+#                "final")
+# fw.plus.gg.tax.file.path <- userprefs[1]
+# gg.only.tax.file.path <- userprefs[2]
+# fw.seq.ids.file.path <- userprefs[3]
+# results.folder.path <- userprefs[4]
+# blast.pident.cutoff <- userprefs[5]
+# taxonomy.pvalue.cutoff.fw <- userprefs[6]
+# taxonomy.pvalue.cutoff.gg <- userprefs[7]
+# final.or.database <- userprefs[8]
+# if (length(userprefs) < 8){final.or.database <- "non-empty string"}
 
 #####
 # Define Functions for Import and Formatting

@@ -35,16 +35,24 @@ blast.pident.cutoff <- userprefs[5]
 taxonomy.pvalue.cutoff.fw <- userprefs[6]
 taxonomy.pvalue.cutoff.gg <- userprefs[7]
 final.or.database <- userprefs[8]
-if (length(userprefs) < 7){final.or.database <- "non-empty string"}
+if (length(userprefs) < 8){final.or.database <- "non-empty string"}
 
-# fw.plus.gg.tax.file.path <- "../../take9c/otus.98.taxonomy"
-# gg.only.tax.file.path <- "../../take9c/otus.general.taxonomy"
-# fw.seq.ids.file.path <- "../../take9c/ids.above.98"
-# results.folder.path <- "../../take9c/conflicts_98"
-# blast.pident.cutoff <- 98
-# taxonomy.pvalue.cutoff.fw <- 85
-# taxonomy.pvalue.cutoff.gg <- 70
-# final.or.database <- "non-empty string"
+# userprefs <- c("../../take9b/otus.98.taxonomy",
+#                "../../take9b/otus.general.taxonomy",
+#                "../../take9b/ids.above.98",
+#                "../../take9b/conflicts_98",
+#                98, 
+#                85, 
+#                70)
+# fw.plus.gg.tax.file.path <- userprefs[1]
+# gg.only.tax.file.path <- userprefs[2]
+# fw.seq.ids.file.path <- userprefs[3]
+# results.folder.path <- userprefs[4]
+# blast.pident.cutoff <- userprefs[5]
+# taxonomy.pvalue.cutoff.fw <- userprefs[6]
+# taxonomy.pvalue.cutoff.gg <- userprefs[7]
+# final.or.database <- userprefs[8]
+# if (length(userprefs) < 8){final.or.database <- "non-empty string"}
 
 #####
 # Define Functions for Import and Formatting

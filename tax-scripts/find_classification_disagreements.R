@@ -325,7 +325,8 @@ view.bootstraps <- function(TaxonomyTable){
   index <- which(tax.nums == "unclassified")
   tax.nums[index] <- 0
   tax.nums <- apply(X = tax.nums, MARGIN = 2, FUN = as.numeric)
-  
+  tax.nums <- cbind(tax[,1],tax.nums)
+  colnames(tax.nums)[1] <- colnames(tax)[1]
   return(tax.nums)
 }
 
@@ -334,10 +335,10 @@ view.bootstraps <- function(TaxonomyTable){
 # Use Functions
 #####
 
-
+#####
 # Generate a final taxonomy file:
 if (final.or.database == "final" | final.or.database == "Final" | final.or.database == "FINAL"){
-  
+#####  
   print.poem()
   
   fw.percents <- import.FW.names()
@@ -365,9 +366,10 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
               row.names = FALSE, col.names = TRUE, quote = FALSE)
 
 
+#####
 # Compare databases by looking at how GG classifies the FW representative sequences
 }else if (final.or.database == "database"){
-
+#####
   fw.percents <- import.FW.names()
   gg.percents <- import.GG.names()
   
@@ -395,9 +397,11 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw, ALL_seqs = fw, FolderPath = results.folder.path)
   
 
+  
+##### 
 # Only compare the classifications made by the fw database to the gg classifications, not full tax tables
 }else{
-  
+#####  
   fw.percents <- import.FW.names()
   gg.percents <- import.GG.names()
   
@@ -472,3 +476,4 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
 # gg.bootstraps <- view.bootstraps(TaxonomyTable = gg.percents.fw.only)
 # write.csv(gg.bootstraps, file = paste(results.folder.path, "/", "gg_classified_bootstraps.csv", sep=""), row.names = FALSE)
 # write.csv(gg.percents.fw.only, file = paste(results.folder.path, "/", "gg_classified_taxonomies.csv", sep=""), row.names = FALSE)
+

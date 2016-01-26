@@ -26,24 +26,7 @@
 # Rscript find_classification_disagreements.R otus.98.taxonomy NA ids.above.98 conflicts_98 98 85 70 final
 # Rscript find_classification_disagreements.R custom.custom.taxonomy custom.general.taxonomy NA conflicts_database NA NA 70 database
 
-userprefs <- commandArgs(trailingOnly = TRUE)
-fw.plus.gg.tax.file.path <- userprefs[1]
-gg.only.tax.file.path <- userprefs[2]
-fw.seq.ids.file.path <- userprefs[3]
-results.folder.path <- userprefs[4]
-blast.pident.cutoff <- userprefs[5]
-taxonomy.pvalue.cutoff.fw <- userprefs[6]
-taxonomy.pvalue.cutoff.gg <- userprefs[7]
-final.or.database <- userprefs[8]
-if (length(userprefs) < 8){final.or.database <- "non-empty string"}
-
-# userprefs <- c("../../take9b/otus.98.taxonomy",
-#                "../../take9b/otus.general.taxonomy",
-#                "../../take9b/ids.above.98",
-#                "../../take9b/conflicts_98",
-#                98, 
-#                85, 
-#                70)
+# userprefs <- commandArgs(trailingOnly = TRUE)
 # fw.plus.gg.tax.file.path <- userprefs[1]
 # gg.only.tax.file.path <- userprefs[2]
 # fw.seq.ids.file.path <- userprefs[3]
@@ -53,6 +36,24 @@ if (length(userprefs) < 8){final.or.database <- "non-empty string"}
 # taxonomy.pvalue.cutoff.gg <- userprefs[7]
 # final.or.database <- userprefs[8]
 # if (length(userprefs) < 8){final.or.database <- "non-empty string"}
+
+userprefs <- c("../../take9b/otus.98.taxonomy",
+               "../../take9b/otus.general.taxonomy",
+               "../../take9b/ids.above.98",
+               "../../take9b/conflicts_98",
+               98, 
+               85, 
+               70,
+               "final")
+fw.plus.gg.tax.file.path <- userprefs[1]
+gg.only.tax.file.path <- userprefs[2]
+fw.seq.ids.file.path <- userprefs[3]
+results.folder.path <- userprefs[4]
+blast.pident.cutoff <- userprefs[5]
+taxonomy.pvalue.cutoff.fw <- userprefs[6]
+taxonomy.pvalue.cutoff.gg <- userprefs[7]
+final.or.database <- userprefs[8]
+if (length(userprefs) < 8){final.or.database <- "non-empty string"}
 
 #####
 # Define Functions for Import and Formatting
@@ -244,7 +245,7 @@ make.unclassified <- function(text,val){
   # (by bootstrap cutoff I mean the stat that's the % of times it got classified into that taxonomy cluster)
 do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   tax <- as.matrix(TaxonomyTable)
-  cutoff <- BootstrapCutoff
+  cutoff <- as.numeric(BootstrapCutoff)
   
   # make all unclassified things uniformly called "unclassified"
   tax <- uniform.unclass.names(TaxonomyTable = tax)
@@ -356,7 +357,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   
   write.table(x = final.taxonomy, 
               file = paste("otus.", blast.pident.cutoff, ".", taxonomy.pvalue.cutoff.fw, ".", taxonomy.pvalue.cutoff.gg, ".taxonomy", sep = ""), 
-              sep = ";", row.names = FALSE)
+              sep = ";", row.names = FALSE, col.names = TRUE, quote = FALSE)
 
 
 # Compare databases by looking at how GG classifies the FW representative sequences

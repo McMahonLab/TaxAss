@@ -88,8 +88,10 @@ plot.num.classified <- function(GGTable, FWTable, Reads = TRUE){
   
   if (Reads == TRUE){
     normalizer <- sum(fwpvals[ ,2])
+    title.word <- "Reads"
   }else{
     normalizer <- nrow(ggpvals)
+    title.word <- "OTUs"
   }
   
   gg.classified <- colSums(ggpvals[ ,3:9]) / normalizer * 100
@@ -97,7 +99,10 @@ plot.num.classified <- function(GGTable, FWTable, Reads = TRUE){
   
   class.table <- rbind(gg.classified,fw.classified)
   
-  barplot(class.table, beside = TRUE)
+  
+  barplot(class.table, beside = TRUE, axes = FALSE, col = c("plum4", "orange2"), main = paste("Improvement in", title.word, "Classified"), ylab = paste("Percent total", title.word, "classified"))
+  axis(2, at = seq.int(from = 0, to = 100, by = 20), labels = seq.int(from = 0, to = 100, by = 20), xpd = T)
+  legend(x = "topright", legend = c("General", "Workflow"), fill = c("plum4", "orange2"))
 }
 
 

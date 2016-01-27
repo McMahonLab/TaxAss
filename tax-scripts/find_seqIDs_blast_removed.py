@@ -21,20 +21,15 @@ in troubleshooting this script.
 """
 
 # Import required libraries
-
 import os	# a library for manipulating files on your computer
 import sys	# a library for reading arguments from the command line
 
-
 # Read input arguments from command line into variable names
-
 fastafile = sys.argv[1]
 blastfile = sys.argv[2]
 outputfile = sys.argv[3]
 
-
 # delete the output file if it already exists so that you append to a blank file
-
 if os.path.isfile(outputfile) :
 	os.remove(outputfile)
 	print("Existing file called " + str(outputfile) + " was deleted.")
@@ -60,10 +55,3 @@ for key in allIDs:
     if key not in blastIDs:
         with open(outputfile,"a") as missing :
             missing.write(key + "\n")
-
-
-# Close all the files you've opened
-
-# fasta.close() think I don't need this anymore either b/c Josh used 'with as' to open files
-# blast.close()
-# missing.close()

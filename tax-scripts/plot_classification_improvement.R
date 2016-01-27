@@ -82,12 +82,18 @@ convert.to.reads.presence.absence <- function(TrueFalseTable){
 # Define functions to plot the data
 #####
 
-plot.num.classified <- function(GGTable, FWTable){
+plot.num.classified <- function(GGTable, FWTable, Reads = TRUE){
   ggpvals <- GGTable
   fwpvals <- FWTable
   
-  gg.classified <- colSums(ggpvals[ ,3:9])
-  fw.classified <- colSums(fwpvals[ ,3:9])
+  if (Reads == TRUE){
+    normalizer <- sum(fwpvals[ ,2])
+  }else{
+    normalizer <- nrow(ggpvals)
+  }
+  
+  gg.classified <- colSums(ggpvals[ ,3:9]) / normalizer * 100
+  fw.classified <- colSums(fwpvals[ ,3:9]) / normalizer * 100
   
   class.table <- rbind(gg.classified,fw.classified)
   
@@ -113,8 +119,8 @@ otus.named.gg <- convert.to.name.presence.absence(PvaluesTable = gg.pvals)
 reads.named.fw <- convert.to.reads.presence.absence(TrueFalseTable = otus.named.fw)
 reads.named.gg <- convert.to.reads.presence.absence(TrueFalseTable = otus.named.gg)
 
-plot.num.classified(FWTable = otus.named.gg, GGTable = otus.named.gg)
-plot.num.classified(FWTable = reads.named.fw, GGTable = reads.named.gg)
+plot.num.classified(FWTable = otus.named.gg, GGTable = otus.named.gg, Reads = FALSE)
+plot.num.classified(FWTable = reads.named.fw, GGTable = reads.named.gg, Reads = TRUE)
 
 
 

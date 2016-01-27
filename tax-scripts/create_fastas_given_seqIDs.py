@@ -47,11 +47,8 @@ with open(fastafile) as fasta:
             allIDs[key] = allIDs[key] + val  # @joshamilton it said this before but I thought that would end up only including the last line of fasta: allIDs[key] = val
             
 ## Generate the output file
-# I think this is not necessary anymore: SeqIDsFile = open(idfile,"r")
-
 with open(outputfile, "a") as ResultFile :
     for key in pidentIDs :
         ResultFile.write('>' + key + '\n')
         ResultFile.write(allIDs[key] + '\n')
-# nor this one: SeqIDsFile.close()
 

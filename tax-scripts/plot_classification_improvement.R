@@ -1,11 +1,24 @@
 # RRR 1/26/16
 
+# syntax for command line:
 
+# $ Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID plots
 
-taxonomy.pvalues.path <- "../../take9c/final.taxonomy.pvalues"
-reads.table.path <- "../../take9c/total.reads.per.seqID"
-gg.pvalues.path <- "../../take9c/final.general.pvalues"
+#####
+# Accept arguments from the command line:
+#####
 
+userprefs <- commandArgs(trailingOnly = TRUE)
+
+taxonomy.pvalues.path <- userprefs[1]
+gg.pvalues.path <- userprefs[2]
+reads.table.path <- userprefs[3]
+path.to.plots.folder <- userprefs[4]
+
+# taxonomy.pvalues.path <- "../../take9c/final.taxonomy.pvalues"
+# gg.pvalues.path <- "../../take9c/final.general.pvalues"
+# reads.table.path <- "../../take9c/total.reads.per.seqID"
+# path.to.plots.folder <- "../../take9c/plots"
 
 #####
 # Define functions to import data
@@ -82,9 +95,10 @@ convert.to.reads.presence.absence <- function(TrueFalseTable){
 # Define functions to plot the data
 #####
 
-plot.num.classified <- function(GGTable, FWTable, Reads = TRUE){
+plot.num.classified <- function(GGTable, FWTable, Reads = TRUE, FolderPath){
   ggpvals <- GGTable
   fwpvals <- FWTable
+  plots.path <- FolderPath
   
   if (Reads == TRUE){
     normalizer <- sum(fwpvals[ ,2])
@@ -99,10 +113,15 @@ plot.num.classified <- function(GGTable, FWTable, Reads = TRUE){
   
   class.table <- rbind(gg.classified,fw.classified)
   
+  # Save plot as .png file
+  png(filename = paste(plots.path, "/Improvement_In_Classification_by_", title.word, ".png", sep = ""), 
+      width = 7, height = 5, units = "in", res = 100)
   
-  barplot(class.table, beside = TRUE, axes = FALSE, col = c("plum4", "orange2"), main = paste("Improvement in", title.word, "Classified"), ylab = paste("Percent total", title.word, "classified"))
+  barplot(class.table, beside = TRUE, axes = FALSE, col = c("plum4", "orange2"), main = paste("Improvement in", title.word, "Classified"), ylab = paste("Percent total", title.word, "classified"), xlab = "Classifications Assigned at Each Taxonomic Level")
   axis(2, at = seq.int(from = 0, to = 100, by = 20), labels = seq.int(from = 0, to = 100, by = 20), xpd = T)
-  legend(x = "topright", legend = c("General", "Workflow"), fill = c("plum4", "orange2"))
+  legend(x = "topright", legend = c("General", "Workflow"), fill = c("plum4", "orange2"), bty = "n")
+  
+  unnecessary.message <- dev.off()
 }
 
 
@@ -124,8 +143,8 @@ otus.named.gg <- convert.to.name.presence.absence(PvaluesTable = gg.pvals)
 reads.named.fw <- convert.to.reads.presence.absence(TrueFalseTable = otus.named.fw)
 reads.named.gg <- convert.to.reads.presence.absence(TrueFalseTable = otus.named.gg)
 
-plot.num.classified(FWTable = otus.named.gg, GGTable = otus.named.gg, Reads = FALSE)
-plot.num.classified(FWTable = reads.named.fw, GGTable = reads.named.gg, Reads = TRUE)
+plot.num.classified(FWTable = otus.named.gg, GGTable = otus.named.gg, Reads = FALSE, FolderPath = path.to.plots.folder)
+plot.num.classified(FWTable = reads.named.fw, GGTable = reads.named.gg, Reads = TRUE, FolderPath = path.to.plots.folder)
 
 
 

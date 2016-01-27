@@ -82,7 +82,17 @@ convert.to.reads.presence.absence <- function(TrueFalseTable){
 # Define functions to plot the data
 #####
 
-plot.num.classified
+plot.num.classified <- function(GGTable, FWTable){
+  ggpvals <- GGTable
+  fwpvals <- FWTable
+  
+  gg.classified <- colSums(ggpvals[ ,3:9])
+  fw.classified <- colSums(fwpvals[ ,3:9])
+  
+  class.table <- rbind(gg.classified,fw.classified)
+  
+  barplot(class.table, beside = TRUE)
+}
 
 
 #####
@@ -103,8 +113,8 @@ otus.named.gg <- convert.to.name.presence.absence(PvaluesTable = gg.pvals)
 reads.named.fw <- convert.to.reads.presence.absence(TrueFalseTable = otus.named.fw)
 reads.named.gg <- convert.to.reads.presence.absence(TrueFalseTable = otus.named.gg)
 
-
-
+plot.num.classified(FWTable = otus.named.gg, GGTable = otus.named.gg)
+plot.num.classified(FWTable = reads.named.fw, GGTable = reads.named.gg)
 
 
 

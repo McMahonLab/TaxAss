@@ -360,10 +360,22 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
               file = paste("otus.", blast.pident.cutoff, ".", taxonomy.pvalue.cutoff.fw, ".", taxonomy.pvalue.cutoff.gg, ".taxonomy", sep = ""), 
               sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
   
-  # this will be used by the plot_classification_improvement.R script
+  # the following will be used by the plot_classification_improvement.R script
+  
   tax.nums <- view.bootstraps(TaxonomyTable = final.taxonomy)
   write.table(x = tax.nums, file = "final.taxonomy.pvalues", sep = ",", 
               row.names = FALSE, col.names = TRUE, quote = FALSE)
+  
+  gg.percents <- import.GG.names()
+  gg.percents <- reformat.gg(GGtable = gg.percents)
+  
+  gg.taxonomy <- do.bootstrap.cutoff(TaxonomyTable = gg.percents, BootstrapCutoff = taxonomy.pvalue.cutoff.gg)
+  colnames(gg.taxonomy) <- c("seqID","kingdom","phylum","class","order","lineage","clade","tribe")
+  
+  gg.nums <- view.bootstraps(TaxonomyTable = gg.taxonomy)
+  write.table(x = gg.nums, file = "final.general.pvalues", sep = ",", 
+              row.names = FALSE, col.names = TRUE, quote = FALSE)
+  
 
 
 #####

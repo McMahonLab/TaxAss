@@ -75,7 +75,7 @@ Summary of Steps and Commands (all commands entered in terminal window):
 	Rscript plot_classification_disagreements.R otus.abund plots conflicts_database conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98
 
 15. generate final taxonomy file (R)
-	Rscript find_classification_disagreements.R otus.98.taxonomy NA ids.above.98 conflicts_98 98 85 70 final
+	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 final
 
 16. tidy up (bash)
 	rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy *.general.taxonomy
@@ -848,9 +848,32 @@ longer when it is included.  This is because in finding the classification disag
 script only compares classifications assigned by the custom database, which is a small subset 
 of all of the classifications.
 
-Rscript find_classification_disagreements.R otus.98.taxonomy NA ids.above.98 conflicts_98 98 85 70 final
+Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 final
 
-
+What the arguments are this (3rd) time you source the script:
+1.	Rscript									this opens R to accept arguments from the command line
+2.	find_classification_disagreements.R		this is the R script you're sourcing
+3.	otus.98.taxonomy						this is the path to your otu taxonomy file 
+											created using both databases in step 9
+4.	otus.general.taxonomy					this is the path to your otu taxonomy file
+											created using only the general database in step 10
+5.	ids.above.98							this is the path to the file created in step 4 that
+											contains all of the sequence IDs above or equal to 
+											your pident cutoff
+6.	conflicts_98							this is the path to the folder you want the R script
+											to save the .csv results files in. You create this
+											folder in this step with the mkdir command.
+7.	98										this is the pident you're using.
+8.	85										this is the p-value cutoff for the custom database
+											assigned sequences. This determines if a classification
+											is good enough to be named or should be "unclassified." 
+9.	70										this is the p-value cutoff for the general database
+											assigned sequences. This determines if a classification
+											is good enough to be named or should be "unclassified." 
+10.	final									this flag lets the script know you want a final file generated.
+											therefore it applies the bootstrap p-value cutoff to the
+											entire script instead of just the custom-classified seqIDs.
+											That's why it will take longer this time you run the script.
 __________________________________________________________________________________________
 
 16. tidy up (bash)

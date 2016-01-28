@@ -15,15 +15,15 @@
 # Receive arguments from terminal command line
 #####
 
-# userprefs <- commandArgs(trailingOnly = TRUE)
+userprefs <- commandArgs(trailingOnly = TRUE)
 
-userprefs <- c("../../take9c/otus.abund",
-               "../../take9c/plots",
-               "../../take9c/conflicts_database",
-               "../../take9c/conflicts_94", "../../take9c/ids.above.94", 94,
-               "../../take9c/conflicts_96", "../../take9c/ids.above.96", 96,
-               "../../take9c/conflicts_98", "../../take9c/ids.above.98", 98,
-               "../../take9c/conflicts_100", "../../take9c/ids.above.100", 100)
+# userprefs <- c("../../take9c/otus.abund",
+#                "../../take9c/plots",
+#                "../../take9c/conflicts_database",
+#                "../../take9c/conflicts_94", "../../take9c/ids.above.94", 94,
+#                "../../take9c/conflicts_96", "../../take9c/ids.above.96", 96,
+#                "../../take9c/conflicts_98", "../../take9c/ids.above.98", 98,
+#                "../../take9c/conflicts_100", "../../take9c/ids.above.100", 100)
 
 otu.table.path <- userprefs[1]
 plots.folder.path <- userprefs[2]

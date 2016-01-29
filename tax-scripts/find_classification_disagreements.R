@@ -28,14 +28,14 @@
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 
-# userprefs <- c("../../take9c/otus.98.taxonomy",
-#                "../../take9c/otus.general.taxonomy",
-#                "../../take9c/ids.above.98",
-#                "../../take9c/conflicts_98",
-#                98, 
-#                85, 
+# userprefs <- c("../../take9e/custom.custom.taxonomy",
+#                "../../take9e/custom.general.taxonomy",
+#                NA,
+#                "../../take9e/conflicts_database/",
+#                NA, 
+#                NA, 
 #                70,
-#                "final")
+#                "database")
 
 fw.plus.gg.tax.file.path <- userprefs[1]
 gg.only.tax.file.path <- userprefs[2]
@@ -331,6 +331,7 @@ view.bootstraps <- function(TaxonomyTable){
 # Generate a final taxonomy file:
 if (final.or.database == "final" | final.or.database == "Final" | final.or.database == "FINAL"){
 #####  
+  cat("\n\ngenerating final file\n\n")
   print.poem()
   
   fw.percents <- import.FW.names()
@@ -374,6 +375,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
 # Compare databases by looking at how GG classifies the FW representative sequences
 }else if (final.or.database == "database"){
 #####
+  cat("\n\ndoing database comparison\n\n")
   fw.percents <- import.FW.names()
   gg.percents <- import.GG.names()
   
@@ -406,6 +408,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
 # Only compare the classifications made by the fw database to the gg classifications, not full tax tables
 }else{
 #####  
+  cat("\ncomparing seqIDs the workflow classified with custom database to how general database would have classified them.\n")
   fw.percents <- import.FW.names()
   gg.percents <- import.GG.names()
   

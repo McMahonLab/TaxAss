@@ -14,6 +14,9 @@ Summary of Steps and Commands (all commands entered in terminal window):
 		sed 's/$/;/' <NoSpaces >EndLineSemicolons
 		mv EndLineSemicolons general.taxonomy
 		rm NoSpaces
+
+NOTE: steps 1-14 can be run in a block using the bash script LazyRun.sh.  to source type in the terminal:
+	./LazyRun.sh
 		
 1. make BLAST database file (blast)
 	makeblastdb -dbtype nucl -in custom.fasta -input_type fasta -parse_seqids -out custom.db
@@ -52,9 +55,9 @@ Summary of Steps and Commands (all commands entered in terminal window):
 	mothur "#classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
 	cat otus.general.wang.taxonomy > otus.general.taxonomy
 
-11. assign taxonomy to custom database with general database (mothur, bash)
+11. compare custom and general databases (mothur, bash)
 	mothur "#classify.seqs(fasta=custom.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
-	mv custom.general.wang.taxonomy custom.general.taxonomy
+	cat custom.general.wang.taxonomy > custom.general.taxonomy
 
 12. reformat taxonomy files (bash)
 	sed 's/[[:blank:]]/\;/' <otus.98.taxonomy >otus.98.taxonomy.reformatted

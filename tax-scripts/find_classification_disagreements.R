@@ -25,17 +25,18 @@
 # Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 
 # Rscript find_classification_disagreements.R otus.98.taxonomy NA ids.above.98 conflicts_98 98 85 70 final
 # Rscript find_classification_disagreements.R custom.custom.taxonomy custom.general.taxonomy NA conflicts_database NA NA 70 database
+# Rscript find_classification_disagreements.R otus.custom.taxonomy otus.general.taxonomy ids.above.98 conflicts_forcing 98 85 70 forcing
 
-userprefs <- commandArgs(trailingOnly = TRUE)
+# userprefs <- commandArgs(trailingOnly = TRUE)
 
-# userprefs <- c("../../take9c/custom.custom.taxonomy",
-#                "../../take9c/custom.general.taxonomy",
-#                NA,
-#                "../../take9c/conflicts_database/",
-#                NA, 
-#                NA, 
-#                70,
-#                "database")
+userprefs <- c("../../practice/otus.custom.taxonomy",
+               "../../practice/otus.98.85.70.taxonomy",
+               "../../practice/ids.above.98",
+               "../../practice/conflicts_database/",
+               98, 
+               85, 
+               70,
+               "forcing")
 
 fw.plus.gg.tax.file.path <- userprefs[1]
 gg.only.tax.file.path <- userprefs[2]
@@ -57,7 +58,8 @@ print.poem <- function(){
 }
 
 # Import the otu taxonomies assigned with both FW and GG
-import.FW.names <- function(){
+import.FW.names <- function(FilePath){
+  fw.plus.gg.tax.file.path <- FilePath
   # Avoid errors from variable row lengths by checking length of all rows (fill=T only checks 1st 5 rows)
   numcol <- max(count.fields(fw.plus.gg.tax.file.path, sep=";"))
   fw <- read.table(fw.plus.gg.tax.file.path, sep=";", fill=T, stringsAsFactors = F, col.names=1:numcol)
@@ -65,7 +67,8 @@ import.FW.names <- function(){
 }
 
 # Import the otu taxonomies assigned with only GG
-import.GG.names <- function(){
+import.GG.names <- function(FilePath){
+  gg.only.tax.file.path <- FilePath
   # Avoid errors from variable row lengths by checking length of all rows (fill=T only checks 1st 5 rows)
   numcol <- max(count.fields(gg.only.tax.file.path, sep=";"))
   gg <- read.table(gg.only.tax.file.path, sep=";", fill=T, stringsAsFactors = F, col.names=1:numcol)
@@ -136,7 +139,8 @@ check.files.match <- function(FWtable, GGtable){
 }
 
 # Import the freshwater sequence IDs as determined by the BLAST cutoff in workflow step 4
-import.FW.seq.IDs <- function(){
+import.FW.seq.IDs <- function(FilePath){
+  fw.seq.ids.file.path <- FilePath
   fw.seqs <- scan(file = fw.seq.ids.file.path)
   fw.seqs <- as.character(fw.seqs)
   return(fw.seqs)
@@ -331,13 +335,13 @@ view.bootstraps <- function(TaxonomyTable){
 # Generate a final taxonomy file:
 if (final.or.database == "final" | final.or.database == "Final" | final.or.database == "FINAL"){
 #####  
-  cat("\n\ngenerating final file\n\n")
+  cat("\n\ngenerating final file\n")
   print.poem()
   
-  fw.percents <- import.FW.names()
+  fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path)
   fw.percents <- reformat.fw(FWtable = fw.percents)
   
-  fw.seq.ids <- import.FW.seq.IDs()
+  fw.seq.ids <- import.FW.seq.IDs(FilePath = fw.seq.ids.file.path)
   fw.indeces <- find.fw.indeces(TaxonomyTable = fw.percents, SeqIDs = fw.seq.ids)
   
   fw.percents.fw.only <- fw.percents[fw.indeces,]
@@ -359,7 +363,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   write.table(x = tax.nums, file = "final.taxonomy.pvalues", sep = ",", 
               row.names = FALSE, col.names = TRUE, quote = FALSE)
   
-  gg.percents <- import.GG.names()
+  gg.percents <- import.GG.names(FilePath = gg.only.tax.file.path)
   gg.percents <- reformat.gg(GGtable = gg.percents)
   
   gg.taxonomy <- do.bootstrap.cutoff(TaxonomyTable = gg.percents, BootstrapCutoff = taxonomy.pvalue.cutoff.gg)
@@ -370,14 +374,14 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
               row.names = FALSE, col.names = TRUE, quote = FALSE)
   
 
-
 #####
 # Compare databases by looking at how GG classifies the FW representative sequences
 }else if (final.or.database == "database"){
 #####
-  cat("\n\ndoing database comparison\n\n")
-  fw.percents <- import.FW.names()
-  gg.percents <- import.GG.names()
+  cat("\ndoing database comparison\n")
+  
+  fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path)
+  gg.percents <- import.GG.names(FilePath = gg.only.tax.file.path)
   
   gg.percents <- reformat.gg(GGtable = gg.percents)
   fw.percents <- reformat.fw(FWtable = fw.percents)
@@ -404,20 +408,41 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   
 
   
-##### 
-# Only compare the classifications made by the fw database to the gg classifications, not full tax tables
-}else{
+
+#####
+# Look at how bad it'd be if you used only the custom database instead of the workflow
+}else if (final.or.database == "forcing"){
 #####  
-  cat("\ncomparing seqIDs the workflow classified with custom database to how general database would have classified them.\n")
-  fw.percents <- import.FW.names()
-  gg.percents <- import.GG.names()
+  cat("examining forcing if you hadn't used my workflow- good thing you did! :)")
+  
+  fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path)
+  gg.percents <- import.GG.names(FilePath = gg.only.tax.file.path)
   
   gg.percents <- reformat.gg(GGtable = gg.percents)
   fw.percents <- reformat.fw(FWtable = fw.percents)
   
   check.files.match(FWtable = fw.percents, GGtable = gg.percents)
   
-  fw.seq.ids <- import.FW.seq.IDs()
+  fw.seq.ids <- import.FW.seq.IDs(FilePath = fw.seq.ids.file.path)
+  fw.indeces <- find.fw.indeces(TaxonomyTable = fw.percents, SeqIDs = fw.seq.ids)
+  
+
+  
+##### 
+# Only compare the classifications made by the fw database to the gg classifications, not full tax tables
+}else{
+#####  
+  cat("\ncomparing seqIDs the workflow classified with custom database to how general database would have classified them.\n")
+  
+  fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path)
+  gg.percents <- import.GG.names(FilePath = gg.only.tax.file.path)
+  
+  gg.percents <- reformat.gg(GGtable = gg.percents)
+  fw.percents <- reformat.fw(FWtable = fw.percents)
+  
+  check.files.match(FWtable = fw.percents, GGtable = gg.percents)
+  
+  fw.seq.ids <- import.FW.seq.IDs(FilePath = fw.seq.ids.file.path)
   fw.indeces <- find.fw.indeces(TaxonomyTable = fw.percents, SeqIDs = fw.seq.ids)
   
   fw.percents.fw.only <- fw.percents[fw.indeces,]

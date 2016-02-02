@@ -32,7 +32,7 @@
 userprefs <- c("../../practice/otus.custom.taxonomy",
                "../../practice/otus.98.85.70.taxonomy",
                "../../practice/ids.above.98",
-               "../../practice/conflicts_database/",
+               "../../practice/conflicts_forcing/",
                98, 
                85, 
                70,
@@ -67,11 +67,20 @@ import.FW.names <- function(FilePath){
 }
 
 # Import the otu taxonomies assigned with only GG
-import.GG.names <- function(FilePath){
-  gg.only.tax.file.path <- FilePath
-  # Avoid errors from variable row lengths by checking length of all rows (fill=T only checks 1st 5 rows)
-  numcol <- max(count.fields(gg.only.tax.file.path, sep=";"))
-  gg <- read.table(gg.only.tax.file.path, sep=";", fill=T, stringsAsFactors = F, col.names=1:numcol)
+import.GG.names <- function(FilePath, final.names = FALSE){
+  
+  if (final.names == FALSE){
+    gg.only.tax.file.path <- FilePath
+    # Avoid errors from variable row lengths by checking length of all rows (fill=T only checks 1st 5 rows)
+    numcol <- max(count.fields(gg.only.tax.file.path, sep=";"))
+    gg <- read.table(gg.only.tax.file.path, sep=";", fill=T, stringsAsFactors = F, col.names=1:numcol)
+
+  }else if (final.names == TRUE){   # b/c the final taxonomy file generated is .csv for user conveniance
+    workflow.tax.file.path <- FilePath
+    numcol <- max(count.fields(workflow.tax.file.path, sep=","))
+    gg <- read.table(workflow.tax.file.path, sep=",", fill=T, stringsAsFactors = F, col.names=1:numcol)
+    
+  }
   return(gg)
 }
 
@@ -416,7 +425,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   cat("examining forcing if you hadn't used my workflow- good thing you did! :)")
   
   fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path)
-  gg.percents <- import.GG.names(FilePath = gg.only.tax.file.path)
+  gg.percents <- import.GG.names(FilePath = gg.only.tax.file.path, final.names = TRUE)
   
   gg.percents <- reformat.gg(GGtable = gg.percents)
   fw.percents <- reformat.fw(FWtable = fw.percents)

@@ -28,10 +28,10 @@
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 
-# userprefs <- c("../../take9e/custom.custom.taxonomy",
-#                "../../take9e/custom.general.taxonomy",
+# userprefs <- c("../../take9c/custom.custom.taxonomy",
+#                "../../take9c/custom.general.taxonomy",
 #                NA,
-#                "../../take9e/conflicts_database/",
+#                "../../take9c/conflicts_database/",
 #                NA, 
 #                NA, 
 #                70,

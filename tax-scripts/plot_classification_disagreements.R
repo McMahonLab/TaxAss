@@ -440,6 +440,10 @@ plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.fol
 # plot.num.classified.outs(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = FALSE)
 plot.num.classified.outs(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE)
 
+# export the reads per seqID for use in the plot_classification_improvement.R script
+write.table(x = seqID.reads, file = "total.reads.per.seqID", sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
+
+
 
 # examine pident cutoff relationship to bootstrap p-values
 

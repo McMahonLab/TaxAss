@@ -75,9 +75,12 @@ Summary of Steps and Commands (all commands entered in terminal window):
 	Rscript plot_classification_disagreements.R otus.abund plots conflicts_database conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98
 
 15. generate final taxonomy file (R)
-	Rscript find_classification_disagreements.R otus.98.taxonomy NA ids.above.98 conflicts_98 98 85 70 final
+	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 final
 
-16. tidy up (bash)
+16. plot classification improvements (R)
+	Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID plots
+
+17. tidy up (bash)
 	rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy *.general.taxonomy
 	mkdir scripts ; mv *.py *.R *.sh scripts
 	mkdir analysis ; mv conflicts* plots analysis
@@ -848,12 +851,67 @@ longer when it is included.  This is because in finding the classification disag
 script only compares classifications assigned by the custom database, which is a small subset 
 of all of the classifications.
 
-Rscript find_classification_disagreements.R otus.98.taxonomy NA ids.above.98 conflicts_98 98 85 70 final
+Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 final
+
+What the arguments are this (3rd) time you source the script:
+1.	Rscript									this opens R to accept arguments from the command line
+2.	find_classification_disagreements.R		this is the R script you're sourcing
+3.	otus.98.taxonomy						this is the path to your otu taxonomy file 
+											created using both databases in step 9
+4.	otus.general.taxonomy					this is the path to your otu taxonomy file
+											created using only the general database in step 10
+5.	ids.above.98							this is the path to the file created in step 4 that
+											contains all of the sequence IDs above or equal to 
+											your pident cutoff
+6.	conflicts_98							this is the path to the folder you want the R script
+											to save the .csv results files in. You create this
+											folder in this step with the mkdir command.
+7.	98										this is the pident you're using.
+8.	85										this is the p-value cutoff for the custom database
+											assigned sequences. This determines if a classification
+											is good enough to be named or should be "unclassified." 
+9.	70										this is the p-value cutoff for the general database
+											assigned sequences. This determines if a classification
+											is good enough to be named or should be "unclassified." 
+10.	final									this flag lets the script know you want a final file generated.
+											therefore it applies the bootstrap p-value cutoff to the
+											entire script instead of just the custom-classified seqIDs.
+											That's why it will take longer this time you run the script.
 
 
 __________________________________________________________________________________________
 
-16. tidy up (bash)
+16. plot classification improvement (R)
+
+In this step two plots are generated that show you the benefit of using the custom workflow.
+The plots show the number of known taxonomic assignments by either % of total OTUs or % of 
+total reads.  Basically, the script sums up everything that is not called "unclassified"
+in the final workflow taxonomy file and the general database taxonomy file with the bootstrap
+p-value cutoffs applied.  These files are both generated in step 15.
+
+Full Command (Type into terminal):
+
+Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID plots
+
+What the arguments are:
+	final.taxonomy.pvalues			a file of p-values corresponding to the final taxonomy file you
+									generated in step 15.  This file, with this name, was automatically
+									generated in step 15 so it is already in your working directory.
+	final.general.pvalues 			a file of p-values corresponding to the general-classified taxonomy
+									after the classification p-value cutoff has been applied. This file,
+									with this name, was automatically generated in step 15 so it is already
+									in your working directory.
+	total.reads.per.seqID			a file that lists each seqID and the total number of reads for that
+									seqID.  This file, with this name, was automatically generated in
+									step 14, using your otus.abund table, so it is already in your 
+									working directory.
+	plots							the name of the folder that plots are saved into.  you created this
+									folder in step 5.
+									
+									
+__________________________________________________________________________________________
+
+17. tidy up (bash)
 
 This step tidies up your working directory folder by removing intermediate files you don't 
 need anymore and moving remaining files into orgainized folders.
@@ -861,7 +919,7 @@ Note: these bash commands only work if you've been using the same names as the w
 Note: go through these commands in order.
 
 
-16.1 remove intermediate files
+17.1 remove intermediate files
 
 Full Command (Type in Terminal):
 
@@ -892,7 +950,7 @@ mkdir intermediate
 mv custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy *.general.taxonomy intermediate/
 
 
-16.2 move scripts into scripts folder
+17.2 move scripts into scripts folder
 
 Full 2 commands (Type in Terminal):
 
@@ -902,7 +960,7 @@ mv *.py *.R *.sh scripts/
 Note: I recommend saving all the script versions you used to create your data so you could reproduce it.
 
 
-16.3 save files used in analyzing your results in analysis folder
+17.3 save files used in analyzing your results in analysis folder
 
 Full 2 commands (Type in Terminal):
 
@@ -913,7 +971,7 @@ Note: You can delete this instead if you're all done analyzing. Instead of the t
 
 rm -r conflicts* plots/
 
-16.4 save your actual data files in a folder called data
+17.4 save your actual data files in a folder called data
 
 Full Two commands (Type in Terminal):
 
@@ -923,7 +981,7 @@ mv otus* data/
 Note: Yeyy!  This is what you're gonna use to actually do stuff now!!
 
 
-16.5 save the version of the taxonomy databases you used in a databases folder
+17.5 save the version of the taxonomy databases you used in a databases folder
 
 Full Two Commands (type in terminal):
 

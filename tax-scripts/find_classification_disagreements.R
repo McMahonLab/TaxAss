@@ -25,18 +25,18 @@
 # Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 
 # Rscript find_classification_disagreements.R otus.98.taxonomy NA ids.above.98 conflicts_98 98 85 70 final
 # Rscript find_classification_disagreements.R custom.custom.taxonomy custom.general.taxonomy NA conflicts_database NA NA 70 database
-# Rscript find_classification_disagreements.R otus.custom.taxonomy otus.general.taxonomy ids.above.98 conflicts_forcing 98 85 70 forcing
+# Rscript find_classification_disagreements.R otus.custom.taxonomy otus.98.85.70.taxonomy ids.above.98 conflicts_forcing NA 85 70 forcing
 
-# userprefs <- commandArgs(trailingOnly = TRUE)
+userprefs <- commandArgs(trailingOnly = TRUE)
 
-userprefs <- c("../../practice/otus.custom.taxonomy",
-               "../../practice/otus.98.85.70.taxonomy",
-               "../../practice/ids.above.98",
-               "../../practice/conflicts_forcing/",
-               98, 
-               85, 
-               70,
-               "forcing")
+# userprefs <- c("../../practice/otus.custom.taxonomy",
+#                "../../practice/otus.98.85.70.taxonomy",
+#                "../../practice/ids.above.98",
+#                "../../practice/conflicts_forcing/",
+#                NA, 
+#                85, 
+#                70,
+#                "forcing")
 
 fw.plus.gg.tax.file.path <- userprefs[1]
 gg.only.tax.file.path <- userprefs[2]
@@ -78,7 +78,7 @@ import.GG.names <- function(FilePath, final.names = FALSE){
   }else if (final.names == TRUE){   # b/c the final taxonomy file generated is .csv for user conveniance
     workflow.tax.file.path <- FilePath
     numcol <- max(count.fields(workflow.tax.file.path, sep=","))
-    gg <- read.table(workflow.tax.file.path, sep=",", fill=T, stringsAsFactors = F, col.names=1:numcol)
+    gg <- read.table(workflow.tax.file.path, sep=",", fill=T, stringsAsFactors = F, col.names=1:numcol, header = TRUE)
     
   }
   return(gg)
@@ -142,8 +142,8 @@ check.files.match <- function(FWtable, GGtable){
   fw <- FWtable
   
   order.check <- all.equal(fw[,1], gg[,1])
-  if (order.check == FALSE){
-    cat("\n\nWARNING!! The Indexing of your files is messed up!!\n\n")
+  if (order.check != TRUE){
+    cat("\n\nWARNING!! The Indexing of your files is messed up!!\nYou have to fix this or all your results will be wrong!\n(somehow the seqID order is not the same in both, even though the reformatting functions in this script are supposed to do that.)\n\n")
   }
 }
 
@@ -195,7 +195,7 @@ uniform.unclass.names <- function(TaxonomyTable){
       odd.entries,
       "\n\nThese names will be renamed as \"unclassified\". If that seems incorrect",
       "then you have to figure out why the parentheses are missing from them.", 
-      "\nHave ALL your names here? Check that in the step 8 mothur command probs=T\n\n")
+      "\nHave ALL your names here? Check that in the classify.seqs() mothur commands probs=T\n\n")
   }
   
   # Change all those names to unclassified (sometimes, for example, they might be "unknown")
@@ -344,7 +344,7 @@ view.bootstraps <- function(TaxonomyTable){
 # Generate a final taxonomy file:
 if (final.or.database == "final" | final.or.database == "Final" | final.or.database == "FINAL"){
 #####  
-  cat("\n\ngenerating final file\n")
+  cat("\n\ngenerating final file- woohoo!\n\n")
   print.poem()
   
   fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path)
@@ -387,7 +387,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
 # Compare databases by looking at how GG classifies the FW representative sequences
 }else if (final.or.database == "database"){
 #####
-  cat("\ndoing database comparison\n")
+  cat("\n\ndoing database comparison\n\n")
   
   fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path)
   gg.percents <- import.GG.names(FilePath = gg.only.tax.file.path)
@@ -422,7 +422,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
 # Look at how bad it'd be if you used only the custom database instead of the workflow
 }else if (final.or.database == "forcing"){
 #####  
-  cat("examining forcing if you hadn't used my workflow- good thing you did! :)")
+  cat("\n\nexamining how the custom database would have classified the dissimilar sequences that didn't belong in it \n(i.e. good thing you used my workflow!)\n\n")
   
   fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path)
   gg.percents <- import.GG.names(FilePath = gg.only.tax.file.path, final.names = TRUE)
@@ -435,13 +435,40 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   fw.seq.ids <- import.FW.seq.IDs(FilePath = fw.seq.ids.file.path)
   fw.indeces <- find.fw.indeces(TaxonomyTable = fw.percents, SeqIDs = fw.seq.ids)
   
+  fw.percents.gg.only <- fw.percents[-fw.indeces, ]
+  gg.percents.gg.only <- gg.percents[-fw.indeces, ]
+  
+  check.files.match(FWtable = fw.percents.gg.only, GGtable = gg.percents.gg.only)
+  
+  fw.gg.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.gg.only, BootstrapCutoff = taxonomy.pvalue.cutoff.fw)
+  gg.gg.only <- do.bootstrap.cutoff(TaxonomyTable = gg.percents.gg.only, BootstrapCutoff = taxonomy.pvalue.cutoff.gg)
+  
+  check.files.match(FWtable = fw.gg.only, GGtable = gg.gg.only)
+  
+  fw.gg.only <- apply(fw.gg.only, 2, remove.parentheses)
+  gg.gg.only <- apply(gg.gg.only, 2, remove.parentheses)
+  
+  check.files.match(FWtable = fw.gg.only, GGtable = gg.gg.only)
+  
+  # Generate the files comparing classifications made by fw to those of gg
+  # Generate a summary file listing the total number of classification disagreements at each level
+  # Files written in find.conflicting.names() loop: the "TaxaLevel_conflicts.csv" that puts taxonomy tables side by side
+  # File written afer loop: the "conflicts_summary.csv" that lists how many conflicts were at each level, and how many seqs were classified by FW
+  num.mismatches <- create.summary.vector()
+  for (t in 1:5){
+    num.mismatches <- find.conflicting.names(FWtable = fw.gg.only, GGtable = gg.gg.only,
+                                             FWtable_percents = fw.percents.gg.only,
+                                             GGtable_percents = gg.percents.gg.only, 
+                                             TaxaLevel = t, tracker = num.mismatches)
+  }
+  export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw.gg.only, ALL_seqs = fw.percents, FolderPath = results.folder.path)
 
   
 ##### 
 # Only compare the classifications made by the fw database to the gg classifications, not full tax tables
 }else{
 #####  
-  cat("\ncomparing seqIDs the workflow classified with custom database to how general database would have classified them.\n")
+  cat("\n\ncomparing seqIDs the workflow classified with custom database to how general database would have classified them.\n\n")
   
   fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path)
   gg.percents <- import.GG.names(FilePath = gg.only.tax.file.path)

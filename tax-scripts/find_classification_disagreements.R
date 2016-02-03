@@ -27,16 +27,16 @@
 # Rscript find_classification_disagreements.R custom.custom.taxonomy custom.general.taxonomy NA conflicts_database NA NA 70 database
 # Rscript find_classification_disagreements.R otus.custom.taxonomy otus.98.85.70.taxonomy ids.above.98 conflicts_forcing NA 85 70 forcing
 
-userprefs <- commandArgs(trailingOnly = TRUE)
+# userprefs <- commandArgs(trailingOnly = TRUE)
 
-# userprefs <- c("../../practice/otus.custom.taxonomy",
-#                "../../practice/otus.98.85.70.taxonomy",
-#                "../../practice/ids.above.98",
-#                "../../practice/conflicts_forcing/",
-#                NA, 
-#                85, 
-#                70,
-#                "forcing")
+userprefs <- c("../../practice/otus.custom.taxonomy",
+               "../../practice/otus.98.85.70.taxonomy",
+               "../../practice/ids.above.98",
+               "../../practice/conflicts_forcing/",
+               NA, 
+               85, 
+               70,
+               "forcing")
 
 fw.plus.gg.tax.file.path <- userprefs[1]
 gg.only.tax.file.path <- userprefs[2]
@@ -273,7 +273,7 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
 }
 
 # Find seqs misclassified at a given phylogenetic level, t
-find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_percents, TaxaLevel, tracker){
+find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_percents, TaxaLevel, tracker, forcing = FALSE){
   fw <- FWtable
   gg <- GGtable
   fw.percents <- FWtable_percents
@@ -284,8 +284,13 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
   taxa.names <- c("kingdom","phylum","class","order","lineage","clade","tribe")
   
   # compare names in column t+1, because first columns are seqID and t=1 is kingdom, t=7 is tribe
-  # ignore names that say unclassified
-  index <- which(gg[,t+1] != fw[,t+1] & gg[,t+1] != "unclassified" & fw[,t+1] != "unclassified")
+  # ignore names that say unclassified, except in forcing comparison when fw giving any erroneous name counts as forcing
+  if (forcing == TRUE){
+    index <- which(gg[,t+1] != fw[,t+1] & fw[,t+1] != "unclassified")
+  }else{
+    index <- which(gg[,t+1] != fw[,t+1] & gg[,t+1] != "unclassified" & fw[,t+1] != "unclassified")
+  }
+  
   cat("there are ", length(index), " conflicting names at ", taxa.names[t], " level\n")
   num.mismatches[t] <- length(index)
   
@@ -459,7 +464,8 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
     num.mismatches <- find.conflicting.names(FWtable = fw.gg.only, GGtable = gg.gg.only,
                                              FWtable_percents = fw.percents.gg.only,
                                              GGtable_percents = gg.percents.gg.only, 
-                                             TaxaLevel = t, tracker = num.mismatches)
+                                             TaxaLevel = t, tracker = num.mismatches,
+                                             forcing = TRUE)
   }
   export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw.gg.only, ALL_seqs = fw.percents, FolderPath = results.folder.path)
 

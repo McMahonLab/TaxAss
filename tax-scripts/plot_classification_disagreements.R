@@ -15,23 +15,32 @@
 # Receive arguments from terminal command line
 #####
 
-userprefs <- commandArgs(trailingOnly = TRUE)
+# userprefs <- commandArgs(trailingOnly = TRUE)
 
-# userprefs <- c("../../take9c/otus.abund",
-#                "../../take9c/plots",
-#                "../../take9c/conflicts_database",
-#                "../../take9c/conflicts_94", "../../take9c/ids.above.94", 94,
-#                "../../take9c/conflicts_96", "../../take9c/ids.above.96", 96,
-#                "../../take9c/conflicts_98", "../../take9c/ids.above.98", 98,
-#                "../../take9c/conflicts_100", "../../take9c/ids.above.100", 100)
+userprefs <- c("../../take10/otus.abund",
+               "../../take10/plots",
+               "../../take10/conflicts_database",
+               "../../practice/conflicts_forcing",
+               "../../take10/conflicts_94", "../../take10/ids.above.94", 94,
+               "../../take10/conflicts_95", "../../take10/ids.above.95", 95,
+               "../../take10/conflicts_96", "../../take10/ids.above.96", 96,
+               "../../take10/conflicts_97", "../../take10/ids.above.97", 97,
+               "../../take10/conflicts_98", "../../take10/ids.above.98", 98,
+               "../../take10/conflicts_99", "../../take10/ids.above.99", 99,
+               "../../take10/conflicts_100", "../../take10/ids.above.100", 100)
 
 otu.table.path <- userprefs[1]
 plots.folder.path <- userprefs[2]
 db.conflicts.folder.path <- userprefs[3]
-rest.of.arguments <- userprefs[-(1:3)]
+forcing.folder.path <- userprefs[4]
+rest.of.arguments <- userprefs[-(1:4)]
 pident.folders <- rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)]
 ids.file.paths <- rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)+1]
 pident.values <- as.numeric(rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)+2])
+# this is automatically exported into the working directory when this script is run normally
+seqID.reads.file.path <- "total.reads.per.seqID.csv"
+
+seqID.reads.file.path <- "../../take10/total.reads.per.seqID"
 
 #####
 # Define functions to import and process the data
@@ -65,9 +74,31 @@ import.all.conflict.summaries <- function(ConflictFolders, PidentsUsed){
 # import the database conflicts summary file
 import.database.conflicts <- function(DatabaseFolder){
   db.conflicts.folder.path <- DatabaseFolder
-  db.conflicts <- read.csv(file = paste(db.conflicts.folder.path, "/conflicts_summary.csv", sep =""), stringsAsFactors = F)
+  db.conflicts <- read.csv(file = paste(db.conflicts.folder.path, "/conflicts_summary.csv", sep =""), stringsAsFactors = FALSE)
   # the sequences totals are not needed here
   return(db.conflicts[1:5,])
+}
+
+# import the optional plotting step's forcing conflicts summary file
+import.forcing.conflicts <- function(ForcingFolder){
+  forcing.folder.path <- ForcingFolder
+  forcing.conflicts <- read.csv(file = paste(forcing.folder.path, "/conflicts_summary.csv", sep = ""), stringsAsFactors = FALSE)
+  # forcing.conflicts <- forcing.conflicts[-6, ] <- # this is the # that should have been GG-classified, it's not very useful. fewer disagreements than that number b/c lots of "unclassified"s
+  forcing.conflicts.matrix <- as.matrix(forcing.conflicts[ ,2, drop = FALSE])
+  row.names(forcing.conflicts.matrix) <- forcing.conflicts[ ,1]
+  forcing.conflicts.matrix <- forcing.conflicts.matrix[-6,1, drop = FALSE] # this is the # that should have been GG-classified, it's not very useful. fewer disagreements than that number b/c lots of "unclassified"s
+  return(forcing.conflicts.matrix)
+}
+
+# import seqID.reads variable for the forcing plot (it's generated w/ the regular plotting)
+import.seqID.reads <- function(FilePath){
+  seqID.reads.file.path <- FilePath
+  
+  seqID.reads <- read.csv(file = seqID.reads.file.path, stringsAsFactors = FALSE)
+  seqID.reads[ ,1] <- as.character(seqID.reads[ ,1])
+  seqID.reads[ ,2] <- as.numeric(seqID.reads[ ,2])
+  
+  return(seqID.reads)
 }
 
 # import the OTU table and then pull out just the total reads for each seqID
@@ -75,7 +106,7 @@ import.and.reformat.otu.table <- function(OTUtable){
   otu.table.path <- OTUtable
   
   otus <- read.table(file = otu.table.path, header = TRUE, stringsAsFactors = FALSE)
-  seqID.reads <- data.frame(seqID = otus[ ,1], reads = rowSums(otus[ ,-1]))
+  seqID.reads <- data.frame(seqID = as.character(otus[ ,1]), reads = as.numeric(rowSums(otus[ ,-1])), stringsAsFactors = FALSE)
   
   return(seqID.reads)
 }
@@ -111,7 +142,7 @@ get.conflict.seqIDs <- function(ConflictsFolders, PidentsUsed){
     for (t in 1:5){
       conflict.ids[[t]] <- read.csv(file = paste(pident.folders[p], "/", all.files[t], sep = ""), header = TRUE, stringsAsFactors = FALSE)
       # first column is the seqID vector
-      conflict.ids[[t]] <- conflict.ids[[t]][,1]
+      conflict.ids[[t]] <- as.character(conflict.ids[[t]][ ,1])
     }
     
     all.pidents[[p]] <- conflict.ids
@@ -395,13 +426,80 @@ plot.bootstrap.percents <- function(FWpValues, GGpValues, ResultsFolder){
   unnecessary.message <- dev.off()
 }
 
+plot.percent.forced <- function(ForcingTable, ResultsFolder, ByReads = FALSE){
+  num.forced <- ForcingTable
+  plots.folder.path <- ResultsFolder
+  
+  if (ByReads == FALSE){
+    plot.type <- "OTUs"
+  }else if (ByReads == TRUE){
+    plot.type <- "Reads"
+  }
+  
+  tot <- num.forced[6]
+  perc.forced <- num.forced[-6,1,drop = FALSE] / tot * 100
+  
+  png(filename = paste(plots.folder.path, "/Forcing_by_", plot.type, ".png", sep = ""), 
+      width = 7, height = 5, units = "in", res = 100)
+  
+  par(mar = c(5,6,4,1))
+  
+  barplot(height = perc.forced, beside = TRUE, names.arg = row.names(perc.forced), ylim = c(0,max(perc.forced)+1),
+          space = .2, 
+          main = paste("Why the custom database alone should not be used\n(By Percent Total ", plot.type, ")", sep = ""),
+          ylab = paste("Percent of total", plot.type, "forced \ninto an incorrect classification"),
+          xlab = "Incorrect Classifications at each Taxonomic Level", col = "olivedrab4")
+  unnecessary.message <- dev.off()
+  
+  
+}
 
+#The total number of forced reads is less meaningful than if one of them is a top OTU- that screws up your analysis most
+plot.most.misleading.forced.otus <- function(ReadsPerForcedSeqIDs, ForcedSeqIDs, ReadsPerSeqID){
+  forced.seqIDs <- ForcedSeqIDs
+  forced.seqID.reads <- ReadsPerForcedSeqIDs
+  seqID.reads <- ReadsPerSeqID
+  
+  for (t in 1:5){
+    cat(max(forced.seqID.reads[[1]][[t]]), "\n")
+  }
+  
+  
+}
 
 #####
 # Use Functions
 #####
 
+#####
+# first check if this is the optional "forcing plot"
+#####
+if (forcing.folder.path != "regular"){
+  otus.forced <- import.forcing.conflicts(ForcingFolder = forcing.folder.path)
+  
+  seqID.reads <- import.seqID.reads(FilePath = seqID.reads.file.path) # this was exported previously but this script
+  
+  forced.seqIDs <- get.conflict.seqIDs(ConflictsFolders = forcing.folder.path, PidentsUsed = "forcing")
+  
+  forced.seqID.reads <- find.reads.per.seqID(ReadsTable = seqID.reads, ConflictsList = forced.seqIDs)
+  
+  read.summaries <- generate.summary.table.of.reads(ReadsList = forced.seqID.reads)
+  
+  tot.reads <- sum(seqID.reads$reads)
+  
+  reads.forced <- rbind(read.summaries, tot.reads)
+  
+  plot.percent.forced(ForcingTable = otus.forced, ResultsFolder = plots.folder.path, ByReads = FALSE)
+  
+  plot.percent.forced(ForcingTable = reads.forced, ResultsFolder = plots.folder.path, ByReads = TRUE)
+  
+  plot.most.misleading.forced.otus
+  
+}
+
+#####
 # examine custom taxonomy disagreements and contribution by number OTUs
+#####
 
 otu.summaries <- import.all.conflict.summaries(ConflictFolders = pident.folders, PidentsUsed = pident.values)
 
@@ -416,8 +514,9 @@ plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.fold
 # plot.num.classified.outs(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = FALSE)
 plot.num.classified.outs(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE)
 
-
+#####
 # examine custom taxonomy disagreements and contribution by number reads
+#####
 
 seqID.reads <- import.and.reformat.otu.table(OTUtable = otu.table.path)
 
@@ -441,7 +540,7 @@ plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.fol
 plot.num.classified.outs(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE)
 
 # export the reads per seqID for use in the plot_classification_improvement.R script
-write.table(x = seqID.reads, file = "total.reads.per.seqID", sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
+write.table(x = seqID.reads, file = "total.reads.per.seqID.csv", sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
 
 
 

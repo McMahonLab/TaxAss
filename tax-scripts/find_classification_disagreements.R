@@ -308,9 +308,14 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
 }
 
 # Set up a summary vector to fill
-create.summary.vector <- function(){
-  num.mismatches <- vector(mode = "numeric", length = 5)
-  names(num.mismatches) <- c("kingdom","phylum","class","order","lineage")
+create.summary.vector <- function(Forcing = FALSE){
+  if(Forcing == TRUE){
+    num.mismatches <- vector(mode = "numeric", length = 6)
+    names(num.mismatches) <- c("kingdom","phylum","class","order","lineage","clade")
+  }else{
+    num.mismatches <- vector(mode = "numeric", length = 5)
+    names(num.mismatches) <- c("kingdom","phylum","class","order","lineage")
+  }
   return(num.mismatches)
 }
 
@@ -459,7 +464,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   # Generate a summary file listing the total number of classification disagreements at each level
   # Files written in find.conflicting.names() loop: the "TaxaLevel_conflicts.csv" that puts taxonomy tables side by side
   # File written afer loop: the "conflicts_summary.csv" that lists how many conflicts were at each level, and how many seqs were classified by FW
-  num.mismatches <- create.summary.vector()
+  num.mismatches <- create.summary.vector(Forcing = TRUE)
   for (t in 1:6){
     num.mismatches <- find.conflicting.names(FWtable = fw.gg.only, GGtable = gg.gg.only,
                                              FWtable_percents = fw.percents.gg.only,

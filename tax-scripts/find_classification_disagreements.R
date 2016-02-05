@@ -460,7 +460,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   
   # export clean fw-db-only table for forcing plots later
   fw <- apply(fw, 2, remove.parentheses)
-  write.table(x = fw, file = paste("otus.", taxonomy.pvalue.cutoff.fw, ".custom.taxonomy", sep = ""), sep = ";")
+  write.table(x = fw, file = paste("otus.custom.", taxonomy.pvalue.cutoff.fw, ".taxonomy", sep = ""), sep = ";")
   
   fw.gg.only <- apply(fw.gg.only, 2, remove.parentheses)
   gg.gg.only <- apply(gg.gg.only, 2, remove.parentheses)

@@ -27,16 +27,16 @@
 # Rscript find_classification_disagreements.R custom.custom.taxonomy custom.general.taxonomy NA conflicts_database NA NA 70 database
 # Rscript find_classification_disagreements.R otus.custom.taxonomy otus.98.85.70.taxonomy ids.above.98 conflicts_forcing NA 85 70 forcing
 
-# userprefs <- commandArgs(trailingOnly = TRUE)
+userprefs <- commandArgs(trailingOnly = TRUE)
 
-userprefs <- c("../../practice/otus.custom.taxonomy",
-               "../../practice/otus.98.85.70.taxonomy",
-               "../../practice/ids.above.98",
-               "../../practice/conflicts_forcing/",
-               NA, 
-               85, 
-               70,
-               "forcing")
+# userprefs <- c("../../practice/otus.custom.taxonomy",
+#                "../../practice/otus.98.85.70.taxonomy",
+#                "../../practice/ids.above.98",
+#                "../../practice/conflicts_forcing/",
+#                NA, 
+#                85, 
+#                70,
+#                "forcing")
 
 fw.plus.gg.tax.file.path <- userprefs[1]
 gg.only.tax.file.path <- userprefs[2]
@@ -460,7 +460,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   # Files written in find.conflicting.names() loop: the "TaxaLevel_conflicts.csv" that puts taxonomy tables side by side
   # File written afer loop: the "conflicts_summary.csv" that lists how many conflicts were at each level, and how many seqs were classified by FW
   num.mismatches <- create.summary.vector()
-  for (t in 1:5){
+  for (t in 1:6){
     num.mismatches <- find.conflicting.names(FWtable = fw.gg.only, GGtable = gg.gg.only,
                                              FWtable_percents = fw.percents.gg.only,
                                              GGtable_percents = gg.percents.gg.only, 

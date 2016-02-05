@@ -85,10 +85,10 @@ import.database.conflicts <- function(DatabaseFolder){
 import.forcing.conflicts <- function(ForcingFolder){
   forcing.folder.path <- ForcingFolder
   forcing.conflicts <- read.csv(file = paste(forcing.folder.path, "/conflicts_summary.csv", sep = ""), stringsAsFactors = FALSE)
-  # forcing.conflicts <- forcing.conflicts[-6, ] <- # this is the # that should have been GG-classified, it's not very useful. fewer disagreements than that number b/c lots of "unclassified"s
   forcing.conflicts.matrix <- as.matrix(forcing.conflicts[ ,2, drop = FALSE])
   row.names(forcing.conflicts.matrix) <- forcing.conflicts[ ,1]
-  forcing.conflicts.matrix <- forcing.conflicts.matrix[-6,1, drop = FALSE] # this is the # that should have been GG-classified, it's not very useful. fewer disagreements than that number b/c lots of "unclassified"s
+  # remove total that should have been GG-classified (confusingly labelled "numFWseqs"), and the clade row.
+  forcing.conflicts.matrix <- forcing.conflicts.matrix[-(6:7),1, drop = FALSE]
   return(forcing.conflicts.matrix)
 }
 

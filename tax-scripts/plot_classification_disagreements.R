@@ -460,11 +460,48 @@ plot.most.misleading.forced.otus <- function(ReadsPerForcedSeqIDs, ForcedSeqIDs,
   forced.seqID.reads <- ReadsPerForcedSeqIDs
   seqID.reads <- ReadsPerSeqID
   
+  # reformat the multilevel lists to 1 level, since there's only 1 upper level anyway. 
+  forced.reads <- forced.seqID.reads[[1]]
+  forced.seqIDs <- forced.seqIDs[[1]]
+  
+  # Find the top 20 OTU abundances out of the conflicts at each taxa level, save their indeces
+  max.forced.seqIDs <- list(kingdom = 0, phylum = 0, class = 0, order = 0, lineage = 0)
+  max.forced.reads <- list(kingdom = 0, phylum = 0, class = 0, order = 0, lineage = 0)
+  max.forced.reads.perc <- list(kingdom = 0, phylum = 0, class = 0, order = 0, lineage = 0)
   for (t in 1:5){
-    cat(max(forced.seqID.reads[[1]][[t]]), "\n")
+    indeces <- order(forced.reads[[t]], decreasing = TRUE)
+    max.indeces <- indeces[1:20]
+    max.forced.seqIDs[[t]] <- forced.seqIDs[[t]][max.indeces]
+    max.forced.reads[[t]] <- forced.reads[[t]][max.indeces]
+    max.forced.reads.perc[[t]] <- forced.reads[[t]][max.indeces] / sum(seqID.reads[ ,2]) * 100
   }
   
   
+  
+  
+  # find the max OTUs by total abundance
+  indeces <- order(seqID.reads[ ,2], decreasing = TRUE)
+  max.indeces <- indeces[1:50]
+  max.seqIDs.reads <- seqID.reads[max.indeces, ]
+  max.seqID.reads.perc <- max.seqIDs.reads 
+  max.seqID.reads.perc[ ,2] <- max.seqID.reads.perc[ ,2] / sum(seqID.reads[ ,2]) * 100
+  
+  # Now which ones of those were forced?
+  seqID.recorder <- list(kingdom = NULL, phylum = NULL, class = NULL, order = NULL, lineage = NULL)
+  for (t in 1:5){
+    for (s in 1:nrow(max.seqID.reads.perc)){
+      check.match <- max.seqID.reads.perc[s,1] == forced.seqIDs[[t]]
+      index <- which(check.match == 1)
+      cat(index)
+      if (length(index) > 0){
+        seqID.recorder[[t]] <- c(seqID.recorder[[t]], s)
+      }
+    }
+  }
+  color.vector <- rep(x = "grey", times = length(max.indeces))
+  color.vector[seqID.recorder[[t]]] <- "red"
+  barplot(max.seqID.reads.perc[ ,2], col = color.vector)
+
 }
 
 #####

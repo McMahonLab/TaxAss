@@ -29,14 +29,14 @@
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 
-# userprefs <- c("../../practice/otus.custom.taxonomy",
-#                "../../practice/otus.98.85.70.taxonomy",
-#                "../../practice/ids.above.98",
-#                "../../practice/conflicts_forcing/",
-#                NA, 
-#                85, 
-#                70,
-#                "forcing")
+userprefs <- c("../../practice/otus.custom.taxonomy",
+               "../../practice/otus.98.85.70.taxonomy",
+               "../../practice/ids.above.98",
+               "../../practice/conflicts_forcing/",
+               NA, 
+               85, 
+               70,
+               "forcing")
 
 fw.plus.gg.tax.file.path <- userprefs[1]
 gg.only.tax.file.path <- userprefs[2]
@@ -450,10 +450,17 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   
   check.files.match(FWtable = fw.percents.gg.only, GGtable = gg.percents.gg.only)
   
-  fw.gg.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.gg.only, BootstrapCutoff = taxonomy.pvalue.cutoff.fw)
   gg.gg.only <- do.bootstrap.cutoff(TaxonomyTable = gg.percents.gg.only, BootstrapCutoff = taxonomy.pvalue.cutoff.gg)
   
+  # Need a custom-only table with bootstrap applied for custom-only forcing plot in plot_classification_disagreements.R with forcing argument
+  fw <- do.bootstrap.cutoff(TaxonomyTable = fw.percents, BootstrapCutoff = taxonomy.pvalue.cutoff.fw)
+  fw.gg.only <- fw[-fw.indeces, ]
+  
   check.files.match(FWtable = fw.gg.only, GGtable = gg.gg.only)
+  
+  # export clean fw-db-only table for forcing plots later
+  fw <- apply(fw, 2, remove.parentheses)
+  write.table(x = fw, file = paste("otus.", taxonomy.pvalue.cutoff.fw, ".custom.taxonomy", sep = ""), sep = ";")
   
   fw.gg.only <- apply(fw.gg.only, 2, remove.parentheses)
   gg.gg.only <- apply(gg.gg.only, 2, remove.parentheses)

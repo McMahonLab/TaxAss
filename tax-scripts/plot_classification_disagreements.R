@@ -273,18 +273,12 @@ import.bootstrap.pvalues <- function(ConflictFolders, PidentsUsed, FW = TRUE){
 # import the custom-only classified taxonomy for the "forcing" plots (function borrowed from find_classification_disagreements.R)
 import.custom.only.taxonomy <- function(FilePath){
   forced.taxonomy.file.path <- FilePath
-  # Avoid errors from variable row lengths by checking length of all rows (fill=T only checks 1st 5 rows)
-  numcol <- max(count.fields(forced.taxonomy.file.path , sep=";"))
-  fw <- read.table(forced.taxonomy.file.path , sep=";", fill=T, stringsAsFactors = F, col.names=1:numcol)
   
-  # Remove strain and empty 10th column
-  fw <- fw[,-c(9,10)]
+  # simple imort b/c file format determined by previous script, shouldn't have any weird things
+  fw <- read.table(forced.taxonomy.file.path , sep=";", fill=T, stringsAsFactors = F, header = TRUE)
   
   # convert seqIDs to characters in case they are numeric b/c as.matrix on numbers adds spaces but as.character doesn't
   fw[,1] <- as.character(fw[,1])
-  
-  # Rename columns
-  colnames(fw) <- c("seqID.fw","kingdom.fw","phylum.fw","class.fw","order.fw","linege.fw","clade.fw","tribe.fw")
   
   # Reorder sequence IDs so can match them to the other file
   index <- order(fw[,1])
@@ -299,6 +293,8 @@ import.custom.only.taxonomy <- function(FilePath){
   return(fw)
 }
 
+#####
+
 # Group seqIDs at each taxa level- this is used in plot.most.misleading.forced.taxa
 group.by.taxon <- function(TaxonomyTable){
   otus.taxa <- TaxonomyTable
@@ -311,76 +307,49 @@ group.by.taxon <- function(TaxonomyTable){
   otus.taxa.ord <- otus.taxa[index, ]
   
   # Make unique taxonomy table (so that there aren't duplicate names at each level as occurs with "unclassified")
-  for (t in 1:6){
-    unique.taxa <- unique(otus.taxa.ord[ ,1:t, drop = FALSE])          # make a list of unique taxa at level t (using all preceding taxa levels)
-    unique.names <- make.unique(unique.taxa[,t])        # make a vector of unique names at level t (so unique without preceding levels)
-    for (u in 1:nrow(unique.taxa)){                     # go through the unique taxa and change their names to being unique in the full otus.taxa.ord table
+  for (t in 2:7){
+    unique.taxa <- unique(otus.taxa.ord[ ,2:t, drop = FALSE])          
+    unique.names <- make.unique(unique.taxa[,(t-1)])       
+    for (u in 1:nrow(unique.taxa)){                     
       for (r in 1:nrow(otus.taxa.ord)){
-        if (all(otus.taxa.ord[r,1:t] == unique.taxa[u,1:t])){
+        if (all(otus.taxa.ord[r,2:t] == unique.taxa[u,1:(t-1)])){
           otus.taxa.ord[r,t] <- unique.names[u]
         }
       }
     }
   }
-  cat("\nFinished making taxonomy names unique.\n")
   
-  # change otus.taxa.ord to being a dataframe and convert the numbers to numeric
-  # Note: the previous loop is *much* faster when it's still in matrix form
+  # change to being a dataframe so that read numbers can be numeric
   otus.taxa.ord <- as.data.frame(otus.taxa.ord, stringsAsFactors = F)
-  otus.taxa.ord[,8:ncol(otus.taxa.ord)] <- apply(otus.taxa.ord[,8:ncol(otus.taxa.ord)], 2, as.numeric)
+  otus.taxa.ord[ ,8] <- as.numeric(otus.taxa.ord[ ,8])
   
   # Create a blank list to fill with data
-  grouped.taxa <- list("phylum"=NULL, "class"=NULL, "order"=NULL, "lineage"=NULL, "clade"=NULL, "tribe"=NULL, "OTU"=NULL)
+  grouped.taxa <- list("kingdom"=NULL,"phylum"=NULL, "class"=NULL, "order"=NULL, "lineage"=NULL, "clade"=NULL)
   
-  # Populate list with the unique taxa names at each level and columns for each sample date
-  for (t in 1:7){
-    # Add unique taxa names followed by zeros to be filled in with OTU rel abundances
-    grouped.taxa[[t]] <- as.data.frame(cbind(unique(otus.taxa.ord[,1:t]), 
-                                             matrix(0,nrow = nrow(unique(otus.taxa.ord[,1:t,drop=F])),ncol = 95)),
-                                       stringsAsFactors=FALSE)
-    # Reformat the zeros to be numeric
-    grouped.taxa[[t]][,(t+1):(t+95)] <- apply(grouped.taxa[[t]][,(t+1):(t+95)], 2, as.numeric)
-    
-    # Name the columns and remove misleading row names in each list element
-    colnames(grouped.taxa[[t]]) <- colnames(otus.taxa.ord)[c(1:t,8:102)]
+  # Populate list with the unique taxa names at each level and a numeric column for total reads
+  for (t in 1:6){
+    grouped.taxa[[t]] <- as.data.frame( cbind( unique(otus.taxa.ord[ ,(2:(t+1))]), 
+                                               rep( x = 0, times = nrow(unique(otus.taxa.ord[ ,(2:(t+1)), drop=F])) ) ), 
+                                        stringsAsFactors = FALSE)
+    grouped.taxa[[t]][ ,(t+1)] <- as.numeric(grouped.taxa[[t]][ ,(t+1)])
+    colnames(grouped.taxa[[t]]) <- c( colnames(otus.taxa.ord)[(2:(t+1))], "reads")
     rownames(grouped.taxa[[t]])<- NULL
   }
   
-  # Fill in the "sum" (sample date) columns in each element of the grouped.taxa list to complete the grouping by taxa
-  for (t in 1:length(grouped.taxa)){                                   # for each taxa level
-    uniquename<- 1                                                            # start with the first unique name
-    for (r in 1:nrow(otus.taxa.ord)){                                         # for each non-unique name in the whole list of names
-      if (all(otus.taxa.ord[r,1:t] == grouped.taxa[[t]][uniquename,1:t])){      # if the non-unique name equals the unique name
-        for (c in 8:ncol(otus.taxa.ord)){                                         # then for each sample date
-          grouped.taxa[[t]][uniquename,(c-7+t)]<- 
-            grouped.taxa[[t]][uniquename,(c-7+t)] + otus.taxa.ord[r,c]       # the unique name gets the non-unique name values added on
-        }
+  # Fill in the reads columns in each element of the grouped.taxa list
+  for (t in 1:6){                                   
+    uniquename <- 1
+    for (r in 1:nrow(otus.taxa.ord)){
+      if ( all( otus.taxa.ord[r, 2:(t + 1)] == grouped.taxa[[t]][uniquename, 1:t]) ){
+        grouped.taxa[[t]][uniquename, (t + 1)] <- grouped.taxa[[t]][uniquename, (t + 1)] + otus.taxa.ord[r,8]
+      }else{
+        uniquename <- uniquename + 1
+        grouped.taxa[[t]][uniquename, (t + 1)] <- grouped.taxa[[t]][uniquename, (t + 1)] + otus.taxa.ord[r,8]
       }
-      else {                                                                    # if the non-unique name doesn't eaual the unique name 
-        uniquename<- uniquename + 1                                               # then move to the next unique name in the taxa_grouped file
-        for (c in 8:ncol(otus.taxa.ord)){                                         # and for each sample date
-          grouped.taxa[[t]][uniquename,c-7+t]<- 
-            grouped.taxa[[t]][uniquename,c-7+t] + otus.taxa.ord[r,c]         # the new unique name gets the non-unique name values added on
-        }                                                                     # note: this steps by row never re-checking a row twice since the rows 
-      }                                                                       # are already in alphabetical order in both lists
     }
-    cat("Now you're on taxa level:",t+1,'\n')
+    cat("Now you're on taxa level:",t,'\n')
   }
-  
-  # Export this data table that took so so long to generate 
-  # as .csv to give others (.csv can open with excel)
-  for (t in 1:7){
-    write.table(grouped.taxa[[t]],
-                paste("data/7-13-15_grouped_taxa_tables/7-13-15_CSV_format/", "7-13-15_",
-                      "grouped_by_", names(grouped.taxa)[t], ".csv",sep=""),
-                sep=",")
-  }
-  # as r default (sep=" ") for easy importing (worried the headings get shifted in .csv)
-  for (t in 1:7){
-    write.table(grouped.taxa[[t]],
-                paste("data/7-13-15_grouped_taxa_tables/7-13-15_r_default_format/", "7-13-15_",
-                      "grouped_by_", names(grouped.taxa)[t], sep=""))
-  }
+  return(grouped.taxa)
 }
 
 #####
@@ -615,37 +584,32 @@ plot.most.misleading.forced.otus <- function(ReadsPerForcedSeqIDs, ForcedSeqIDs,
   }
 }
 
+#####
 
 
 plot.most.misleading.forced.taxa <- function(TaxonomyTable, ReadsPerSeqID){
   forced.taxonomy <- TaxonomyTable
   seqID.reads <- ReadsPerSeqID
   
-  forced.seqIDs <- ForcedSeqIDs
-  forced.seqID.reads <- ReadsPerForcedSeqIDs
-  plots.folder.path <- OutputFolder
-  
-  
-  # first put them im the same order (they should be both character seqIDs already)
-  index.1 <- order(forced.taxonomy[ ,1])
-  index.2 <- order(seqID.reads[ ,1])
-  forced.taxonomy.ord <- forced.taxonomy[index.1, ]
-  seqID.reads.ord <- seqID.reads[index.2, ]
-  if (all.equal(seqID.reads.ord[ ,1], forced.taxonomy.ord[ ,1]) != TRUE){
+  # first put them im the same order (they should be both character seqIDs already, and taxonomy was ordered inside it's import function)
+  index <- order(seqID.reads[ ,1])
+  seqID.reads.ord <- seqID.reads[index, ]
+  if (all.equal(seqID.reads.ord[ ,1], forced.taxonomy[ ,1]) != TRUE){
     cat("Crap something's messed up with the indexing, seqID.reads and forced.taxonomy need to have the same order of seqIDs")
   }
   
   # add total reads to taxonomy table
-  tax.reads <- cbind(forced.taxonomy.ord, seqID.reads.ord[ ,2])
+  tax.reads <- cbind(forced.taxonomy, seqID.reads.ord[ ,2])
   colnames(tax.reads)[9] <- "reads"
   
-  # find the top 10 of each taxa level by total abundance- use my old TAGs script for this
+  # find the number of reads per taxa level
+  grouped.taxa <- group.by.taxon(TaxonomyTable = tax.reads)
   
-  
-  
-  # find total reads per level
+  # look just at the top 20 levels
+  grouped.taxa.ord <- 
   
   # find the contributing seqIDs
+  
   
   # figure out which of those seqIDs were forced
   
@@ -660,18 +624,18 @@ plot.most.misleading.forced.taxa <- function(TaxonomyTable, ReadsPerSeqID){
 }
 
 
-  # Find the top 20 OTU abundances out of the conflicts at each taxa level, save their indeces
-  max.forced.seqIDs <- list(kingdom = 0, phylum = 0, class = 0, order = 0, lineage = 0)
-  max.forced.reads <- list(kingdom = 0, phylum = 0, class = 0, order = 0, lineage = 0)
-  max.forced.reads.perc <- list(kingdom = 0, phylum = 0, class = 0, order = 0, lineage = 0)
-  for (t in 1:5){
-    indeces <- order(forced.reads[[t]], decreasing = TRUE)
-    max.indeces <- indeces[1:20]
-    max.forced.seqIDs[[t]] <- forced.seqIDs[[t]][max.indeces]
-    max.forced.reads[[t]] <- forced.reads[[t]][max.indeces]
-    max.forced.reads.perc[[t]] <- forced.reads[[t]][max.indeces] / sum(seqID.reads[ ,2]) * 100
-  }
-  # Figure out what their classifications were
+#   # Find the top 20 OTU abundances out of the conflicts at each taxa level, save their indeces
+#   max.forced.seqIDs <- list(kingdom = 0, phylum = 0, class = 0, order = 0, lineage = 0)
+#   max.forced.reads <- list(kingdom = 0, phylum = 0, class = 0, order = 0, lineage = 0)
+#   max.forced.reads.perc <- list(kingdom = 0, phylum = 0, class = 0, order = 0, lineage = 0)
+#   for (t in 1:5){
+#     indeces <- order(forced.reads[[t]], decreasing = TRUE)
+#     max.indeces <- indeces[1:20]
+#     max.forced.seqIDs[[t]] <- forced.seqIDs[[t]][max.indeces]
+#     max.forced.reads[[t]] <- forced.reads[[t]][max.indeces]
+#     max.forced.reads.perc[[t]] <- forced.reads[[t]][max.indeces] / sum(seqID.reads[ ,2]) * 100
+#   }
+#   # Figure out what their classifications were
 
 
 

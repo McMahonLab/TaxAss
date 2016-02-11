@@ -29,14 +29,23 @@
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 
-userprefs <- c("../../practice/otus.custom.taxonomy",
-               "../../practice/otus.98.85.70.taxonomy",
-               "../../practice/ids.above.98",
-               "../../practice/conflicts_forcing/",
-               NA, 
-               85, 
-               70,
-               "forcing")
+# userprefs <- c("../../take10a/otus.98.taxonomy",
+#                "../../take10a/otus.general.taxonomy",
+#                "../../take10a/ids.above.98",
+#                "../../take10a/conflicts_98",
+#                98, 
+#                85, 
+#                70
+#                )
+# userprefs <- c("../../take10a/custom.custom.taxonomy",
+#                "../../take10a/custom.general.taxonomy",
+#                "NA",
+#                "../../take10a/conflicts_database/",
+#                NA, 
+#                NA, 
+#                70,
+#                "database")
+
 
 fw.plus.gg.tax.file.path <- userprefs[1]
 gg.only.tax.file.path <- userprefs[2]
@@ -210,6 +219,7 @@ uniform.unclass.names <- function(TaxonomyTable){
 }
 
 # makes empty spots in the database be called unclassified.  more error prone b/c have to guess odd names!
+# do this separately for the database b/c it doesn't have parentheses (it is the FW training set)
 uniform.unclass.names.database <- function(TaxonomyDatabase){
   tax <- TaxonomyDatabase
   

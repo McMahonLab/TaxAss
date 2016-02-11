@@ -75,7 +75,7 @@ NOTE: steps 1-14 can be run in a block using the bash script LazyRun.sh.  to sou
 	Rscript find_classification_disagreements.R custom.custom.taxonomy custom.general.taxonomy NA conflicts_database NA NA 70 database 
 
 14. choose appropriate pident cutoff (R)
-	Rscript plot_classification_disagreements.R otus.abund plots conflicts_database conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98
+	Rscript plot_classification_disagreements.R otus.abund plots conflicts_database regular regular conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98
 
 15. generate final taxonomy file (R)
 	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 final
@@ -810,7 +810,7 @@ order to examine the cutoff sensitivity, you may want to run steps 4-9 & 12-14 m
 with different pident cutoffs.  Note that the slowest step, classify.seqs() in mothur, will
 be much faster because the mothur database files are not re-made.
 
-Rscript plot_classification_disagreements.R otus.abund plots conflicts_database conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98
+Rscript plot_classification_disagreements.R otus.abund plots conflicts_database regular regular conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98
 
 What the arguments are:
 1.		Rscript									Calls program R in a way that accepts command line arguments
@@ -821,6 +821,8 @@ What the arguments are:
 5.		conflicts_database						path to folder containing taxonomy disagreements between
 												the custom and the general database.
 												You made this folder in step 13.
+6.		regular									placeholder, this is only used in the step where you plot forcing
+7.		regular									also placeholder. Note: these must say "regular" though.
 6.		conflicts_94							path to folder containing taxonomy disagreements between
 												this cutom+general workflow and the general database alone.
 												You made this folder in step 13.

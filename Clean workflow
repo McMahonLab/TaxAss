@@ -75,16 +75,23 @@ NOTE: steps 1-14 can be run in a block using the bash script LazyRun.sh.  to sou
 	Rscript find_classification_disagreements.R custom.custom.taxonomy custom.general.taxonomy NA conflicts_database NA NA 70 database 
 
 14. choose appropriate pident cutoff (R)
-	Rscript plot_classification_disagreements.R otus.abund plots conflicts_database regular regular conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98
+	Rscript plot_classification_disagreements.R otus.abund plots conflicts_database regular NA conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98
 
 15. generate final taxonomy file (R)
 	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 final
 
-16. plot classification improvements (R)
-	Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID plots
+16. OPTIONAL: plot benefits of using this workflow (R)
+	Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID.csv plots
+	mothur "#classify.seqs(fasta=otus.fasta, template=custom.fasta, taxonomy=custom.taxonomy, method=wang, probs=T, processors=2)"
+	cat otus.custom.wang.taxonomy > otus.custom.taxonomy
+	sed 's/[[:blank:]]/\;/' <otus.custom.taxonomy >otus.custom.taxonomy.reformatted
+	mv otus.custom.taxonomy.reformatted otus.custom.taxonomy
+	mkdir conflicts_forcing
+	Rscript find_classification_disagreements.R otus.custom.taxonomy otus.98.85.70.taxonomy ids.above.98 conflicts_forcing NA 85 70 forcing
+	Rscript plot_classification_disagreements.R otus.abund plots NA conflicts_forcing otus.custom.85.taxonomy NA NA
 
 17. tidy up (bash)
-	rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy *.general.taxonomy
+	rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otus.custom.taxonomy otus.custom.[0-9]* *pvalues total*
 	mkdir scripts ; mv *.py *.R *.sh scripts
 	mkdir analysis ; mv conflicts* plots analysis
 	mkdir data ; mv otus* data
@@ -575,6 +582,8 @@ What the output files are (note you have no control over the name extensions add
 	otus.above.98.custom.wang.tax.summary
 	otus.below.98.general.wang.taxonomy
 	otus.below.98.general.wang.tax.summary
+
+**** add in the database files that are generated too***
 	
 NOTE: these bootstrap percent confidence values are NOT the confidence that the taxonomy 
 assignment is *correct*, just that it is *repeatable* in that database.  This is another 
@@ -886,7 +895,9 @@ What the arguments are this (3rd) time you source the script:
 
 __________________________________________________________________________________________
 
-16. plot classification improvement (R)
+16. OPTIONAL: plot benefits of using this workflow (R)
+
+16.a Plot improvement over using general database alone
 
 In this step two plots are generated that show you the benefit of using the custom workflow.
 The plots show the number of known taxonomic assignments by either % of total OTUs or % of 
@@ -912,7 +923,30 @@ What the arguments are:
 									working directory.
 	plots							the name of the folder that plots are saved into.  you created this
 									folder in step 5.
-									
+
+16.b Plot folly of using custom database alone
+
+In this step the classifications you get using the custom database alone are compared to the final workflow
+taxonomy file generated in step 15.  The plots created show the "forcing" that would occur from using only
+the small database.  Forcing occurs because the RDP classifier classifies sequences stochastically, putting
+them with the most similar sequence *in your database*.  If there are no similar sequences and the database is 
+large, then the sequence will be put somewhere different each time, end up with a low p-value, and be called
+unclassified.  However in a smaller database, it's possible that a dissimilar sequence might be put reliably
+in the same classification because it is most similar to that, even though the sequence itself is very dissimilar.
+This is what I call forcing.  These plots take longer to generate because first you must classify your OTUs 
+with the custom database alone, and then you must group the classifications by taxonomic level (all other
+steps in this workflow are on an OTU-level.) However, the plots are very beautiful so it is worth your wait. :)
+
+mothur "#classify.seqs(fasta=otus.fasta, template=custom.fasta, taxonomy=custom.taxonomy, method=wang, probs=T, processors=2)"
+cat otus.custom.wang.taxonomy > otus.custom.taxonomy
+
+sed 's/[[:blank:]]/\;/' <otus.custom.taxonomy >otus.custom.taxonomy.reformatted
+mv otus.custom.taxonomy.reformatted otus.custom.taxonomy
+
+mkdir conflicts_forcing
+Rscript find_classification_disagreements.R otus.custom.taxonomy otus.98.85.70.taxonomy ids.above.98 conflicts_forcing NA 85 70 forcing
+
+Rscript plot_classification_disagreements.R otus.abund plots NA conflicts_forcing otus.custom.85.taxonomy NA NA
 									
 __________________________________________________________________________________________
 
@@ -928,25 +962,28 @@ Note: go through these commands in order.
 
 Full Command (Type in Terminal):
 
-rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy *.general.taxonomy
+rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otus.custom.taxonomy otus.custom.[0-9]* *pvalues total*
 
 What each of these intermediate files is and why you might want to keep them:
 custom.db.*		The blast database files (saves time if you want to re-run blast on the same taxonomy database)
 custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree*
 				The mothur database files (saves time if you want to re-run classify seqs with the same taxonomy database)
+				This also removes custom.custom.taxonomy, which was only for comparison and isn't needed anymore either
 *wang* mothur.*.logfile
-				The mothur classify seqs output files (these can be regenerated quickly if you save mothur db files)
+				The mothur classify seqs output files (these can be regenerated relatively quickly if you save mothur db files)
 otus.custom.blast*
 				The blast results (these are quick to regenerate if you have the blast database)
 ids*			lists of seqIDs (not needed once you have the fasta files)
-rm otus.below*.fasta otus.above*.fasta
-				separated fasta files (not needed post-classification.)
-otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy
-				the classifications at different pident cutoffs and from green genes alone
+otus.below*.fasta otus.above*.fasta
+				separated fasta files from the custom & general classifications (not needed post-classification.)
+otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otus.custom.taxonomy otus.custom.[0-9]*
+				the classifications at different pident cutoffs and from general and custom alone
 				note: these files don't have p-value cutoffs applied (i.e. nothing's called unclassified). 
 				If you want to save files like these for additional analysis, 
 					re-run step 15 to get additional "final" versions.
 					re-run step 10 with an additional "cutoff=" flag.
+*pvalues total*	These are files generated to use in the plot improvement script
+
 
 Note: if for some reason you want to keep these files, you can either skip this step
 or type in the terminal:

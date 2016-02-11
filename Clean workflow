@@ -91,7 +91,7 @@ NOTE: steps 1-14 can be run in a block using the bash script LazyRun.sh.  to sou
 	Rscript plot_classification_disagreements.R otus.abund plots NA conflicts_forcing otus.custom.85.taxonomy NA NA
 
 17. tidy up (bash)
-	rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otus.custom.taxonomy otus.custom.[0-9]* *pvalues total*
+	rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otus.custom.taxonomy custom.general* otus.custom.[0-9]* *pvalues total*
 	mkdir scripts ; mv *.py *.R *.sh scripts
 	mkdir analysis ; mv conflicts* plots analysis
 	mkdir data ; mv otus* data
@@ -962,7 +962,7 @@ Note: go through these commands in order.
 
 Full Command (Type in Terminal):
 
-rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otus.custom.taxonomy otus.custom.[0-9]* *pvalues total*
+rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otus.custom.taxonomy custom.general* otus.custom.[0-9]* *pvalues total*
 
 What each of these intermediate files is and why you might want to keep them:
 custom.db.*		The blast database files (saves time if you want to re-run blast on the same taxonomy database)
@@ -976,8 +976,8 @@ otus.custom.blast*
 ids*			lists of seqIDs (not needed once you have the fasta files)
 otus.below*.fasta otus.above*.fasta
 				separated fasta files from the custom & general classifications (not needed post-classification.)
-otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otus.custom.taxonomy otus.custom.[0-9]*
-				the classifications at different pident cutoffs and from general and custom alone
+otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otus.custom.taxonomy otus.custom.[0-9]* custom.general*
+				the classifications at different pident cutoffs and from general and custom alone and the database comparison
 				note: these files don't have p-value cutoffs applied (i.e. nothing's called unclassified). 
 				If you want to save files like these for additional analysis, 
 					re-run step 15 to get additional "final" versions.

@@ -27,16 +27,16 @@
 # Rscript find_classification_disagreements.R custom.custom.taxonomy custom.general.taxonomy NA conflicts_database NA NA 70 database
 # Rscript find_classification_disagreements.R otus.custom.taxonomy otus.98.85.70.taxonomy ids.above.98 conflicts_forcing NA 85 70 forcing
 
-# userprefs <- commandArgs(trailingOnly = TRUE)
+userprefs <- commandArgs(trailingOnly = TRUE)
 
-userprefs <- c("../../take10a/otus.98.taxonomy",
-               "../../take10a/otus.general.taxonomy",
-               "../../take10a/ids.above.98",
-               "../../take10a/conflicts_98",
-               98, 
-               85, 
-               70
-               )
+# userprefs <- c("../../take10a/otus.98.taxonomy",
+#                "../../take10a/otus.general.taxonomy",
+#                "../../take10a/ids.above.98",
+#                "../../take10a/conflicts_98",
+#                98, 
+#                85, 
+#                70
+#                )
 # userprefs <- c("../../take10a/custom.custom.taxonomy",
 #                "../../take10a/custom.general.taxonomy",
 #                "NA",
@@ -206,7 +206,7 @@ uniform.unclass.names <- function(TaxonomyTable){
   # Warn user the names you are changing
   odd.entries <- unique(grep(pattern = '.*\\(', x <- tax[,2:8], value = TRUE, invert=T))
   if (length(odd.entries) > 0){
-  cat("\nWarning: These names in your taxonomy table are missing a bootstrap taxonomy assignment value:\n\n",
+  cat("\nNote: These names in your taxonomy table are missing a bootstrap taxonomy assignment value:\n\n",
       odd.entries,
       "\n\nThese names will be renamed as \"unclassified\". If that seems incorrect",
       "then you have to figure out why the parentheses are missing from them.", 

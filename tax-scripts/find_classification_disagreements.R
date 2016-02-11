@@ -27,16 +27,16 @@
 # Rscript find_classification_disagreements.R custom.custom.taxonomy custom.general.taxonomy NA conflicts_database NA NA 70 database
 # Rscript find_classification_disagreements.R otus.custom.taxonomy otus.98.85.70.taxonomy ids.above.98 conflicts_forcing NA 85 70 forcing
 
-userprefs <- commandArgs(trailingOnly = TRUE)
+# userprefs <- commandArgs(trailingOnly = TRUE)
 
-# userprefs <- c("../../take10a/otus.98.taxonomy",
-#                "../../take10a/otus.general.taxonomy",
-#                "../../take10a/ids.above.98",
-#                "../../take10a/conflicts_98",
-#                98, 
-#                85, 
-#                70
-#                )
+userprefs <- c("../../take10a/otus.98.taxonomy",
+               "../../take10a/otus.general.taxonomy",
+               "../../take10a/ids.above.98",
+               "../../take10a/conflicts_98",
+               98, 
+               85, 
+               70
+               )
 # userprefs <- c("../../take10a/custom.custom.taxonomy",
 #                "../../take10a/custom.general.taxonomy",
 #                "NA",
@@ -149,6 +149,12 @@ reformat.gg <- function(GGtable){
 check.files.match <- function(FWtable, GGtable){
   gg <- GGtable
   fw <- FWtable
+  
+  # only care about values, but all equal doesn't return true if the names are different (ex. "seqID.fw" != "seqID.gg")
+  row.names(fw) <- NULL
+  row.names(gg) <- NULL
+  colnames(fw) <- NULL
+  colnames(gg) <- NULL
   
   order.check <- all.equal(fw[,1], gg[,1])
   if (order.check != TRUE){

@@ -15,20 +15,20 @@
 # Receive arguments from terminal command line
 #####
 
-# userprefs <- commandArgs(trailingOnly = TRUE)
+userprefs <- commandArgs(trailingOnly = TRUE)
 
-userprefs <- c("../../take10/otus.abund",
-               "../../take10/plots",
-               "../../take10/conflicts_database",
-               "../../practice/conflicts_forcing",
-               "../../practice/otus.custom.85.taxonomy",
-               "../../take10/conflicts_94", "../../take10/ids.above.94", 94,
-               "../../take10/conflicts_95", "../../take10/ids.above.95", 95,
-               "../../take10/conflicts_96", "../../take10/ids.above.96", 96,
-               "../../take10/conflicts_97", "../../take10/ids.above.97", 97,
-               "../../take10/conflicts_98", "../../take10/ids.above.98", 98,
-               "../../take10/conflicts_99", "../../take10/ids.above.99", 99,
-               "../../take10/conflicts_100", "../../take10/ids.above.100", 100)
+# userprefs <- c("../../take10/otus.abund",
+#                "../../take10/plots",
+#                "../../take10/conflicts_database",
+#                "../../practice/conflicts_forcing",
+#                "../../practice/otus.custom.85.taxonomy",
+#                "../../take10/conflicts_94", "../../take10/ids.above.94", 94,
+#                "../../take10/conflicts_95", "../../take10/ids.above.95", 95,
+#                "../../take10/conflicts_96", "../../take10/ids.above.96", 96,
+#                "../../take10/conflicts_97", "../../take10/ids.above.97", 97,
+#                "../../take10/conflicts_98", "../../take10/ids.above.98", 98,
+#                "../../take10/conflicts_99", "../../take10/ids.above.99", 99,
+#                "../../take10/conflicts_100", "../../take10/ids.above.100", 100)
 
 otu.table.path <- userprefs[1]
 plots.folder.path <- userprefs[2]
@@ -42,7 +42,7 @@ pident.values <- as.numeric(rest.of.arguments[seq(from = 1, to = length(rest.of.
 # this is automatically exported into the working directory when this script is run normally
 seqID.reads.file.path <- "total.reads.per.seqID.csv"
 
-seqID.reads.file.path <- "../../take10/total.reads.per.seqID"
+# seqID.reads.file.path <- "../../take10/total.reads.per.seqID"
 
 #####
 # Define functions to import and process the data

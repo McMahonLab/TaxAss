@@ -87,8 +87,8 @@ import.forcing.conflicts <- function(ForcingFolder){
   forcing.conflicts <- read.csv(file = paste(forcing.folder.path, "/conflicts_summary.csv", sep = ""), stringsAsFactors = FALSE)
   forcing.conflicts.matrix <- as.matrix(forcing.conflicts[ ,2, drop = FALSE])
   row.names(forcing.conflicts.matrix) <- forcing.conflicts[ ,1]
-  # remove total that should have been GG-classified (confusingly labelled "numFWseqs"), and the clade row.
-  forcing.conflicts.matrix <- forcing.conflicts.matrix[-(6:7),1, drop = FALSE]
+  # remove total that should have been GG-classified (confusingly labelled "numFWseqs")
+  forcing.conflicts.matrix <- forcing.conflicts.matrix[-7,1, drop = FALSE]
   return(forcing.conflicts.matrix)
 }
 
@@ -134,14 +134,23 @@ get.conflict.seqIDs <- function(ConflictsFolders, PidentsUsed){
   pident.folders <- ConflictsFolders
   pident.values <- PidentsUsed
   
+  # forcing plots go to clade level
+  if (pident.values == "forcing"){
+    num.taxa.levels <- 6
+    conflict.ids.start <- list(Kingdom = NULL, Phylum = NULL, Class = NULL, Order = NULL, Lineage = NULL, Clade = NULL)
+  }else{
+    num.taxa.levels <- 5
+    conflict.ids.start <- list(Kingdom = NULL, Phylum = NULL, Class = NULL, Order = NULL, Lineage = NULL)
+  }
+  
   all.pidents <- list(NULL)
   # for each pident folder
   for (p in 1:length(pident.values)){
     all.files <- list.files(pident.folders[p])
-    conflict.ids <- list(Kingdom = NULL, Phylum = NULL, Class = NULL, Order = NULL, Lineage = NULL)
+    conflict.ids <- conflict.ids.start
     
     # for each taxonomy file
-    for (t in 1:5){
+    for (t in 1:num.taxa.levels){
       conflict.ids[[t]] <- read.csv(file = paste(pident.folders[p], "/", all.files[t], sep = ""), header = TRUE, stringsAsFactors = FALSE)
       # first column is the seqID vector
       conflict.ids[[t]] <- as.character(conflict.ids[[t]][ ,1])
@@ -154,17 +163,26 @@ get.conflict.seqIDs <- function(ConflictsFolders, PidentsUsed){
 }
 
 # create a list of total reads that matches the structure of the list of conflicting seqIDs
-find.reads.per.seqID <- function(ReadsTable, ConflictsList){
+find.reads.per.seqID <- function(ReadsTable, ConflictsList, Forcing = FALSE){
   otu.reads <- ReadsTable
   conflict.ids <- ConflictsList
+  
+  # forcing plots go to clade level
+  if (Forcing == TRUE){
+    num.taxa.levels <- 6
+    taxa.list.start <- list(Kingdom = NULL, Phylum = NULL, Class = NULL, Order = NULL, Lineage = NULL, Clade = NULL)
+  }else{
+    num.taxa.levels <- 5
+    taxa.list.start <- list(Kingdom = NULL, Phylum = NULL, Class = NULL, Order = NULL, Lineage = NULL)
+  }
   
   # for each upper list level (pident folder)
   pidents.list <- list(NULL)
   for (p in 1:length(conflict.ids)){
   
     # for each inner list level (taxonomy level)
-    taxa.list <- list(Kingdom = NULL, Phylum = NULL, Class = NULL, Order = NULL, Lineage = NULL)
-    for (t in 1:5){
+    taxa.list <- taxa.list.start
+    for (t in 1:num.taxa.levels){
       # for each seqID
       if (length(conflict.ids[[p]][[t]]) > 0){
         for (s in 1:length(conflict.ids[[p]][[t]])){
@@ -181,11 +199,18 @@ find.reads.per.seqID <- function(ReadsTable, ConflictsList){
 }
 
 # collapse the list of total reads per seqID into a table of total reads: taxa level x pident
-generate.summary.table.of.reads <- function(ReadsList){
+generate.summary.table.of.reads <- function(ReadsList, Forcing = FALSE){
   reads.list <- ReadsList
   
+  # forcing plots go to clade level
+  if (Forcing == TRUE){
+    num.taxa.levels <- 6
+  }else{
+    num.taxa.levels <- 5
+  }
+  
   # Set up empty matrix to fill
-  reads.summary <- matrix(0, nrow = 5, ncol = length(reads.list))
+  reads.summary <- matrix(0, nrow = num.taxa.levels, ncol = length(reads.list))
   row.names(reads.summary) <- names(reads.list[[1]])
   colnames(reads.summary) <- names(reads.list)
   
@@ -194,7 +219,7 @@ generate.summary.table.of.reads <- function(ReadsList){
     
     # For each inner list's vector (taxa level)
     taxa.sum <- NULL
-    for (t in 1:5){
+    for (t in 1:num.taxa.levels){
       taxa.sum[t] <- sum(reads.list[[p]][[t]])
     }
     reads.summary[,p] <- taxa.sum
@@ -562,8 +587,8 @@ plot.percent.forced <- function(ForcingTable, ResultsFolder, ByReads = FALSE){
     plot.type <- "Reads"
   }
   
-  tot <- num.forced[6]
-  perc.forced <- num.forced[-6,1,drop = FALSE] / tot * 100
+  tot <- num.forced[7]
+  perc.forced <- num.forced[-7,1,drop = FALSE] / tot * 100
   
   png(filename = paste(plots.folder.path, "/Forcing_by_", plot.type, ".png", sep = ""), 
       width = 7, height = 5, units = "in", res = 100)
@@ -580,7 +605,7 @@ plot.percent.forced <- function(ForcingTable, ResultsFolder, ByReads = FALSE){
   
 }
 
-plot.most.misleading.forced.otus <- function(ReadsPerForcedSeqIDs, ForcedSeqIDs, ReadsPerSeqID, OutputFolder){
+plot.most.misleading.forced.otus <- function(ReadsPerForcedSeqIDs, ForcedSeqIDs, ReadsPerSeqID, OutputFolder, PlottingLevels = 1:6, NumOTUs = 50){
   forced.seqIDs <- ForcedSeqIDs
   forced.seqID.reads <- ReadsPerForcedSeqIDs
   seqID.reads <- ReadsPerSeqID
@@ -592,18 +617,17 @@ plot.most.misleading.forced.otus <- function(ReadsPerForcedSeqIDs, ForcedSeqIDs,
   
   # find the max OTUs by total abundance
   indeces <- order(seqID.reads[ ,2], decreasing = TRUE)
-  max.indeces <- indeces[1:50]
+  max.indeces <- indeces[1:NumOTUs]
   max.seqIDs.reads <- seqID.reads[max.indeces, ]
   max.seqID.reads.perc <- max.seqIDs.reads 
   max.seqID.reads.perc[ ,2] <- max.seqID.reads.perc[ ,2] / sum(seqID.reads[ ,2]) * 100
   
   # Now which ones of those were forced?
-  seqID.recorder <- list(kingdom = NULL, phylum = NULL, class = NULL, order = NULL, lineage = NULL)
+  seqID.recorder <- list(kingdom = NULL, phylum = NULL, class = NULL, order = NULL, lineage = NULL, clade = NULL)
   for (t in 1:5){
     for (s in 1:nrow(max.seqID.reads.perc)){
       check.match <- max.seqID.reads.perc[s,1] == forced.seqIDs[[t]]
       index <- which(check.match == 1)
-      cat(index)
       if (length(index) > 0){
         seqID.recorder[[t]] <- c(seqID.recorder[[t]], s)
       }
@@ -612,7 +636,7 @@ plot.most.misleading.forced.otus <- function(ReadsPerForcedSeqIDs, ForcedSeqIDs,
   
   # This doesn't show up well because it's by OTU, not by taxonomic assignment which can have several OTUs.
   # plot it and export the plots
-  for (t in 1:5){
+  for (t in PlottingLevels){
     color.vector <- rep(x = "grey", times = length(max.indeces))
     color.vector[seqID.recorder[[t]]] <- "red"
     
@@ -627,7 +651,7 @@ plot.most.misleading.forced.otus <- function(ReadsPerForcedSeqIDs, ForcedSeqIDs,
   }
 }
 
-plot.most.misleading.forced.taxa <- function(TopTaxaList, ForcedTaxonomy, ForcedReadsList, ForcedSeqIDsList, ResultsFolder, PlottingLevels = 1:5, TotalReads){
+plot.most.misleading.forced.taxa <- function(TopTaxaList, ForcedTaxonomy, ForcedReadsList, ForcedSeqIDsList, ResultsFolder, PlottingLevels = 1:6, TotalReads){
   top.taxa <- TopTaxaList
   forced.taxonomy <- ForcedTaxonomy
   forced.seqID.reads <- ForcedReadsList
@@ -645,7 +669,7 @@ plot.most.misleading.forced.taxa <- function(TopTaxaList, ForcedTaxonomy, Forced
   
   # find the contributing forced seqIDs and tally their reads
   taxa.reads.forced <- 0
-  for (t in 1:5){ #*** see if I can get forced.seqIDs to go to clade level****
+  for (t in 1:6){ 
     
     for (r in 1:nrow(top.taxa[[t]])){
       index.seqIDs <- which(forced.taxonomy[ ,(t + 1)] == top.taxa[[t]][r,t])
@@ -664,7 +688,7 @@ plot.most.misleading.forced.taxa <- function(TopTaxaList, ForcedTaxonomy, Forced
   }
  
   # add in columns of "correct" reads
-  for (t in 1:5){
+  for (t in 1:6){
     top.taxa[[t]][ ,(t + 3)] <- top.taxa[[t]][ ,(t + 1)] - top.taxa[[t]][ ,(t + 2)]
   }
   
@@ -707,9 +731,9 @@ if (forcing.folder.path != "regular"){
   
   forced.seqIDs <- get.conflict.seqIDs(ConflictsFolders = forcing.folder.path, PidentsUsed = "forcing")
   
-  forced.seqID.reads <- find.reads.per.seqID(ReadsTable = seqID.reads, ConflictsList = forced.seqIDs)
+  forced.seqID.reads <- find.reads.per.seqID(ReadsTable = seqID.reads, ConflictsList = forced.seqIDs, Forcing = TRUE)
   
-  read.summaries <- generate.summary.table.of.reads(ReadsList = forced.seqID.reads)
+  read.summaries <- generate.summary.table.of.reads(ReadsList = forced.seqID.reads, Forcing = TRUE)
   
   tot.reads <- sum(seqID.reads$reads)
   
@@ -726,11 +750,11 @@ if (forcing.folder.path != "regular"){
   plot.percent.forced(ForcingTable = reads.forced, ResultsFolder = plots.folder.path, ByReads = TRUE)
   
   plot.most.misleading.forced.otus(ReadsPerForcedSeqIDs = forced.seqID.reads, ForcedSeqIDs = forced.seqIDs, 
-                                   ReadsPerSeqID = seqID.reads, OutputFolder = plots.folder.path)
+                                   ReadsPerSeqID = seqID.reads, OutputFolder = plots.folder.path, PlottingLevels = 1:6)
   
   plot.most.misleading.forced.taxa(TopTaxaList = top.taxa, ForcedTaxonomy = forced.taxonomy, 
                                    ForcedReadsList = forced.seqID.reads, ForcedSeqIDsList = forced.seqIDs, 
-                                   ResultsFolder = plots.folder.path, PlottingLevels = 4:5, TotalReads = tot.reads)
+                                   ResultsFolder = plots.folder.path, PlottingLevels = 4:6, TotalReads = tot.reads)
 #####
 # If not then do the normal comparison for choosing pident cutoff
 #####

@@ -293,13 +293,24 @@ import.custom.only.taxonomy <- function(FilePath){
   return(fw)
 }
 
-#####
-
 # Group seqIDs at each taxa level- this is used in plot.most.misleading.forced.taxa
-group.by.taxon <- function(TaxonomyTable){
-  otus.taxa <- TaxonomyTable
+group.seqIDs.into.taxa <- function(TaxonomyTable, ReadsPerSeqID){
+  forced.taxonomy <- TaxonomyTable
+  seqID.reads <- ReadsPerSeqID
+
+  # first put them im the same order (they should be both character seqIDs already, and taxonomy was ordered inside it's import function)
+  index <- order(seqID.reads[ ,1])
+  seqID.reads.ord <- seqID.reads[index, ]
+  if (all.equal(seqID.reads.ord[ ,1], forced.taxonomy[ ,1]) != TRUE){
+    cat("Crap something's messed up with the indexing, seqID.reads and forced.taxonomy need to have the same order of seqIDs")
+  }
+  
+  # add total reads to taxonomy table
+  tax.reads <- cbind(forced.taxonomy, seqID.reads.ord[ ,2])
+  colnames(tax.reads)[9] <- "reads"
   
   # leave out tribe- forced.seqIDs only goes down to clade
+  otus.taxa <- tax.reads  # name change is a relic, also makes easier to troubleshoot
   otus.taxa <- otus.taxa[ ,-8]
   
   # Order taxonomy names so that phyla are alphabetical, classes within a phylum are alphabetical, etc
@@ -351,6 +362,38 @@ group.by.taxon <- function(TaxonomyTable){
   }
   return(grouped.taxa)
 }
+
+# Find the most abundant taxa at each taxonomy level
+find.top.taxa.by.total.reads <- function(TaxonomyList, NumberTopTaxa){
+  grouped.taxa <- TaxonomyList
+  num.taxa <- NumberTopTaxa
+  
+  # arrange highest to lowest total reads
+  grouped.taxa.ord <- list("kingdom"=NULL,"phylum"=NULL, "class"=NULL, "order"=NULL, "lineage"=NULL, "clade"=NULL)
+  for (t in 1:6){
+    index <- order(grouped.taxa[[t]][ ,(t + 1)], decreasing = TRUE)
+    grouped.taxa.ord[[t]] <- grouped.taxa[[t]][index, ]
+  }
+  
+  # remove unclassified taxa b/c those really can't be compared on the same taxa level, and likely wouldn't be included in a "top taxa" analysis anyway.
+  not.unclassifieds <- list("kingdom"=NULL, "phylum"=NULL, "class"=NULL, "order"=NULL, "lineage"=NULL, "clade"=NULL)
+  for (t in 1:6){
+    index <- grep(x = grouped.taxa.ord[[t]][ ,t], pattern =  "unclassified.*", value = FALSE )
+    not.unclassifieds[[t]] <- grouped.taxa.ord[[t]][-index, ]
+  }
+  
+  # look just at the top 20 levels
+  grouped.taxa.top <- list("kingdom"=NULL,"phylum"=NULL, "class"=NULL, "order"=NULL, "lineage"=NULL, "clade"=NULL)
+  for (t in 1:6){
+    if (nrow(not.unclassifieds[[t]]) < num.taxa){
+      grouped.taxa.top[[t]] <- not.unclassifieds[[t]]
+    }else{
+      grouped.taxa.top[[t]] <- not.unclassifieds[[t]][1:num.taxa, ]
+    }
+  }
+  return(grouped.taxa.top)
+}
+
 
 #####
 # Define functions to plot the data
@@ -584,65 +627,70 @@ plot.most.misleading.forced.otus <- function(ReadsPerForcedSeqIDs, ForcedSeqIDs,
   }
 }
 
-#####
-
-
-plot.most.misleading.forced.taxa <- function(TaxonomyTable, ReadsPerSeqID){
-  forced.taxonomy <- TaxonomyTable
-  seqID.reads <- ReadsPerSeqID
+plot.most.misleading.forced.taxa <- function(TopTaxaList, ForcedTaxonomy, ForcedReadsList, ForcedSeqIDsList, ResultsFolder, PlottingLevels = 1:5, TotalReads){
+  top.taxa <- TopTaxaList
+  forced.taxonomy <- ForcedTaxonomy
+  forced.seqID.reads <- ForcedReadsList
+  forced.seqIDs <- ForcedSeqIDsList
+  plots.folder.path <- ResultsFolder
+  tot.reads <- TotalReads
   
-  # first put them im the same order (they should be both character seqIDs already, and taxonomy was ordered inside it's import function)
-  index <- order(seqID.reads[ ,1])
-  seqID.reads.ord <- seqID.reads[index, ]
-  if (all.equal(seqID.reads.ord[ ,1], forced.taxonomy[ ,1]) != TRUE){
-    cat("Crap something's messed up with the indexing, seqID.reads and forced.taxonomy need to have the same order of seqIDs")
+  # reformatting- don't repeat this step twice
+  forced.seqID.reads <- forced.seqID.reads[[1]]
+  forced.seqIDs <- forced.seqIDs[[1]]
+  for (t in 1:6){
+    top.taxa[[t]] <- cbind(top.taxa[[t]], forced = 0, correct = 0)
+    names(top.taxa[[t]])[(t+1)] <- "total"
   }
   
-  # add total reads to taxonomy table
-  tax.reads <- cbind(forced.taxonomy, seqID.reads.ord[ ,2])
-  colnames(tax.reads)[9] <- "reads"
+  # find the contributing forced seqIDs and tally their reads
+  taxa.reads.forced <- 0
+  for (t in 1:5){ #*** see if I can get forced.seqIDs to go to clade level****
+    
+    for (r in 1:nrow(top.taxa[[t]])){
+      index.seqIDs <- which(forced.taxonomy[ ,(t + 1)] == top.taxa[[t]][r,t])
+      taxas.seqIDs <- forced.taxonomy[index.seqIDs,1]
+      
+      for (s in 1:length(taxas.seqIDs)){
+        is.forced <- which(forced.seqIDs[[t]] == taxas.seqIDs[s])
+        if (length(is.forced) != 0){
+          taxa.reads.forced <- taxa.reads.forced + forced.seqID.reads[[t]][is.forced]
+        }
+      }
+      
+      top.taxa[[t]][r,(t + 2)] <- taxa.reads.forced
+      taxa.reads.forced <- 0
+    }
+  }
+ 
+  # add in columns of "correct" reads
+  for (t in 1:5){
+    top.taxa[[t]][ ,(t + 3)] <- top.taxa[[t]][ ,(t + 1)] - top.taxa[[t]][ ,(t + 2)]
+  }
   
-  # find the number of reads per taxa level
-  grouped.taxa <- group.by.taxon(TaxonomyTable = tax.reads)
-  
-  # look just at the top 20 levels
-  grouped.taxa.ord <- 
-  
-  # find the contributing seqIDs
-  
-  
-  # figure out which of those seqIDs were forced
-  
-  # find reads per forced seqIDs and sum
-  
-  # stacked bar
-  
-  
-  
-  
-  
+  # make stacked bar
+  for (t in PlottingLevels){
+    # long names go off the plot
+    taxa.names <- sub(pattern = ".*__", replacement = "", x = top.taxa[[t]][ ,t])
+    taxa.names <- substr(x = taxa.names, start = 1, stop = 20)
+    
+    # make the y axis not have crazy big numbers on it, put them in rounded percents
+    max.bar <- max(top.taxa[[t]][ ,(t+1)])
+    y.axis.ticks <- c(0, max.bar * (1/4), max.bar * (1/2), max.bar * (3/4), max.bar)
+    y.axis.labels <- round(x = y.axis.ticks / tot.reads * 100, digits = 0)
+    
+    # generate files of the plots
+    png(filename = paste(plots.folder.path, "/", t, "_Forcing_of_top_taxa-", names(top.taxa)[t], ".png", sep = ""), 
+        width = 7, height = 5, units = "in", res = 100)
+    par(mar = c(10,5,5,2))
+    barplot(height = t(as.matrix(top.taxa[[t]][ , (t + 3):(t + 2)])), col = c("grey", "red"),
+            main = paste("Forcing at the ", names(top.taxa)[t], " level\nwhen using only the custom database", sep = ""),
+            names.arg = taxa.names, legend.text = c("correct","forced"), args.legend = list(x = "topright", bty = "n"),
+            las = 2, xpd = TRUE, axes = FALSE, ylab = "Percent of total reads", cex.lab = 1.2)
+    axis(side = 2, at = y.axis.ticks, labels = y.axis.labels)
+    unnecessary.message <- dev.off()
+  }
 }
-
-
-#   # Find the top 20 OTU abundances out of the conflicts at each taxa level, save their indeces
-#   max.forced.seqIDs <- list(kingdom = 0, phylum = 0, class = 0, order = 0, lineage = 0)
-#   max.forced.reads <- list(kingdom = 0, phylum = 0, class = 0, order = 0, lineage = 0)
-#   max.forced.reads.perc <- list(kingdom = 0, phylum = 0, class = 0, order = 0, lineage = 0)
-#   for (t in 1:5){
-#     indeces <- order(forced.reads[[t]], decreasing = TRUE)
-#     max.indeces <- indeces[1:20]
-#     max.forced.seqIDs[[t]] <- forced.seqIDs[[t]][max.indeces]
-#     max.forced.reads[[t]] <- forced.reads[[t]][max.indeces]
-#     max.forced.reads.perc[[t]] <- forced.reads[[t]][max.indeces] / sum(seqID.reads[ ,2]) * 100
-#   }
-#   # Figure out what their classifications were
-
-
-
-
-
-
-
 
 
 #####
@@ -667,71 +715,81 @@ if (forcing.folder.path != "regular"){
   
   reads.forced <- rbind(read.summaries, tot.reads)
   
+  forced.taxonomy <- import.custom.only.taxonomy(FilePath = forced.taxonomy.file)
+  
+  grouped.taxa <- group.seqIDs.into.taxa(TaxonomyTable = forced.taxonomy, ReadsPerSeqID = seqID.reads)
+  
+  top.taxa <- find.top.taxa.by.total.reads(TaxonomyList = grouped.taxa, NumberTopTaxa = 20)
+  
   plot.percent.forced(ForcingTable = otus.forced, ResultsFolder = plots.folder.path, ByReads = FALSE)
   
   plot.percent.forced(ForcingTable = reads.forced, ResultsFolder = plots.folder.path, ByReads = TRUE)
   
-  plot.most.misleading.forced.otus(ReadsPerForcedSeqIDs = forced.seqID.reads, ForcedSeqIDs = forced.seqIDs, ReadsPerSeqID = seqID.reads, OutputFolder = plots.folder.path)
+  plot.most.misleading.forced.otus(ReadsPerForcedSeqIDs = forced.seqID.reads, ForcedSeqIDs = forced.seqIDs, 
+                                   ReadsPerSeqID = seqID.reads, OutputFolder = plots.folder.path)
   
-
+  plot.most.misleading.forced.taxa(TopTaxaList = top.taxa, ForcedTaxonomy = forced.taxonomy, 
+                                   ForcedReadsList = forced.seqID.reads, ForcedSeqIDsList = forced.seqIDs, 
+                                   ResultsFolder = plots.folder.path, PlottingLevels = 4:5, TotalReads = tot.reads)
+#####
+# If not then do the normal comparison for choosing pident cutoff
+#####
+}else{
   
-  forced.taxonomy <- import.custom.only.taxonomy(FilePath = forced.taxonomy.file)
+  #####
+  # examine custom taxonomy disagreements and contribution by number OTUs
+  #####
   
-  plot.most.misleading.forced.taxon
+  otu.summaries <- import.all.conflict.summaries(ConflictFolders = pident.folders, PidentsUsed = pident.values)
+  
+  db.summary <- import.database.conflicts(DatabaseFolder = db.conflicts.folder.path)
+  
+  plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path)
+  plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, y.axis.limit = 10)
+  # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE)
+  # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE, y.axis.limit = 1)
+  plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, DBconflicts = db.summary, y.axis.limit = max(db.summary[,2]))
+  
+  # plot.num.classified.outs(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = FALSE)
+  plot.num.classified.outs(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE)
+  
+  #####
+  # examine custom taxonomy disagreements and contribution by number reads
+  #####
+  
+  seqID.reads <- import.and.reformat.otu.table(OTUtable = otu.table.path)
+  
+  conflict.seqIDs <- get.conflict.seqIDs(ConflictsFolders = pident.folders, PidentsUsed = pident.values)
+  
+  conflict.seqID.reads <- find.reads.per.seqID(ReadsTable = seqID.reads, ConflictsList = conflict.seqIDs)
+  
+  read.summaries <- generate.summary.table.of.reads(ReadsList = conflict.seqID.reads)
+  
+  custom.seqIDs <- import.ids.above(FilePaths = ids.file.paths, PidentsUsed = pident.values)
+  
+  read.summaries <- add.totals.to.read.summaries(ReadSummaryTable = read.summaries, AbundanceTable = seqID.reads, 
+                                                 PidentsUsed = pident.values, CustomSeqIDs = custom.seqIDs)
+  
+  # plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE)
+  # plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, y.axis.limit = 10000)
+  plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE)
+  plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE, y.axis.limit = .1)
+  
+  # plot.num.classified.outs(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = FALSE)
+  plot.num.classified.outs(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE)
+  
+  # export the reads per seqID for use in the plot_classification_improvement.R script
+  write.table(x = seqID.reads, file = "total.reads.per.seqID.csv", sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
+  
+  
+  #####
+  # examine pident cutoff relationship to bootstrap p-values -this plot is not useful.
+  #####
+  # fw.pvalues <- import.bootstrap.pvalues(ConflictFolders = pident.folders, PidentsUsed = pident.values, FW = TRUE)
+  # gg.pvalues <- import.bootstrap.pvalues(ConflictFolders = pident.folders, PidentsUsed = pident.values, FW = FALSE)
+  
+  # plot.bootstrap.percents(FWpValues = fw.pvalues, GGpValues = gg.pvalues, ResultsFolder = plots.folder.path)
 }
 
-#####
-# examine custom taxonomy disagreements and contribution by number OTUs
-#####
-
-otu.summaries <- import.all.conflict.summaries(ConflictFolders = pident.folders, PidentsUsed = pident.values)
-
-db.summary <- import.database.conflicts(DatabaseFolder = db.conflicts.folder.path)
-
-plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path)
-plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, y.axis.limit = 10)
-# plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE)
-# plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE, y.axis.limit = 1)
-plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, DBconflicts = db.summary, y.axis.limit = max(db.summary[,2]))
-
-# plot.num.classified.outs(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = FALSE)
-plot.num.classified.outs(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE)
-
-#####
-# examine custom taxonomy disagreements and contribution by number reads
-#####
-
-seqID.reads <- import.and.reformat.otu.table(OTUtable = otu.table.path)
-
-conflict.seqIDs <- get.conflict.seqIDs(ConflictsFolders = pident.folders, PidentsUsed = pident.values)
-
-conflict.seqID.reads <- find.reads.per.seqID(ReadsTable = seqID.reads, ConflictsList = conflict.seqIDs)
-
-read.summaries <- generate.summary.table.of.reads(ReadsList = conflict.seqID.reads)
-
-custom.seqIDs <- import.ids.above(FilePaths = ids.file.paths, PidentsUsed = pident.values)
-
-read.summaries <- add.totals.to.read.summaries(ReadSummaryTable = read.summaries, AbundanceTable = seqID.reads, 
-                                               PidentsUsed = pident.values, CustomSeqIDs = custom.seqIDs)
-
-# plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE)
-# plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, y.axis.limit = 10000)
-plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE)
-plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE, y.axis.limit = .1)
-
-# plot.num.classified.outs(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = FALSE)
-plot.num.classified.outs(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE)
-
-# export the reads per seqID for use in the plot_classification_improvement.R script
-write.table(x = seqID.reads, file = "total.reads.per.seqID.csv", sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
-
-
-
-# examine pident cutoff relationship to bootstrap p-values
-
-# fw.pvalues <- import.bootstrap.pvalues(ConflictFolders = pident.folders, PidentsUsed = pident.values, FW = TRUE)
-# gg.pvalues <- import.bootstrap.pvalues(ConflictFolders = pident.folders, PidentsUsed = pident.values, FW = FALSE)
-# 
-# plot.bootstrap.percents(FWpValues = fw.pvalues, GGpValues = gg.pvalues, ResultsFolder = plots.folder.path)
 
 

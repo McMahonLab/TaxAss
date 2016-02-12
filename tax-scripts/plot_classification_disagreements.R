@@ -22,7 +22,10 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                NA,
 #                "../../take12-MErun/conflicts_forcing",
 #                "../../take12-MErun/otus.custom.85.taxonomy")
-# #                
+# userprefs <- c("../../take12-MErun/otus.abund",
+#                "../../take12-MErun/plots",
+#                "../../take12-MErun/conflicts_database",
+#                "regular", NA, 
 #                "../../take12-MErun/conflicts_94", "../../take12-MErun/ids.above.94", 94,
 #                "../../take12-MErun/conflicts_95", "../../take12-MErun/ids.above.95", 95,
 #                "../../take12-MErun/conflicts_96", "../../take12-MErun/ids.above.96", 96,
@@ -442,7 +445,7 @@ plot.num.forced <- function(ConflictSummaryTable, ResultsFolder, DBconflicts = a
   mismatches <- sum.table[1:(nrow(sum.table)-2),]
   pidents <- colnames(mismatches)
   pidents <- as.numeric(pidents)
-  total.seqs.or.reads <- sum.table[7,1]
+  total.seqs.or.reads <- sum.table[nrow(sum.table),1]
   
   # modify plot based on type specified in function calls
   if (ByReads == FALSE){
@@ -486,7 +489,7 @@ plot.num.forced <- function(ConflictSummaryTable, ResultsFolder, DBconflicts = a
        xlab = "\"full length\" pident cutoff (similar to ANI of read to custom database)")
   
   # Fill Plot with beautiful data
-  color <- rainbow(nrow(mismatches))
+  color <- c("seagreen4","violetred4","slateblue4","turquoise4")
   for (r in 1:nrow(mismatches)){
     lines(x = pidents, y = mismatches[r,], col = color[r], lwd = 2)
     points(x = pidents, y = mismatches[r,], col = color[r], pch = 19, cex =1.3)
@@ -495,7 +498,7 @@ plot.num.forced <- function(ConflictSummaryTable, ResultsFolder, DBconflicts = a
   # Add database conflicts for baseline, if desired:
   if (db.conflicts[1,1] != FALSE){
     for (r in 1:nrow(db.conflicts)){
-      abline(h = db.conflicts[r,2], col = color[r])
+      abline(h = db.conflicts[r,2], col = color[r], lty =2, lwd =3)
     }
   }
   
@@ -777,11 +780,16 @@ if (forcing.folder.path != "regular"){
   
   db.summary <- import.database.conflicts(DatabaseFolder = db.conflicts.folder.path)
   
+  #ignore lineage- it's way higher than the others doesn't fit on graphs
+  otu.summaries <- otu.summaries[-5, ]
+  db.summary <- db.summary[-5, ]
+  
   plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path)
   plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, y.axis.limit = 10)
   # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE)
   # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE, y.axis.limit = 1)
   plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, DBconflicts = db.summary, y.axis.limit = max(db.summary[,2]))
+  plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, DBconflicts = db.summary)
   
   # plot.num.classified.outs(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = FALSE)
   plot.num.classified.outs(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE)
@@ -802,11 +810,13 @@ if (forcing.folder.path != "regular"){
   
   read.summaries <- add.totals.to.read.summaries(ReadSummaryTable = read.summaries, AbundanceTable = seqID.reads, 
                                                  PidentsUsed = pident.values, CustomSeqIDs = custom.seqIDs)
+  #leave out lineage on the plots b/c it's too much higher
+  read.summaries <- read.summaries[-5, ]
   
   # plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE)
   # plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, y.axis.limit = 10000)
   plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE)
-  plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE, y.axis.limit = .1)
+  plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE, y.axis.limit = .5)
   
   # plot.num.classified.outs(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = FALSE)
   plot.num.classified.outs(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE)

@@ -22,17 +22,17 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                NA,
 #                "../../take12-MErun/conflicts_forcing",
 #                "../../take12-MErun/otus.custom.85.taxonomy")
-# userprefs <- c("../../take12-MErun/otus.abund",
-#                "../../take12-MErun/plots",
-#                "../../take12-MErun/conflicts_database",
+# userprefs <- c("../../take14/otus.abund",
+#                "../../take14/plots",
+#                "../../take14/conflicts_database",
 #                "regular", NA, 
-#                "../../take12-MErun/conflicts_94", "../../take12-MErun/ids.above.94", 94,
-#                "../../take12-MErun/conflicts_95", "../../take12-MErun/ids.above.95", 95,
-#                "../../take12-MErun/conflicts_96", "../../take12-MErun/ids.above.96", 96,
-#                "../../take12-MErun/conflicts_97", "../../take12-MErun/ids.above.97", 97,
-#                "../../take12-MErun/conflicts_98", "../../take12-MErun/ids.above.98", 98,
-#                "../../take12-MErun/conflicts_99", "../../take12-MErun/ids.above.99", 99,
-#                "../../take12-MErun/conflicts_100", "../../take12-MErun/ids.above.100", 100)
+#                "../../take14/conflicts_94", "../../take14/ids.above.94", 94,
+#                "../../take14/conflicts_95", "../../take14/ids.above.95", 95,
+#                "../../take14/conflicts_96", "../../take14/ids.above.96", 96,
+#                "../../take14/conflicts_97", "../../take14/ids.above.97", 97,
+#                "../../take14/conflicts_98", "../../take14/ids.above.98", 98,
+#                "../../take14/conflicts_99", "../../take14/ids.above.99", 99,
+#                "../../take14/conflicts_100", "../../take14/ids.above.100", 100)
 
 otu.table.path <- userprefs[1]
 plots.folder.path <- userprefs[2]
@@ -114,7 +114,7 @@ import.seqID.reads <- function(FilePath){
 import.and.reformat.otu.table <- function(OTUtable){
   otu.table.path <- OTUtable
   
-  otus <- read.table(file = otu.table.path, header = TRUE, stringsAsFactors = FALSE)
+  otus <- read.table(file = otu.table.path, sep = "\t", header = TRUE, stringsAsFactors = FALSE)
   seqID.reads <- data.frame(seqID = as.character(otus[ ,1]), reads = as.numeric(rowSums(otus[ ,-1])), stringsAsFactors = FALSE)
   
   return(seqID.reads)
@@ -128,7 +128,12 @@ import.ids.above <- function(FilePaths, PidentsUsed){
   
   fw.ids <- list(NULL)
   for (p in 1:length(pident.values)){
-    fw.ids[[p]] <- scan(file = ids.file.paths[p])
+    # fw.ids[[p]] <- scan(file = ids.file.paths[p])
+    
+    fw.ids[[p]] <- read.table(file = ids.file.paths[p], stringsAsFactors = FALSE)
+    fw.ids[[p]] <- fw.ids[[p]][ ,1]
+    fw.ids[[p]] <- as.character(fw.ids[[p]])
+    
     names(fw.ids)[p] <- pident.values[p]
   }
   

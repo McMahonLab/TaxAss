@@ -21,9 +21,8 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                "../../take12-MErun/plots",
 #                NA,
 #                "../../take12-MErun/conflicts_forcing",
-#                "../../take12-MErun/otus.custom.85.taxonomy",
-#                NA,NA,NA)
-#                
+#                "../../take12-MErun/otus.custom.85.taxonomy")
+# #                
 #                "../../take12-MErun/conflicts_94", "../../take12-MErun/ids.above.94", 94,
 #                "../../take12-MErun/conflicts_95", "../../take12-MErun/ids.above.95", 95,
 #                "../../take12-MErun/conflicts_96", "../../take12-MErun/ids.above.96", 96,
@@ -38,9 +37,12 @@ db.conflicts.folder.path <- userprefs[3]
 forcing.folder.path <- userprefs[4]
 forced.taxonomy.file <-userprefs[5]
 rest.of.arguments <- userprefs[-(1:5)]
-pident.folders <- rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)]
-ids.file.paths <- rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)+1]
-pident.values <- as.numeric(rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)+2])
+if (length(rest.of.arguments) > 0){
+  pident.folders <- rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)]
+  ids.file.paths <- rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)+1]
+  pident.values <- as.numeric(rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)+2])
+}
+
 # this is automatically exported into the working directory when this script is run normally
 seqID.reads.file.path <- "total.reads.per.seqID.csv"
 

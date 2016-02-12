@@ -20,7 +20,7 @@ mkdir conflicts_forcing
 Rscript find_classification_disagreements.R otus.custom.taxonomy otus.$pident.85.70.taxonomy ids.above.$pident conflicts_forcing NA 85 70 forcing
 Rscript plot_classification_disagreements.R NA plots NA conflicts_forcing otus.custom.85.taxonomy
 
-printf 'Steps 15-16 have finished running.  When you\'re finished with all your analysis you can tidy up your working directory with step 17. \n \a'
+printf 'Steps 15-16 have finished running.  When you are finished with all your analysis you can tidy up your working directory with step 17. \n \a'
 sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'
 
 exit 0

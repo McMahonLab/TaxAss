@@ -15,20 +15,20 @@
 # Receive arguments from terminal command line
 #####
 
-# userprefs <- commandArgs(trailingOnly = TRUE)
+userprefs <- commandArgs(trailingOnly = TRUE)
 
-userprefs <- c("../../take12-MErun/otus.abund",
-               "../../take12-MErun/plots",
-               "../../take12-MErun/conflicts_database",
-               "regular",
-               NA,
-               "../../take12-MErun/conflicts_94", "../../take12-MErun/ids.above.94", 94,
-               "../../take12-MErun/conflicts_95", "../../take12-MErun/ids.above.95", 95,
-               "../../take12-MErun/conflicts_96", "../../take12-MErun/ids.above.96", 96,
-               "../../take12-MErun/conflicts_97", "../../take12-MErun/ids.above.97", 97,
-               "../../take12-MErun/conflicts_98", "../../take12-MErun/ids.above.98", 98,
-               "../../take12-MErun/conflicts_99", "../../take12-MErun/ids.above.99", 99,
-               "../../take12-MErun/conflicts_100", "../../take12-MErun/ids.above.100", 100)
+# userprefs <- c("../../take12-MErun/otus.abund",
+#                "../../take12-MErun/plots",
+#                "../../take12-MErun/conflicts_database",
+#                "regular",
+#                NA,
+#                "../../take12-MErun/conflicts_94", "../../take12-MErun/ids.above.94", 94,
+#                "../../take12-MErun/conflicts_95", "../../take12-MErun/ids.above.95", 95,
+#                "../../take12-MErun/conflicts_96", "../../take12-MErun/ids.above.96", 96,
+#                "../../take12-MErun/conflicts_97", "../../take12-MErun/ids.above.97", 97,
+#                "../../take12-MErun/conflicts_98", "../../take12-MErun/ids.above.98", 98,
+#                "../../take12-MErun/conflicts_99", "../../take12-MErun/ids.above.99", 99,
+#                "../../take12-MErun/conflicts_100", "../../take12-MErun/ids.above.100", 100)
 
 otu.table.path <- userprefs[1]
 plots.folder.path <- userprefs[2]
@@ -42,7 +42,7 @@ pident.values <- as.numeric(rest.of.arguments[seq(from = 1, to = length(rest.of.
 # this is automatically exported into the working directory when this script is run normally
 seqID.reads.file.path <- "total.reads.per.seqID.csv"
 
-seqID.reads.file.path <- "../../take12-MErun/total.reads.per.seqID"
+# seqID.reads.file.path <- "../../take12-MErun/total.reads.per.seqID"
 
 #####
 # Define functions to import and process the data

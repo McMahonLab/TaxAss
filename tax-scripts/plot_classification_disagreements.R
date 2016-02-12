@@ -17,11 +17,13 @@
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 
-# userprefs <- c("../../take12-MErun/otus.abund",
+# userprefs <- c(NA,
 #                "../../take12-MErun/plots",
 #                "../../take12-MErun/conflicts_database",
-#                "regular",
-#                NA,
+#                "../../take12-MErun/conflicts_forcing",
+#                "../../take12-MErun/otus.custom.85.taxonomy",
+#                NA,NA,NA)
+#                
 #                "../../take12-MErun/conflicts_94", "../../take12-MErun/ids.above.94", 94,
 #                "../../take12-MErun/conflicts_95", "../../take12-MErun/ids.above.95", 95,
 #                "../../take12-MErun/conflicts_96", "../../take12-MErun/ids.above.96", 96,
@@ -42,7 +44,7 @@ pident.values <- as.numeric(rest.of.arguments[seq(from = 1, to = length(rest.of.
 # this is automatically exported into the working directory when this script is run normally
 seqID.reads.file.path <- "total.reads.per.seqID.csv"
 
-# seqID.reads.file.path <- "../../take12-MErun/total.reads.per.seqID"
+# seqID.reads.file.path <- "../../take12-MErun/total.reads.per.seqID.csv"
 
 #####
 # Define functions to import and process the data
@@ -404,7 +406,12 @@ find.top.taxa.by.total.reads <- function(TaxonomyList, NumberTopTaxa){
   not.unclassifieds <- list("kingdom"=NULL, "phylum"=NULL, "class"=NULL, "order"=NULL, "lineage"=NULL, "clade"=NULL)
   for (t in 1:6){
     index <- grep(x = grouped.taxa.ord[[t]][ ,t], pattern =  "unclassified.*", value = FALSE )
-    not.unclassifieds[[t]] <- grouped.taxa.ord[[t]][-index, ]
+    # this is necessary because you can not use -0 as an index
+    if (length(index) != 0){
+      not.unclassifieds[[t]] <- grouped.taxa.ord[[t]][-index, ]
+    }else{
+      not.unclassifieds[[t]] <- grouped.taxa.ord[[t]]
+    }
   }
   
   # look just at the top 20 levels
@@ -727,7 +734,7 @@ plot.most.misleading.forced.taxa <- function(TopTaxaList, ForcedTaxonomy, Forced
 if (forcing.folder.path != "regular"){
   otus.forced <- import.forcing.conflicts(ForcingFolder = forcing.folder.path)
   
-  seqID.reads <- import.seqID.reads(FilePath = seqID.reads.file.path) # this was exported previously but this script
+  seqID.reads <- import.seqID.reads(FilePath = seqID.reads.file.path) # this was exported previously by this script
   
   forced.seqIDs <- get.conflict.seqIDs(ConflictsFolders = forcing.folder.path, PidentsUsed = "forcing")
   

@@ -8,17 +8,17 @@
 # Accept arguments from the command line:
 #####
 
-userprefs <- commandArgs(trailingOnly = TRUE)
+# userprefs <- commandArgs(trailingOnly = TRUE)
+# 
+# taxonomy.pvalues.path <- userprefs[1]
+# gg.pvalues.path <- userprefs[2]
+# reads.table.path <- userprefs[3]
+# path.to.plots.folder <- userprefs[4]
 
-taxonomy.pvalues.path <- userprefs[1]
-gg.pvalues.path <- userprefs[2]
-reads.table.path <- userprefs[3]
-path.to.plots.folder <- userprefs[4]
-
-# taxonomy.pvalues.path <- "../../take9c/final.taxonomy.pvalues"
-# gg.pvalues.path <- "../../take9c/final.general.pvalues"
-# reads.table.path <- "../../take9c/total.reads.per.seqID"
-# path.to.plots.folder <- "../../take9c/plots"
+taxonomy.pvalues.path <- "../../take13/final.taxonomy.pvalues"
+gg.pvalues.path <- "../../take13/final.general.pvalues"
+reads.table.path <- "../../take13/total.reads.per.seqID.csv"
+path.to.plots.folder <- "../../take13/plots"
 
 #####
 # Define functions to import data
@@ -95,7 +95,7 @@ convert.to.reads.presence.absence <- function(TrueFalseTable){
 # Define functions to plot the data
 #####
 
-plot.num.classified <- function(GGTable, FWTable, Reads = TRUE, FolderPath){
+plot.num.classified <- function(GGTable, FWTable, Reads = TRUE, FolderPath, Tribe = FALSE){
   ggpvals <- GGTable
   fwpvals <- FWTable
   plots.path <- FolderPath
@@ -112,6 +112,12 @@ plot.num.classified <- function(GGTable, FWTable, Reads = TRUE, FolderPath){
   fw.classified <- colSums(fwpvals[ ,3:9]) / normalizer * 100
   
   class.table <- rbind(gg.classified,fw.classified)
+  
+  # Don't include tribe on plot if you know tribe-level assignments are inaccurate
+  if (Tribe == FALSE){
+    class.table <- class.table[ ,-7]
+  }
+  
   
   # Save plot as .png file
   png(filename = paste(plots.path, "/Improvement_In_Classification_by_", title.word, ".png", sep = ""), 

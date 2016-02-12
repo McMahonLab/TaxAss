@@ -19,7 +19,7 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 
 # userprefs <- c(NA,
 #                "../../take12-MErun/plots",
-#                "../../take12-MErun/conflicts_database",
+#                NA,
 #                "../../take12-MErun/conflicts_forcing",
 #                "../../take12-MErun/otus.custom.85.taxonomy",
 #                NA,NA,NA)

@@ -20,8 +20,6 @@ databases/*.numNonZero
 databases/*.prob
 databases/*.sum
 databases/*.train
-databases/FWonly_11Feb2016_1452.taxonomy
-databases/FWonly_11Feb2016_1452_ready.fasta
 
 # Data Directories
 processedData

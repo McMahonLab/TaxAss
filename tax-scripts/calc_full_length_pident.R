@@ -28,8 +28,8 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 blast.file.path <- userprefs[1]
 hit.stats.path <- userprefs[2]
 
-# blast.file.path <- "../../take8/otus.custom.blast.table"
-# hit.stats.path <- "../../take8/otus.custom.blast.table.modified"
+# blast.file.path <- "../../take13/otus.custom.blast.table"
+# hit.stats.path <- "../../take13/otus.custom.blast.table.modified"
 
 #####
 # Define Functions
@@ -56,6 +56,9 @@ format.BLAST.data <- function(BlastTable){
   
   # remove the now unnecessary qend/qstart columns
   blast <- blast[,-(5:6)]
+  
+  # make seqIDs characters for consistency btwn all file types- avoid erros w/ some
+  blast[ ,1] <- as.character(blast[ ,1])
   
   # are most of the alignments full length?
   #   cat("\nalignment length \tmean:", mean(blast$length), "\t\tmin:", min(blast$length), "\t\tmax:",max(blast$length),
@@ -128,7 +131,7 @@ choose.best.hit <- function(BlastTable, OutputFile){
   blast <- cbind(blast, hit.num.best.ids)
   
   # save this table to feed into a plotting/analysis script
-  write.table(x = blast, file = hit.stats.path, row.names = F, col.names = F, sep = "\t" )
+  write.table(x = blast, file = hit.stats.path, row.names = F, col.names = F, sep = "\t", quote =  FALSE)
   
   return(blast)
 }
@@ -161,3 +164,5 @@ blast <- format.BLAST.data(BlastTable = blast)
 blast <- calc.full.pIDs(BlastTable = blast)
 
 blast <- choose.best.hit(BlastTable = blast, OutputFile = hit.stats.path)
+
+

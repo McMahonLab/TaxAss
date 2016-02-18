@@ -29,10 +29,10 @@
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 
-# userprefs <- c("../../take10a/otus.98.taxonomy",
-#                "../../take10a/otus.general.taxonomy",
-#                "../../take10a/ids.above.98",
-#                "../../take10a/conflicts_98",
+# userprefs <- c("../../take14/otus.98.taxonomy",
+#                "../../take14/otus.general.taxonomy",
+#                "../../take14/ids.above.98",
+#                "../../take14/conflicts_98",
 #                98, 
 #                85, 
 #                70
@@ -165,7 +165,8 @@ check.files.match <- function(FWtable, GGtable){
 # Import the freshwater sequence IDs as determined by the BLAST cutoff in workflow step 4
 import.FW.seq.IDs <- function(FilePath){
   fw.seq.ids.file.path <- FilePath
-  fw.seqs <- scan(file = fw.seq.ids.file.path)
+  fw.seqs <- read.table(file = fw.seq.ids.file.path, stringsAsFactors = FALSE)
+  fw.seqs <- fw.seqs[ ,1]
   fw.seqs <- as.character(fw.seqs)
   return(fw.seqs)
 }

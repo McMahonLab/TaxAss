@@ -17,18 +17,22 @@
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 
-# userprefs <- c("../../take10/otus.abund",
-#                "../../take10/plots",
-#                "../../take10/conflicts_database",
-#                "../../practice/conflicts_forcing",
-#                "../../practice/otus.custom.85.taxonomy",
-#                "../../take10/conflicts_94", "../../take10/ids.above.94", 94,
-#                "../../take10/conflicts_95", "../../take10/ids.above.95", 95,
-#                "../../take10/conflicts_96", "../../take10/ids.above.96", 96,
-#                "../../take10/conflicts_97", "../../take10/ids.above.97", 97,
-#                "../../take10/conflicts_98", "../../take10/ids.above.98", 98,
-#                "../../take10/conflicts_99", "../../take10/ids.above.99", 99,
-#                "../../take10/conflicts_100", "../../take10/ids.above.100", 100)
+# userprefs <- c(NA,
+#                "../../take12-MErun/plots",
+#                NA,
+#                "../../take12-MErun/conflicts_forcing",
+#                "../../take12-MErun/otus.custom.85.taxonomy")
+# userprefs <- c("../../take14/otus.abund",
+#                "../../take14/plots",
+#                "../../take14/conflicts_database",
+#                "regular", NA, 
+#                "../../take14/conflicts_94", "../../take14/ids.above.94", 94,
+#                "../../take14/conflicts_95", "../../take14/ids.above.95", 95,
+#                "../../take14/conflicts_96", "../../take14/ids.above.96", 96,
+#                "../../take14/conflicts_97", "../../take14/ids.above.97", 97,
+#                "../../take14/conflicts_98", "../../take14/ids.above.98", 98,
+#                "../../take14/conflicts_99", "../../take14/ids.above.99", 99,
+#                "../../take14/conflicts_100", "../../take14/ids.above.100", 100)
 
 otu.table.path <- userprefs[1]
 plots.folder.path <- userprefs[2]
@@ -36,13 +40,16 @@ db.conflicts.folder.path <- userprefs[3]
 forcing.folder.path <- userprefs[4]
 forced.taxonomy.file <-userprefs[5]
 rest.of.arguments <- userprefs[-(1:5)]
-pident.folders <- rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)]
-ids.file.paths <- rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)+1]
-pident.values <- as.numeric(rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)+2])
+if (length(rest.of.arguments) > 0){
+  pident.folders <- rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)]
+  ids.file.paths <- rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)+1]
+  pident.values <- as.numeric(rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)+2])
+}
+
 # this is automatically exported into the working directory when this script is run normally
 seqID.reads.file.path <- "total.reads.per.seqID.csv"
 
-# seqID.reads.file.path <- "../../take10/total.reads.per.seqID"
+# seqID.reads.file.path <- "../../take12-MErun/total.reads.per.seqID.csv"
 
 #####
 # Define functions to import and process the data
@@ -107,7 +114,7 @@ import.seqID.reads <- function(FilePath){
 import.and.reformat.otu.table <- function(OTUtable){
   otu.table.path <- OTUtable
   
-  otus <- read.table(file = otu.table.path, header = TRUE, stringsAsFactors = FALSE)
+  otus <- read.table(file = otu.table.path, sep = "\t", header = TRUE, stringsAsFactors = FALSE)
   seqID.reads <- data.frame(seqID = as.character(otus[ ,1]), reads = as.numeric(rowSums(otus[ ,-1])), stringsAsFactors = FALSE)
   
   return(seqID.reads)
@@ -121,7 +128,12 @@ import.ids.above <- function(FilePaths, PidentsUsed){
   
   fw.ids <- list(NULL)
   for (p in 1:length(pident.values)){
-    fw.ids[[p]] <- scan(file = ids.file.paths[p])
+    # fw.ids[[p]] <- scan(file = ids.file.paths[p])
+    
+    fw.ids[[p]] <- read.table(file = ids.file.paths[p], stringsAsFactors = FALSE)
+    fw.ids[[p]] <- fw.ids[[p]][ ,1]
+    fw.ids[[p]] <- as.character(fw.ids[[p]])
+    
     names(fw.ids)[p] <- pident.values[p]
   }
   
@@ -135,7 +147,7 @@ get.conflict.seqIDs <- function(ConflictsFolders, PidentsUsed){
   pident.values <- PidentsUsed
   
   # forcing plots go to clade level
-  if (pident.values == "forcing"){
+  if (pident.values[1] == "forcing"){
     num.taxa.levels <- 6
     conflict.ids.start <- list(Kingdom = NULL, Phylum = NULL, Class = NULL, Order = NULL, Lineage = NULL, Clade = NULL)
   }else{
@@ -404,7 +416,12 @@ find.top.taxa.by.total.reads <- function(TaxonomyList, NumberTopTaxa){
   not.unclassifieds <- list("kingdom"=NULL, "phylum"=NULL, "class"=NULL, "order"=NULL, "lineage"=NULL, "clade"=NULL)
   for (t in 1:6){
     index <- grep(x = grouped.taxa.ord[[t]][ ,t], pattern =  "unclassified.*", value = FALSE )
-    not.unclassifieds[[t]] <- grouped.taxa.ord[[t]][-index, ]
+    # this is necessary because you can not use -0 as an index
+    if (length(index) != 0){
+      not.unclassifieds[[t]] <- grouped.taxa.ord[[t]][-index, ]
+    }else{
+      not.unclassifieds[[t]] <- grouped.taxa.ord[[t]]
+    }
   }
   
   # look just at the top 20 levels
@@ -433,7 +450,7 @@ plot.num.forced <- function(ConflictSummaryTable, ResultsFolder, DBconflicts = a
   mismatches <- sum.table[1:(nrow(sum.table)-2),]
   pidents <- colnames(mismatches)
   pidents <- as.numeric(pidents)
-  total.seqs.or.reads <- sum.table[7,1]
+  total.seqs.or.reads <- sum.table[nrow(sum.table),1]
   
   # modify plot based on type specified in function calls
   if (ByReads == FALSE){
@@ -477,7 +494,7 @@ plot.num.forced <- function(ConflictSummaryTable, ResultsFolder, DBconflicts = a
        xlab = "\"full length\" pident cutoff (similar to ANI of read to custom database)")
   
   # Fill Plot with beautiful data
-  color <- rainbow(nrow(mismatches))
+  color <- c("seagreen4","violetred4","slateblue4","turquoise4")
   for (r in 1:nrow(mismatches)){
     lines(x = pidents, y = mismatches[r,], col = color[r], lwd = 2)
     points(x = pidents, y = mismatches[r,], col = color[r], pch = 19, cex =1.3)
@@ -486,7 +503,7 @@ plot.num.forced <- function(ConflictSummaryTable, ResultsFolder, DBconflicts = a
   # Add database conflicts for baseline, if desired:
   if (db.conflicts[1,1] != FALSE){
     for (r in 1:nrow(db.conflicts)){
-      abline(h = db.conflicts[r,2], col = color[r])
+      abline(h = db.conflicts[r,2], col = color[r], lty =2, lwd =3)
     }
   }
   
@@ -727,7 +744,7 @@ plot.most.misleading.forced.taxa <- function(TopTaxaList, ForcedTaxonomy, Forced
 if (forcing.folder.path != "regular"){
   otus.forced <- import.forcing.conflicts(ForcingFolder = forcing.folder.path)
   
-  seqID.reads <- import.seqID.reads(FilePath = seqID.reads.file.path) # this was exported previously but this script
+  seqID.reads <- import.seqID.reads(FilePath = seqID.reads.file.path) # this was exported previously by this script
   
   forced.seqIDs <- get.conflict.seqIDs(ConflictsFolders = forcing.folder.path, PidentsUsed = "forcing")
   
@@ -768,11 +785,16 @@ if (forcing.folder.path != "regular"){
   
   db.summary <- import.database.conflicts(DatabaseFolder = db.conflicts.folder.path)
   
+  #ignore lineage- it's way higher than the others doesn't fit on graphs
+  otu.summaries <- otu.summaries[-5, ]
+  db.summary <- db.summary[-5, ]
+  
   plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path)
   plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, y.axis.limit = 10)
   # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE)
   # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE, y.axis.limit = 1)
   plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, DBconflicts = db.summary, y.axis.limit = max(db.summary[,2]))
+  plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, DBconflicts = db.summary)
   
   # plot.num.classified.outs(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = FALSE)
   plot.num.classified.outs(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE)
@@ -793,11 +815,13 @@ if (forcing.folder.path != "regular"){
   
   read.summaries <- add.totals.to.read.summaries(ReadSummaryTable = read.summaries, AbundanceTable = seqID.reads, 
                                                  PidentsUsed = pident.values, CustomSeqIDs = custom.seqIDs)
+  #leave out lineage on the plots b/c it's too much higher
+  read.summaries <- read.summaries[-5, ]
   
   # plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE)
   # plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, y.axis.limit = 10000)
   plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE)
-  plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE, y.axis.limit = .1)
+  plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE, y.axis.limit = .5)
   
   # plot.num.classified.outs(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = FALSE)
   plot.num.classified.outs(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE)

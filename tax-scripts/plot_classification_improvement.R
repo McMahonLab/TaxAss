@@ -8,17 +8,17 @@
 # Accept arguments from the command line:
 #####
 
-# userprefs <- commandArgs(trailingOnly = TRUE)
-# 
-# taxonomy.pvalues.path <- userprefs[1]
-# gg.pvalues.path <- userprefs[2]
-# reads.table.path <- userprefs[3]
-# path.to.plots.folder <- userprefs[4]
+userprefs <- commandArgs(trailingOnly = TRUE)
 
-taxonomy.pvalues.path <- "../../take13/final.taxonomy.pvalues"
-gg.pvalues.path <- "../../take13/final.general.pvalues"
-reads.table.path <- "../../take13/total.reads.per.seqID.csv"
-path.to.plots.folder <- "../../take13/plots"
+taxonomy.pvalues.path <- userprefs[1]
+gg.pvalues.path <- userprefs[2]
+reads.table.path <- userprefs[3]
+path.to.plots.folder <- userprefs[4]
+
+# taxonomy.pvalues.path <- "../../take13/final.taxonomy.pvalues"
+# gg.pvalues.path <- "../../take13/final.general.pvalues"
+# reads.table.path <- "../../take13/total.reads.per.seqID.csv"
+# path.to.plots.folder <- "../../take13/plots"
 
 #####
 # Define functions to import data

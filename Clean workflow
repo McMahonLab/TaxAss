@@ -907,7 +907,7 @@ p-value cutoffs applied.  These files are both generated in step 15.
 
 Full Command (Type into terminal):
 
-Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID plots
+Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID.csv plots
 
 What the arguments are:
 	final.taxonomy.pvalues			a file of p-values corresponding to the final taxonomy file you

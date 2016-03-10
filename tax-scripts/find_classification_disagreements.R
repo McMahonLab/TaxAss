@@ -16,9 +16,9 @@
   # the fw.only means that only the seqIDs that the workflow assigned with fw are included in the table
 
 
-#####
+# ####
 # Receive arguments from terminal command line
-#####
+# ####
 
 # Example syntax for pident comparison, final taxonomy generation, and database comparison, respectively:
 
@@ -57,9 +57,9 @@ taxonomy.pvalue.cutoff.gg <- userprefs[7]
 final.or.database <- userprefs[8]
 if (length(userprefs) < 8){final.or.database <- "non-empty string"}
 
-#####
+# ####
 # Define Functions for Import and Formatting
-#####
+# ####
 
 # Entertain user with a poem while they wait:
 print.poem <- function(){
@@ -178,9 +178,9 @@ remove.parentheses <- function(x){
 }
 
 
-#####
+# ####
 # Define Functions for Data Analysis
-#####
+# ####
 
 # Find index of sequences that were classified by the freshwater database. returns a vector of indeces.
 find.fw.indeces <- function(TaxonomyTable, SeqIDs){
@@ -363,14 +363,14 @@ view.bootstraps <- function(TaxonomyTable){
 }
 
 
-#####
+# ####
 # Use Functions
-#####
+# ####
 
-#####
+# ####
 # Generate a final taxonomy file:
 if (final.or.database == "final" | final.or.database == "Final" | final.or.database == "FINAL"){
-#####  
+# ####  
   cat("\n\ngenerating final file- woohoo!\n\n")
   print.poem()
   
@@ -410,10 +410,10 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
               row.names = FALSE, col.names = TRUE, quote = FALSE)
   
 
-#####
+# ####
 # Compare databases by looking at how GG classifies the FW representative sequences
 }else if (final.or.database == "database"){
-#####
+# ####
   cat("\n\ndoing database comparison\n\n")
   
   fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path)
@@ -445,10 +445,10 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
 
   
 
-#####
+# ####
 # Look at how bad it'd be if you used only the custom database instead of the workflow
 }else if (final.or.database == "forcing"){
-#####  
+# ####  
   cat("\n\nexamining how the custom database would have classified the dissimilar sequences that didn't belong in it \n(i.e. good thing you used my workflow!)\n\n")
   
   fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path)
@@ -499,10 +499,10 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw.gg.only, ALL_seqs = fw.percents, FolderPath = results.folder.path)
 
   
-##### 
+# #### 
 # Only compare the classifications made by the fw database to the gg classifications, not full tax tables
 }else{
-#####  
+# ####  
   cat("\n\ncomparing seqIDs the workflow classified with custom database to how general database would have classified them.\n\n")
   
   fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path)

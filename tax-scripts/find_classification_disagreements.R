@@ -362,7 +362,7 @@ view.bootstraps <- function(TaxonomyTable){
   tax <- TaxonomyTable
   
   # create a matrix of bootstrap numbers, copy from do.bootstrap.cutoff()
-  tax.nums <- apply(tax[,2:ncol(tax)],2,pull.out.percent)
+  tax.nums <- apply(tax[ ,-1], 2, pull.out.percent)
   index <- which(tax.nums == "unclassified")
   tax.nums[index] <- 0
   tax.nums <- apply(X = tax.nums, MARGIN = 2, FUN = as.numeric)

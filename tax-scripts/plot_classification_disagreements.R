@@ -9,7 +9,7 @@
 # The variable part is that more pidents can be added, as long as they continue the pattern folder number folder number
 
 # Terminal command line syntax:
-# Rscript plot_classification_disagreements.R otus.abund plots conflicts_database conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98 ...
+# Rscript plot_classification_disagreements.R otus.abund plots conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98 ...
 
 #####
 # Receive arguments from terminal command line
@@ -33,13 +33,14 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                "../../take14/conflicts_98", "../../take14/ids.above.98", 98,
 #                "../../take14/conflicts_99", "../../take14/ids.above.99", 99,
 #                "../../take14/conflicts_100", "../../take14/ids.above.100", 100)
+# in case you want to add this back to the plots, need to specify this path and un-comment the plotting calls that use it.
+# db.conflicts.folder.path <- "file path to conflicts_database"
 
 otu.table.path <- userprefs[1]
 plots.folder.path <- userprefs[2]
-db.conflicts.folder.path <- userprefs[3]
-forcing.folder.path <- userprefs[4]
-forced.taxonomy.file <-userprefs[5]
-rest.of.arguments <- userprefs[-(1:5)]
+forcing.folder.path <- userprefs[3]
+forced.taxonomy.file <-userprefs[4]
+rest.of.arguments <- userprefs[-(1:4)]
 if (length(rest.of.arguments) > 0){
   pident.folders <- rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)]
   ids.file.paths <- rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)+1]
@@ -783,18 +784,19 @@ if (forcing.folder.path != "regular"){
   
   otu.summaries <- import.all.conflict.summaries(ConflictFolders = pident.folders, PidentsUsed = pident.values)
   
-  db.summary <- import.database.conflicts(DatabaseFolder = db.conflicts.folder.path)
+  # I removed this from the terminal command also because it is misleading and confusing and doesn't add to the plot. left a commented out input line for use within RStudio at the top.
+  # db.summary <- import.database.conflicts(DatabaseFolder = db.conflicts.folder.path)
   
-  #ignore lineage- it's way higher than the others doesn't fit on graphs
+  # ignore lineage- it's way higher than the others doesn't fit on graphs
   otu.summaries <- otu.summaries[-5, ]
-  db.summary <- db.summary[-5, ]
+  # db.summary <- db.summary[-5, ]
   
   plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path)
   plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, y.axis.limit = 10)
   # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE)
   # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE, y.axis.limit = 1)
-  plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, DBconflicts = db.summary, y.axis.limit = max(db.summary[,2]))
-  plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, DBconflicts = db.summary)
+  # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, DBconflicts = db.summary, y.axis.limit = max(db.summary[,2]))
+  # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, DBconflicts = db.summary)
   
   # plot.num.classified.outs(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = FALSE)
   plot.num.classified.outs(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE)

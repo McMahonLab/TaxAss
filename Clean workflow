@@ -176,9 +176,20 @@ and rename them to match the above names so that you can copy and paste commands
 Also put the script files in this workflow into that same folder.
 Then make that folder your working directory for the entirety of this workflow.
 
-Reformat your files so that:
+I. General notes on the seqIDs in all files:
 
-1. .taxonomy files: 
+OTU seqID's:
+			-cannot contain any whitespace
+			 BLAST will call some parts the seqID and some parts comments if they're separated.
+			 Having BLAST seqIDs that don't match the full >comment line of the fasta file will 
+		 	 throw off the python script that creates fasta files for the chosen seqIDs in step 8.
+		 	 -must match between the otus.fasta file and the otus.abund file,
+			 though consistent ordering is not necessary.
+
+
+II. Taxonomy Database Files:
+
+	1. .taxonomy files: 
 		-must be compatible with mothur, example format:
 		
 			seqID tab kingdom;phylum;class;order;family;genus;species;
@@ -189,12 +200,12 @@ Reformat your files so that:
 		
 		-If you are using the Green Genes taxonomy database, you can reformat it this way: 
 
-Full 4 Commands (type in terminal) when general.taxonomy is the green genes taxonomy file:
+	Full 4 Commands (type in terminal) when general.taxonomy is the green genes taxonomy file:
 
-sed 's/ //g' <general.taxonomy >NoSpaces
-sed 's/$/;/' <NoSpaces >EndLineSemicolons
-mv EndLineSemicolons general.taxonomy
-rm NoSpaces
+	sed 's/ //g' <general.taxonomy >NoSpaces
+	sed 's/$/;/' <NoSpaces >EndLineSemicolons
+	mv EndLineSemicolons general.taxonomy
+	rm NoSpaces
 
 			Syntax of commands and what each argument does:
 				sed 's/find/replace/ <input >output
@@ -216,30 +227,50 @@ rm NoSpaces
 					rm		this removes (aka deletes) the file named filename
 		
 
-			-If you are using the Silva database... no fucking clue, what does this look like??
+			-If you are using the Silva database... ***add formatting advice***
 			*************
 
-2. OTU seqID's:
-			-must match between the otus.fasta file and the otus.abund file,
-			 though consistent ordering is not necessary.
-			-cannot contain any whitespace
-			 BLAST will call some parts the seqID and some parts comments if they're separated.
-			 Having BLAST seqIDs that don't match the full >comment line of the fasta file will 
-		 	 throw off the python script that finds the chosen sequences.
-
-3. OTU files:
-		-format of the OTU table otus.abund is tab delimited, seqIDs in 1st column, abundances in rest of columns:
-			seqID	Abundance	Abundance	Abundance	Abundance
-			seqID	Abundance	Abundance	Abundance	Abundance
-			seqID	Abundance	Abundance	Abundance	Abundance
+	2. .fasta files:
+		-these should be in fasta format (note the carrot before the seqID, a new line 
+		separateing seqID from sequence, sequence can be one line or multiple lines.)
 		
+		>seqID
+		TACGTAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAG
+		>seqID
+		TACGTAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAG
+		
+II. Your OTU files:
 		-QC of your OTU sequences should be performed before you start assigning taxonomy.
+		 if you start using mothur, and start this workflow right before the first classify.seqs() command
+		 if you start using qiime ****where do you start there??**
+
+	1. .fasta file:
+		- same format as the taxonomy database fasta files, above.
 		
-		If you did QC in mothur, the starting files are called:
-		***************
+		- if you're using mothur, this file is called:
+		stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.fasta
 		
-		If you did QC in qiime, the starting files are called:
-		***************
+		- if you're using qiime, this file is called:
+		*****look up qiime***
+		
+		to format the mothur file:
+
+	2. .abund file:
+		- this is the table of relative abundances for each OTU in each sample, 
+		 aka your OTU table.
+		 
+		-format is tab delimited, seqIDs in 1st column, abundances in rest of columns:
+			seqID	Abundance	Abundance	Abundance	Abundance
+			seqID	Abundance	Abundance	Abundance	Abundance
+			seqID	Abundance	Abundance	Abundance	Abundance
+		
+		
+		- If you're using mothur, this file is called:
+		***fill this in!!!***
+		
+		-If you're using qiime, this file is called:
+		****check on this***
+		
 		
 __________________________________________________________________________________________
 

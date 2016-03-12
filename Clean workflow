@@ -462,67 +462,63 @@ the evalue statistics, see: http://www.ncbi.nlm.nih.gov/BLAST/tutorial/Altschul-
 
 The python script find_seqIDs_blast_removed.py is used to find all of the 
 sequence IDs in the original fasta file that do not appear in the blast output.  The python 
-script then creates a new file in the same format as step 4's R script output file that
+script then creates a new file in the same format as step 5's R script output file that
 is a newline-delimited list of the missing sequence IDs.
 
 The bash command cat concatenates these missing ids with the ids below the chosen cutoff
 pident.  That is because the ids blast didn't report hits for had even worse pidents than 
-the ones that didn't make the R script cutoff.
+the ones that didn't make the R script cutoff, so they belong in the set that will be 
+classified by the general database.
 
-Full Command (type in terminal):
+Full Two Commands (type in terminal):
 
 python find_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table.modified ids.missing
 cat ids.below.98 ids.missing > ids.below.98.all
-
-These arguments in the python script must be in the correct order.
-python sources the .py script using the arguments supplied after it in the terminal.
-Separate all arguments with a space.
-
-What each argument is- 1st command (python):
-	1st: script.py		path to this script. The script is called find_seqIDs_blast_removed.py
-	2nd: fastafile		path to the fasta file containing all the seqIDs
-	3rd: blastfile		path to the blast results in table format (col1 = seqID)				
-	4th: outputfile		path to the file with \n delimited seqIDs the script adds to
 						
-What each file is:
+What each argument is in python script:
+	python							opens the python program to source the script
 	find_seqIDs_blast_removed.py	python script you're sourcing
-	otus.fasta						original fasta file of your sequences from step 0
-	otus.FW.blast.table.modified	reformatted blast results from step 4
-	ids.below.98					seqIDs below your cutoff from R script in step 4 
-									that the missing ones are added to in this step.
+	otus.fasta						original fasta file of your sequences from step 0,
+									this contains all the seqIDs
+	otus.FW.blast.table.modified	reformatted blast results from step 4,
+									this contains all the seqIDs reported by BLAST
+	ids.missing						the output file of seqIDs that were left out of BLAST
+									results.  Its format is new line delimited seqIDs, no header
+	
+What each argument in the bash script is:
+	cat								function that concatenates two files
+	ids.below.98					seqIDs below your cutoff from R script in step 5.
+	ids.missing						seqIDs not returned by BLAST, from this step, above.
+	> ids.below.98.all				combine those two files into this new one.
+									this now contains all the seqIDs you will classify in
+									the general taxonomy database, in \n delimited format.
 									
-
 __________________________________________________________________________________________
 
 8. create fasta files of desired sequence IDs (python)
 
-The create_fastas_given_seqIDs.py takes the sequence IDs selected from the blast output 
+The create_fastas_given_seqIDs.py takes the sequence IDs selected using the blast output 
 and finds them in the original query fasta file.  
 It then creates a new fasta file containing just the desired sequences.
+The script is run twice, first to create the fasta file for seqIDs above the pident cutoff,
+second to create the fasta file for seqIDs below the pident cutoff.  The fasta files will 
+be classified with the custom and general databases, respectively.
 
 Full Two Commands (type in terminal):
 
 python create_fastas_given_seqIDs.py ids.above.98 otus.fasta otus.above.98.fasta
 python create_fastas_given_seqIDs.py ids.below.98.all otus.fasta otus.below.98.fasta
 
-These arguments must be in the correct order.
-python sources the .py script using the arguments supplied after it in the terminal.
-Separate all arguments with a space.
-
 What each argument is:
-	1st: script.py	the path to this script. The script is called create_fastas_given_seqIDs.py
-	2nd: idfile		the path to the file with \n separated seqIDs that was generated in step 4
-	3rd: fastafile	the path to the otu fasta file containing all the seqIDs from step 0
-	4th: outputfile the path to the new fasta file the script generates
-					NOTE: if this file already exist the script will delete it before starting.
-
-What each file is:
+	python							opens the python program to souce the script
 	create_fastas_given_seqIDs.py	the python script you're sourcing 
-	ids.above.98					the file of seqIDs at or above your cutoff from step 4
-	ids.below.98.all				the file of all seqIDs below your cutoff from step 6
-	otus.fasta						the original fasta file of your otu sequences
+	ids.above.98					the file of seqIDs at or above your cutoff from step 5
+	ids.below.98.all				the file of all seqIDs below your cutoff from step 7
+	otus.fasta						the original fasta file of all your OTU sequences from step 0
 	otus.above.98.fasta				the output file with fasta sequences at or above your cutoff
 	otus.below.98.fasta				the output file with fasta sequences below your cutoff
+									NOTE: if this output file already exist the script will 
+									delete it before starting.
 	
 __________________________________________________________________________________________
 

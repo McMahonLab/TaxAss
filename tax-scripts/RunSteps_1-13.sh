@@ -5,14 +5,14 @@
 # This lets you run multiple pidents in paralelle which makes it faster.
 # The actual commands in this script are identical to the workflow commands
 # that you type directly into the terminal command line.
-# The only additional code is an array of pidents and a loop to run them repeatedly.
+# The only additional code is an array of pidents and a loop to run them all.
 # RRR 1/12/16
 
 # Choose pidents to test over.
 
-pident=("100" "99" "98" "97" "96" "95" "94")
+pident=("100" "99" "98" "97" "96" "95")
 
-# First Run steps 1-12 to generate databases and folders exactly following workflow
+# First Run steps 1-11 to generate databases and folders exactly following workflow
 # Note: still gotta do the reformatting on your own (step 0)
 
 # 1
@@ -43,23 +43,15 @@ cat otus.above.${pident[0]}.custom.wang.taxonomy otus.below.${pident[0]}.general
 mothur "#classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
 cat otus.general.wang.taxonomy > otus.general.taxonomy
 # 11
-mothur "#classify.seqs(fasta=custom.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
-mv custom.general.wang.taxonomy custom.general.taxonomy
-# 12
 sed 's/[[:blank:]]/\;/' <otus.${pident[0]}.taxonomy >otus.${pident[0]}.taxonomy.reformatted
 mv otus.${pident[0]}.taxonomy.reformatted otus.${pident[0]}.taxonomy
 sed 's/[[:blank:]]/\;/' <otus.general.taxonomy >otus.general.taxonomy.reformatted
 mv otus.general.taxonomy.reformatted otus.general.taxonomy
-sed 's/[[:blank:]]/\;/' <custom.general.taxonomy >custom.general.taxonomy.reformatted
-mv custom.general.taxonomy.reformatted custom.general.taxonomy
-sed 's/[[:blank:]]/\;/' <custom.taxonomy >custom.custom.taxonomy
-# 13
+# 12
 mkdir conflicts_${pident[0]}
 Rscript find_classification_disagreements.R otus.${pident[0]}.taxonomy otus.general.taxonomy ids.above.${pident[0]} conflicts_${pident[0]} ${pident[0]} 85 70
-mkdir conflicts_database
-Rscript find_classification_disagreements.R custom.custom.taxonomy custom.general.taxonomy NA conflicts_database NA NA 70 database 
 
-# Next Run steps 4-9 and 12-13 with different pident cutoffs
+# Next Run steps 4-9 and 11-12 with different pident cutoffs
 # Define a function called runagain since you repeat this part many times in paralelle
 
 runagain () {
@@ -78,10 +70,10 @@ runagain () {
    mothur "#classify.seqs(fasta=otus.below.$1.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
    # 9
    cat otus.above.$1.custom.wang.taxonomy otus.below.$1.general.wang.taxonomy > otus.$1.taxonomy
-   # 12 a,b
+   # 11 a,b
    sed 's/[[:blank:]]/\;/' <otus.$1.taxonomy >otus.$1.taxonomy.reformatted
    mv otus.$1.taxonomy.reformatted otus.$1.taxonomy
-   # 13 a,b
+   # 12 a,b
    mkdir conflicts_$1
    Rscript find_classification_disagreements.R otus.$1.taxonomy otus.general.taxonomy ids.above.$1 conflicts_$1 $1 85 70
 }
@@ -99,7 +91,8 @@ wait
 # the & lets the levels of the loop run in parallel
 # the wait makes sure all the loops finish before the script exits
 
-# Now run step 14- plotting everything together to choose final pident
+# Now run step 13- plotting everything together to choose final pident
+# First generate the arguments for the command call:
 
 args_string=""
 for p in ${pident[*]}
@@ -107,8 +100,8 @@ do
    args_string+=" conflicts_$p ids.above.$p $p"
 done
 
-# 14
-Rscript plot_classification_disagreements.R otus.abund plots conflicts_database regular NA $args_string
+# 13
+Rscript plot_classification_disagreements.R otus.abund plots regular NA $args_string
 
 printf 'Steps 1-14 have finished running.  Now analysze the plots from step 14 to choose your final pident and generate your final taxonomy file in step 15.  Optionally you can compare to how your taxonomy would have been in step 16. At the end tidy up your working directory with step 17. \n \a'
 sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; 

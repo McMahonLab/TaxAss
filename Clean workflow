@@ -259,7 +259,8 @@ II. Your OTU files:
 		- this is the table of relative abundances for each OTU in each sample, 
 		 aka your OTU table.
 		 
-		-format is tab delimited, seqIDs in 1st column, abundances in rest of columns:
+		-format is tab delimited, seqIDs in 1st column, abundances in rest of columns, with headers (aka colnames):
+			colname	colname		colname		colname		colname
 			seqID	Abundance	Abundance	Abundance	Abundance
 			seqID	Abundance	Abundance	Abundance	Abundance
 			seqID	Abundance	Abundance	Abundance	Abundance

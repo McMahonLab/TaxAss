@@ -28,8 +28,8 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 blast.file.path <- userprefs[1]
 hit.stats.path <- userprefs[2]
 
-blast.file.path <- "../../take16/otus.custom.blast.table"
-hit.stats.path <- "../../take16/otus.custom.blast.table.modified"
+# blast.file.path <- "../../take16/otus.custom.blast.table"
+# hit.stats.path <- "../../take16/otus.custom.blast.table.modified"
 
 #####
 # Define Functions

@@ -14,9 +14,6 @@
 
 pident=("100" "99" "98" "97" "96" "95")
 
-# First Run steps 1-11 to generate databases and folders exactly following workflow
-# Note: still gotta do the reformatting on your own (step 0)
-
 
 # Next Run steps 4-9 and 11-12 with different pident cutoffs
 # Define a function called runagain since you repeat this part many times in paralelle
@@ -58,19 +55,10 @@ wait
 # the & lets the levels of the loop run in parallel
 # the wait makes sure all the loops finish before the script exits
 
-# Now run step 14- plotting everything together to choose final pident
-# First generate the arguments for the command call:
+# Next run step 14- plotting everything together to choose final pident
 
-args_string=""
-for p in ${pident[*]}
-do
-   args_string+=" conflicts_$p ids.above.$p $p"
-done
 
-# 14
-Rscript plot_classification_disagreements.R otus.abund plots regular NA $args_string
-
-printf 'Steps 1-14 have finished running.  Now analysze the plots from step 14 to choose your final pident and generate your final taxonomy file in step 15.  Optionally you can compare to how your taxonomy would have been in step 16. At the end tidy up your working directory with step 17. \n \a'
+printf 'Steps 1-13 have finished running for the rest of the pidents. Next run step 15 to choose your cutoff. \n \a'
 sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; 
 
 exit 0

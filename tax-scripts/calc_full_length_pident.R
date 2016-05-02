@@ -28,8 +28,8 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 blast.file.path <- userprefs[1]
 hit.stats.path <- userprefs[2]
 
-# blast.file.path <- "../../take13/otus.custom.blast.table"
-# hit.stats.path <- "../../take13/otus.custom.blast.table.modified"
+blast.file.path <- "../../take16/otus.custom.blast.table"
+hit.stats.path <- "../../take16/otus.custom.blast.table.modified"
 
 #####
 # Define Functions
@@ -38,7 +38,7 @@ hit.stats.path <- userprefs[2]
 # Import the blast output
 import.BLAST.data <- function(File){
   blast.file.path <- File
-  blast <- read.table(file = blast.file.path, sep = "\t", stringsAsFactors = F)
+  blast <- read.table(file = blast.file.path, sep = "\t", stringsAsFactors = F, colClasses = "character")
   colnames(blast) <- c("qseqid","pident","length","qlen","qstart","qend")
   return(blast)
 }
@@ -56,9 +56,6 @@ format.BLAST.data <- function(BlastTable){
   
   # remove the now unnecessary qend/qstart columns
   blast <- blast[,-(5:6)]
-  
-  # make seqIDs characters for consistency btwn all file types- avoid erros w/ some
-  blast[ ,1] <- as.character(blast[ ,1])
   
   # are most of the alignments full length?
   #   cat("\nalignment length \tmean:", mean(blast$length), "\t\tmin:", min(blast$length), "\t\tmax:",max(blast$length),

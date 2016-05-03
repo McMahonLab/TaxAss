@@ -4,9 +4,10 @@
 # Make a plot showing the proportion of sequences classified in FW database
 # compare pidents based on # OTUs and # reads impacted.
 
-# This script is step 13 of the taxonomy assignment workflow. It takes arguments from the command line.
-# The number of arguments can be variable, but they must be in order and .
+# This script is step 14 of the taxonomy assignment workflow, used to decide on pident cutoff. It takes arguments from the command line.
+# The number of arguments can be variable, but they must be in order
 # The variable part is that more pidents can be added, as long as they continue the pattern folder number folder number
+# This script is also used in step 16 optionally to plot the forcing that would have occured if you only used FW
 
 # Terminal command line syntax:
 # Rscript plot_classification_disagreements.R otus.abund plots conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98 ...
@@ -17,25 +18,36 @@
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 
-# userprefs <- c(NA,
-#                "../../take12-MErun/plots",
-#                NA,
-#                "../../take12-MErun/conflicts_forcing",
-#                "../../take12-MErun/otus.custom.85.taxonomy")
-# userprefs <- c("../../take14/otus.abund",
-#                "../../take14/plots",
-#                "../../take14/conflicts_database",
-#                "regular", NA, 
-#                "../../take14/conflicts_94", "../../take14/ids.above.94", 94,
-#                "../../take14/conflicts_95", "../../take14/ids.above.95", 95,
-#                "../../take14/conflicts_96", "../../take14/ids.above.96", 96,
-#                "../../take14/conflicts_97", "../../take14/ids.above.97", 97,
-#                "../../take14/conflicts_98", "../../take14/ids.above.98", 98,
-#                "../../take14/conflicts_99", "../../take14/ids.above.99", 99,
-#                "../../take14/conflicts_100", "../../take14/ids.above.100", 100)
-# in case you want to add this back to the plots, need to specify this path and un-comment the plotting calls that use it.
-# db.conflicts.folder.path <- "file path to conflicts_database"
+# FOR CHOOSING CUTOFF:
+userprefs <- c("../../take17/otus.abund",
+               "../../take17/plots",
+               "regular",
+               "regular",
+               "../../take17/conflicts_95",
+               "../../take17/ids.above.95",
+               95,
+               "../../take17/conflicts_96",
+               "../../take17/ids.above.96",
+               96,
+               "../../take17/conflicts_97",
+               "../../take17/ids.above.97",
+               97,
+               "../../take17/conflicts_98",
+               "../../take17/ids.above.98",
+               98,
+               "../../take17/conflicts_99",
+               "../../take17/ids.above.99",
+               99,
+               "../../take17/conflicts_100",
+               "../../take17/ids.above.100",
+               100)
+# FOR PLOTTING FORCING (**add this in)
 
+
+# in case you want to add the db baseline conflict back to the plots, need to specify this path below
+# and un-comment the plotting calls that use it at the end of the script.
+
+# db.conflicts.folder.path <- "file path to conflicts_database"
 otu.table.path <- userprefs[1]
 plots.folder.path <- userprefs[2]
 forcing.folder.path <- userprefs[3]
@@ -50,7 +62,6 @@ if (length(rest.of.arguments) > 0){
 # this is automatically exported into the working directory when this script is run normally
 seqID.reads.file.path <- "total.reads.per.seqID.csv"
 
-# seqID.reads.file.path <- "../../take12-MErun/total.reads.per.seqID.csv"
 
 #####
 # Define functions to import and process the data
@@ -104,8 +115,7 @@ import.forcing.conflicts <- function(ForcingFolder){
 import.seqID.reads <- function(FilePath){
   seqID.reads.file.path <- FilePath
   
-  seqID.reads <- read.csv(file = seqID.reads.file.path, stringsAsFactors = FALSE)
-  seqID.reads[ ,1] <- as.character(seqID.reads[ ,1])
+  seqID.reads <- read.csv(file = seqID.reads.file.path, colClasses = "character")
   seqID.reads[ ,2] <- as.numeric(seqID.reads[ ,2])
   
   return(seqID.reads)
@@ -115,8 +125,9 @@ import.seqID.reads <- function(FilePath){
 import.and.reformat.otu.table <- function(OTUtable){
   otu.table.path <- OTUtable
   
-  otus <- read.table(file = otu.table.path, sep = "\t", header = TRUE, stringsAsFactors = FALSE)
-  seqID.reads <- data.frame(seqID = as.character(otus[ ,1]), reads = as.numeric(rowSums(otus[ ,-1])), stringsAsFactors = FALSE)
+  otus <- read.table(file = otu.table.path, sep = "\t", header = TRUE, colClasses = "character")
+  samples <- apply(X = otus[ ,-1], MARGIN = 2, FUN = as.numeric)
+  seqID.reads <- data.frame(seqID = otus[ ,1], reads = rowSums(samples), stringsAsFactors = FALSE)
   
   return(seqID.reads)
 }
@@ -131,9 +142,8 @@ import.ids.above <- function(FilePaths, PidentsUsed){
   for (p in 1:length(pident.values)){
     # fw.ids[[p]] <- scan(file = ids.file.paths[p])
     
-    fw.ids[[p]] <- read.table(file = ids.file.paths[p], stringsAsFactors = FALSE)
+    fw.ids[[p]] <- read.table(file = ids.file.paths[p], colClasses = "character")
     fw.ids[[p]] <- fw.ids[[p]][ ,1]
-    fw.ids[[p]] <- as.character(fw.ids[[p]])
     
     names(fw.ids)[p] <- pident.values[p]
   }
@@ -164,9 +174,7 @@ get.conflict.seqIDs <- function(ConflictsFolders, PidentsUsed){
     
     # for each taxonomy file
     for (t in 1:num.taxa.levels){
-      conflict.ids[[t]] <- read.csv(file = paste(pident.folders[p], "/", all.files[t], sep = ""), header = TRUE, stringsAsFactors = FALSE)
-      # first column is the seqID vector
-      conflict.ids[[t]] <- as.character(conflict.ids[[t]][ ,1])
+      conflict.ids[[t]] <- read.csv(file = paste(pident.folders[p], "/", all.files[t], sep = ""), header = TRUE, colClasses = "character")
     }
     
     all.pidents[[p]] <- conflict.ids
@@ -313,16 +321,13 @@ import.custom.only.taxonomy <- function(FilePath){
   forced.taxonomy.file.path <- FilePath
   
   # simple imort b/c file format determined by previous script, shouldn't have any weird things
-  fw <- read.table(forced.taxonomy.file.path , sep=";", fill=T, stringsAsFactors = F, header = TRUE)
-  
-  # convert seqIDs to characters in case they are numeric b/c as.matrix on numbers adds spaces but as.character doesn't
-  fw[,1] <- as.character(fw[,1])
+  fw <- read.table(forced.taxonomy.file.path , sep=";", fill=T, colClasses = "character", header = TRUE)
   
   # Reorder sequence IDs so can match them to the other file
   index <- order(fw[,1])
   fw <- fw[index,]
   
-  # Convert into a character matrix (from dataframe w/ seqID's integer) for faster processing
+  # Convert into a character matrix for faster processing
   fw <- as.matrix(fw)
   
   # Remove row names that will not match between the data tables

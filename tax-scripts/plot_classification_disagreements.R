@@ -11,12 +11,19 @@
 
 # Terminal command line syntax:
 # Rscript plot_classification_disagreements.R otus.abund plots conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98 ...
+# Rscript plot_classification_disagreements.R NA plots conflicts_forcing otus.custom.80.taxonomy 
 
 # ####
 # Receive arguments from terminal command line
 # ####
 
 userprefs <- commandArgs(trailingOnly = TRUE)
+
+# # FOR PLOTTING FORCING  **don't forget to change the seqID.reads file path below!!
+# userprefs <- c(NA,
+#                "../../take17/plots",
+#                "../../take17/conflicts_forcing",
+#                "../../take17/otus.custom.80.taxonomy")
 
 # # FOR CHOOSING CUTOFF:
 # userprefs <- c("../../take17/otus.abund",
@@ -41,8 +48,6 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                "../../take17/conflicts_100",
 #                "../../take17/ids.above.100",
 #                100)
-# # FOR PLOTTING FORCING (**add this in)
-
 
 # in case you want to add the db baseline conflict back to the plots, need to specify this path below
 # and un-comment the plotting calls that use it at the end of the script.
@@ -62,6 +67,8 @@ if (length(rest.of.arguments) > 0){
 # this is automatically exported into the working directory when this script is run normally
 seqID.reads.file.path <- "total.reads.per.seqID.csv"
 
+# # For troubleshooting, enter manual file path:
+# seqID.reads.file.path <- "../../take17/total.reads.per.seqID.csv"
 
 # ####
 # Define functions to import and process the data
@@ -848,5 +855,6 @@ if (forcing.folder.path != "regular"){
   # plot.bootstrap.percents(FWpValues = fw.pvalues, GGpValues = gg.pvalues, ResultsFolder = plots.folder.path)
 }
 
+# ####
 
 

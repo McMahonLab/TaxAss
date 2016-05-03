@@ -47,7 +47,7 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                "../../take17/conflicts_99",
 #                99,
 #                80,
-#                70, 
+#                70,
 #                "final")
 # # DATABASE COMPARISON: note you have to do step 11.5 to generate the files you need for this
 # userprefs <- c("../../take17/custom.custom.taxonomy",

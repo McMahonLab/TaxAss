@@ -23,29 +23,51 @@
 # Example syntax for pident comparison, final taxonomy generation, and database comparison, respectively:
 
 # Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 
-# Rscript find_classification_disagreements.R otus.98.taxonomy NA ids.above.98 conflicts_98 98 85 70 final
+# Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 final
 # Rscript find_classification_disagreements.R custom.custom.taxonomy custom.general.taxonomy NA conflicts_database NA NA 70 database
 # Rscript find_classification_disagreements.R otus.custom.taxonomy otus.98.85.70.taxonomy ids.above.98 conflicts_forcing NA 85 70 forcing
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 
-# userprefs <- c("../../take13/otus.98.taxonomy",
-#                "../../take13/otus.general.taxonomy",
-#                "../../take13/ids.above.98",
-#                "../../take13/conflicts_98",
-#                98,
-#                85,
-#                70, "final"
-#                )
-# userprefs <- c("../../take10a/custom.custom.taxonomy",
-#                "../../take10a/custom.general.taxonomy",
+# ####
+# input for troubleshooting
+# ####
+# # CONFLICT FINDING ONLY:
+# userprefs <- c("../../take17/otus.99.taxonomy",
+#                "../../take17/otus.general.taxonomy",
+#                "../../take17/ids.above.99",
+#                "../../take17/conflicts_99",
+#                99,
+#                80,
+#                70)
+# # FINAL TABLE GENERATION: note you do need the otus.general.taxonomy file b/c it's used to prep a file for plot_classification_improvement.R in step 16
+# userprefs <- c("../../take17/otus.99.taxonomy",
+#                "../../take17/otus.general.taxonomy",
+#                "../../take17/ids.above.99",
+#                "../../take17/conflicts_99",
+#                99,
+#                80,
+#                70, 
+#                "final")
+# # DATABASE COMPARISON: note you have to do step 11.5 to generate the files you need for this
+# userprefs <- c("../../take17/custom.custom.taxonomy",
+#                "../../take17/custom.general.taxonomy",
 #                "NA",
-#                "../../take10a/conflicts_database/",
-#                NA, 
-#                NA, 
+#                "../../take17/conflicts_database/",
+#                NA,
+#                NA,
 #                70,
 #                "database")
-
+# # FORCING ANALYSIS: note this isn't in the workflow, but it shows how much forcing you'd get from using FW alone
+# userprefs <- c("../../take17/otus.custom.taxonomy",
+#                "../../take17/otus.99.80.70.taxonomy",
+#                "../../take17/ids.above.99",
+#                "../../take17/conflicts_forcing/",
+#                NA,
+#                80,
+#                70,
+#                "forcing")
+# ####
 
 fw.plus.gg.tax.file.path <- userprefs[1]
 gg.only.tax.file.path <- userprefs[2]
@@ -71,23 +93,23 @@ import.FW.names <- function(FilePath){
   fw.plus.gg.tax.file.path <- FilePath
   # Avoid errors from variable row lengths by checking length of all rows (fill=T only checks 1st 5 rows)
   numcol <- max(count.fields(fw.plus.gg.tax.file.path, sep=";"))
-  fw <- read.table(fw.plus.gg.tax.file.path, sep=";", fill=T, stringsAsFactors = F, col.names=1:numcol)
+  fw <- read.table(fw.plus.gg.tax.file.path, sep=";", fill=T, colClasses = "character", col.names=1:numcol)
   return(fw)
 }
 
-# Import the otu taxonomies assigned with only GG
+# Import the otu taxonomies assigned with only GG, or with the workflow's GG+FW combo
 import.GG.names <- function(FilePath, final.names = FALSE){
   
   if (final.names == FALSE){
     gg.only.tax.file.path <- FilePath
     # Avoid errors from variable row lengths by checking length of all rows (fill=T only checks 1st 5 rows)
     numcol <- max(count.fields(gg.only.tax.file.path, sep=";"))
-    gg <- read.table(gg.only.tax.file.path, sep=";", fill=T, stringsAsFactors = F, col.names=1:numcol)
+    gg <- read.table(gg.only.tax.file.path, sep=";", fill=T, colClasses = "character", col.names=1:numcol)
 
   }else if (final.names == TRUE){   # b/c the final taxonomy file generated is .csv for user conveniance
     workflow.tax.file.path <- FilePath
     numcol <- max(count.fields(workflow.tax.file.path, sep=","))
-    gg <- read.table(workflow.tax.file.path, sep=",", fill=T, stringsAsFactors = F, col.names=1:numcol, header = TRUE)
+    gg <- read.table(workflow.tax.file.path, sep=",", fill=T, colClasses = "character", col.names=1:numcol, header = TRUE)
     
   }
   return(gg)
@@ -100,9 +122,6 @@ reformat.fw <- function(FWtable){
   # Remove strain and empty 10th column
   fw <- fw[,-c(9,10)]
   
-  # convert seqIDs to characters in case they are numeric b/c as.matrix on numbers adds spaces but as.character doesn't
-  fw[,1] <- as.character(fw[,1])
-  
   # Rename columns
   colnames(fw) <- c("seqID.fw","kingdom.fw","phylum.fw","class.fw","order.fw","linege.fw","clade.fw","tribe.fw")
   
@@ -110,7 +129,7 @@ reformat.fw <- function(FWtable){
   index <- order(fw[,1])
   fw <- fw[index,]
   
-  # Convert into a character matrix (from dataframe w/ seqID's integer) for faster processing
+  # Convert into a matrix for faster processing
   fw <- as.matrix(fw)
   
   # Remove row names that will not match between the data tables
@@ -125,9 +144,6 @@ reformat.gg <- function(GGtable){
   
   # Remove empty 9th column
   gg <- gg[,1:8]
-  
-  # convert seqIDs to characters in case they are numeric b/c as.matrix() on numbers adds spaces but as.character() doesn't
-  gg[,1] <- as.character(gg[,1])
   
   # Rename columns
   colnames(gg) <- c("seqID.gg","kingdom.gg","phylum.gg","class.gg","order.gg","family.gg","genus.gg","species.gg")
@@ -165,9 +181,8 @@ check.files.match <- function(FWtable, GGtable){
 # Import the freshwater sequence IDs as determined by the BLAST cutoff in workflow step 4
 import.FW.seq.IDs <- function(FilePath){
   fw.seq.ids.file.path <- FilePath
-  fw.seqs <- read.table(file = fw.seq.ids.file.path, stringsAsFactors = FALSE)
+  fw.seqs <- read.table(file = fw.seq.ids.file.path, colClasses = "character")
   fw.seqs <- fw.seqs[ ,1]
-  fw.seqs <- as.character(fw.seqs)
   return(fw.seqs)
 }
 

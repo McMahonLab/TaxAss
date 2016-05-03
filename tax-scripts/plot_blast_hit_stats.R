@@ -12,6 +12,9 @@
 # Note: it will make plots with data for other cutoffs not supplied by the user.
 # The script is calculating those for the given table, it's not a hard-coding mistake.
 
+# terminal command line syntax:
+# RScript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
+
 # ####
 # Receive arguments from terminal command line
 # ####
@@ -26,10 +29,10 @@ if (length(userprefs) > 3){
   mirror.location <- "https://cran.mtu.edu"
 }
 
-# blast.file.path <- "../../take17/otus.custom.blast.table.modified"
-# pident.cutoff <- 98
-# plots.folder.path <- "../../take17/plots"
-# mirror.location <- "https://cran.mtu.edu"
+blast.file.path <- "../../take17/otus.custom.blast.table.modified"
+pident.cutoff <- 98
+plots.folder.path <- "../../take17/plots"
+mirror.location <- "https://cran.mtu.edu"
 
 # ####
 # Install Necessary Packages

@@ -12,9 +12,9 @@
 # Note: it will make plots with data for other cutoffs not supplied by the user.
 # The script is calculating those for the given table, it's not a hard-coding mistake.
 
-#####
+# ####
 # Receive arguments from terminal command line
-#####
+# ####
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 blast.file.path <- userprefs[1]
@@ -26,14 +26,14 @@ if (length(userprefs) > 3){
   mirror.location <- "https://cran.mtu.edu"
 }
 
-# blast.file.path <- "../../take9c/otus.custom.blast.table.modified"
-# pident.cutoff <- 98
-# plots.folder.path <- "../../take9c/plots"
-# mirror.location <- "https://cran.mtu.edu"
+blast.file.path <- "../../take17/otus.custom.blast.table.modified"
+pident.cutoff <- 98
+plots.folder.path <- "../../take17/plots"
+mirror.location <- "https://cran.mtu.edu"
 
-#####
+# ####
 # Install Necessary Packages
-#####
+# ####
 
 # The package reshape is needed, must specify cran mirror and library path with Rscript
 library.path <- cat(.libPaths()) # this is the default installation path
@@ -46,15 +46,16 @@ get.necessary.packages <- function(){
   }
 }
 
-#####
+# ####
 # Define Functions for Handling Data
-#####
+# ####
 
 # import the blast table generated in find_seqIDs_with_pident
 import.BLAST.hits.table <- function(FilePath){
   blast.file <- FilePath
-  blast <- read.table(file = blast.file, header = F, sep = "")
+  blast <- read.table(file = blast.file, header = F, sep = "", colClasses = "character")
   colnames(blast) <- c("qseqid", "pident", "length", "qlen", "q.align", "true.pids", "hit.num")
+  blast[ ,2:7] <- apply(blast[ ,2:7], 2, as.numeric)
   return(blast)
 }
 
@@ -90,9 +91,9 @@ reformat.fract.ids.vs.hit.num <- function(BlastTable){
   return(blast.casted)
 }
 
-#####
+# ####
 # Define Functions for Plotting Data
-#####
+# ####
  
 # bar plot blast hit number results
 bar.plot.blast.results <- function(BlastHitsTable, OutputFolder, NumBars, Cutoff = 0){
@@ -203,9 +204,9 @@ line.plot.overlay.blast.results <- function(BlastTable, CutoffVector, OutputFold
   unnecessary.comment <- dev.off()
 }
  
-#####
+# ####
 # Use Functions
-#####
+# ####
 
 get.necessary.packages()
 

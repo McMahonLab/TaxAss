@@ -16,32 +16,32 @@
 # Receive arguments from terminal command line
 # ####
 
-# userprefs <- commandArgs(trailingOnly = TRUE)
+userprefs <- commandArgs(trailingOnly = TRUE)
 
-# FOR CHOOSING CUTOFF:
-userprefs <- c("../../take17/otus.abund",
-               "../../take17/plots",
-               "regular",
-               "regular",
-               "../../take17/conflicts_95",
-               "../../take17/ids.above.95",
-               95,
-               "../../take17/conflicts_96",
-               "../../take17/ids.above.96",
-               96,
-               "../../take17/conflicts_97",
-               "../../take17/ids.above.97",
-               97,
-               "../../take17/conflicts_98",
-               "../../take17/ids.above.98",
-               98,
-               "../../take17/conflicts_99",
-               "../../take17/ids.above.99",
-               99,
-               "../../take17/conflicts_100",
-               "../../take17/ids.above.100",
-               100)
-# FOR PLOTTING FORCING (**add this in)
+# # FOR CHOOSING CUTOFF:
+# userprefs <- c("../../take17/otus.abund",
+#                "../../take17/plots",
+#                "regular",
+#                "regular",
+#                "../../take17/conflicts_95",
+#                "../../take17/ids.above.95",
+#                95,
+#                "../../take17/conflicts_96",
+#                "../../take17/ids.above.96",
+#                96,
+#                "../../take17/conflicts_97",
+#                "../../take17/ids.above.97",
+#                97,
+#                "../../take17/conflicts_98",
+#                "../../take17/ids.above.98",
+#                98,
+#                "../../take17/conflicts_99",
+#                "../../take17/ids.above.99",
+#                99,
+#                "../../take17/conflicts_100",
+#                "../../take17/ids.above.100",
+#                100)
+# # FOR PLOTTING FORCING (**add this in)
 
 
 # in case you want to add the db baseline conflict back to the plots, need to specify this path below

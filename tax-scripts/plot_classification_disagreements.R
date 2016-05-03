@@ -12,36 +12,36 @@
 # Terminal command line syntax:
 # Rscript plot_classification_disagreements.R otus.abund plots conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98 ...
 
-#####
+# ####
 # Receive arguments from terminal command line
-#####
+# ####
 
-userprefs <- commandArgs(trailingOnly = TRUE)
+# userprefs <- commandArgs(trailingOnly = TRUE)
 
-# # FOR CHOOSING CUTOFF:
-# userprefs <- c("../../take17/otus.abund",
-#                "../../take17/plots",
-#                "regular",
-#                "regular",
-#                "../../take17/conflicts_95",
-#                "../../take17/ids.above.95",
-#                95,
-#                "../../take17/conflicts_96",
-#                "../../take17/ids.above.96",
-#                96,
-#                "../../take17/conflicts_97",
-#                "../../take17/ids.above.97",
-#                97,
-#                "../../take17/conflicts_98",
-#                "../../take17/ids.above.98",
-#                98,
-#                "../../take17/conflicts_99",
-#                "../../take17/ids.above.99",
-#                99,
-#                "../../take17/conflicts_100",
-#                "../../take17/ids.above.100",
-#                100)
-# # FOR PLOTTING FORCING (**add this in)
+# FOR CHOOSING CUTOFF:
+userprefs <- c("../../take17/otus.abund",
+               "../../take17/plots",
+               "regular",
+               "regular",
+               "../../take17/conflicts_95",
+               "../../take17/ids.above.95",
+               95,
+               "../../take17/conflicts_96",
+               "../../take17/ids.above.96",
+               96,
+               "../../take17/conflicts_97",
+               "../../take17/ids.above.97",
+               97,
+               "../../take17/conflicts_98",
+               "../../take17/ids.above.98",
+               98,
+               "../../take17/conflicts_99",
+               "../../take17/ids.above.99",
+               99,
+               "../../take17/conflicts_100",
+               "../../take17/ids.above.100",
+               100)
+# FOR PLOTTING FORCING (**add this in)
 
 
 # in case you want to add the db baseline conflict back to the plots, need to specify this path below
@@ -63,9 +63,9 @@ if (length(rest.of.arguments) > 0){
 seqID.reads.file.path <- "total.reads.per.seqID.csv"
 
 
-#####
+# ####
 # Define functions to import and process the data
-#####
+# ####
 
 # import all the conflict summary files from each folder and compile them into a matrix
 import.all.conflict.summaries <- function(ConflictFolders, PidentsUsed){
@@ -175,6 +175,8 @@ get.conflict.seqIDs <- function(ConflictsFolders, PidentsUsed){
     # for each taxonomy file
     for (t in 1:num.taxa.levels){
       conflict.ids[[t]] <- read.csv(file = paste(pident.folders[p], "/", all.files[t], sep = ""), header = TRUE, colClasses = "character")
+      # only want the first column, the seqIDs
+      conflict.ids[[t]] <- conflict.ids[[t]][ ,1]
     }
     
     all.pidents[[p]] <- conflict.ids
@@ -443,9 +445,9 @@ find.top.taxa.by.total.reads <- function(TaxonomyList, NumberTopTaxa){
 }
 
 
-#####
+# ####
 # Define functions to plot the data
-#####
+# ####
 
 plot.num.forced <- function(ConflictSummaryTable, ResultsFolder, DBconflicts = as.data.frame(FALSE), ByReads = FALSE, AsPercent = FALSE, y.axis.limit = 0){
   sum.table <- ConflictSummaryTable
@@ -740,13 +742,13 @@ plot.most.misleading.forced.taxa <- function(TopTaxaList, ForcedTaxonomy, Forced
 }
 
 
-#####
+# ####
 # Use Functions
-#####
+# ####
 
-#####
+# ####
 # first check if this is the optional "forcing plot"
-#####
+# ####
 if (forcing.folder.path != "regular"){
   otus.forced <- import.forcing.conflicts(ForcingFolder = forcing.folder.path)
   
@@ -778,14 +780,14 @@ if (forcing.folder.path != "regular"){
   plot.most.misleading.forced.taxa(TopTaxaList = top.taxa, ForcedTaxonomy = forced.taxonomy, 
                                    ForcedReadsList = forced.seqID.reads, ForcedSeqIDsList = forced.seqIDs, 
                                    ResultsFolder = plots.folder.path, PlottingLevels = 4:6, TotalReads = tot.reads)
-#####
+# ####
 # If not then do the normal comparison for choosing pident cutoff
-#####
+# ####
 }else{
   
-  #####
+  # ####
   # examine custom taxonomy disagreements and contribution by number OTUs
-  #####
+  # ####
   
   otu.summaries <- import.all.conflict.summaries(ConflictFolders = pident.folders, PidentsUsed = pident.values)
   
@@ -806,9 +808,9 @@ if (forcing.folder.path != "regular"){
   # plot.num.classified.outs(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = FALSE)
   plot.num.classified.outs(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE)
   
-  #####
+  # ####
   # examine custom taxonomy disagreements and contribution by number reads
-  #####
+  # ####
   
   seqID.reads <- import.and.reformat.otu.table(OTUtable = otu.table.path)
   
@@ -837,9 +839,9 @@ if (forcing.folder.path != "regular"){
   write.table(x = seqID.reads, file = "total.reads.per.seqID.csv", sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
   
   
-  #####
+  # ####
   # examine pident cutoff relationship to bootstrap p-values -this plot is not useful.
-  #####
+  # ####
   # fw.pvalues <- import.bootstrap.pvalues(ConflictFolders = pident.folders, PidentsUsed = pident.values, FW = TRUE)
   # gg.pvalues <- import.bootstrap.pvalues(ConflictFolders = pident.folders, PidentsUsed = pident.values, FW = FALSE)
   

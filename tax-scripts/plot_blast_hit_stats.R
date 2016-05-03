@@ -26,10 +26,10 @@ if (length(userprefs) > 3){
   mirror.location <- "https://cran.mtu.edu"
 }
 
-blast.file.path <- "../../take17/otus.custom.blast.table.modified"
-pident.cutoff <- 98
-plots.folder.path <- "../../take17/plots"
-mirror.location <- "https://cran.mtu.edu"
+# blast.file.path <- "../../take17/otus.custom.blast.table.modified"
+# pident.cutoff <- 98
+# plots.folder.path <- "../../take17/plots"
+# mirror.location <- "https://cran.mtu.edu"
 
 # ####
 # Install Necessary Packages

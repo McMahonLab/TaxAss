@@ -16,45 +16,47 @@ pident=("100" "99" "98" "97" "96" "95")
 # Note: still gotta do the reformatting on your own (step 0)
 
 # 1
-makeblastdb -dbtype nucl -in custom.fasta -input_type fasta -parse_seqids -out custom.db
+makeblastdb -dbtype nucl -in custom.fasta -input_type fasta -parse_seqids -out custom.db &&
 # 2
-blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 5
+blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 5 &&
 # 3
-blast_formatter -archive otus.custom.blast -outfmt "6 qseqid pident length qlen qstart qend" -out otus.custom.blast.table
+blast_formatter -archive otus.custom.blast -outfmt "6 qseqid pident length qlen qstart qend" -out otus.custom.blast.table &&
 # 4
-Rscript calc_full_length_pident.R otus.custom.blast.table otus.custom.blast.table.modified
+Rscript calc_full_length_pident.R otus.custom.blast.table otus.custom.blast.table.modified &&
 #5
-Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.above.${pident[0]} ${pident[0]} TRUE 
-Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.below.${pident[0]} ${pident[0]} FALSE
+Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.above.${pident[0]} ${pident[0]} TRUE &&
+Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.below.${pident[0]} ${pident[0]} FALSE &&
 # 6
-mkdir plots
-RScript plot_blast_hit_stats.R otus.custom.blast.table.modified ${pident[0]} plots
+mkdir plots &&
+RScript plot_blast_hit_stats.R otus.custom.blast.table.modified ${pident[0]} plots &&
 # 7
-python find_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table.modified ids.missing
-cat ids.below.${pident[0]} ids.missing > ids.below.${pident[0]}.all
+python find_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table.modified ids.missing &&
+cat ids.below.${pident[0]} ids.missing > ids.below.${pident[0]}.all &&
 # 8
-python create_fastas_given_seqIDs.py ids.above.${pident[0]} otus.fasta otus.above.${pident[0]}.fasta
-python create_fastas_given_seqIDs.py ids.below.${pident[0]}.all otus.fasta otus.below.${pident[0]}.fasta
+python create_fastas_given_seqIDs.py ids.above.${pident[0]} otus.fasta otus.above.${pident[0]}.fasta &&
+python create_fastas_given_seqIDs.py ids.below.${pident[0]}.all otus.fasta otus.below.${pident[0]}.fasta &&
 # 9
-mothur "#classify.seqs(fasta=otus.above.${pident[0]}.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2)"
-mothur "#classify.seqs(fasta=otus.below.${pident[0]}.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
+mothur "#classify.seqs(fasta=otus.above.${pident[0]}.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2)" &&
+mothur "#classify.seqs(fasta=otus.below.${pident[0]}.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)" &&
 # 10
-cat otus.above.${pident[0]}.custom.wang.taxonomy otus.below.${pident[0]}.general.wang.taxonomy > otus.${pident[0]}.taxonomy
+cat otus.above.${pident[0]}.custom.wang.taxonomy otus.below.${pident[0]}.general.wang.taxonomy > otus.${pident[0]}.taxonomy &&
 # 11
-mothur "#classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
-cat otus.general.wang.taxonomy > otus.general.taxonomy
+mothur "#classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)" &&
+cat otus.general.wang.taxonomy > otus.general.taxonomy &&
+# optional step 11.5 database comparison not run here.
 # 12
-sed 's/[[:blank:]]/\;/' <otus.${pident[0]}.taxonomy >otus.${pident[0]}.taxonomy.reformatted
-mv otus.${pident[0]}.taxonomy.reformatted otus.${pident[0]}.taxonomy
-sed 's/[[:blank:]]/\;/' <otus.general.taxonomy >otus.general.taxonomy.reformatted
-mv otus.general.taxonomy.reformatted otus.general.taxonomy
+sed 's/[[:blank:]]/\;/' <otus.${pident[0]}.taxonomy >otus.${pident[0]}.taxonomy.reformatted &&
+mv otus.${pident[0]}.taxonomy.reformatted otus.${pident[0]}.taxonomy &&
+sed 's/[[:blank:]]/\;/' <otus.general.taxonomy >otus.general.taxonomy.reformatted &&
+mv otus.general.taxonomy.reformatted otus.general.taxonomy &&
 # 13
-mkdir conflicts_${pident[0]}
-Rscript find_classification_disagreements.R otus.${pident[0]}.taxonomy otus.general.taxonomy ids.above.${pident[0]} conflicts_${pident[0]} ${pident[0]} 85 70
+mkdir conflicts_${pident[0]} &&
+Rscript find_classification_disagreements.R otus.${pident[0]}.taxonomy otus.general.taxonomy ids.above.${pident[0]} conflicts_${pident[0]} ${pident[0]} 85 70 &&
 
 # Next Run steps 4-9 and 11-12 with different pident cutoffs
 # Define a function called runagain since you repeat this part many times in paralelle
 
+# ** should I put && at the ends of the lines here or would that mess up the paralellization in the runagain loop?
 runagain () {
    # 5
    Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.above.$1 $1 TRUE 
@@ -91,6 +93,7 @@ wait
 
 # the & lets the levels of the loop run in parallel
 # the wait makes sure all the loops finish before the script exits
+# the && makes it only run the next step if the previous step exited successfully
 
 # Now run step 14- plotting everything together to choose final pident
 # First generate the arguments for the command call:
@@ -102,7 +105,7 @@ do
 done
 
 # 14
-Rscript plot_classification_disagreements.R otus.abund plots regular NA $args_string
+Rscript plot_classification_disagreements.R otus.abund plots regular regular $args_string &&
 
 printf 'Steps 1-14 have finished running.  Now analysze the plots from step 14 to choose your final pident and generate your final taxonomy file in step 15.  Optionally you can compare to how your taxonomy would have been in step 16. At the end tidy up your working directory with step 17. \n \a'
 sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; 

@@ -11,6 +11,8 @@
 # Choose pidents to test over.
 
 pident=("100" "99" "98" "97" "96" "95")
+fwbootstrap=("85")
+ggbootstrap=("70")
 
 # First Run steps 1-11 to generate databases and folders exactly following workflow
 # Note: still gotta do the reformatting on your own (step 0)
@@ -51,7 +53,7 @@ sed 's/[[:blank:]]/\;/' <otus.general.taxonomy >otus.general.taxonomy.reformatte
 mv otus.general.taxonomy.reformatted otus.general.taxonomy &&
 # 13
 mkdir conflicts_${pident[0]} &&
-Rscript find_classification_disagreements.R otus.${pident[0]}.taxonomy otus.general.taxonomy ids.above.${pident[0]} conflicts_${pident[0]} ${pident[0]} 85 70 &&
+Rscript find_classification_disagreements.R otus.${pident[0]}.taxonomy otus.general.taxonomy ids.above.${pident[0]} conflicts_${pident[0]} ${pident[0]} $fwbootstrap $ggbootstrap &&
 
 # Next Run steps 4-9 and 11-12 with different pident cutoffs
 # Define a function called runagain since you repeat this part many times in paralelle
@@ -78,7 +80,7 @@ runagain () {
    mv otus.$1.taxonomy.reformatted otus.$1.taxonomy
    # 13
    mkdir conflicts_$1
-   Rscript find_classification_disagreements.R otus.$1.taxonomy otus.general.taxonomy ids.above.$1 conflicts_$1 $1 85 70
+   Rscript find_classification_disagreements.R otus.$1.taxonomy otus.general.taxonomy ids.above.$1 conflicts_$1 $1 $fwbootstrap $ggbootstrap
 }
 
 # Using function runagain run the additional pidents in paralelle

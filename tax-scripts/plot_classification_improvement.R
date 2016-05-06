@@ -26,17 +26,15 @@ path.to.plots.folder <- userprefs[4]
 
 import.pvalues <- function(FilePath){
   taxonomy.pvalues.path <- FilePath
-  pvals <- read.table(file = taxonomy.pvalues.path, header = TRUE, sep = ",", stringsAsFactors = FALSE)
+  pvals <- read.table(file = taxonomy.pvalues.path, header = TRUE, sep = ",", colClasses = "character")
   pvals[,2:8] <- apply(X = pvals[,2:8], MARGIN = 2, FUN = as.numeric)
-  pvals[,1] <- as.character(pvals[,1])
   return(pvals)
 }
 
 import.read.counts <- function(FilePath){
   reads.table.path <- FilePath
-  reads <- read.table(file = reads.table.path, header = TRUE, sep = ",", stringsAsFactors = FALSE)
+  reads <- read.table(file = reads.table.path, header = TRUE, sep = ",", colClasses = "character")
   reads[,2] <- as.numeric(reads[,2])
-  reads[,1] <- as.character(reads[,1])
   return(reads)
 }
 

@@ -18,9 +18,9 @@
 # The format of the output file is \n separated qseqids
 
 
-#####
+# ####
 # Receive arguments from terminal command line
-#####
+# ####
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 blast.file.path <- userprefs[1]
@@ -28,19 +28,19 @@ output.file.path <- userprefs[2]
 users.cutoff <- as.numeric(userprefs[3])
 user.wants.matches <- as.logical(userprefs[4])
 
-# blast.file.path <- "../../take9c/otus.custom.blast.table.modified"
-# output.file.path <- "../../take9c/ids.below.98"
+# blast.file.path <- "../../take16/otus.custom.blast.table.modified"
+# output.file.path <- "../../take16/ids.above.98"
 # users.cutoff <- as.numeric(98)
-# user.wants.matches <- as.logical(FALSE)
+# user.wants.matches <- as.logical(TRUE)
 
-#####
+# ####
 # Define Functions
-#####
+# ####
 
 # Import the modified blast table
 import.BLAST.data <- function(File){
   blast.file.path <- File
-  blast <- read.table(file = blast.file.path, sep = "\t", header = F, stringsAsFactors = F)
+  blast <- read.table(file = blast.file.path, sep = "\t", header = F, stringsAsFactors = F, colClasses = "character")
   colnames(blast) <- c("qseqid","pident","length","qlen","q.align","true.pids","hit.num.best.ids")
   return(blast)
 }
@@ -52,10 +52,14 @@ filter.seqIDs <- function(BlastTable, cutoff.perc.id, want.matches, File){
   hits <- want.matches
   output.file.path <- File
   
+  # had to import everything as character because very long numbers for seqIDs got changed to scientific notation on import
+  
+  
+  
   if (hits == TRUE){
-    index <- which(blast$true.pids >= cutoff)
+    index <- which(as.numeric(blast$true.pids) >= cutoff)
   }else{
-    index <- which(blast$true.pids < cutoff)
+    index <- which(as.numeric(blast$true.pids) < cutoff)
   }
   
   seq.ids <- blast[index,1]
@@ -74,9 +78,9 @@ filter.seqIDs <- function(BlastTable, cutoff.perc.id, want.matches, File){
   
 }
 
-#####
+# ####
 # Use Functions
-#####
+# ####
 
 blast <- import.BLAST.data(File = blast.file.path)
 

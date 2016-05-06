@@ -174,6 +174,7 @@ bar.plot.stacked.blast.results <- function(BlastTable, CutoffVector, OutputFolde
     }
   }
   
+  # export stacked bar plot
   png(filename = paste(plot.folder, "/BLAST_hits_used_for_pidents_", min(CutoffVector), "-", max(CutoffVector), ".png", sep = ""), 
       width = 8, height = 5, units = "in", res = 100)
   par(mar = c(8.5,5,4,.4))
@@ -188,6 +189,9 @@ bar.plot.stacked.blast.results <- function(BlastTable, CutoffVector, OutputFolde
                        sep = "")
   mtext(text = description, side = 1, line = 7.5, at = -2, cex = .75, adj = 0)
   unnecessary.comment <- dev.off()
+  
+  #export .csv table of results
+  write.csv(x = hits.matrix, file = paste(plot.folder, "/BLAST_hits_used_for_pidents_", min(CutoffVector), "-", max(CutoffVector), ".csv", sep = ""))
   
 #   legend(x = num.hits.reported+1, y = 100, legend = row.names(hits.matrix), 
 #          text.col = rainbow(length(num.hits.reported)))
@@ -240,7 +244,7 @@ bar.plot.blast.results(BlastHitsTable = cutoff.hit.stats, Cutoff = pident.cutoff
 # line.plot.overlay.blast.results(BlastTable = blast, CutoffVector = 90:100, OutputFolder = plots.folder.path)
 
 # View stacked bar chart to see how the proportion of best hits changes with different cutoffs
-bar.plot.stacked.blast.results(BlastTable = blast, CutoffVector = 90:100, OutputFolder = plots.folder.path)
+bar.plot.stacked.blast.results(BlastTable = blast, CutoffVector = c(0,90:100), OutputFolder = plots.folder.path)
 # bar.plot.stacked.blast.results(BlastTable = blast, CutoffVector = 70:100, OutputFolder = plots.folder.path)
 
 # Note how that plot levels off as you look way lower on the pidents.

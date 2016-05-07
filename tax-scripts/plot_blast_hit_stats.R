@@ -30,7 +30,7 @@ if (length(userprefs) > 3){
 
 # blast.file.path <- "../../take13/otus.custom.blast.table.modified"
 # pident.cutoff <- 98
-# plots.folder.path <- "../../take13/plots"
+# plots.folder.path <- "~/Desktop/test"
 # mirror.location <- "https://cran.mtu.edu"
 
 # ####
@@ -147,7 +147,7 @@ bar.plot.blast.results <- function(BlastHitsTable, OutputFolder, NumBars, Cutoff
 }
 
 # Make a stacked bar chart showing how the proportions change with different pidents
-bar.plot.stacked.blast.results <- function(BlastTable, CutoffVector, OutputFolder){
+bar.plot.stacked.blast.results <- function(BlastTable, CutoffVector, OutputFolder, Reverse = FALSE){
   blast <- BlastTable
   cutoffs <- CutoffVector
   plot.folder <- OutputFolder
@@ -174,27 +174,39 @@ bar.plot.stacked.blast.results <- function(BlastTable, CutoffVector, OutputFolde
     }
   }
   
-  # export stacked bar plot
-  png(filename = paste(plot.folder, "/BLAST_hits_used_for_pidents_", min(CutoffVector), "-", max(CutoffVector), ".png", sep = ""), 
-      width = 8, height = 5, units = "in", res = 100)
-  par(mar = c(8.5,5,4,.4))
-  barplot(hits.matrix, ylim = c(0,100), col=c("grey",rainbow(num.hits.reported-1)),
-          main = "Which BLAST hit gave the best \"full length\" pident?",
-          xlab = "Full length pident cutoff used to filter seqIDs (%)", 
-          ylab = "SeqIDs corresponding to each blast hit number (%)")
-  description <- paste("The grey bar is blast hit #1. These are the percent of seqIDs where both you and blast calculated the same hit to have the best pident.\n",
-                       "The colored bars are blast hits #2 - ", num.hits.reported, ". These are the percent of seqIDs where the calculated full length pident was better for a different hit.\n",
-                       "At a more stringent pident filter (x axis), fewer poor matches exist so BLAST reports longer matches leading to fewer discrepancies.\n",
-                       "However, if there is a lot of color in your chosen pident's bar you must adjust the BLAST settings to correct that!\n",
-                       sep = "")
-  mtext(text = description, side = 1, line = 7.5, at = -2, cex = .75, adj = 0)
-  unnecessary.comment <- dev.off()
+  # Plot stacked bar that doesn't have hit #1 so that it's easier to see:
+  if (Reverse == TRUE){
+    missed.best.hits <- hits.matrix[-1, ]
+    png(filename = paste(plot.folder, "/BLAST_hits_used_for_pidents_", min(CutoffVector), "-", max(CutoffVector), "_only_incorrect_hits.png", sep = ""), 
+        width = 8, height = 5, units = "in", res = 100)
+    par(mar = c(8.5,5,4,.4))
+    barplot(hits.matrix[-1, ], ylim = c(0,max(colSums(missed.best.hits))+2), col=rainbow(num.hits.reported),
+            main = "Which BLAST hits missed the best \"full length\" pident?",
+            xlab = "Full length pident cutoff used to filter seqIDs (%)", 
+            ylab = "SeqIDs corresponding to each blast hit number (%)")
+    legend(x = num.hits.reported+1, y = max(colSums(missed.best.hits)), legend = row.names(missed.best.hits),
+           text.col = rainbow(num.hits.reported-1), bty = "n")
+    unnecessary.comment <- dev.off()
+  }else{
+    # export stacked bar plot with all hit numbers (the origional one)
+    png(filename = paste(plot.folder, "/BLAST_hits_used_for_pidents_", min(CutoffVector), "-", max(CutoffVector), ".png", sep = ""), 
+        width = 8, height = 5, units = "in", res = 100)
+    par(mar = c(8.5,5,4,.4))
+    barplot(hits.matrix, ylim = c(0,100), col=c("grey",rainbow(num.hits.reported-1)),
+            main = "Which BLAST hit gave the best \"full length\" pident?",
+            xlab = "Full length pident cutoff used to filter seqIDs (%)", 
+            ylab = "SeqIDs corresponding to each blast hit number (%)")
+    description <- paste("The grey bar is blast hit #1. These are the percent of seqIDs where both you and blast calculated the same hit to have the best pident.\n",
+                         "The colored bars are blast hits #2 - ", num.hits.reported, ". These are the percent of seqIDs where the calculated full length pident was better for a different hit.\n",
+                         "At a more stringent pident filter (x axis), fewer poor matches exist so BLAST reports longer matches leading to fewer discrepancies.\n",
+                         "However, if there is a lot of color in your chosen pident's bar you must adjust the BLAST settings to correct that!\n",
+                         sep = "")
+    mtext(text = description, side = 1, line = 7.5, at = -2, cex = .75, adj = 0)
+    unnecessary.comment <- dev.off()
+  }
   
   #export .csv table of results
   write.csv(x = hits.matrix, file = paste(plot.folder, "/BLAST_hits_used_for_pidents_", min(CutoffVector), "-", max(CutoffVector), ".csv", sep = ""))
-  
-#   legend(x = num.hits.reported+1, y = 100, legend = row.names(hits.matrix), 
-#          text.col = rainbow(length(num.hits.reported)))
 }
 
 # plot number of seqIDs at each hit #
@@ -246,6 +258,8 @@ bar.plot.blast.results(BlastHitsTable = cutoff.hit.stats, Cutoff = pident.cutoff
 # View stacked bar chart to see how the proportion of best hits changes with different cutoffs
 bar.plot.stacked.blast.results(BlastTable = blast, CutoffVector = c(0,90:100), OutputFolder = plots.folder.path)
 # bar.plot.stacked.blast.results(BlastTable = blast, CutoffVector = 70:100, OutputFolder = plots.folder.path)
+bar.plot.stacked.blast.results(BlastTable = blast, CutoffVector = c(0,90:100), OutputFolder = plots.folder.path, Reverse = TRUE)
+
 
 # Note how that plot levels off as you look way lower on the pidents.
 # That's probably because that's where blast's built-in e-value cutoff

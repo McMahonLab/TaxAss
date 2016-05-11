@@ -25,29 +25,29 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                "../../take17/conflicts_forcing",
 #                "../../take17/otus.custom.80.taxonomy")
 
-# # FOR CHOOSING CUTOFF:
-# userprefs <- c("../../take17/otus.abund",
-#                "../../take17/plots",
-#                "regular",
-#                "regular",
-#                "../../take17/conflicts_95",
-#                "../../take17/ids.above.95",
-#                95,
-#                "../../take17/conflicts_96",
-#                "../../take17/ids.above.96",
-#                96,
-#                "../../take17/conflicts_97",
-#                "../../take17/ids.above.97",
-#                97,
-#                "../../take17/conflicts_98",
-#                "../../take17/ids.above.98",
-#                98,
-#                "../../take17/conflicts_99",
-#                "../../take17/ids.above.99",
-#                99,
-#                "../../take17/conflicts_100",
-#                "../../take17/ids.above.100",
-#                100)
+# FOR CHOOSING CUTOFF:
+userprefs <- c("../../take18playwith/otus.abund",
+               "../../take18playwith/plots",
+               "regular",
+               "regular",
+               "../../take18playwith/conflicts_95",
+               "../../take18playwith/ids.above.95",
+               95,
+               "../../take18playwith/conflicts_96",
+               "../../take18playwith/ids.above.96",
+               96,
+               "../../take18playwith/conflicts_97",
+               "../../take18playwith/ids.above.97",
+               97,
+               "../../take18playwith/conflicts_98",
+               "../../take18playwith/ids.above.98",
+               98,
+               "../../take18playwith/conflicts_99",
+               "../../take18playwith/ids.above.99",
+               99,
+               "../../take18playwith/conflicts_100",
+               "../../take18playwith/ids.above.100",
+               100)
 
 # in case you want to add the db baseline conflict back to the plots, need to specify this path below
 # and un-comment the plotting calls that use it at the end of the script.
@@ -64,11 +64,11 @@ if (length(rest.of.arguments) > 0){
   pident.values <- as.numeric(rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)+2])
 }
 
-# this is automatically exported into the working directory when this script is run normally
-seqID.reads.file.path <- "total.reads.per.seqID.csv"
+# # this is automatically exported into the working directory when this script is run normally
+# seqID.reads.file.path <- "total.reads.per.seqID.csv"
 
-# # For troubleshooting, enter manual file path:
-# seqID.reads.file.path <- "../../take17/total.reads.per.seqID.csv"
+# For troubleshooting, enter manual file path:
+seqID.reads.file.path <- "../../take18playwith/total.reads.per.seqID.csv"
 
 # ####
 # Define functions to import and process the data
@@ -802,11 +802,12 @@ if (forcing.folder.path != "regular"){
   # db.summary <- import.database.conflicts(DatabaseFolder = db.conflicts.folder.path)
   
   # ignore lineage- it's way higher than the others doesn't fit on graphs
-  otu.summaries <- otu.summaries[-5, ]
+  # ignore order- so many unclassifieds that it looks lower than class and is confusing
+  otu.summaries <- otu.summaries[c(-5,-4), ]
   # db.summary <- db.summary[-5, ]
   
   plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path)
-  plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, y.axis.limit = 10)
+  plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, y.axis.limit = 10) #zooms on any phylum forcing
   # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE)
   # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE, y.axis.limit = 1)
   # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, DBconflicts = db.summary, y.axis.limit = max(db.summary[,2]))

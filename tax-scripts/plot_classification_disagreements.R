@@ -748,6 +748,31 @@ plot.most.misleading.forced.taxa <- function(TopTaxaList, ForcedTaxonomy, Forced
   }
 }
 
+export.summary.table <- function(SummaryTable, FolderPath, ByOTU = TRUE, Percents = FALSE){
+  folder.path <- FolderPath
+  sum.table <- SummaryTable
+  if (ByOTU == TRUE){
+    file.name <- "conflict_summary_by_OTU.csv"
+  }else if (ByOTU == FALSE){
+    if (Percents == TRUE){
+      file.name <- "conflict_summary_by_percent_read.csv"
+    }else{
+      file.name <- "conflict_summary_by_read.csv"
+    }
+  }
+  
+  if (Percents == TRUE){
+    tot.read <- sum.table[nrow(sum.table), 1]
+    make.percent <- function(x){
+      perc <- x / tot.read
+      return(perc)
+    }
+    sum.table <- apply(X = sum.table, MARGIN = 2, FUN = make.percent)
+  }
+  
+  write.csv(x = sum.table, file = paste(FolderPath, "/", file.name, sep = ""), quote = FALSE)
+}
+
 
 # ####
 # Use Functions
@@ -797,6 +822,7 @@ if (forcing.folder.path != "regular"){
   # ####
   
   otu.summaries <- import.all.conflict.summaries(ConflictFolders = pident.folders, PidentsUsed = pident.values)
+  export.summary.table(SummaryTable = otu.summaries, FolderPath = plots.folder.path, ByOTU = TRUE)
   
   # I removed this from the terminal command also because it is misleading and confusing and doesn't add to the plot. left a commented out input line for use within RStudio at the top.
   # db.summary <- import.database.conflicts(DatabaseFolder = db.conflicts.folder.path)
@@ -832,8 +858,14 @@ if (forcing.folder.path != "regular"){
   
   read.summaries <- add.totals.to.read.summaries(ReadSummaryTable = read.summaries, AbundanceTable = seqID.reads, 
                                                  PidentsUsed = pident.values, CustomSeqIDs = custom.seqIDs)
+  # NOTE: the totals in read summaries may not be 100% or total reads, depending on how the otu table was normalized.
+  # ex: if normalized so each column sums to 1, the "total reads" ends up being the number of samples. 
+  export.summary.table(SummaryTable = read.summaries, FolderPath = plots.folder.path, ByOTU = FALSE)
+  export.summary.table(SummaryTable = read.summaries, FolderPath = plots.folder.path, ByOTU = FALSE, Percents = TRUE)
+  
   #leave out lineage on the plots b/c it's too much higher
-  read.summaries <- read.summaries[-5, ]
+  #leave out order because there's too many unclassifieds, makes it hard to interpret
+  read.summaries <- read.summaries[c(-5,-4), ]
   
   # plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE)
   # plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, y.axis.limit = 10000)

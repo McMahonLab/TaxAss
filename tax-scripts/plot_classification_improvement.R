@@ -8,17 +8,17 @@
 # Accept arguments from the command line:
 #####
 
-userprefs <- commandArgs(trailingOnly = TRUE)
+# userprefs <- commandArgs(trailingOnly = TRUE)
+# 
+# taxonomy.pvalues.path <- userprefs[1]
+# gg.pvalues.path <- userprefs[2]
+# reads.table.path <- userprefs[3]
+# path.to.plots.folder <- userprefs[4]
 
-taxonomy.pvalues.path <- userprefs[1]
-gg.pvalues.path <- userprefs[2]
-reads.table.path <- userprefs[3]
-path.to.plots.folder <- userprefs[4]
-
-# taxonomy.pvalues.path <- "../../take13/final.taxonomy.pvalues"
-# gg.pvalues.path <- "../../take13/final.general.pvalues"
-# reads.table.path <- "../../take13/total.reads.per.seqID.csv"
-# path.to.plots.folder <- "../../take13/plots"
+taxonomy.pvalues.path <- "../../take18playwith/final.taxonomy.pvalues"
+gg.pvalues.path <- "../../take18playwith/final.general.pvalues"
+reads.table.path <- "../../take18playwith/total.reads.per.seqID.csv"
+path.to.plots.folder <- "../../take18playwith/plots"
 
 #####
 # Define functions to import data
@@ -93,7 +93,7 @@ convert.to.reads.presence.absence <- function(TrueFalseTable){
 # Define functions to plot the data
 #####
 
-plot.num.classified <- function(GGTable, FWTable, Reads = TRUE, FolderPath, Tribe = FALSE){
+plot.num.classified <- function(GGTable, FWTable, Reads = TRUE, FolderPath, Tribe = FALSE, Kingdom = FALSE){
   ggpvals <- GGTable
   fwpvals <- FWTable
   plots.path <- FolderPath
@@ -116,6 +116,10 @@ plot.num.classified <- function(GGTable, FWTable, Reads = TRUE, FolderPath, Trib
     class.table <- class.table[ ,-7]
   }
   
+  # Don't include kingdom on plot since they really should all be the same kingdom and non-bacteria should be filtered out of the data
+  if (Kingdom == FALSE){
+    class.table <- class.table[ ,-1]
+  }
   
   # Save plot as .png file
   png(filename = paste(plots.path, "/Improvement_In_Classification_by_", title.word, ".png", sep = ""), 

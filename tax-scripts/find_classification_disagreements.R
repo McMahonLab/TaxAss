@@ -88,7 +88,7 @@ if (length(userprefs) < 8){final.or.database <- "non-empty string"}
 file.name.final.taxonomy <- paste("otus.", blast.pident.cutoff, ".", taxonomy.pvalue.cutoff.fw, ".", taxonomy.pvalue.cutoff.gg, ".taxonomy", sep = "")
 file.name.workflow.pvalues <- "final.taxonomy.pvalues"
 file.name.general.pvalues <- "final.general.pvalues"
-file.name.workflow.names <- "final.workflow.names"
+file.name.workflow.names <- "final.taxonomy.names"
 file.name.general.names <- "final.general.names"
 
 # when forcing flag is used, these are exported into the working directory:

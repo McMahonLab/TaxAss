@@ -41,10 +41,10 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                80,
 #                70)
 # # FINAL TABLE GENERATION: note you do need the otus.general.taxonomy file b/c it's used to prep a file for plot_classification_improvement.R in step 16
-# userprefs <- c("../../take17/otus.99.taxonomy",
-#                "../../take17/otus.general.taxonomy",
-#                "../../take17/ids.above.99",
-#                "../../take17/conflicts_99",
+# userprefs <- c("../../take18playwith/otus.99.taxonomy",
+#                "../../take18playwith/otus.general.taxonomy",
+#                "../../take18playwith/ids.above.99",
+#                "../../take18playwith/conflicts_99/",
 #                99,
 #                80,
 #                70,
@@ -78,6 +78,25 @@ taxonomy.pvalue.cutoff.fw <- userprefs[6]
 taxonomy.pvalue.cutoff.gg <- userprefs[7]
 final.or.database <- userprefs[8]
 if (length(userprefs) < 8){final.or.database <- "non-empty string"}
+
+
+# ####
+# Pre-determined Output File Names
+# ####
+
+# when "final" flag is used, these are exported into the working directory:
+file.name.final.taxonomy <- paste("otus.", blast.pident.cutoff, ".", taxonomy.pvalue.cutoff.fw, ".", taxonomy.pvalue.cutoff.gg, ".taxonomy", sep = "")
+file.name.workflow.pvalues <- "final.taxonomy.pvalues"
+file.name.general.pvalues <- "final.general.pvalues"
+file.name.workflow.names <- "final.workflow.names"
+file.name.general.names <- "final.general.names"
+
+# when forcing flag is used, these are exported into the working directory:
+file.name.custom.only.taxonomy <- paste("otus.custom.", taxonomy.pvalue.cutoff.fw, ".taxonomy", sep = "")
+
+# note- files with predetermined names that end up in results folder are not included here
+# all of the pre-determined names are used by other scripts and shouldn't be changed.  
+
 
 # ####
 # Define Functions for Import and Formatting
@@ -413,15 +432,15 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   final.taxonomy <- rbind(final.taxonomy.fw.only, final.taxonomy.gg.only)
   colnames(final.taxonomy) <- c("seqID","kingdom","phylum","class","order","lineage","clade","tribe")
   
-  write.table(x = final.taxonomy, 
-              file = paste("otus.", blast.pident.cutoff, ".", taxonomy.pvalue.cutoff.fw, ".", taxonomy.pvalue.cutoff.gg, ".taxonomy", sep = ""), 
-              sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
+  write.table(x = final.taxonomy, file = file.name.final.taxonomy, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
   
   # the following will be used by the plot_classification_improvement.R script
   
   tax.nums <- view.bootstraps(TaxonomyTable = final.taxonomy)
-  write.table(x = tax.nums, file = "final.taxonomy.pvalues", sep = ",", 
-              row.names = FALSE, col.names = TRUE, quote = FALSE)
+  write.table(x = tax.nums, file = file.name.workflow.pvalues, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
+  
+  tax.names <- apply(final.taxonomy, 2, remove.parentheses)
+  write.table(x = tax.names, file = file.name.workflow.names, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
   
   gg.percents <- import.GG.names(FilePath = gg.only.tax.file.path)
   gg.percents <- reformat.gg(GGtable = gg.percents)
@@ -430,9 +449,10 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   colnames(gg.taxonomy) <- c("seqID","kingdom","phylum","class","order","lineage","clade","tribe")
   
   gg.nums <- view.bootstraps(TaxonomyTable = gg.taxonomy)
-  write.table(x = gg.nums, file = "final.general.pvalues", sep = ",", 
-              row.names = FALSE, col.names = TRUE, quote = FALSE)
+  write.table(x = gg.nums, file = file.name.general.pvalues, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
   
+  gg.names <- apply(X = gg.taxonomy, MARGIN = 2, FUN = remove.parentheses)
+  write.table(x = gg.names, file = file.name.general.names, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
 
 # ####
 # Compare databases by looking at how GG classifies the FW representative sequences
@@ -501,7 +521,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   
   # export clean fw-db-only table for forcing plots later
   fw <- apply(fw, 2, remove.parentheses)
-  write.table(x = fw, file = paste("otus.custom.", taxonomy.pvalue.cutoff.fw, ".taxonomy", sep = ""), sep = ";")
+  write.table(x = fw, file = file.name.custom.only.taxonomy, sep = ";")
   
   fw.gg.only <- apply(fw.gg.only, 2, remove.parentheses)
   gg.gg.only <- apply(gg.gg.only, 2, remove.parentheses)

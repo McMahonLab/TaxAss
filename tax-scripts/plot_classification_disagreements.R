@@ -25,29 +25,29 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                "../../take17/conflicts_forcing",
 #                "../../take17/otus.custom.80.taxonomy")
 
-# # FOR CHOOSING CUTOFF:
-# userprefs <- c("../../take18playwith/otus.abund",
-#                "../../take18playwith/plots",
-#                "regular",
-#                "regular",
-#                "../../take18playwith/conflicts_95",
-#                "../../take18playwith/ids.above.95",
-#                95,
-#                "../../take18playwith/conflicts_96",
-#                "../../take18playwith/ids.above.96",
-#                96,
-#                "../../take18playwith/conflicts_97",
-#                "../../take18playwith/ids.above.97",
-#                97,
-#                "../../take18playwith/conflicts_98",
-#                "../../take18playwith/ids.above.98",
-#                98,
-#                "../../take18playwith/conflicts_99",
-#                "../../take18playwith/ids.above.99",
-#                99,
-#                "../../take18playwith/conflicts_100",
-#                "../../take18playwith/ids.above.100",
-#                100)
+# FOR CHOOSING CUTOFF:
+userprefs <- c("../../take18playwith/otus.abund",
+               "../../take18playwith/plots",
+               "regular",
+               "regular",
+               "../../take18playwith/conflicts_95",
+               "../../take18playwith/ids.above.95",
+               95,
+               "../../take18playwith/conflicts_96",
+               "../../take18playwith/ids.above.96",
+               96,
+               "../../take18playwith/conflicts_97",
+               "../../take18playwith/ids.above.97",
+               97,
+               "../../take18playwith/conflicts_98",
+               "../../take18playwith/ids.above.98",
+               98,
+               "../../take18playwith/conflicts_99",
+               "../../take18playwith/ids.above.99",
+               99,
+               "../../take18playwith/conflicts_100",
+               "../../take18playwith/ids.above.100",
+               100)
 
 # in case you want to add the db baseline conflict back to the plots, need to specify this path below
 # and un-comment the plotting calls that use it at the end of the script.
@@ -64,11 +64,11 @@ if (length(rest.of.arguments) > 0){
   pident.values <- as.numeric(rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)+2])
 }
 
-# this is automatically exported into the working directory when this script is run normally
-seqID.reads.file.path <- "total.reads.per.seqID.csv"
+# # this is automatically exported into the working directory when this script is run normally
+# seqID.reads.file.path <- "total.reads.per.seqID.csv"
 
-# # For troubleshooting, enter manual file path:
-# seqID.reads.file.path <- "../../take18playwith/total.reads.per.seqID.csv"
+# For troubleshooting, enter manual file path:
+seqID.reads.file.path <- "../../take18playwith/total.reads.per.seqID.csv"
 
 # ####
 # Define functions to import and process the data
@@ -527,10 +527,9 @@ plot.num.forced <- function(ConflictSummaryTable, ResultsFolder, DBconflicts = a
   unnecessary.message <- dev.off()
 }
 
-plot.num.classified.outs <- function(ConflictSummaryTable, ResultsFolder, ByReads = FALSE, AsPercent = TRUE, OverlayOTUTable = FALSE){
+plot.num.classified.outs <- function(ConflictSummaryTable, ResultsFolder, ByReads = FALSE, AsPercent = TRUE){
   sum.table <- ConflictSummaryTable
   results.file.path <- ResultsFolder
-  sum.table.overlay <- OverlayOTUTable
   
   # pull out data needed for this plot
   num.fw <- sum.table[nrow(sum.table)-1,]
@@ -538,20 +537,10 @@ plot.num.classified.outs <- function(ConflictSummaryTable, ResultsFolder, ByRead
   pidents <- colnames(sum.table)
   pidents <- as.numeric(pidents)
   
-  if (length(sum.table.overlay) != 1){
-    num.fw.overlay <- sum.table.overlay[nrow(sum.table.overlay)-1,]
-    tot.seq.overlay <- sum.table.overlay[nrow(sum.table.overlay),1]
-  }
-  
-  if (length(sum.table.overlay) != 1){
-    plot.of <- "read"
-    plot.of.overlay <- "OTU_and_"
-  }else if (ByReads == FALSE){
+  if (ByReads == FALSE){
     plot.of <- "OTU"
-    plot.of.overlay <- ""
   }else{
     plot.of <- "read"
-    plot.of.overlay <- ""
   }
   
   if (AsPercent == FALSE){
@@ -559,37 +548,21 @@ plot.num.classified.outs <- function(ConflictSummaryTable, ResultsFolder, ByRead
   }else{
     plot.as <- "Percent"
     num.fw <- num.fw / tot.seq * 100
-    if (length(sum.table.overlay) != 1){
-      num.fw.overlay <- num.fw.overlay / tot.seq.overlay * 100
-    }
   }
   
   # Save plot as .png file
-  png(filename = paste(results.file.path, "/Custom_db_contributions_by_", plot.of.overlay, plot.of, "_", plot.as, "s.png", sep = ""), 
+  png(filename = paste(results.file.path, "/Custom_db_contributions_by_", plot.of, "_", plot.as, "s.png", sep = ""), 
       width = 5, height = 5, units = "in", res = 100)
   
-  # Set up an empty plot
+  # Set up and empty plot
   plot(x = pidents, y = num.fw, type = "n", 
        main = "Contribution of Custom Taxonomy \n to Total Classifications", cex.main = 1,
        xlab = "\"Full Length\" percent identity (similar to ANI)", 
        ylab = paste("OTUs Classified by Custom Taxonomy (", plot.as, " ", plot.of, "s)", sep = ""))
-  axis(side = 2, col.axis = "lightsalmon")
   
   # Fill plot with beautiful data
   lines(x = pidents, y = num.fw, col = "lightsalmon", lwd = 1.5)
   points(x = pidents, y = num.fw, col = "lightsalmon", pch = 19, cex = 1.3)
-  
-  # Add overlay to plot
-  if (length(sum.table.overlay) != 1){
-    par(new = TRUE)
-    
-    # Set up an empty overlaid plot
-    plot(x = pidents, y = num.fw.overlay, type = "n", axes = FALSE, ann = FALSE)
-    lines(x = pidents, y = num.fw.overlay, col = "thistle", lwd = 1.5)
-    points(x = pidents, y = num.fw.overlay, col = "thistle", pch = 19, cex = 1.3)
-    mtext(text = paste("OTUs Classified by Custom Taxonomy (", plot.as, " ", plot.of, "s)", sep = ""), side = 4)
-    axis(side = 4, at = pretty(num.fw.overlay), col.axis = "thistle")
-  }
   
   unnecessary.message <- dev.off()
 }
@@ -905,10 +878,6 @@ if (forcing.folder.path != "regular"){
   # export the reads per seqID for use in the plot_classification_improvement.R script
   write.table(x = seqID.reads, file = "total.reads.per.seqID.csv", sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
   
-  
-  # plot an overlay
-  
-  plot.num.classified.outs(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE, OverlayOTUTable = otu.summaries)
   
   # ####
   # examine pident cutoff relationship to bootstrap p-values -this plot is not useful.

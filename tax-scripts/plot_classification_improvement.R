@@ -128,6 +128,32 @@ plot.num.classified <- function(GGTable, FWTable, Reads = TRUE, FolderPath, Trib
   unnecessary.message <- dev.off()
 }
 
+fancy.barplot <- function(BesideData, StackedData, BarSpacing){
+  y <- BesideData
+  z <- StackedData
+  bar.space.y <- BarSpacing
+  bar.width <- 1  # spacing and axis limits will determine what width 1 looks like, no need to change
+  
+  # find all values from the basic "beside" plot:
+  num.sections <- ncol(y)
+  bar.spots <- barplot(y, col = rainbow(2, s = .3), beside = TRUE, width = bar.width, space = bar.space.y, plot = FALSE)
+  tot.x <- max(bar.spots) + .5 * bar.width + bar.space.y[2]
+  max.y <- max(y)
+  
+  # calculate bar spacing
+  bar.space.beside <- c(bar.space.y[2], rep(bar.space.y[1] + bar.space.y[2] + bar.width, length.out <- num.sections - 1))
+  bar.space.stacked <- bar.space.y[2] + bar.width + bar.space.y[1]
+  
+  # make plots
+  barplot(y[1, ], col = rainbow(1, s = .3), border = "black", beside = FALSE, width = bar.width, space = bar.space.beside, xlim = c(0, tot.x), ylim = c(0, max.y))
+  barplot(z, add = TRUE, col = rainbow(3, s = .3), border = "black", beside = FALSE, width = bar.width, space = bar.space.stacked, xlim = c(0, tot.x), ylim = c(0, max.y))
+  
+  # Uncomment this to make the basic "beside" plot to check against- sets up empty bars and you watch them fill correctly:
+  # bar.spots <- barplot(y, col = rainbow(2, s = 0), beside = TRUE, width = bar.width, space = bar.space.y, xlim = c(0, tot.x), ylim = c(0, max.y))
+  # barplot(y[1, ], add = TRUE, col = rainbow(1, s = .3), border = NA, beside = FALSE, width = bar.width, space = bar.space.beside, xlim = c(0, tot.x), ylim = c(0, max.y))
+  # barplot(z, add = TRUE, col = rainbow(3, s = .3), border = NA, beside = FALSE, width = bar.width, space = bar.space.stacked, xlim = c(0, tot.x), ylim = c(0, max.y))
+}
+# fancy.barplot(BesideData = y, StackedData = z, BarSpacing = c(.1,1))
 
 #####
 # Use functions!

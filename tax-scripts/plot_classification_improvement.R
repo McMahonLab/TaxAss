@@ -186,8 +186,17 @@ get.stacked.data <- function(Same, Better, New, Reads = TRUE){
   return(class.table)
 }
 
+check.numbers.add.up <- function(StackedData, BesideData){
+  stacked <- StackedData
+  beside <- BesideData
+  
+  checker <- all.equal(colSums(stacked), beside[2, ])
+  cat("check sums of stacked match workflow bar of beside: ", checker)
+}
+
 # Define functions to plot the data ----
 
+# original "besides"-only plot
 plot.num.classified <- function(GGTable, FWTable, Reads = TRUE, FolderPath, Tribe = FALSE, Kingdom = FALSE){
   ggpvals <- GGTable
   fwpvals <- FWTable
@@ -227,32 +236,33 @@ plot.num.classified <- function(GGTable, FWTable, Reads = TRUE, FolderPath, Trib
   unnecessary.message <- dev.off()
 }
 
+# the fancy barplot has both the total classified by general and workflow as bars beside each other,
+# but the total classified by the workflow is further split into a stacked chart of the type of classification
 fancy.barplot <- function(BesideData, StackedData, BarSpacing){
   y <- BesideData
   z <- StackedData
   bar.space.y <- BarSpacing
   bar.width <- 1  # spacing and axis limits will determine what width 1 looks like, no need to change
+  col.y <- "grey"
+  col.z <- c("grey", "orange", "red")
   
   # find all values from the basic "beside" plot:
   num.sections <- ncol(y)
-  bar.spots <- barplot(y, col = rainbow(2, s = .3), beside = TRUE, width = bar.width, space = bar.space.y, plot = FALSE)
+  bar.spots <- barplot(y, beside = TRUE, width = bar.width, space = bar.space.y, plot = FALSE)
   tot.x <- max(bar.spots) + .5 * bar.width + bar.space.y[2]
   max.y <- max(y)
+  empty.labels <- rep(x = "", times = num.sections)
   
-  # calculate bar spacing
-  bar.space.beside <- c(bar.space.y[2], rep(bar.space.y[1] + bar.space.y[2] + bar.width, length.out <- num.sections - 1))
+  # calculate bar and label spacing
+  bar.space.beside <- c(bar.space.y[2], rep(bar.space.y[1] + bar.space.y[2] + bar.width, length.out = num.sections - 1))
   bar.space.stacked <- bar.space.y[2] + bar.width + bar.space.y[1]
+  loc.labels <- bar.spots[seq(from = 1, to = length(bar.spots), by = 2)] + .5 * bar.width + .5 * bar.space.y[1]
   
   # make plots
-  barplot(y[1, ], col = rainbow(1, s = .3), border = "black", beside = FALSE, width = bar.width, space = bar.space.beside, xlim = c(0, tot.x), ylim = c(0, max.y))
-  barplot(z, add = TRUE, col = rainbow(3, s = .3), border = "black", beside = FALSE, width = bar.width, space = bar.space.stacked, xlim = c(0, tot.x), ylim = c(0, max.y))
-  
-  # Uncomment this to make the basic "beside" plot to check against- sets up empty bars and you watch them fill correctly:
-  # bar.spots <- barplot(y, col = rainbow(2, s = 0), beside = TRUE, width = bar.width, space = bar.space.y, xlim = c(0, tot.x), ylim = c(0, max.y))
-  # barplot(y[1, ], add = TRUE, col = rainbow(1, s = .3), border = NA, beside = FALSE, width = bar.width, space = bar.space.beside, xlim = c(0, tot.x), ylim = c(0, max.y))
-  # barplot(z, add = TRUE, col = rainbow(3, s = .3), border = NA, beside = FALSE, width = bar.width, space = bar.space.stacked, xlim = c(0, tot.x), ylim = c(0, max.y))
+  barplot(y[1, ], col = col.y, border = "black", beside = FALSE, width = bar.width, space = bar.space.beside, xlim = c(0, tot.x), ylim = c(0, 100), names.arg = empty.labels)
+  barplot(z, add = TRUE, col = col.z, border = "black", beside = FALSE, width = bar.width, space = bar.space.stacked, xlim = c(0, tot.x), ylim = c(0, 100), names.arg = empty.labels, axes = FALSE)           
+  mtext(text = colnames(z), side = 1, line = 1, at = loc.labels)
 }
-# fancy.barplot(BesideData = y, StackedData = z, BarSpacing = c(.1,1))
 
 
 # ---- Use functions! ----
@@ -292,17 +302,24 @@ reads.newly.named <- convert.to.reads.presence.absence(TrueFalseTable = otus.new
 stacked.data.otus <- get.stacked.data(Same = otus.unchanged, Better = otus.reclassified, New = otus.newly.named, Reads = FALSE)
 stacked.data.reads <- get.stacked.data(Same = reads.unchanged, Better = reads.reclassified, New = reads.newly.named, Reads = TRUE)
 
-barplot(stacked.data.otus)
+check.numbers.add.up(StackedData = stacked.data.otus, BesideData = beside.data.otus)
+check.numbers.add.up(StackedData = stacked.data.reads, BesideData = beside.data.reads)
 
-par(mfrow = c(1,2))
-barplot(beside.data.reads, beside = T, main = "reads", ylim = c(0,100))
-par(new = F)
-barplot(beside.data.otus, beside = T, main = "otus", ylim = c(0,100))
+# Generate the Plot!
 
+fancy.barplot(BesideData = beside.data.otus[ ,-c(1,7)], StackedData = stacked.data.otus[ ,-c(1,7)], BarSpacing = c(0,1))
+fancy.barplot(BesideData = beside.data.reads[ ,-c(1,7)], StackedData = stacked.data.reads[ ,-c(1,7)], BarSpacing = c(0,1))
 
-plot.num.classified(FWTable = otus.named.gg, GGTable = otus.named.gg, Reads = FALSE, FolderPath = path.to.plots.folder)
-plot.num.classified(FWTable = reads.named.fw, GGTable = reads.named.gg, Reads = TRUE, FolderPath = path.to.plots.folder)
-
+# par(mfrow = c(2,2))
+# barplot(beside.data.reads, beside = T, main = "reads", ylim = c(0,100))
+# barplot(beside.data.otus, beside = T, main = "otus", ylim = c(0,100))
+# barplot(stacked.data.reads[ ,4:7], legend =T, ylim = c(0,100), border = NA, main = "reads")
+# barplot(stacked.data.otus[ ,4:7], legend =T, ylim = c(0,100), border = NA, main = "otus")
+# 
+# 
+# plot.num.classified(FWTable = otus.named.gg, GGTable = otus.named.gg, Reads = FALSE, FolderPath = path.to.plots.folder)
+# plot.num.classified(FWTable = reads.named.fw, GGTable = reads.named.gg, Reads = TRUE, FolderPath = path.to.plots.folder)
+# 
 
 
 

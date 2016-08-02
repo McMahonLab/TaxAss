@@ -930,7 +930,7 @@ p-value cutoffs applied.  These files are both generated in step 15.
 
 Full Command (Type into terminal):
 
-Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID.csv plots
+Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID.csv plots final.taxonomy.names final.general.names
 
 What the arguments are:
 	final.taxonomy.pvalues			a file of p-values corresponding to the final taxonomy file you
@@ -946,6 +946,10 @@ What the arguments are:
 									working directory.
 	plots							the name of the folder that plots are saved into.  you created this
 									folder in step 6.
+	final.taxonomy.names			**add description!
+	final.general.names				**add description!
+
+**Include the files that are generated! listed in the script too.
 
 15.5.b. Plot folly of using custom database alone
 

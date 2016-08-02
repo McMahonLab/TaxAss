@@ -4,22 +4,31 @@
 
 # $ Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID plots
 
+# This script generates the following files, all within the specified folder. names are hard-coded:
+#   WorkflowImprovement-OTUsClassified.png
+#   WorkflowImprovement-ReadsClassified.png
+#   WorkflowImprovement-BesideData-OTUs.csv
+#   WorkflowImprovement-BesideData-Reads.csv
+#   WorkflowImprovement-StackedData-OTUs.csv
+#   WorkflowImprovement-StackedData-Reads.csv
 
 # ---- Accept arguments from the command line: ----
 
-# userprefs <- commandArgs(trailingOnly = TRUE)
-# 
-# taxonomy.pvalues.path <- userprefs[1]
-# gg.pvalues.path <- userprefs[2]
-# reads.table.path <- userprefs[3]
-# path.to.plots.folder <- userprefs[4]
+userprefs <- commandArgs(trailingOnly = TRUE)
 
-taxonomy.pvalues.path <- "../../take18playwith/final.taxonomy.pvalues"
-gg.pvalues.path <- "../../take18playwith/final.general.pvalues"
-reads.table.path <- "../../take18playwith/total.reads.per.seqID.csv"
-path.to.plots.folder <- "../../take18playwith/plots"
-taxonomy.names.path <- "../../take18playwith/final.taxonomy.names"
-gg.names.path <- "../../take18playwith/final.general.names"
+taxonomy.pvalues.path <- userprefs[1]
+gg.pvalues.path <- userprefs[2]
+reads.table.path <- userprefs[3]
+path.to.plots.folder <- userprefs[4]
+taxonomy.names.path <- userprefs[5]
+gg.names.path <- userprefs[6]
+  
+# taxonomy.pvalues.path <- "../../take18playwith/final.taxonomy.pvalues"
+# gg.pvalues.path <- "../../take18playwith/final.general.pvalues"
+# reads.table.path <- "../../take18playwith/total.reads.per.seqID.csv"
+# path.to.plots.folder <- "../../take18playwith/plots"
+# taxonomy.names.path <- "../../take18playwith/final.taxonomy.names"
+# gg.names.path <- "../../take18playwith/final.general.names"
 
 
 # ---- Define functions to import and format data ----
@@ -77,7 +86,6 @@ order.by.seqID.and.combine.tables <- function(ReadsTable, PvaluesTable){
   
   return(pvals.with.reads)
 }
-
 
 
 # ---- Define functions to manipulate the data ----
@@ -194,6 +202,7 @@ check.numbers.add.up <- function(StackedData, BesideData){
   cat("check sums of stacked match workflow bar of beside: ", checker)
 }
 
+
 # Define functions to plot the data ----
 
 # original "besides"-only plot
@@ -238,13 +247,18 @@ plot.num.classified <- function(GGTable, FWTable, Reads = TRUE, FolderPath, Trib
 
 # the fancy barplot has both the total classified by general and workflow as bars beside each other,
 # but the total classified by the workflow is further split into a stacked chart of the type of classification
-fancy.barplot <- function(BesideData, StackedData, BarSpacing){
+fancy.barplot <- function(BesideData, StackedData, BarSpacing, DataType, FolderPath){
   y <- BesideData
   z <- StackedData
   bar.space.y <- BarSpacing
   bar.width <- 1  # spacing and axis limits will determine what width 1 looks like, no need to change
   col.y <- "grey"
   col.z <- c("grey", "orange", "red")
+  y.axis.label <- paste(DataType, "Classified (%)")
+  beside.legend <- c("Left Bars- Greegenes", "Right Bars- Workflow")
+  stacked.legend <- c("Unchanged", "Re-Classified","Newly-Classified")
+  title.label <- "Classification Improvement"
+  file.name <- paste(FolderPath, "/WorkflowImprovement-", DataType, "Classified.png", sep = "")
   
   # find all values from the basic "beside" plot:
   num.sections <- ncol(y)
@@ -259,14 +273,20 @@ fancy.barplot <- function(BesideData, StackedData, BarSpacing){
   loc.labels <- bar.spots[seq(from = 1, to = length(bar.spots), by = 2)] + .5 * bar.width + .5 * bar.space.y[1]
   
   # make plots
+  png(filename = file.name, width = 8, height = 6, units = "in", res = 100)
   barplot(y[1, ], col = col.y, border = "black", beside = FALSE, width = bar.width, space = bar.space.beside, xlim = c(0, tot.x), ylim = c(0, 100), names.arg = empty.labels)
   barplot(z, add = TRUE, col = col.z, border = "black", beside = FALSE, width = bar.width, space = bar.space.stacked, xlim = c(0, tot.x), ylim = c(0, 100), names.arg = empty.labels, axes = FALSE)           
   mtext(text = colnames(z), side = 1, line = 1, at = loc.labels)
+  mtext(text = y.axis.label, side = 2, line = 2.2, cex = 1.5)
+  mtext(text = beside.legend, side = 1, line = 3, col = col.y, at = c(1, 18), cex = 1.5, adj = c(0,1))
+  mtext(text = stacked.legend, side = 3, line = c(0, -1.5, -3), at = 14, cex = 1.5, col = col.z, adj = 0)
+  mtext(text = title.label, side = 3, line = 1.5, cex = 1.5, at = 3, adj = 0)
+  unnecessary.message <- dev.off()
 }
 
 # these are .csv files of the data used to make the plots.
-export.summary.table <- function(Summary, FilePath, PlotType, DataType){
-  file.name <- paste(FilePath, "/WorkflowImprovement-", PlotType, "Data-", DataType, ".csv", sep = "")
+export.summary.table <- function(Summary, FolderPath, PlotType, DataType){
+  file.name <- paste(FolderPath, "/WorkflowImprovement-", PlotType, "Data-", DataType, ".csv", sep = "")
   write.csv(x = Summary, file = file.name, quote = FALSE)
 }
 
@@ -312,16 +332,16 @@ check.numbers.add.up(StackedData = stacked.data.otus, BesideData = beside.data.o
 check.numbers.add.up(StackedData = stacked.data.reads, BesideData = beside.data.reads)
 
 # Generate the Plot!
-
-fancy.barplot(BesideData = beside.data.otus[ ,-c(1,7)], StackedData = stacked.data.otus[ ,-c(1,7)], BarSpacing = c(0,1))
-fancy.barplot(BesideData = beside.data.reads[ ,-c(1,7)], StackedData = stacked.data.reads[ ,-c(1,7)], BarSpacing = c(0,1))
+excluded.taxa <- c(1)
+fancy.barplot(BesideData = beside.data.otus[ ,-excluded.taxa], StackedData = stacked.data.otus[ ,-excluded.taxa], BarSpacing = c(0,1), DataType = "OTUs", FolderPath = path.to.plots.folder)
+fancy.barplot(BesideData = beside.data.reads[ ,-excluded.taxa], StackedData = stacked.data.reads[ ,-excluded.taxa], BarSpacing = c(0,1), DataType = "Reads", FolderPath = path.to.plots.folder)
 
 # Export the Data!
 
-export.summary.table(Summary = beside.data.otus, FilePath = path.to.plots.folder, PlotType = "Beside", DataType = "OTUs")
-export.summary.table(Summary = beside.data.reads, FilePath = path.to.plots.folder, PlotType = "Beside", DataType = "Reads")
-export.summary.table(Summary = stacked.data.otus, FilePath = path.to.plots.folder, PlotType = "Stacked", DataType = "OTUs")
-export.summary.table(Summary = stacked.data.reads, FilePath = path.to.plots.folder, PlotType = "Stacked", DataType = "Reads")
+export.summary.table(Summary = beside.data.otus, FolderPath = path.to.plots.folder, PlotType = "Beside", DataType = "OTUs")
+export.summary.table(Summary = beside.data.reads, FolderPath = path.to.plots.folder, PlotType = "Beside", DataType = "Reads")
+export.summary.table(Summary = stacked.data.otus, FolderPath = path.to.plots.folder, PlotType = "Stacked", DataType = "OTUs")
+export.summary.table(Summary = stacked.data.reads, FolderPath = path.to.plots.folder, PlotType = "Stacked", DataType = "Reads")
 
 
 # Check the fancy plot by looking at the simple component plots

@@ -264,6 +264,12 @@ fancy.barplot <- function(BesideData, StackedData, BarSpacing){
   mtext(text = colnames(z), side = 1, line = 1, at = loc.labels)
 }
 
+# these are .csv files of the data used to make the plots.
+export.summary.table <- function(Summary, FilePath, PlotType, DataType){
+  file.name <- paste(FilePath, "/WorkflowImprovement-", PlotType, "Data-", DataType, ".csv", sep = "")
+  write.csv(x = Summary, file = file.name, quote = FALSE)
+}
+
 
 # ---- Use functions! ----
 
@@ -310,16 +316,28 @@ check.numbers.add.up(StackedData = stacked.data.reads, BesideData = beside.data.
 fancy.barplot(BesideData = beside.data.otus[ ,-c(1,7)], StackedData = stacked.data.otus[ ,-c(1,7)], BarSpacing = c(0,1))
 fancy.barplot(BesideData = beside.data.reads[ ,-c(1,7)], StackedData = stacked.data.reads[ ,-c(1,7)], BarSpacing = c(0,1))
 
+# Export the Data!
+
+export.summary.table(Summary = beside.data.otus, FilePath = path.to.plots.folder, PlotType = "Beside", DataType = "OTUs")
+export.summary.table(Summary = beside.data.reads, FilePath = path.to.plots.folder, PlotType = "Beside", DataType = "Reads")
+export.summary.table(Summary = stacked.data.otus, FilePath = path.to.plots.folder, PlotType = "Stacked", DataType = "OTUs")
+export.summary.table(Summary = stacked.data.reads, FilePath = path.to.plots.folder, PlotType = "Stacked", DataType = "Reads")
+
+
+# Check the fancy plot by looking at the simple component plots
+
 # par(mfrow = c(2,2))
 # barplot(beside.data.reads, beside = T, main = "reads", ylim = c(0,100))
 # barplot(beside.data.otus, beside = T, main = "otus", ylim = c(0,100))
 # barplot(stacked.data.reads[ ,4:7], legend =T, ylim = c(0,100), border = NA, main = "reads")
 # barplot(stacked.data.otus[ ,4:7], legend =T, ylim = c(0,100), border = NA, main = "otus")
-# 
-# 
+
+
+# Legacy plot- the original simple "beside-only" barplot showing improvement.
+
 # plot.num.classified(FWTable = otus.named.gg, GGTable = otus.named.gg, Reads = FALSE, FolderPath = path.to.plots.folder)
 # plot.num.classified(FWTable = reads.named.fw, GGTable = reads.named.gg, Reads = TRUE, FolderPath = path.to.plots.folder)
-# 
+
 
 
 

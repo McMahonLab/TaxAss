@@ -83,9 +83,6 @@ reorganize.ecosystem.list.by.taxa.level <- function(EcoList, TaxaList){
 }
 
 
-
-
-
 # ---- Define Functions to Plot Data ----
 
 # This is modified from fancy.barplot() in plot_classification_improvement.R (workflow step 15).
@@ -115,6 +112,7 @@ fancy.barplot <- function(BesideData, StackedData, BarSpacing = c(0,1), YaxisMax
   return(loc.labels)
 }
 
+# ---- left over from inside of fancy.barplot ----
 y.axis.label <- paste(DataType, "Classified (%)")
 beside.legend <- c("Left Bars- Greegenes", "Right Bars- Workflow")
 stacked.legend <- c("Unchanged", "Re-Classified","Newly-Classified")

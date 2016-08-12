@@ -257,7 +257,11 @@ II. Your OTU files:
 
 	2. .abund file:
 		- this is the table of relative abundances for each OTU in each sample, 
-		 aka your OTU table.
+		 aka your OTU table. Note: it needs to be relative abundance not raw counts.
+		 That means you could either have subsampled, or have divided all abundances
+		 by the total reads in all your samples.  In other words, it must be relativized
+		 by sample so that each sample has the same total reads. This is important for the
+		 plot in step 14 that helps you choose an appropriate pident cutoff.
 		 
 		-format is tab delimited, seqIDs in 1st column, abundances in rest of columns, with headers (aka colnames):
 			colname	colname		colname		colname		colname

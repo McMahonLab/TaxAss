@@ -28,9 +28,9 @@ if (length(userprefs) > 3){
   mirror.location <- "https://cran.mtu.edu"
 }
 
-# blast.file.path <- "../../take13/otus.custom.blast.table.modified"
+# blast.file.path <- "../../take19/otus.custom.blast.table.modified"
 # pident.cutoff <- 98
-# plots.folder.path <- "~/Desktop/test"
+# plots.folder.path <- "../../take19/plots"
 # mirror.location <- "https://cran.mtu.edu"
 
 # ####
@@ -77,11 +77,10 @@ reformat.fract.ids.vs.hit.num <- function(BlastTable){
   blast <- BlastTable
   
   # Only look at seqID and hit.num
-  blast <- blast[,c(1,7)]
-  blast <- apply(X = blast, MARGIN = 2, FUN = as.numeric)
+  blast <- blast[ ,c(1,7)]
+  blast[ ,2] <- as.numeric(blast[ ,2])
   
   # Use the reshape package to rearrange your data tables
-  blast <- as.data.frame(blast)
   # id is hit.num because that is the category we're arranging by
   # measured is qseqid because that is the variable we're applying the aggregate funciton to- what's the total #?
   blast.melted <- melt(data = blast, id.vars = "hit.num", measure.vars = "qseqid")

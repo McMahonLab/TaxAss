@@ -54,6 +54,7 @@ reformat.for.workflow <- function(OTUs){
   # rows = OTUs, cols = samples, col 1 = seqIDs
   otu.table <- t(OTUs)
   otu.table <- cbind(row.names(otu.table), otu.table)
+  colnames(otu.table)[1] <- "seqID"
   return(otu.table)
 }
 

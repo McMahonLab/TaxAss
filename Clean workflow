@@ -14,6 +14,8 @@ Summary of Steps and Commands (all commands entered in terminal window):
 		sed 's/$/;/' <NoSpaces >EndLineSemicolons
 		mv EndLineSemicolons general.taxonomy
 		rm NoSpaces
+	for mothur .count_table as OTU table:
+		Rscript reformat_mothur_OTU_tables.R StupidLongMothurName.count_table count_table otus.abund
 
 NOTE: steps 1-14 can be run in a block using the bash script LazyRun.sh.  to source type in the terminal:
 	./LazyRun.sh
@@ -57,7 +59,10 @@ NOTE: steps 1-14 can be run in a block using the bash script LazyRun.sh.  to sou
 	mothur "#classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
 	cat otus.general.wang.taxonomy > otus.general.taxonomy
 
-11.5 OPTIONAL database improvement check, see database improvement workflow step 11.5
+11.5 OPTIONAL- feeds into Database_Improvement_Workflow
+	assign taxonomy to custom database with general database (mothur, bash)
+	mothur "#classify.seqs(fasta=custom.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
+	cat custom.general.wang.taxonomy custom.general.taxonomy
 
 12. reformat taxonomy files (bash)
 	sed 's/[[:blank:]]/\;/' <otus.98.taxonomy >otus.98.taxonomy.reformatted
@@ -75,17 +80,19 @@ NOTE: steps 1-14 can be run in a block using the bash script LazyRun.sh.  to sou
 15. generate final taxonomy file (R)
 	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 final
 
-16. OPTIONAL: plot benefits of using this workflow (R)
-	Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID.csv plots
-	mothur "#classify.seqs(fasta=otus.fasta, template=custom.fasta, taxonomy=custom.taxonomy, method=wang, probs=T, processors=2)"
-	cat otus.custom.wang.taxonomy > otus.custom.taxonomy
-	sed 's/[[:blank:]]/\;/' <otus.custom.taxonomy >otus.custom.taxonomy.reformatted
-	mv otus.custom.taxonomy.reformatted otus.custom.taxonomy
-	mkdir conflicts_forcing
-	Rscript find_classification_disagreements.R otus.custom.taxonomy otus.98.85.70.taxonomy ids.above.98 conflicts_forcing NA 85 70 forcing
-	Rscript plot_classification_disagreements.R NA plots conflicts_forcing otus.custom.85.taxonomy
+15.5 OPTIONAL: plot benefits of using this workflow (R, mothur, bash)
+	Improvement over general database only:
+		Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID.csv plots
+	Improvement over custom database only:
+		mothur "#classify.seqs(fasta=otus.fasta, template=custom.fasta, taxonomy=custom.taxonomy, method=wang, probs=T, processors=2)"
+		cat otus.custom.wang.taxonomy > otus.custom.taxonomy
+		sed 's/[[:blank:]]/\;/' <otus.custom.taxonomy >otus.custom.taxonomy.reformatted
+		mv otus.custom.taxonomy.reformatted otus.custom.taxonomy
+		mkdir conflicts_forcing
+		Rscript find_classification_disagreements.R otus.custom.taxonomy otus.98.85.70.taxonomy ids.above.98 conflicts_forcing NA 85 70 forcing
+		Rscript plot_classification_disagreements.R NA plots conflicts_forcing otus.custom.85.taxonomy
 
-17. tidy up (bash)
+16. tidy up (bash)
 	rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otus.custom.taxonomy custom.general* otus.custom.[0-9]* *pvalues total*
 	mkdir scripts ; mv *.py *.R *.sh scripts
 	mkdir analysis ; mv conflicts* plots analysis
@@ -291,7 +298,7 @@ Full Command (type in terminal):
 		
 Rscript reformat_mothur_OTU_tables.R StupidLongMothurName.count_table count_table otus.abund
 		
-	What each argument is:
+What each argument is:
 	Rscript								Signal you're sourcing an R script with arguments
 	reformat_mothur_OTU_tables.R		Name of R script to run
 	StupidLongMothurName.count_table	name of the mothur file you're starting with
@@ -299,7 +306,7 @@ Rscript reformat_mothur_OTU_tables.R StupidLongMothurName.count_table count_tabl
 										options: count_table or shared
 	otus.abund							name of the OTU table you feed into this workflow
 		
-	more notes on the mothur file types:
+More notes on the mothur file types:
 	.count_table		use if you are not clustering sequences, just cleaning sequencing errors
 	.shared				use if you clustered sequences
 	In other words, whatever your last OTU-esque table is prior to assigning taxonomy.
@@ -708,20 +715,22 @@ ________________________________________________________________________________
 
 11.5 assign taxonomy to custom database with general database (mothur, bash)
 
-This allows you to compare your two databases to get an idea of the baseline level of 
-disagreement you can expect from their taxonomy classifications.  Also, in step 13 you
-will generate a list of these disagreements that you can use to update your custom
-database classifications to better match your general database, if desired.  When you 
-choose an appropriate pident cutoff the goal is to avoid forcing OTUs into the custom
-database, which can be seen when the general database gives a very different 
-classification. Knowing the level of disagreement between the databases themselves can
-give you an idea of how much disagreement is acceptable.
+This is used in the Database_Improvement_Workflow.txt in the arb-scripts folder. 
+It's basically pointless to do if you're not working on the quality of the custom database.
+
+By classifying the custom database with the general database you can:
+	- Compare your two databases to get an idea of the baseline level of disagreement you 
+	  can expect from their taxonomy classifications.  This was not super helpful so you can't
+	  do it from the command line anymore, you have to open up step 14's 
+	  plot_classification_disagreements.R and uncomment out that part to do it manually.
+	- Generate a list of database disagreements that you can use to update your custom
+	  database classifications to better match your general database using the .csv files
+	  generated in step 12. 
 
 Full Two Commands (Type in Terminal):
 
 mothur "#classify.seqs(fasta=custom.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
 cat custom.general.wang.taxonomy custom.general.taxonomy
-
 
 What the commands do:
 	See step 9 for a detailed explanation of these two commands and their arguments.
@@ -748,7 +757,7 @@ Reformat both files you will compare:
 Find: tab
 Replace: semicolon
 
-Full Seven Commands (Type in Terminal):
+Full Four Commands (Type in Terminal):
 
 sed 's/[[:blank:]]/\;/' <otus.98.taxonomy >otus.98.taxonomy.reformatted
 mv otus.98.taxonomy.reformatted otus.98.taxonomy

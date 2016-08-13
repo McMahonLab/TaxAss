@@ -164,17 +164,19 @@ ________________________________________________________________________________
 0. format files (textwrangler or bash)
 
 These are the files you supply as input into the workflow:
-	custom.fasta		fasta sequences in your small, specific taxonomy database
-	custom.taxonomy		taxonomy names in your small, specific taxonomy database
-	general.fasta		fasta sequences in your large, general taxonomy database
-	general.taxonomy	taxonomy names in your large, general taxonomy database
-	otus.fasta			fasta sequences for each of your OTUs
+	custom.fasta		fasta sequences in your small, ecosystem-specific taxonomy database
+	custom.taxonomy		taxonomy names in your small, ecosystem-specific taxonomy database
+	general.fasta		fasta sequences in your large, general comrpehensive taxonomy database
+	general.taxonomy	taxonomy names in your large, general comprehensive taxonomy database
+	otus.fasta			fasta sequences for each of your OTUs (OTUs can be clustered or unique sequences)
 	otus.abund			relative abundance of each OTU (i.e. the OTU table)
 
 I recommend you move all of these files into a new folder that also contains the workflow scripts, 
 and rename them to match the above names so that you can copy and paste commands from this workflow.
 Also put the script files in this workflow into that same folder.
 Then make that folder your working directory for the entirety of this workflow.
+
+_____________________________________________
 
 I. General notes on the seqIDs in all files:
 
@@ -187,108 +189,125 @@ OTU seqID's:
 			 though consistent ordering is not necessary.
 
 
+_____________________________________________
+
 II. Taxonomy Database Files:
 
-	1. .taxonomy files: 
-		-must be compatible with mothur, example format:
-		
-			seqID tab kingdom;phylum;class;order;family;genus;species;
-		
-		-no whitespace except for the tab between seqID and taxonomy
-		-taxonomy level names separated by semicolons
-		-must have a semicolon at the end of each line, too!
-		
-		-If you are using the Green Genes taxonomy database, you can reformat it this way: 
+______________________
 
-	Full 4 Commands (type in terminal) when general.taxonomy is the green genes taxonomy file:
+1. .taxonomy files: 
 
-	sed 's/ //g' <general.taxonomy >NoSpaces
-	sed 's/$/;/' <NoSpaces >EndLineSemicolons
-	mv EndLineSemicolons general.taxonomy
-	rm NoSpaces
+Must be compatible with mothur, example format:
+		
+seqID	kingdom;phylum;class;order;family;genus;species;
+		
+	-no whitespace except for the tab between seqID and taxonomy
+	-taxonomy level names separated by semicolons
+	-must have a semicolon at the end of each line, too!
 
-			Syntax of commands and what each argument does:
-				sed 's/find/replace/ <input >output
-					sed		is a "stream editor," a function for editing streams of text in the terminal
-					s		tells it you are doing a substitution
-							in the first sed command that was simply a typed space
-							in the second sed command the $ means 'end of line'
-					replace	this is what you are replacing with
-							in the first sed command it was left blank, to simply remove spaces
-							in the second sed command it is a semicolon
-					g		this means "global" find/replace all occurances, not just the first per line
-					input	this is the file sed searches through, here it is general.taxonomy (if that is green genes!)
-					output	this is the file sed creates (note it must have a different name than input)
+___________		
+
+The Green Genes taxonomy database can be reformatted this way: 
+
+Full 4 Commands (type in terminal) when general.taxonomy is the green genes taxonomy file:
+
+sed 's/ //g' <general.taxonomy >NoSpaces
+sed 's/$/;/' <NoSpaces >EndLineSemicolons
+mv EndLineSemicolons general.taxonomy
+rm NoSpaces
+
+Syntax of commands and what each argument does:
+	sed 's/find/replace/ <input >output
+		sed		is a "stream editor," a function for editing streams of text in the terminal
+		s		tells it you are doing a substitution
+				in the first sed command that was simply a typed space
+				in the second sed command the $ means 'end of line'
+		replace	this is what you are replacing with
+				in the first sed command it was left blank, to simply remove spaces
+				in the second sed command it is a semicolon
+		g		this means "global" find/replace all occurances, not just the first per line
+		input	this is the file sed searches through, here it is general.taxonomy (if that is green genes!)
+		output	this is the file sed creates (note it must have a different name than input)
 	
-				mv filename1 filename2
-					mv		this is a function to move (aka rename) a file from name1 to name2
-							simply keeping the edited file the same name  
-				rm filename
-					rm		this removes (aka deletes) the file named filename
+	mv filename1 filename2
+		mv		this is a function to move (aka rename) a file from name1 to name2
+				simply keeping the edited file the same name  
+	rm filename
+		rm		this removes (aka deletes) the file named filename
 		
+___________
 
-			-If you are using the Silva database... ***add formatting advice***
+The Silva database... ***add formatting advice***
 			*************
 
-	2. .fasta files:
-		-these should be in fasta format (note the carrot before the seqID, a new line 
-		separateing seqID from sequence, sequence can be one line or multiple lines.)
+______________________
+
+2. .fasta files:
+
+These should be in fasta format (note the carrot before the seqID, a new line separateing 
+seqID from sequence, sequence can be one line or multiple lines.) example format:
 		
-		>seqID
-		TACGTAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAG
-		>seqID
-		TACGTAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAG
+>seqID
+TACGTAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAG
+>seqID
+TACGTAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAG
 		
+
+_____________________________________________
+
 II. Your OTU files:
-		-QC of your OTU sequences should be performed before you start assigning taxonomy.
-		 if you start using mothur, and start this workflow right before the first classify.seqs() command
-		 if you start using qiime ****where do you start there??**
+	- QC of your OTU sequences should be performed before you start this workflow.
 
-	1. .fasta file:
-		- same format as the taxonomy database fasta files, above.
-		
-		- if you're using mothur, this file is called:
-		stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.fasta
-		
-		- if you're using qiime, this file is called:
-		*****look up qiime***
-		
-		to format the mothur file:
+______________________
 
-	2. .abund file:
-		- this is the table of relative abundances for each OTU in each sample, 
-		 aka your OTU table. Note: it needs to be relative abundance not raw counts.
-		 That means you could either have subsampled, or have divided all abundances
-		 by the total reads in all your samples.  In other words, it must be relativized
-		 by sample so that each sample has the same total reads. This is important for the
-		 plot in step 14 that helps you choose an appropriate pident cutoff.
-		 
-		-format is tab delimited, seqIDs in 1st column, abundances in rest of columns, with headers (aka colnames):
-			colname	colname		colname		colname		colname
-			seqID	Abundance	Abundance	Abundance	Abundance
-			seqID	Abundance	Abundance	Abundance	Abundance
-			seqID	Abundance	Abundance	Abundance	Abundance
+1. .fasta file:
+
+Same format as the taxonomy database fasta files, above.
+
+______________________
+
+2. .abund file:
+
+This is the table of relative abundances for each OTU in each sample, aka your OTU table. 
+
+	- It needs to be in relative abundance not raw counts.
+	 That means you could either have subsampled during QC, or have divided all abundances
+	 in a given sample by the total reads in that samples.  In other words, it must be 
+	 relativized by sample so that each sample has the same total reads. This is important 
+	 for the plot in step 14 that helps you choose an appropriate pident cutoff.
+	 
+	- Format is tab delimited, seqIDs in 1st column, abundances in rest of columns, with headers (aka colnames):
+
+colname	colname		colname		colname		colname
+seqID	Abundance	Abundance	Abundance	Abundance
+seqID	Abundance	Abundance	Abundance	Abundance
+seqID	Abundance	Abundance	Abundance	Abundance
 		
+___________
 		
-		- If you're using mothur, the file extension you want is:
-		.count_table	if you are not clustering sequences, just cleaning sequencing errors
-		.shared			if you are clustering sequences
+If mothur was used for QC, reformat file using the R script reformat_mothur_OTU_tables.R:
 		
-		convert their format using the R script reformat_mothur_OTU_tables.R:
+Full Command (type in terminal):
 		
-		Full Command (type in terminal):
+Rscript reformat_mothur_OTU_tables.R StupidLongMothurName.count_table count_table otus.abund
 		
-		Rscript reformat_mothur_OTU_tables.R StupidLongMothurName.count_table count_table otus.abund
+	What each argument is:
+	Rscript								Signal you're sourcing an R script with arguments
+	reformat_mothur_OTU_tables.R		Name of R script to run
+	StupidLongMothurName.count_table	name of the mothur file you're starting with
+	count_table							type of mothur file, as specified by it's extension
+										options: count_table or shared
+	otus.abund							name of the OTU table you feed into this workflow
 		
-		What each argument is:
-		Rscript								Signal you're sourcing an R script with arguments
-		reformat_mothur_OTU_tables.R		Name of R script to run
-		StupidLongMothurName.count_table	name of the mothur file you're starting with
-		count_table							type of mothur file, as specified by it's extension
-											options: count_table or shared
-		otus.abund							name of the OTU table you feed into this workflow
-		
-		-If you're using qiime, this file is called:
+	more notes on the mothur file types:
+	.count_table		use if you are not clustering sequences, just cleaning sequencing errors
+	.shared				use if you clustered sequences
+	In other words, whatever your last OTU-esque table is prior to assigning taxonomy.
+	Note that the .abund file is a non-table-y space-saving format that you can't use here.
+			
+___________
+
+If qiime, this file is called:
 		****check on this***
 		
 		

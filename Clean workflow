@@ -270,8 +270,23 @@ II. Your OTU files:
 			seqID	Abundance	Abundance	Abundance	Abundance
 		
 		
-		- If you're using mothur, this file is called:
-		***fill this in!!!***
+		- If you're using mothur, the file extension you want is:
+		.count_table	if you are not clustering sequences, just cleaning sequencing errors
+		.shared			if you are clustering sequences
+		
+		convert their format using the R script reformat_mothur_OTU_tables.R:
+		
+		Full Command (type in terminal):
+		
+		Rscript reformat_mothur_OTU_tables.R StupidLongMothurName.count_table count_table otus.abund
+		
+		What each argument is:
+		Rscript								Signal you're sourcing an R script with arguments
+		reformat_mothur_OTU_tables.R		Name of R script to run
+		StupidLongMothurName.count_table	name of the mothur file you're starting with
+		count_table							type of mothur file, as specified by it's extension
+											options: count_table or shared
+		otus.abund							name of the OTU table you feed into this workflow
 		
 		-If you're using qiime, this file is called:
 		****check on this***
@@ -483,7 +498,9 @@ What each generated file is:
 	BLAST_hits_used_for_pidents_70-100.png
 	BLAST_hits_used_for_pidents_90-100.png
 	BLAST_hits_used_overall.png
-	
+
+note: if there is a tie where two hits are equally good at 5th place, I think BLAST will report both
+and label one of them hit # 6.  So if you have an extra hit number, it doesn't mean there's a problem.
 ****Choose which plots to keep*****
 __________________________________________________________________________________________
 
@@ -595,7 +612,7 @@ What each flag does:
 				note: the default is no cutoff, full reporting.  I have an R script that
 				let's you apply a bootstrap cutoff after the fact if you want to see everything 1st
 	processors=	the number of processors on your computer to run it on
-				note: this did not work on my mac, still ran on only 1 core.
+				note: I think mothur has a bug where this only works on windows. 
 
 What the output files are (note you have no control over the name extensions added):
 	otus.above.98.custom.wang.taxonomy

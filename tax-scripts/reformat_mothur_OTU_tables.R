@@ -1,10 +1,10 @@
-# ---- Convert mothur output into Workflow-compatible OTU table (Step 0) ----
+# ---- Convert mothur output into a Workflow-compatible OTU table (Step 0) ----
 
 # Script written by Ben Peterson, edited by Robin Rohwer
 
 # Q: What are all these f****** mothur formats???  
 
-# a count_table made early on, and is used if you do not go on to clustering steps.
+# A: a count_table is made early on, and is used if you do not go on to clustering steps.
 # it is tab delimited, with column names. 
 # rows are seqIDs, columns are samples, except col 1 = the seqID and col 2 = the total (summed) for each seqID
 # the values are raw sequencing counts.
@@ -17,13 +17,20 @@
 # Never fear, these will be added in as row names! 
 # Third column is the total number of OTUs
 
-# ---- Define File Paths ----
+# Syntax in Command Line:
 
-path.to.mothur.file <- "~/Desktop/TaxonomyTrainingSets/BLASTing/StartFiles19/danube-10.count_table"
+# Rscript StupidLongMothurName.count_table count_table otus.abund
 
-path.to.output.file <- "~/Desktop/TaxonomyTrainingSets/BLASTing/StartFiles19/danube-10.otus"
+# ---- Accept Arguments from Terminal Command Line ----
 
-mothur.extension <- "count_table" # because I think..... several ones will work??? clearly .shared worked for ben!
+userprefs <- commandArgs(trailingOnly = TRUE)
+path.to.mothur.file <- userprefs[1] 
+mothur.extension <- userprefs[2]
+path.to.output.file <- userprefs[3]
+
+# path.to.mothur.file <- "~/Desktop/TaxonomyTrainingSets/BLASTing/StartFiles19/danube-10.count_table"
+# mothur.extension <- "count_table" # because I think..... several ones will work??? clearly .shared worked for ben!
+# path.to.output.file <- "~/Desktop/TaxonomyTrainingSets/BLASTing/StartFiles19/danube-10.otus"
 
 # ---- Define Functions ----
 

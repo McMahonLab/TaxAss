@@ -49,7 +49,7 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                80,
 #                70,
 #                "final")
-# # DATABASE COMPARISON: note you have to do step 11.5 to generate the files you need for this
+# # DATABASE COMPARISON: part of optional step 11.5 
 # userprefs <- c("../../take17/custom.custom.taxonomy",
 #                "../../take17/custom.general.taxonomy",
 #                "NA",
@@ -58,11 +58,11 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                NA,
 #                70,
 #                "database")
-# # FORCING ANALYSIS: note this isn't in the workflow, but it shows how much forcing you'd get from using FW alone
-# userprefs <- c("../../take17/otus.custom.taxonomy",
-#                "../../take17/otus.99.80.70.taxonomy",
-#                "../../take17/ids.above.99",
-#                "../../take17/conflicts_forcing/",
+# # # FORCING ANALYSIS: part of optional step 15.5
+# userprefs <- c("../../take18playwith/otus.custom.taxonomy",
+#                "../../take18playwith/otus.98.80.70.taxonomy",
+#                "../../take18playwith/ids.above.98",
+#                "../../take18playwith/conflicts_forcing/",
 #                NA,
 #                80,
 #                70,
@@ -370,8 +370,8 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
 # Set up a summary vector to fill
 create.summary.vector <- function(Forcing = FALSE){
   if(Forcing == TRUE){
-    num.mismatches <- vector(mode = "numeric", length = 6)
-    names(num.mismatches) <- c("kingdom","phylum","class","order","lineage","clade")
+    num.mismatches <- vector(mode = "numeric", length = 7)
+    names(num.mismatches) <- c("kingdom","phylum","class","order","lineage","clade","tribe")
   }else{
     num.mismatches <- vector(mode = "numeric", length = 5)
     names(num.mismatches) <- c("kingdom","phylum","class","order","lineage")
@@ -533,7 +533,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   # Files written in find.conflicting.names() loop: the "TaxaLevel_conflicts.csv" that puts taxonomy tables side by side
   # File written afer loop: the "conflicts_summary.csv" that lists how many conflicts were at each level, and how many seqs were classified by FW
   num.mismatches <- create.summary.vector(Forcing = TRUE)
-  for (t in 1:6){
+  for (t in 1:7){
     num.mismatches <- find.conflicting.names(FWtable = fw.gg.only, GGtable = gg.gg.only,
                                              FWtable_percents = fw.percents.gg.only,
                                              GGtable_percents = gg.percents.gg.only, 

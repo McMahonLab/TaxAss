@@ -15,15 +15,13 @@
 pident=("100" "99" "98" "97" "96" "95")
 
 
-# Next Run steps 4-9 and 11-12 with different pident cutoffs
+# Next Run steps 5, 7-10, & 12-13 with different pident cutoffs
 # Define a function called runagain since you repeat this part many times in paralelle
 
 runagain () {
    # 5
    Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.above.$1 $1 TRUE 
    Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.below.$1 $1 FALSE
-   # 6 b
-   RScript plot_blast_hit_stats.R otus.custom.blast.table.modified $1 plots
    # 7 b
    cat ids.below.$1 ids.missing > ids.below.$1.all
    # 8
@@ -58,7 +56,7 @@ wait
 # Next run step 14- plotting everything together to choose final pident
 
 
-printf 'Steps 1-13 have finished running for the rest of the pidents. Next run step 15 to choose your cutoff. \n \a'
+printf 'Steps 1-13 have finished running for the rest of the pidents. Next run step 14 to choose your cutoff. \n \a'
 sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; 
 
 exit 0

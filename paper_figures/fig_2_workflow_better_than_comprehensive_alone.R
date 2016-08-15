@@ -24,8 +24,8 @@ bogs.epi.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take18pla
 bogs.hypo.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take18playwith/plots/WorkflowImprovement-BesideData-Reads.csv"
 bogs.hypo.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take18playwith/plots/WorkflowImprovement-StackedData-Reads.csv"
 
-danube.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take18playwith/plots/WorkflowImprovement-BesideData-Reads.csv"
-danube.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take18playwith/plots/WorkflowImprovement-StackedData-Reads.csv"
+danube.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take19/plots/WorkflowImprovement-BesideData-Reads.csv"
+danube.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take19/plots/WorkflowImprovement-StackedData-Reads.csv"
 
 taihu.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take18playwith/plots/WorkflowImprovement-BesideData-Reads.csv"
 taihu.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take18playwith/plots/WorkflowImprovement-StackedData-Reads.csv"

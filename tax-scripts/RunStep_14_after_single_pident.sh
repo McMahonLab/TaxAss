@@ -28,7 +28,7 @@ done
 # 14
 Rscript plot_classification_disagreements.R otus.abund plots regular NA $args_string
 
-printf 'Steps 1-14 have finished running.  Now analysze the plots from step 14 to choose your final pident and generate your final taxonomy file in step 15.  Optionally you can compare to how your taxonomy would have been in step 16. At the end tidy up your working directory with step 17. \n \a'
+printf 'Step 14 has finished running.  Now analysze the plots from step 14 to choose your final pident, then generate your final taxonomy file in step 15.  Optionally you can look at how much better your taxonomy is now in step 15.5. At the end tidy up your working directory and delete large intermediate files with step 16. \n \a'
 sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; 
 
 exit 0

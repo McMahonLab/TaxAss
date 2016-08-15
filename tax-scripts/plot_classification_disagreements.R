@@ -25,29 +25,29 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                "../../take18playwith/conflicts_forcing",
 #                "../../take18playwith/otus.custom.80.taxonomy")
 # 
-# # FOR CHOOSING CUTOFF:
-# userprefs <- c("../../take18playwith/otus.abund",
-#                "../../take18playwith/plots",
-#                "regular",
-#                "regular",
-#                "../../take18playwith/conflicts_95",
-#                "../../take18playwith/ids.above.95",
-#                95,
-#                "../../take18playwith/conflicts_96",
-#                "../../take18playwith/ids.above.96",
-#                96,
-#                "../../take18playwith/conflicts_97",
-#                "../../take18playwith/ids.above.97",
-#                97,
-#                "../../take18playwith/conflicts_98",
-#                "../../take18playwith/ids.above.98",
-#                98,
-#                "../../take18playwith/conflicts_99",
-#                "../../take18playwith/ids.above.99",
-#                99,
-#                "../../take18playwith/conflicts_100",
-#                "../../take18playwith/ids.above.100",
-#                100)
+# FOR CHOOSING CUTOFF:
+userprefs <- c("../../take18playwith/otus.abund",
+               "../../take18playwith/plots",
+               "regular",
+               "regular",
+               "../../take18playwith/conflicts_95",
+               "../../take18playwith/ids.above.95",
+               95,
+               "../../take18playwith/conflicts_96",
+               "../../take18playwith/ids.above.96",
+               96,
+               "../../take18playwith/conflicts_97",
+               "../../take18playwith/ids.above.97",
+               97,
+               "../../take18playwith/conflicts_98",
+               "../../take18playwith/ids.above.98",
+               98,
+               "../../take18playwith/conflicts_99",
+               "../../take18playwith/ids.above.99",
+               99,
+               "../../take18playwith/conflicts_100",
+               "../../take18playwith/ids.above.100",
+               100)
 
 # in case you want to add the db baseline conflict back to the plots, need to specify this path below
 # and un-comment the plotting calls that use it at the end of the script.
@@ -756,25 +756,27 @@ plot.most.misleading.forced.taxa <- function(TopTaxaList, ForcedTaxonomy, Forced
 export.summary.table <- function(SummaryTable, FolderPath, ByOTU = TRUE, Percents = FALSE){
   folder.path <- FolderPath
   sum.table <- SummaryTable
+  
   if (ByOTU == TRUE){
-    file.name <- "conflict_summary_by_OTU.csv"
+    data.type <- "OTUs"
   }else if (ByOTU == FALSE){
-    if (Percents == TRUE){
-      file.name <- "conflict_summary_by_percent_read.csv"
-    }else{
-      file.name <- "conflict_summary_by_read.csv"
-    }
+    data.type <- "reads"
+  }
+  
+  make.percent <- function(x){
+    perc <- x / tot.read
+    return(perc)
   }
   
   if (Percents == TRUE){
     tot.read <- sum.table[nrow(sum.table), 1]
-    make.percent <- function(x){
-      perc <- x / tot.read
-      return(perc)
-    }
     sum.table <- apply(X = sum.table, MARGIN = 2, FUN = make.percent)
+    Percents <- "_percent"
+  }else{
+    Percents <- ""
   }
   
+  file.name <- paste("conflict_summary_by", Percents, "_", data.type, ".csv", sep = "")
   write.csv(x = sum.table, file = paste(FolderPath, "/", file.name, sep = ""), quote = FALSE)
 }
 
@@ -827,7 +829,8 @@ if (forcing.folder.path != "regular"){
   # ####
   
   otu.summaries <- import.all.conflict.summaries(ConflictFolders = pident.folders, PidentsUsed = pident.values)
-  export.summary.table(SummaryTable = otu.summaries, FolderPath = plots.folder.path, ByOTU = TRUE)
+  export.summary.table(SummaryTable = otu.summaries, FolderPath = plots.folder.path, ByOTU = TRUE, Percents = FALSE)
+  export.summary.table(SummaryTable = otu.summaries, FolderPath = plots.folder.path, ByOTU = TRUE, Percents = TRUE)
   
   # I removed this from the terminal command also because it is misleading and confusing and doesn't add to the plot. left a commented out input line for use within RStudio at the top.
   # db.summary <- import.database.conflicts(DatabaseFolder = db.conflicts.folder.path)

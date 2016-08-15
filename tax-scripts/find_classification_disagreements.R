@@ -58,7 +58,7 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                NA,
 #                70,
 #                "database")
-# # # FORCING ANALYSIS: part of optional step 15.5
+# # FORCING ANALYSIS: part of optional step 15.5
 # userprefs <- c("../../take18playwith/otus.custom.taxonomy",
 #                "../../take18playwith/otus.98.80.70.taxonomy",
 #                "../../take18playwith/ids.above.98",

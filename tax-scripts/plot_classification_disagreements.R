@@ -21,10 +21,10 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 
 # # FOR PLOTTING FORCING  **don't forget to change the seqID.reads file path below!!
 # userprefs <- c(NA,
-#                "../../take19/plots",
-#                "../../take19/conflicts_forcing",
-#                "../../take19/otus.custom.85.taxonomy",
-#                "../../take19/otus.98.85.70.taxonomy")
+#                "../../take_mendota_clust/plots",
+#                "../../take_mendota_clust/conflicts_forcing",
+#                "../../take_mendota_clust/otus.custom.80.taxonomy",
+#                "../../take_mendota_clust/otus.98.80.80.taxonomy")
 # 
 # # # FOR CHOOSING CUTOFF:
 # userprefs <- c("../../take18playwith/otus.abund",
@@ -51,7 +51,7 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                "../../take18playwith/ids.above.100",
 #                100)
 # 
-# seqID.reads.file.path <- "../../take18playwith/total.reads.per.seqID.csv"
+# seqID.reads.file.path <- "../../take_mendota_clust/total.reads.per.seqID.csv"
 
 # in case you want to add the db baseline conflict back to the plots, need to specify this path below
 # and un-comment the plotting calls that use it at the end of the script.
@@ -930,7 +930,7 @@ if (forcing.folder.path != "regular"){
   
   grouped.final.taxa <- group.seqIDs.into.taxa(TaxonomyTable = final.taxonomy, ReadsPerSeqID = seqID.reads)
   
-  top.final.taxa <- find.top.taxa.by.total.reads(TaxonomyList = grouped.final.taxa, NumberTopTaxa = 20)
+  top.final.taxa <- find.top.taxa.by.total.reads(TaxonomyList = grouped.final.taxa, NumberTopTaxa = 50)
   
   top.final.taxa <- find.forcing.diffs(TopFinalList = top.final.taxa, AllForcedList = grouped.taxa)
 
@@ -945,7 +945,7 @@ if (forcing.folder.path != "regular"){
                                    ForcedReadsList = forced.seqID.reads, ForcedSeqIDsList = forced.seqIDs, 
                                    ResultsFolder = plots.folder.path, PlottingLevels = 1:7, TotalReads = tot.reads)
 
-  plot.forcing.diffs(TopTaxaList = top.final.taxa, NumBars = 50, FolderPath = plots.folder.path)
+  # plot.forcing.diffs(TopTaxaList = top.final.taxa, NumBars = 50, FolderPath = plots.folder.path)
   
 # ####
 # If not then do the normal comparison for choosing pident cutoff

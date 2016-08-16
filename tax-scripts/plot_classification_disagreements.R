@@ -26,32 +26,32 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                "../../take19/otus.custom.85.taxonomy",
 #                "../../take19/otus.98.85.70.taxonomy")
 # 
-# # FOR CHOOSING CUTOFF:
-userprefs <- c("../../take18playwith/otus.abund",
-               "../../take18playwith/plots",
-               "regular",
-               "regular",
-               "regular",
-               "../../take18playwith/conflicts_95",
-               "../../take18playwith/ids.above.95",
-               95,
-               "../../take18playwith/conflicts_96",
-               "../../take18playwith/ids.above.96",
-               96,
-               "../../take18playwith/conflicts_97",
-               "../../take18playwith/ids.above.97",
-               97,
-               "../../take18playwith/conflicts_98",
-               "../../take18playwith/ids.above.98",
-               98,
-               "../../take18playwith/conflicts_99",
-               "../../take18playwith/ids.above.99",
-               99,
-               "../../take18playwith/conflicts_100",
-               "../../take18playwith/ids.above.100",
-               100)
-
-seqID.reads.file.path <- "../../take18playwith/total.reads.per.seqID.csv"
+# # # FOR CHOOSING CUTOFF:
+# userprefs <- c("../../take18playwith/otus.abund",
+#                "../../take18playwith/plots",
+#                "regular",
+#                "regular",
+#                "regular",
+#                "../../take18playwith/conflicts_95",
+#                "../../take18playwith/ids.above.95",
+#                95,
+#                "../../take18playwith/conflicts_96",
+#                "../../take18playwith/ids.above.96",
+#                96,
+#                "../../take18playwith/conflicts_97",
+#                "../../take18playwith/ids.above.97",
+#                97,
+#                "../../take18playwith/conflicts_98",
+#                "../../take18playwith/ids.above.98",
+#                98,
+#                "../../take18playwith/conflicts_99",
+#                "../../take18playwith/ids.above.99",
+#                99,
+#                "../../take18playwith/conflicts_100",
+#                "../../take18playwith/ids.above.100",
+#                100)
+# 
+# seqID.reads.file.path <- "../../take18playwith/total.reads.per.seqID.csv"
 
 # in case you want to add the db baseline conflict back to the plots, need to specify this path below
 # and un-comment the plotting calls that use it at the end of the script.

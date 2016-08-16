@@ -5,7 +5,7 @@
 # Define File Paths
 #####
 
-comma.delim.trainingset <- "../../take10/custom.custom.taxonomy"
+comma.delim.trainingset <- "../../take18playwith/custom.taxonomy-semicolons"
 results.folder <- "~/Desktop/tax_typos"
 
 

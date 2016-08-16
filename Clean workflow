@@ -17,7 +17,11 @@ Summary of Steps and Commands (all commands entered in terminal window):
 	for mothur .count_table as OTU table:
 		Rscript reformat_mothur_OTU_tables.R StupidLongMothurName.count_table count_table otus.abund
 
-NOTE: steps 1-14 can be run in a block using the bash script LazyRun.sh.  to source type in the terminal:
+NOTE: steps 1-14 can be run in a block using the bash scripts:
+
+
+
+  to source type in the terminal:
 	./LazyRun.sh
 		
 1. make BLAST database file (blast)
@@ -76,7 +80,7 @@ NOTE: steps 1-14 can be run in a block using the bash script LazyRun.sh.  to sou
 	
 14. OPTIONAL BUT RECOMMENDED: choose appropriate pident cutoff (R)
 	note: you have to repeat steps 5, 7-10, & 12-13 with multiple pident cutoffs to do this step
-	Rscript plot_classification_disagreements.R otus.abund plots regular regular conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98
+	Rscript plot_classification_disagreements.R otus.abund plots regular NA NA conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98
 
 15. generate final taxonomy file (R)
 	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 final
@@ -91,7 +95,7 @@ NOTE: steps 1-14 can be run in a block using the bash script LazyRun.sh.  to sou
 		mv otus.custom.taxonomy.reformatted otus.custom.taxonomy
 		mkdir conflicts_forcing
 		Rscript find_classification_disagreements.R otus.custom.taxonomy otus.98.85.70.taxonomy ids.above.98 conflicts_forcing NA 85 70 forcing
-		Rscript plot_classification_disagreements.R NA plots conflicts_forcing otus.custom.85.taxonomy
+		Rscript plot_classification_disagreements.R NA plots conflicts_forcing otus.custom.85.taxonomy otus.98.85.70.taxonomy
 
 16. tidy up (bash)
 	rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otus.custom.taxonomy custom.general* otus.custom.[0-9]* *pvalues total*
@@ -888,7 +892,7 @@ the decision this step is agonizing over when you chose that, and the plot will 
 if the sequences in it were already clustered. We recommend, if you're skipping this step,
 to just choose a pident cutoff in the range of 97-99.
 
-Rscript plot_classification_disagreements.R otus.abund plots regular regular conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98
+Rscript plot_classification_disagreements.R otus.abund plots regular NA NA conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98
 
 What the arguments are:
 1.		Rscript									Calls program R in a way that accepts command line arguments
@@ -898,19 +902,20 @@ What the arguments are:
 												file from that.  It needs it to compare by % reads.
 4.		plots									path to folder you are saving the plots into.
 												note: this folder must already exist. you made it in step 6.
-
 5.		regular									placeholder, this is only used in the step where you plot forcing
-6.		regular									also placeholder. Note: these must say "regular" though.
-7.		conflicts_94							path to folder containing taxonomy disagreements between
+												Note: this one must say exactly "regular"
+6.		NA										also placeholder for forcing, could say anything
+7.		NA										also placeholder for forcing, could say anything
+8.		conflicts_94							path to folder containing taxonomy disagreements between
 												this cutom+general workflow and the general database alone.
 												You made this folder in step 13.
-8.		ids.above.94							path to the file that lists all the seqIDs meeting your
+9.		ids.above.94							path to the file that lists all the seqIDs meeting your
 												pident cutoff that were therefore classified with your
 												custom databse. You made this file in step 4.
-9.		94										pident cutoff used in the previous two arguments
-10.		conflicts_96							folder of taxonomy disagreements
-11.		ids.above.96							file of custom-classified seqIDs	
-12.		96										pident cutoff for previous two arguments
+10.		94										pident cutoff used in the previous two arguments
+11.		conflicts_96							folder of taxonomy disagreements
+12.		ids.above.96							file of custom-classified seqIDs	
+13.		96										pident cutoff for previous two arguments
 n.		...										additional arguments
 												you can have as many pident cutoffs compared as you
 												want.  Just keep listing them in this format:
@@ -1023,7 +1028,7 @@ unclassified.  However in a smaller database, it's possible that a dissimilar se
 in the same classification because it is most similar to that, even though the sequence itself is very dissimilar.
 This is what I call forcing.  These plots take longer to generate because first you must classify your OTUs 
 with the custom database alone, and then you must group the classifications by taxonomic level (all other
-steps in this workflow are on an OTU-level.) However, the plots are very beautiful so it is worth your wait. :)
+steps in this workflow are on an OTU-level.) However, the plots are very beautiful :)
 
 mothur "#classify.seqs(fasta=otus.fasta, template=custom.fasta, taxonomy=custom.taxonomy, method=wang, probs=T, processors=2)"
 cat otus.custom.wang.taxonomy > otus.custom.taxonomy
@@ -1034,7 +1039,7 @@ mv otus.custom.taxonomy.reformatted otus.custom.taxonomy
 mkdir conflicts_forcing
 Rscript find_classification_disagreements.R otus.custom.taxonomy otus.98.85.70.taxonomy ids.above.98 conflicts_forcing NA 85 70 forcing
 
-Rscript plot_classification_disagreements.R NA plots conflicts_forcing otus.custom.85.taxonomy
+Rscript plot_classification_disagreements.R NA plots conflicts_forcing otus.custom.85.taxonomy otus.98.85.70.taxonomy
 									
 __________________________________________________________________________________________
 

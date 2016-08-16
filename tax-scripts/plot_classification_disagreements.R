@@ -10,8 +10,8 @@
 # This script is also used in step 16 optionally to plot the forcing that would have occured if you only used FW
 
 # Terminal command line syntax:
-# Rscript plot_classification_disagreements.R otus.abund plots conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98 ...
-# Rscript plot_classification_disagreements.R NA plots conflicts_forcing otus.custom.80.taxonomy 
+# Rscript plot_classification_disagreements.R otus.abund plots regular NA NA conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98 ...
+# Rscript plot_classification_disagreements.R NA plots conflicts_forcing otus.custom.85.taxonomy otus.98.85.70.taxonomy
 
 # ####
 # Receive arguments from terminal command line
@@ -19,15 +19,17 @@
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 
-# # FOR PLOTTING FORCING  **don't forget to change the seqID.reads file path below!!
-# userprefs <- c(NA,
-#                "../../take18playwith/plots",
-#                "../../take18playwith/conflicts_forcing",
-#                "../../take18playwith/otus.custom.80.taxonomy")
-# 
+# FOR PLOTTING FORCING  **don't forget to change the seqID.reads file path below!!
+userprefs <- c(NA,
+               "../../take19/plots",
+               "../../take19/conflicts_forcing",
+               "../../take19/otus.custom.85.taxonomy",
+               "../../take19/otus.98.85.70.taxonomy")
+
 # FOR CHOOSING CUTOFF:
 userprefs <- c("../../take18playwith/otus.abund",
                "../../take18playwith/plots",
+               "regular",
                "regular",
                "regular",
                "../../take18playwith/conflicts_95",
@@ -56,8 +58,9 @@ userprefs <- c("../../take18playwith/otus.abund",
 otu.table.path <- userprefs[1]
 plots.folder.path <- userprefs[2]
 forcing.folder.path <- userprefs[3]
-forced.taxonomy.file <-userprefs[4]
-rest.of.arguments <- userprefs[-(1:4)]
+forced.taxonomy.file <- userprefs[4]
+final.taxonomy.file <- userprefs[5]
+rest.of.arguments <- userprefs[-(1:5)]
 if (length(rest.of.arguments) > 0){
   pident.folders <- rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)]
   ids.file.paths <- rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)+1]
@@ -68,7 +71,7 @@ if (length(rest.of.arguments) > 0){
 seqID.reads.file.path <- "total.reads.per.seqID.csv"
 
 # # For troubleshooting, enter manual file path:
-# seqID.reads.file.path <- "../../take18playwith/total.reads.per.seqID.csv"
+seqID.reads.file.path <- "../../take19/total.reads.per.seqID.csv"
 
 # ####
 # Define functions to import and process the data
@@ -124,6 +127,10 @@ import.seqID.reads <- function(FilePath){
   
   seqID.reads <- read.csv(file = seqID.reads.file.path, colClasses = "character")
   seqID.reads[ ,2] <- as.numeric(seqID.reads[ ,2])
+  
+  #alphabetical order matches taxonomy tables
+  index <- order(seqID.reads[ ,1])
+  seqID.reads <- seqID.reads[index, ]
   
   return(seqID.reads)
 }
@@ -326,23 +333,33 @@ import.bootstrap.pvalues <- function(ConflictFolders, PidentsUsed, FW = TRUE){
 }
 
 # import the custom-only classified taxonomy for the "forcing" plots (function borrowed from find_classification_disagreements.R)
-import.custom.only.taxonomy <- function(FilePath){
-  forced.taxonomy.file.path <- FilePath
+import.taxonomy.file <- function(FilePath, Final = FALSE){
+  taxonomy.file.path <- FilePath
+  if (Final == FALSE){
+    delimitor <- ";"
+  }else if (Final == TRUE){
+    delimitor <- ","
+  }
   
   # simple imort b/c file format determined by previous script, shouldn't have any weird things
-  fw <- read.table(forced.taxonomy.file.path , sep=";", fill=T, colClasses = "character", header = TRUE)
-  
-  # Reorder sequence IDs so can match them to the other file
-  index <- order(fw[,1])
-  fw <- fw[index,]
+  tax <- read.table(taxonomy.file.path , sep = delimitor, fill=T, colClasses = "character", header = TRUE)
   
   # Convert into a character matrix for faster processing
-  fw <- as.matrix(fw)
+  tax <- as.matrix(tax)
+  
+  # remove percent confidences from final file so that identical names will match
+  if (Final == TRUE){
+    tax <- apply(X = tax, MARGIN = 2, FUN = remove.parentheses)
+  }
+  
+  # Reorder sequence IDs so can match them to the other file
+  index <- order(tax[ ,1])
+  tax <- tax[index, ]
   
   # Remove row names that will not match between the data tables
-  row.names(fw) <- NULL
+  row.names(tax) <- NULL
   
-  return(fw)
+  return(tax)
 }
 
 # Group seqIDs at each taxa level- this is used in plot.most.misleading.forced.taxa
@@ -448,6 +465,53 @@ find.top.taxa.by.total.reads <- function(TaxonomyList, NumberTopTaxa){
     }
   }
   return(grouped.taxa.top)
+}
+
+# Remove parentheses and % confidence- script from find_classification_disagreements.R
+remove.parentheses <- function(x){
+  fixed.name <- sub(pattern = '\\(.*\\)' , replacement = '', x = x)
+  return(fixed.name)
+}
+
+# find the differences btwn the workflow and the custom-only classifications
+find.forcing.diffs <- function(TopFinalList, AllForcedList){
+  top.final <- TopFinalList
+  all.forced <- AllForcedList
+  
+  for (t in 1:length(top.final)){
+    fw.reads <- NULL
+    difference <- NULL
+    for (n in 1:nrow(top.final[[t]])){
+      index <- which(all.forced[[t]][ ,t] == top.final[[t]][n,t])
+      if (length(index) > 0){
+        temp.reads <- all.forced[[t]][index,(t+1)]
+      }else{
+        temp.reads <- 0
+      }
+      fw.reads <- c(fw.reads, temp.reads)
+      difference <- c(difference, temp.reads - top.final[[t]][n,(t+1)])
+    }
+    top.final[[t]] <- cbind(top.final[[t]], fw.reads, difference)
+  }
+  
+  for (t in 1:length(top.final)){
+    x <- top.final[[t]]
+    grey.bars <- x$reads
+    red.bars <- x$difference
+    blue.bars <- abs(x$difference)
+    
+    for (r in 1:nrow(x)){
+      if (x$difference[r] > 0){
+        blue.bars[r] <- 0
+      }else if (x$difference[r] < 0){
+        red.bars[r] <- 0
+        grey.bars[r] <- grey.bars[r] - blue.bars[r]
+      }
+    }
+    
+    top.final[[t]] <- cbind(top.final[[t]], grey.bars, red.bars, blue.bars)
+  }
+  return(top.final)
 }
 
 
@@ -753,6 +817,50 @@ plot.most.misleading.forced.taxa <- function(TopTaxaList, ForcedTaxonomy, Forced
   }
 }
 
+plot.forcing.diffs <- function(TopTaxaList, NumBars, FolderPath, PlottingLevels = 1:length(TopTaxaList)){
+  top.taxa <- TopTaxaList
+  
+  # pull out and format just the data for the plot
+  stacked.data <- list(NULL) 
+  for (t in PlottingLevels){
+    num.bars <- NumBars
+    if (nrow(top.taxa[[t]]) < num.bars){
+      num.bars <- nrow(top.taxa[[t]])
+    }
+    stacked.data[[t]] <- top.taxa[[t]][1:num.bars, c(t + 4, t + 5, t + 6)]
+    row.names(stacked.data[[t]]) <- top.taxa[[t]][1:num.bars ,t]
+    stacked.data[[t]] <- as.matrix(stacked.data[[t]])
+    stacked.data[[t]] <- t(stacked.data[[t]])
+    names(stacked.data)[t] <- names(top.taxa)[t]
+  }
+  
+  # export plots and data!
+  for (t in PlottingLevels){
+    # descriptive file names
+    plot.name <- paste(FolderPath, "/", t, "-Forcing_Diffs-", names(stacked.data)[t], ".png", sep = "")
+    csv.name <- paste(FolderPath, "/", t, "-Forcing_Diffs-", names(stacked.data)[t], ".csv", sep = "")
+    
+    # # long names go off the plot
+    # taxa.names <- sub(pattern = ".*__", replacement = "", x = colnames(stacked.data[[t]]))
+    # taxa.names <- substr(x = taxa.names, start = 1, stop = 20)
+    # 
+    # # make the y axis not have crazy big numbers on it, put them in rounded percents
+    # max.bar <- max(stacked.data[[t]][1, ] + stacked.data[[t]][2, ])
+    # y.axis.ticks <- c(0, max.bar * (1/4), max.bar * (1/2), max.bar * (3/4), max.bar)
+    # y.axis.labels <- round(x = y.axis.ticks / tot.reads * 100, digits = 0)
+    
+    # make to plots!
+    # png(filename = plot.name, width = 7, height = 5, units = "in", res = 100)
+    par(mar = c(10,5,5,2))
+    barplot(height = stacked.data[[t]], beside = FALSE, col = c("grey","red","blue"), main = names(stacked.data)[t], las = 2, ylab = "Relative Abundance (% reads)", cex.axis = .5)
+    legend(x = "topright", legend = c("Gained from forcing", "Lost from forcing"), fill = c("red", "blue"), border = FALSE, bty = "n", inset = .05)
+    # unnecessary.message <- dev.off()
+    
+    # export the data! ... do the full data not just stacked data:
+    write.csv(x = top.taxa[[t]], file = csv.name, quote = FALSE, row.names = FALSE)
+  }
+}
+
 export.summary.table <- function(SummaryTable, FolderPath, ByOTU = TRUE, Percents = FALSE){
   folder.path <- FolderPath
   sum.table <- SummaryTable
@@ -792,7 +900,7 @@ if (forcing.folder.path != "regular"){
   otus.forced <- import.forcing.conflicts(ForcingFolder = forcing.folder.path)
   
   seqID.reads <- import.seqID.reads(FilePath = seqID.reads.file.path) # this was exported previously by this script
-  
+# ----  
   forced.seqIDs <- get.conflict.seqIDs(ConflictsFolders = forcing.folder.path, PidentsUsed = "forcing")
   
   forced.seqID.reads <- find.reads.per.seqID(ReadsTable = seqID.reads, ConflictsList = forced.seqIDs, Forcing = TRUE)
@@ -802,13 +910,21 @@ if (forcing.folder.path != "regular"){
   tot.reads <- sum(seqID.reads$reads)
   
   reads.forced <- rbind(read.summaries, tot.reads)
-  
-  forced.taxonomy <- import.custom.only.taxonomy(FilePath = forced.taxonomy.file)
+# ----  
+  forced.taxonomy <- import.taxonomy.file(FilePath = forced.taxonomy.file)
   
   grouped.taxa <- group.seqIDs.into.taxa(TaxonomyTable = forced.taxonomy, ReadsPerSeqID = seqID.reads)
   
   top.taxa <- find.top.taxa.by.total.reads(TaxonomyList = grouped.taxa, NumberTopTaxa = 20)
   
+  final.taxonomy <- import.taxonomy.file(FilePath = final.taxonomy.file, Final = TRUE)
+  
+  grouped.final.taxa <- group.seqIDs.into.taxa(TaxonomyTable = final.taxonomy, ReadsPerSeqID = seqID.reads)
+  
+  top.final.taxa <- find.top.taxa.by.total.reads(TaxonomyList = grouped.final.taxa, NumberTopTaxa = 20)
+  
+  top.final.taxa <- find.forcing.diffs(TopFinalList = top.final.taxa, AllForcedList = grouped.taxa)
+# ----
   plot.percent.forced(ForcingTable = otus.forced, ResultsFolder = plots.folder.path, ByReads = FALSE)
   
   plot.percent.forced(ForcingTable = reads.forced, ResultsFolder = plots.folder.path, ByReads = TRUE)
@@ -819,6 +935,9 @@ if (forcing.folder.path != "regular"){
   plot.most.misleading.forced.taxa(TopTaxaList = top.taxa, ForcedTaxonomy = forced.taxonomy, 
                                    ForcedReadsList = forced.seqID.reads, ForcedSeqIDsList = forced.seqIDs, 
                                    ResultsFolder = plots.folder.path, PlottingLevels = 1:7, TotalReads = tot.reads)
+# ----
+  plot.forcing.diffs(TopTaxaList = top.final.taxa, NumBars = 50, FolderPath = plots.folder.path)
+  
 # ####
 # If not then do the normal comparison for choosing pident cutoff
 # ####

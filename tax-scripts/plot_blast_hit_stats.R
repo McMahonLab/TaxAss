@@ -120,28 +120,34 @@ bar.plot.blast.results <- function(BlastHitsTable, OutputFolder, NumBars, Cutoff
   if (Cutoff == 0){
     
     # export the plot
-    png(filename = paste(plot.folder, "/BLAST_hits_used_overall.png", sep=""), 
-        width = 5.5, height = 5, units = "in", res = 100)
+    plot.name <- paste(plot.folder, "/BLAST_hits_used_overall.png", sep="")
+    png(filename = plot.name, width = 5.5, height = 5, units = "in", res = 100)
     barplot(height = hits.matrix[,2], names.arg = hits.matrix[,1], ylim = c(0,100),
             main = "Which BLAST hit gave the best \"full length\" pident?\n(no cutoff pident applied)",
             xlab = "Hit Number", ylab = "Percent of Best Hits (%)", col = "lightsalmon")
     unnecessary.comment <- dev.off()
+    cat("made plot: ", plot.name, "\n")
     
     # export the table 
-    write.csv(x = hits.matrix, file = paste(plot.folder, "/BLAST_hits_used_overall.csv", sep = ""))
+    file.name <- paste(plot.folder, "/BLAST_hits_used_overall.csv", sep = "")
+    write.csv(x = hits.matrix, file = file.name, quote = FALSE, row.names = FALSE)
+    cat("made datafile: ", file.name, "\n")
     
   }else{
     
     # export the plot
-    png(filename = paste(plot.folder, "/BLAST_hits_used_for_pident_", Cutoff, ".png", sep=""), 
-        width = 5.5, height = 5, units = "in", res = 100)
+    plot.name <- paste(plot.folder, "/BLAST_hits_used_for_pident_", Cutoff, ".png", sep="")
+    png(filename = plot.name, width = 5.5, height = 5, units = "in", res = 100)
     barplot(height = hits.matrix[,2], names.arg = hits.matrix[,1], ylim = c(0,100),
             main = paste("Which BLAST hit gave the best \"full length\" pident?\n(out of seqIDs above cutoff: >=",Cutoff,")",sep=""),
             xlab = "Hit Number", ylab = "Percent of Best Hits (%)", col = "lightsalmon")
     unnecessary.comment <- dev.off()
+    cat("made plot: ", plot.name, "\n")
     
     #export the table
-    write.csv(x = hits.matrix, file = paste(plot.folder, "/BLAST_hits_used_for_pident_", Cutoff, ".csv", sep = ""))
+    file.name <- paste(plot.folder, "/BLAST_hits_used_for_pident_", Cutoff, ".csv", sep = "")
+    write.csv(x = hits.matrix, file = file.name, quote = FALSE, row.names = FALSE)
+    cat("made datafile: ", file.name, "\n")
   }
 }
 
@@ -176,8 +182,8 @@ bar.plot.stacked.blast.results <- function(BlastTable, CutoffVector, OutputFolde
   # Plot stacked bar that doesn't have hit #1 so that it's easier to see:
   if (Reverse == TRUE){
     missed.best.hits <- hits.matrix[-1, ]
-    png(filename = paste(plot.folder, "/BLAST_hits_used_for_pidents_", min(CutoffVector), "-", max(CutoffVector), "_only_incorrect_hits.png", sep = ""), 
-        width = 8, height = 5, units = "in", res = 100)
+    plot.name <- paste(plot.folder, "/BLAST_hits_used_for_pidents_", min(CutoffVector), "-", max(CutoffVector), "_only_incorrect_hits.png", sep = "")
+    png(filename = plot.name, width = 8, height = 5, units = "in", res = 100)
     par(mar = c(8.5,5,4,.4))
     barplot(hits.matrix[-1, ], ylim = c(0,max(colSums(missed.best.hits))+2), col=rainbow(num.hits.reported),
             main = "Which BLAST hits missed the best \"full length\" pident?",
@@ -186,10 +192,11 @@ bar.plot.stacked.blast.results <- function(BlastTable, CutoffVector, OutputFolde
     legend(x = num.hits.reported+1, y = max(colSums(missed.best.hits)), legend = row.names(missed.best.hits),
            text.col = rainbow(num.hits.reported-1), bty = "n")
     unnecessary.comment <- dev.off()
+    cat("made plot: ", plot.name, "\n")
   }else{
     # export stacked bar plot with all hit numbers (the origional one)
-    png(filename = paste(plot.folder, "/BLAST_hits_used_for_pidents_", min(CutoffVector), "-", max(CutoffVector), ".png", sep = ""), 
-        width = 8, height = 5, units = "in", res = 100)
+    plot.name <- paste(plot.folder, "/BLAST_hits_used_for_pidents_", min(CutoffVector), "-", max(CutoffVector), ".png", sep = "")
+    png(filename = plot.name, width = 8, height = 5, units = "in", res = 100)
     par(mar = c(8.5,5,4,.4))
     barplot(hits.matrix, ylim = c(0,100), col=c("grey",rainbow(num.hits.reported-1)),
             main = "Which BLAST hit gave the best \"full length\" pident?",
@@ -202,10 +209,13 @@ bar.plot.stacked.blast.results <- function(BlastTable, CutoffVector, OutputFolde
                          sep = "")
     mtext(text = description, side = 1, line = 7.5, at = -2, cex = .75, adj = 0)
     unnecessary.comment <- dev.off()
+    cat("made plot: ", plot.name, "\n")
   }
   
   #export .csv table of results
-  write.csv(x = hits.matrix, file = paste(plot.folder, "/BLAST_hits_used_for_pidents_", min(CutoffVector), "-", max(CutoffVector), ".csv", sep = ""))
+  file.name <- paste(plot.folder, "/BLAST_hits_used_for_pidents_", min(CutoffVector), "-", max(CutoffVector), ".csv", sep = "")
+  write.csv(x = hits.matrix, file = file.name, quote = FALSE)
+  cat("Made datafile: ", file.name, "\n")
 }
 
 # plot number of seqIDs at each hit #
@@ -241,15 +251,15 @@ get.necessary.packages()
 blast <- import.BLAST.hits.table(FilePath = blast.file.path)
 hits.reported <- length(unique(blast$hit.num))
 
-# View a table, 'hit.stats', that shows the percent of times each hit was best
-hit.stats <- reformat.fract.ids.vs.hit.num(BlastTable = blast)
-bar.plot.blast.results(BlastHitsTable = hit.stats, OutputFolder = plots.folder.path, NumBars = hits.reported)
+# # View a table, 'hit.stats', that shows the percent of times each hit was best
+# hit.stats <- reformat.fract.ids.vs.hit.num(BlastTable = blast)
+# bar.plot.blast.results(BlastHitsTable = hit.stats, OutputFolder = plots.folder.path, NumBars = hits.reported)
 
-# View a table, 'cutoff.hit.stats', that shows the percent of time each hit was best 
-# after the blast results have been sorted for users chosen cutoff (the one supplied in command line)
-blast.cutoff <- apply.pident.cutoff(BlastTable = blast, PidentCutoff = pident.cutoff)
-cutoff.hit.stats <- reformat.fract.ids.vs.hit.num(BlastTable = blast.cutoff)
-bar.plot.blast.results(BlastHitsTable = cutoff.hit.stats, Cutoff = pident.cutoff, OutputFolder = plots.folder.path, NumBars = hits.reported)
+# # View a table, 'cutoff.hit.stats', that shows the percent of time each hit was best 
+# # after the blast results have been sorted for users chosen cutoff (the one supplied in command line)
+# blast.cutoff <- apply.pident.cutoff(BlastTable = blast, PidentCutoff = pident.cutoff)
+# cutoff.hit.stats <- reformat.fract.ids.vs.hit.num(BlastTable = blast.cutoff)
+# bar.plot.blast.results(BlastHitsTable = cutoff.hit.stats, Cutoff = pident.cutoff, OutputFolder = plots.folder.path, NumBars = hits.reported)
 
 # # View a plot of overlayed lines showing how the proportion of best hits changes with different cutoffs
 # line.plot.overlay.blast.results(BlastTable = blast, CutoffVector = 90:100, OutputFolder = plots.folder.path)

@@ -5,8 +5,8 @@
 # Define File Paths
 #####
 
-comma.delim.trainingset <- "../../take18playwith/custom.taxonomy-semicolons"
-results.folder <- "~/Desktop/tax_typos"
+comma.delim.trainingset <- "~/Desktop/custom.taxonomy-semicolon-check"
+results.folder <- "~/Desktop/tax_typos/fix_check"
 
 
 #####

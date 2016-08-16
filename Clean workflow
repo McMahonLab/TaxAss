@@ -87,7 +87,7 @@ NOTE: steps 1-14 can be run in a block using the bash scripts:
 
 15.5 OPTIONAL: plot benefits of using this workflow (R, mothur, bash)
 	Improvement over general database only:
-		Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID.csv plots
+		Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID.csv plots final.taxonomy.names final.general.names
 	Improvement over custom database only:
 		mothur "#classify.seqs(fasta=otus.fasta, template=custom.fasta, taxonomy=custom.taxonomy, method=wang, probs=T, processors=2)"
 		cat otus.custom.wang.taxonomy > otus.custom.taxonomy

@@ -27,30 +27,32 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                "../../take19/otus.98.85.70.taxonomy")
 # 
 # # FOR CHOOSING CUTOFF:
-# userprefs <- c("../../take18playwith/otus.abund",
-#                "../../take18playwith/plots",
-#                "regular",
-#                "regular",
-#                "regular",
-#                "../../take18playwith/conflicts_95",
-#                "../../take18playwith/ids.above.95",
-#                95,
-#                "../../take18playwith/conflicts_96",
-#                "../../take18playwith/ids.above.96",
-#                96,
-#                "../../take18playwith/conflicts_97",
-#                "../../take18playwith/ids.above.97",
-#                97,
-#                "../../take18playwith/conflicts_98",
-#                "../../take18playwith/ids.above.98",
-#                98,
-#                "../../take18playwith/conflicts_99",
-#                "../../take18playwith/ids.above.99",
-#                99,
-#                "../../take18playwith/conflicts_100",
-#                "../../take18playwith/ids.above.100",
-#                100)
-# 
+userprefs <- c("../../take18playwith/otus.abund",
+               "../../take18playwith/plots",
+               "regular",
+               "regular",
+               "regular",
+               "../../take18playwith/conflicts_95",
+               "../../take18playwith/ids.above.95",
+               95,
+               "../../take18playwith/conflicts_96",
+               "../../take18playwith/ids.above.96",
+               96,
+               "../../take18playwith/conflicts_97",
+               "../../take18playwith/ids.above.97",
+               97,
+               "../../take18playwith/conflicts_98",
+               "../../take18playwith/ids.above.98",
+               98,
+               "../../take18playwith/conflicts_99",
+               "../../take18playwith/ids.above.99",
+               99,
+               "../../take18playwith/conflicts_100",
+               "../../take18playwith/ids.above.100",
+               100)
+
+seqID.reads.file.path <- "../../take18playwith/total.reads.per.seqID.csv"
+
 # in case you want to add the db baseline conflict back to the plots, need to specify this path below
 # and un-comment the plotting calls that use it at the end of the script.
 
@@ -69,9 +71,6 @@ if (length(rest.of.arguments) > 0){
 
 # this is automatically exported into the working directory when this script is run normally
 seqID.reads.file.path <- "total.reads.per.seqID.csv"
-
-# # For troubleshooting, enter manual file path:
-# seqID.reads.file.path <- "../../take19/total.reads.per.seqID.csv"
 
 # ####
 # Define functions to import and process the data
@@ -566,15 +565,15 @@ plot.num.forced <- function(ConflictSummaryTable, ResultsFolder, DBconflicts = a
   }
   
   # Save plot as .png file
-  png(filename = paste(results.file.path, "/Classification_Disagreements_of_", plot.of, "_", plot.as, "s", yplotlabel, db.label, ".png", sep = ""), 
-      width = 5, height = 5, units = "in", res = 100)
+  plot.name <- paste(results.file.path, "/Classification_Disagreements_of_", plot.of, "_", plot.as, "s", yplotlabel, db.label, ".png", sep = "")
+  png(filename = plot.name, width = 5, height = 5, units = "in", res = 100)
   
   # Set up an empty plot
-  plot(x = 0, type = "n", ylim = c(0,ymax), xlim = c(min(pidents),max(pidents)),
-       main = paste("Disagreements Between Custom and General Taxonomy Classifications\n(Are we forcing OTUs into our favorite groups?)", db.plot.label, sep = ""),
-       cex.main = .8,
-       ylab = paste("Classification Disagreements (", plot.as, " ", plot.of, "s)", sep = ""), cex.lab = .8, 
-       xlab = "\"full length\" pident cutoff (similar to ANI of read to custom database)")
+  plot.title <- paste("Disagreements Between Custom and General Taxonomy Classifications\n(Are we forcing OTUs into our favorite groups?)", db.plot.label, sep = "")
+  y.label <- paste("Classification Disagreements (", plot.as, " ", plot.of, "s)", sep = "")
+  x.label <- "\"full length\" pident cutoff (similar to ANI of read to custom database)"
+  plot(x = 0, type = "n", ylim = c(0, ymax), xlim = c(min(pidents), max(pidents)),
+       main = plot.title, cex.main = .8, ylab = y.label, cex.lab = .8, xlab = x.label)
   
   # Fill Plot with beautiful data
   color <- c("seagreen4","violetred4","slateblue4","turquoise4")
@@ -593,6 +592,7 @@ plot.num.forced <- function(ConflictSummaryTable, ResultsFolder, DBconflicts = a
   legend("topright", legend = row.names(mismatches), text.col = color, cex=1)
   
   unnecessary.message <- dev.off()
+  cat("made plot: ", plot.name, "\n")
 }
 
 plot.num.classified.outs <- function(ConflictSummaryTable, ResultsFolder, ByReads = FALSE, AsPercent = TRUE){
@@ -619,20 +619,21 @@ plot.num.classified.outs <- function(ConflictSummaryTable, ResultsFolder, ByRead
   }
   
   # Save plot as .png file
-  png(filename = paste(results.file.path, "/Custom_db_contributions_by_", plot.of, "_", plot.as, "s.png", sep = ""), 
-      width = 5, height = 5, units = "in", res = 100)
+  file.name <- paste(results.file.path, "/Custom_db_contributions_by_", plot.of, "_", plot.as, "s.png", sep = "")
+  png(filename = file.name, width = 5, height = 5, units = "in", res = 100)
   
   # Set up and empty plot
-  plot(x = pidents, y = num.fw, type = "n", 
-       main = "Contribution of Custom Taxonomy \n to Total Classifications", cex.main = 1,
-       xlab = "\"Full Length\" percent identity (similar to ANI)", 
-       ylab = paste("OTUs Classified by Custom Taxonomy (", plot.as, " ", plot.of, "s)", sep = ""))
+  plot.title <- "Contribution of Custom Taxonomy \n to Total Classifications"
+  x.label <- "\"Full Length\" percent identity (similar to ANI)"
+  y.label <- paste("OTUs Classified by Custom Taxonomy (", plot.as, " ", plot.of, "s)", sep = "")
+  plot(x = pidents, y = num.fw, type = "n", main = plot.title, cex.main = 1, xlab = x.label, ylab = y.label)
   
   # Fill plot with beautiful data
   lines(x = pidents, y = num.fw, col = "lightsalmon", lwd = 1.5)
   points(x = pidents, y = num.fw, col = "lightsalmon", pch = 19, cex = 1.3)
   
   unnecessary.message <- dev.off()
+  cat("made plot: ", file.name, "\n")
 }
   
 plot.bootstrap.percents <- function(FWpValues, GGpValues, ResultsFolder){
@@ -877,7 +878,7 @@ export.summary.table <- function(SummaryTable, FolderPath, ByOTU = TRUE, Percent
   }
   
   make.percent <- function(x){
-    perc <- x / tot.read
+    perc <- x / tot.read * 100
     return(perc)
   }
   
@@ -891,6 +892,7 @@ export.summary.table <- function(SummaryTable, FolderPath, ByOTU = TRUE, Percent
   
   file.name <- paste("conflict_summary_by", Percents, "_", data.type, ".csv", sep = "")
   write.csv(x = sum.table, file = paste(FolderPath, "/", file.name, sep = ""), quote = FALSE)
+  cat("made datafile: ", file.name, "\n")
 }
 
 
@@ -990,9 +992,9 @@ if (forcing.folder.path != "regular"){
   
   read.summaries <- add.totals.to.read.summaries(ReadSummaryTable = read.summaries, AbundanceTable = seqID.reads, 
                                                  PidentsUsed = pident.values, CustomSeqIDs = custom.seqIDs)
-  # NOTE: the totals in read summaries may not be 100% or total reads, depending on how the otu table was normalized.
-  # ex: if normalized so each column sums to 1, the "total reads" ends up being the number of samples. 
-  export.summary.table(SummaryTable = read.summaries, FolderPath = plots.folder.path, ByOTU = FALSE)
+  
+  # seqID.reads is normalized to total reads, so these are both out of 100 % . An absolute read number is meaningless. 
+  # export.summary.table(SummaryTable = read.summaries, FolderPath = plots.folder.path, ByOTU = FALSE)
   export.summary.table(SummaryTable = read.summaries, FolderPath = plots.folder.path, ByOTU = FALSE, Percents = TRUE)
   
   #leave out lineage on the plots b/c it's too much higher
@@ -1009,7 +1011,7 @@ if (forcing.folder.path != "regular"){
   
   # export the reads per seqID for use in the plot_classification_improvement.R script
   write.table(x = seqID.reads, file = "total.reads.per.seqID.csv", sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
-  
+  cat("made the datafile: ", "total.reads.per.seqID.csv")
   
   # ####
   # examine pident cutoff relationship to bootstrap p-values -this plot is not useful.

@@ -19,12 +19,12 @@
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 
-# # FOR PLOTTING FORCING  **don't forget to change the seqID.reads file path below!!
-# userprefs <- c(NA,
-#                "../../take_mendota_clust/plots",
-#                "../../take_mendota_clust/conflicts_forcing",
-#                "../../take_mendota_clust/otus.custom.80.taxonomy",
-#                "../../take_mendota_clust/otus.98.80.80.taxonomy")
+# FOR PLOTTING FORCING  **don't forget to change the seqID.reads file path below!!
+userprefs <- c(NA,
+               "../../take_mendota_clust/plots",
+               "../../take_mendota_clust/conflicts_forcing",
+               "../../take_mendota_clust/otus.custom.80.taxonomy",
+               "../../take_mendota_clust/otus.98.80.80.taxonomy")
 # 
 # # # FOR CHOOSING CUTOFF:
 # userprefs <- c("../../take18playwith/otus.abund",
@@ -51,7 +51,7 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                "../../take18playwith/ids.above.100",
 #                100)
 # 
-# seqID.reads.file.path <- "../../take_mendota_clust/total.reads.per.seqID.csv"
+seqID.reads.file.path <- "../../take_mendota_clust/total.reads.per.seqID.csv"
 
 # in case you want to add the db baseline conflict back to the plots, need to specify this path below
 # and un-comment the plotting calls that use it at the end of the script.
@@ -436,7 +436,7 @@ group.seqIDs.into.taxa <- function(TaxonomyTable, ReadsPerSeqID){
 }
 
 # Find the most abundant taxa at each taxonomy level
-find.top.taxa.by.total.reads <- function(TaxonomyList, NumberTopTaxa){
+find.top.taxa.by.total.reads <- function(TaxonomyList, NumberTopTaxa, RemoveUnclass = FALSE){
   grouped.taxa <- TaxonomyList
   num.taxa <- NumberTopTaxa
   
@@ -447,16 +447,21 @@ find.top.taxa.by.total.reads <- function(TaxonomyList, NumberTopTaxa){
     grouped.taxa.ord[[t]] <- grouped.taxa[[t]][index, ]
   }
   
-  # remove unclassified taxa b/c those really can't be compared on the same taxa level, and likely wouldn't be included in a "top taxa" analysis anyway.
-  not.unclassifieds <- list("kingdom"=NULL, "phylum"=NULL, "class"=NULL, "order"=NULL, "lineage"=NULL, "clade"=NULL, "tribe"=NULL)
-  for (t in 1:7){
-    index <- grep(x = grouped.taxa.ord[[t]][ ,t], pattern =  "unclassified.*", value = FALSE )
-    # this is necessary because you can not use -0 as an index
-    if (length(index) != 0){
-      not.unclassifieds[[t]] <- grouped.taxa.ord[[t]][-index, ]
-    }else{
-      not.unclassifieds[[t]] <- grouped.taxa.ord[[t]]
+  if (RemoveUnclass == TRUE){
+    # remove unclassified taxa b/c those really can't be compared on the same taxa level, and likely wouldn't be included in a "top taxa" analysis anyway.
+    not.unclassifieds <- list("kingdom"=NULL, "phylum"=NULL, "class"=NULL, "order"=NULL, "lineage"=NULL, "clade"=NULL, "tribe"=NULL)
+    for (t in 1:7){
+      index <- grep(x = grouped.taxa.ord[[t]][ ,t], pattern =  "unclassified.*", value = FALSE )
+      # this is necessary because you can not use -0 as an index
+      if (length(index) != 0){
+        not.unclassifieds[[t]] <- grouped.taxa.ord[[t]][-index, ]
+      }else{
+        not.unclassifieds[[t]] <- grouped.taxa.ord[[t]]
+      }
     }
+  }else{
+    # name is misleading now but this is easier than chaning all the names:
+    not.unclassifieds <- grouped.taxa.ord
   }
   
   # look just at the top 20 levels
@@ -924,16 +929,16 @@ if (forcing.folder.path != "regular"){
   
   grouped.taxa <- group.seqIDs.into.taxa(TaxonomyTable = forced.taxonomy, ReadsPerSeqID = seqID.reads)
   
-  top.taxa <- find.top.taxa.by.total.reads(TaxonomyList = grouped.taxa, NumberTopTaxa = 20)
+  top.taxa <- find.top.taxa.by.total.reads(TaxonomyList = grouped.taxa, NumberTopTaxa = 20, RemoveUnclass = FALSE)
   
   final.taxonomy <- import.taxonomy.file(FilePath = final.taxonomy.file, Final = TRUE)
-  
-  grouped.final.taxa <- group.seqIDs.into.taxa(TaxonomyTable = final.taxonomy, ReadsPerSeqID = seqID.reads)
-  
-  top.final.taxa <- find.top.taxa.by.total.reads(TaxonomyList = grouped.final.taxa, NumberTopTaxa = 50)
-  
-  top.final.taxa <- find.forcing.diffs(TopFinalList = top.final.taxa, AllForcedList = grouped.taxa)
 
+  grouped.final.taxa <- group.seqIDs.into.taxa(TaxonomyTable = final.taxonomy, ReadsPerSeqID = seqID.reads)
+
+  top.final.taxa <- find.top.taxa.by.total.reads(TaxonomyList = grouped.final.taxa, NumberTopTaxa = 50, RemoveUnclass = FALSE)
+
+  top.final.taxa <- find.forcing.diffs(TopFinalList = top.final.taxa, AllForcedList = grouped.taxa)
+  
   # plot.percent.forced(ForcingTable = otus.forced, ResultsFolder = plots.folder.path, ByReads = FALSE)
   
   # plot.percent.forced(ForcingTable = reads.forced, ResultsFolder = plots.folder.path, ByReads = TRUE)

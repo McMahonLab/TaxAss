@@ -19,38 +19,38 @@
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 
-# FOR PLOTTING FORCING  **don't forget to change the seqID.reads file path below!!
-userprefs <- c(NA,
-               "../../take19/plots",
-               "../../take19/conflicts_forcing",
-               "../../take19/otus.custom.85.taxonomy",
-               "../../take19/otus.98.85.70.taxonomy")
-
-# FOR CHOOSING CUTOFF:
-userprefs <- c("../../take18playwith/otus.abund",
-               "../../take18playwith/plots",
-               "regular",
-               "regular",
-               "regular",
-               "../../take18playwith/conflicts_95",
-               "../../take18playwith/ids.above.95",
-               95,
-               "../../take18playwith/conflicts_96",
-               "../../take18playwith/ids.above.96",
-               96,
-               "../../take18playwith/conflicts_97",
-               "../../take18playwith/ids.above.97",
-               97,
-               "../../take18playwith/conflicts_98",
-               "../../take18playwith/ids.above.98",
-               98,
-               "../../take18playwith/conflicts_99",
-               "../../take18playwith/ids.above.99",
-               99,
-               "../../take18playwith/conflicts_100",
-               "../../take18playwith/ids.above.100",
-               100)
-
+# # FOR PLOTTING FORCING  **don't forget to change the seqID.reads file path below!!
+# userprefs <- c(NA,
+#                "../../take19/plots",
+#                "../../take19/conflicts_forcing",
+#                "../../take19/otus.custom.85.taxonomy",
+#                "../../take19/otus.98.85.70.taxonomy")
+# 
+# # FOR CHOOSING CUTOFF:
+# userprefs <- c("../../take18playwith/otus.abund",
+#                "../../take18playwith/plots",
+#                "regular",
+#                "regular",
+#                "regular",
+#                "../../take18playwith/conflicts_95",
+#                "../../take18playwith/ids.above.95",
+#                95,
+#                "../../take18playwith/conflicts_96",
+#                "../../take18playwith/ids.above.96",
+#                96,
+#                "../../take18playwith/conflicts_97",
+#                "../../take18playwith/ids.above.97",
+#                97,
+#                "../../take18playwith/conflicts_98",
+#                "../../take18playwith/ids.above.98",
+#                98,
+#                "../../take18playwith/conflicts_99",
+#                "../../take18playwith/ids.above.99",
+#                99,
+#                "../../take18playwith/conflicts_100",
+#                "../../take18playwith/ids.above.100",
+#                100)
+# 
 # in case you want to add the db baseline conflict back to the plots, need to specify this path below
 # and un-comment the plotting calls that use it at the end of the script.
 
@@ -71,7 +71,7 @@ if (length(rest.of.arguments) > 0){
 seqID.reads.file.path <- "total.reads.per.seqID.csv"
 
 # # For troubleshooting, enter manual file path:
-seqID.reads.file.path <- "../../take19/total.reads.per.seqID.csv"
+# seqID.reads.file.path <- "../../take19/total.reads.per.seqID.csv"
 
 # ####
 # Define functions to import and process the data
@@ -140,9 +140,14 @@ import.and.reformat.otu.table <- function(OTUtable){
   otu.table.path <- OTUtable
   
   otus <- read.table(file = otu.table.path, sep = "\t", header = TRUE, colClasses = "character")
-  samples <- apply(X = otus[ ,-1], MARGIN = 2, FUN = as.numeric)
-  seqID.reads <- data.frame(seqID = otus[ ,1], reads = rowSums(samples), stringsAsFactors = FALSE)
+  seqID <- otus[ ,1]
+  otus <- as.matrix(otus[ ,-1])
+  otus <- apply(X = otus, MARGIN = 2, FUN = as.numeric)
+  reads <- rowSums(otus)
+  # otu table is normalized by sample reads- re-normalize by total reads
+  reads <- reads / sum(reads) * 100
   
+  seqID.reads <- data.frame(seqID, reads, stringsAsFactors = FALSE)
   return(seqID.reads)
 }
 

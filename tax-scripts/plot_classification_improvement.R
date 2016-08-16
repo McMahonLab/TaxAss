@@ -282,12 +282,14 @@ fancy.barplot <- function(BesideData, StackedData, BarSpacing, DataType, FolderP
   mtext(text = stacked.legend, side = 3, line = c(0, -1.5, -3), at = 14, cex = 1.5, col = col.z, adj = 0)
   mtext(text = title.label, side = 3, line = 1.5, cex = 1.5, at = 3, adj = 0)
   unnecessary.message <- dev.off()
+  cat("made plot: ", file.name, "\n")
 }
 
 # these are .csv files of the data used to make the plots.
 export.summary.table <- function(Summary, FolderPath, PlotType, DataType){
   file.name <- paste(FolderPath, "/WorkflowImprovement-", PlotType, "Data-", DataType, ".csv", sep = "")
   write.csv(x = Summary, file = file.name, quote = FALSE)
+  cat("made datafile: ", file.name, "\n")
 }
 
 

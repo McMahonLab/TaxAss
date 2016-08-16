@@ -11,11 +11,11 @@
 # Choose pidents to test over.
 
 pident=("100" "99" "98" "97" "96" "95")
-fwbootstrap=("85")
-ggbootstrap=("70")
+fwbootstrap=("80")
+ggbootstrap=("80")
 
-# First Run steps 1-11 to generate databases and folders exactly following workflow
-# Note: still gotta do the reformatting on your own (step 0)
+# First Run steps 1-13 to generate databases and folders exactly following workflow
+# Note: still gotta do the reformatting manually (step 0)
 
 # 1
 makeblastdb -dbtype nucl -in custom.fasta -input_type fasta -parse_seqids -out custom.db &&
@@ -63,8 +63,6 @@ runagain () {
    # 5
    Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.above.$1 $1 TRUE 
    Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.below.$1 $1 FALSE
-   # 6 b
-   RScript plot_blast_hit_stats.R otus.custom.blast.table.modified $1 plots
    # 7 b
    cat ids.below.$1 ids.missing > ids.below.$1.all
    # 8
@@ -107,9 +105,9 @@ do
 done
 
 # 14
-Rscript plot_classification_disagreements.R otus.abund plots regular regular $args_string &&
+Rscript plot_classification_disagreements.R otus.abund plots regular NA NA $args_string &&
 
-printf 'Steps 1-14 have finished running.  Now analysze the plots from step 14 to choose your final pident and generate your final taxonomy file in step 15.  Optionally you can compare to how your taxonomy would have been in step 16. At the end tidy up your working directory with step 17. \n \a'
+printf 'Steps 1-14 have finished running.  Now analysze the plots from step 14 to choose your final pident and generate your final taxonomy file in step 15.  Optionally you can then check out your classification improvement in step 15.5. At the end delete intermediate files with step 16. \n \a'
 sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; 
 
 exit 0

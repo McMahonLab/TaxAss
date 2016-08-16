@@ -861,9 +861,11 @@ plot.forcing.diffs <- function(TopTaxaList, NumBars, FolderPath, PlottingLevels 
     barplot(height = stacked.data[[t]], beside = FALSE, col = c("grey","red","blue"), main = names(stacked.data)[t], las = 2, ylab = "Relative Abundance (% reads)", cex.axis = .5)
     legend(x = "topright", legend = c("Gained from forcing", "Lost from forcing"), fill = c("red", "blue"), border = FALSE, bty = "n", inset = .05)
     # unnecessary.message <- dev.off()
+    # cat("made plot: ", plot.name, "\n")
     
     # export the data! ... do the full data not just stacked data:
     write.csv(x = top.taxa[[t]], file = csv.name, quote = FALSE, row.names = FALSE)
+    cat("made datafile: ", csv.name, "\n")
   }
 }
 
@@ -907,7 +909,7 @@ if (forcing.folder.path != "regular"){
   otus.forced <- import.forcing.conflicts(ForcingFolder = forcing.folder.path)
   
   seqID.reads <- import.seqID.reads(FilePath = seqID.reads.file.path) # this was exported previously by this script
-# ----  
+  
   forced.seqIDs <- get.conflict.seqIDs(ConflictsFolders = forcing.folder.path, PidentsUsed = "forcing")
   
   forced.seqID.reads <- find.reads.per.seqID(ReadsTable = seqID.reads, ConflictsList = forced.seqIDs, Forcing = TRUE)
@@ -917,7 +919,7 @@ if (forcing.folder.path != "regular"){
   tot.reads <- sum(seqID.reads$reads)
   
   reads.forced <- rbind(read.summaries, tot.reads)
-# ----  
+  
   forced.taxonomy <- import.taxonomy.file(FilePath = forced.taxonomy.file)
   
   grouped.taxa <- group.seqIDs.into.taxa(TaxonomyTable = forced.taxonomy, ReadsPerSeqID = seqID.reads)
@@ -931,18 +933,18 @@ if (forcing.folder.path != "regular"){
   top.final.taxa <- find.top.taxa.by.total.reads(TaxonomyList = grouped.final.taxa, NumberTopTaxa = 20)
   
   top.final.taxa <- find.forcing.diffs(TopFinalList = top.final.taxa, AllForcedList = grouped.taxa)
-# ----
-  plot.percent.forced(ForcingTable = otus.forced, ResultsFolder = plots.folder.path, ByReads = FALSE)
+
+  # plot.percent.forced(ForcingTable = otus.forced, ResultsFolder = plots.folder.path, ByReads = FALSE)
   
-  plot.percent.forced(ForcingTable = reads.forced, ResultsFolder = plots.folder.path, ByReads = TRUE)
+  # plot.percent.forced(ForcingTable = reads.forced, ResultsFolder = plots.folder.path, ByReads = TRUE)
   
-  plot.most.misleading.forced.otus(ReadsPerForcedSeqIDs = forced.seqID.reads, ForcedSeqIDs = forced.seqIDs, 
-                                   ReadsPerSeqID = seqID.reads, OutputFolder = plots.folder.path, PlottingLevels = 1:7)
+  # plot.most.misleading.forced.otus(ReadsPerForcedSeqIDs = forced.seqID.reads, ForcedSeqIDs = forced.seqIDs, 
+  #                                  ReadsPerSeqID = seqID.reads, OutputFolder = plots.folder.path, PlottingLevels = 1:7)
   
   plot.most.misleading.forced.taxa(TopTaxaList = top.taxa, ForcedTaxonomy = forced.taxonomy, 
                                    ForcedReadsList = forced.seqID.reads, ForcedSeqIDsList = forced.seqIDs, 
                                    ResultsFolder = plots.folder.path, PlottingLevels = 1:7, TotalReads = tot.reads)
-# ----
+
   plot.forcing.diffs(TopTaxaList = top.final.taxa, NumBars = 50, FolderPath = plots.folder.path)
   
 # ####
@@ -967,7 +969,7 @@ if (forcing.folder.path != "regular"){
   # db.summary <- db.summary[-5, ]
   
   plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path)
-  plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, y.axis.limit = 10) #zooms on any phylum forcing
+  # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, y.axis.limit = 10) #zooms on any phylum forcing
   # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE)
   # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE, y.axis.limit = 1)
   # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, DBconflicts = db.summary, y.axis.limit = max(db.summary[,2]))
@@ -1004,7 +1006,7 @@ if (forcing.folder.path != "regular"){
   # plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE)
   # plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, y.axis.limit = 10000)
   plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE)
-  plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE, y.axis.limit = .5)
+  # plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE, y.axis.limit = .5)
   
   # plot.num.classified.outs(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = FALSE)
   plot.num.classified.outs(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE)

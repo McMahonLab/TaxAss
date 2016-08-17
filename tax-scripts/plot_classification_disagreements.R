@@ -366,8 +366,8 @@ import.taxonomy.file <- function(FilePath, Final = FALSE){
   return(tax)
 }
 
-# Group seqIDs at each taxa level- this is used in plot.most.misleading.forced.taxa
-group.seqIDs.into.taxa <- function(TaxonomyTable, ReadsPerSeqID){
+# Group seqIDs at each taxa level for forcing plots - decide how to treat unclassifieds: group, or make unique ? (can remove later, not this step)
+group.seqIDs.into.taxa <- function(TaxonomyTable, ReadsPerSeqID, UniqueUnclass){
   forced.taxonomy <- TaxonomyTable
   seqID.reads <- ReadsPerSeqID
 
@@ -389,14 +389,16 @@ group.seqIDs.into.taxa <- function(TaxonomyTable, ReadsPerSeqID){
   index <- order(otus.taxa[ ,2], otus.taxa[ ,3], otus.taxa[ ,4], otus.taxa[ ,5], otus.taxa[ ,6], otus.taxa[ ,7], otus.taxa[ ,8])
   otus.taxa.ord <- otus.taxa[index, ]
   
-  # Make unique taxonomy table (so that there aren't duplicate names at each level as occurs with "unclassified")
-  for (t in 2:8){
-    unique.taxa <- unique(otus.taxa.ord[ ,2:t, drop = FALSE])          
-    unique.names <- make.unique(unique.taxa[,(t-1)])       
-    for (u in 1:nrow(unique.taxa)){                     
-      for (r in 1:nrow(otus.taxa.ord)){
-        if (all(otus.taxa.ord[r,2:t] == unique.taxa[u,1:(t-1)])){
-          otus.taxa.ord[r,t] <- unique.names[u]
+  if (UniqueUnclass == TRUE){
+    # Make unique taxonomy table (so that there aren't duplicate names at each level as occurs with "unclassified")
+    for (t in 2:8){
+      unique.taxa <- unique(otus.taxa.ord[ ,2:t, drop = FALSE])          
+      unique.names <- make.unique(unique.taxa[,(t-1)])       
+      for (u in 1:nrow(unique.taxa)){                     
+        for (r in 1:nrow(otus.taxa.ord)){
+          if (all(otus.taxa.ord[r,2:t] == unique.taxa[u,1:(t-1)])){
+            otus.taxa.ord[r,t] <- unique.names[u]
+          }
         }
       }
     }
@@ -432,13 +434,40 @@ group.seqIDs.into.taxa <- function(TaxonomyTable, ReadsPerSeqID){
     }
     cat("Now you're on taxa level:",t,'\n')
   }
+  
+  if (UniqueUnclass == FALSE){
+    # combine unclassifieds at each level so that they form just one bar regardless of differing upper levels
+    for (t in 1:7){
+      index <- which(grouped.taxa[[t]][ ,t] == "unclassified")
+      if (length(index) > 0){
+        unclass.reads <- sum(grouped.taxa[[t]][index, (t + 1)])
+        unclass.names <- c(rep.int(x = "CombinedTaxa", times = t - 1), "unclassified")
+        unclass.row <- c(unclass.names, unclass.reads)
+        grouped.taxa[[t]] <- grouped.taxa[[t]][-index, ]
+        grouped.taxa[[t]] <- rbind(grouped.taxa[[t]], unclass.row)
+        grouped.taxa[[t]][ ,(t + 1)] <- as.numeric(grouped.taxa[[t]][ ,(t + 1)])
+        ord.index <- order(grouped.taxa[[t]][ ,(t + 1)], decreasing = TRUE)
+        grouped.taxa[[t]] <- grouped.taxa[[t]][ord.index, ]
+      }
+    }
+  }
+  
   return(grouped.taxa)
 }
 
-# Find the most abundant taxa at each taxonomy level
-find.top.taxa.by.total.reads <- function(TaxonomyList, NumberTopTaxa, RemoveUnclass = FALSE){
+# Find the most abundant taxa at each taxonomy level - and decide if you want to include unclassifieds in your rank abund calcs
+find.top.taxa.by.total.reads <- function(TaxonomyList, NumberTopTaxa = "all", RemoveUnclass){
   grouped.taxa <- TaxonomyList
-  num.taxa <- NumberTopTaxa
+  
+  # trim or don't trim the total number of results
+  num.taxa <- NULL
+  if (NumberTopTaxa == "all"){
+    for (t in 1:length(grouped.taxa)){
+      num.taxa[t] <- nrow(grouped.taxa[[t]])
+    }
+  }else{
+    num.taxa <- rep.int(x = NumberTopTaxa, times = length(grouped.taxa))
+  }
   
   # arrange highest to lowest total reads
   grouped.taxa.ord <- list("kingdom"=NULL,"phylum"=NULL, "class"=NULL, "order"=NULL, "lineage"=NULL, "clade"=NULL, "tribe"=NULL)
@@ -467,10 +496,10 @@ find.top.taxa.by.total.reads <- function(TaxonomyList, NumberTopTaxa, RemoveUncl
   # look just at the top 20 levels
   grouped.taxa.top <- list("kingdom"=NULL,"phylum"=NULL, "class"=NULL, "order"=NULL, "lineage"=NULL, "clade"=NULL, "tribe"=NULL)
   for (t in 1:7){
-    if (nrow(not.unclassifieds[[t]]) < num.taxa){
+    if (nrow(not.unclassifieds[[t]]) < num.taxa[t]){
       grouped.taxa.top[[t]] <- not.unclassifieds[[t]]
     }else{
-      grouped.taxa.top[[t]] <- not.unclassifieds[[t]][1:num.taxa, ]
+      grouped.taxa.top[[t]] <- not.unclassifieds[[t]][1:num.taxa[t], ]
     }
   }
   return(grouped.taxa.top)
@@ -523,6 +552,20 @@ find.forcing.diffs <- function(TopFinalList, AllForcedList){
   return(top.final)
 }
 
+# this removes taxa that are low abundance based on their max of red, grey, and blue heights. (so narrows in on interesting bars while maintaining origional ranks)
+filter.out.low.abund <- function(TaxaList, CutoffVector){
+  for (t in 1:7){
+    max.heights <- NULL
+    for (r in 1:nrow(TaxaList[[t]])){
+      max.heights[r] <- max(TaxaList[[t]][r,(t + 4):(t + 6)])
+    }
+    index <- which(max.heights < CutoffVector[t])
+    if (length(index) > 0){
+      TaxaList[[t]] <- TaxaList[[t]][-index, ]
+    }
+  }
+  return(TaxaList)
+}
 
 # ####
 # Define functions to plot the data
@@ -863,7 +906,7 @@ plot.forcing.diffs <- function(TopTaxaList, NumBars, FolderPath, PlottingLevels 
     # make to plots!
     # png(filename = plot.name, width = 7, height = 5, units = "in", res = 100)
     par(mar = c(10,5,5,2))
-    barplot(height = stacked.data[[t]], beside = FALSE, col = c("grey","red","blue"), main = names(stacked.data)[t], las = 2, ylab = "Relative Abundance (% reads)", cex.axis = .5)
+    barplot(height = stacked.data[[t]], beside = FALSE, col = c("grey","red","blue"), main = names(stacked.data)[t], las = 2, ylab = "Relative Abundance (% reads)", border = NA)
     legend(x = "topright", legend = c("Gained from forcing", "Lost from forcing"), fill = c("red", "blue"), border = FALSE, bty = "n", inset = .05)
     # unnecessary.message <- dev.off()
     # cat("made plot: ", plot.name, "\n")
@@ -927,17 +970,19 @@ if (forcing.folder.path != "regular"){
   
   forced.taxonomy <- import.taxonomy.file(FilePath = forced.taxonomy.file)
   
-  grouped.taxa <- group.seqIDs.into.taxa(TaxonomyTable = forced.taxonomy, ReadsPerSeqID = seqID.reads)
+  grouped.taxa <- group.seqIDs.into.taxa(TaxonomyTable = forced.taxonomy, ReadsPerSeqID = seqID.reads, UniqueUnclass = FALSE)
   
-  top.taxa <- find.top.taxa.by.total.reads(TaxonomyList = grouped.taxa, NumberTopTaxa = 20, RemoveUnclass = FALSE)
+  top.taxa <- find.top.taxa.by.total.reads(TaxonomyList = grouped.taxa, NumberTopTaxa = 20, RemoveUnclass = FALSE) # only used for custom-only rank abund order (plot.most.misleading.forced.taxa)                   .                              
   
   final.taxonomy <- import.taxonomy.file(FilePath = final.taxonomy.file, Final = TRUE)
 
-  grouped.final.taxa <- group.seqIDs.into.taxa(TaxonomyTable = final.taxonomy, ReadsPerSeqID = seqID.reads)
+  grouped.final.taxa <- group.seqIDs.into.taxa(TaxonomyTable = final.taxonomy, ReadsPerSeqID = seqID.reads, UniqueUnclass = FALSE)
 
-  top.final.taxa <- find.top.taxa.by.total.reads(TaxonomyList = grouped.final.taxa, NumberTopTaxa = 50, RemoveUnclass = FALSE)
+  top.final.taxa <- find.top.taxa.by.total.reads(TaxonomyList = grouped.final.taxa, NumberTopTaxa = "all", RemoveUnclass = FALSE) # all here to export all data, numbars (workflow rank abund) is determined in plot function.
 
   top.final.taxa <- find.forcing.diffs(TopFinalList = top.final.taxa, AllForcedList = grouped.taxa)
+  
+  top.final.taxa <- filter.out.low.abund(TaxaList = top.final.taxa, CutoffVector = c(0, .5, .5, .5, .5, .5, .5))
   
   # plot.percent.forced(ForcingTable = otus.forced, ResultsFolder = plots.folder.path, ByReads = FALSE)
   
@@ -946,11 +991,11 @@ if (forcing.folder.path != "regular"){
   # plot.most.misleading.forced.otus(ReadsPerForcedSeqIDs = forced.seqID.reads, ForcedSeqIDs = forced.seqIDs, 
   #                                  ReadsPerSeqID = seqID.reads, OutputFolder = plots.folder.path, PlottingLevels = 1:7)
   
-  plot.most.misleading.forced.taxa(TopTaxaList = top.taxa, ForcedTaxonomy = forced.taxonomy, 
-                                   ForcedReadsList = forced.seqID.reads, ForcedSeqIDsList = forced.seqIDs, 
-                                   ResultsFolder = plots.folder.path, PlottingLevels = 1:7, TotalReads = tot.reads)
+  # plot.most.misleading.forced.taxa(TopTaxaList = top.taxa, ForcedTaxonomy = forced.taxonomy, 
+  #                                  ForcedReadsList = forced.seqID.reads, ForcedSeqIDsList = forced.seqIDs, 
+  #                                  ResultsFolder = plots.folder.path, PlottingLevels = 1:7, TotalReads = tot.reads)
 
-  # plot.forcing.diffs(TopTaxaList = top.final.taxa, NumBars = 50, FolderPath = plots.folder.path)
+  plot.forcing.diffs(TopTaxaList = top.final.taxa, NumBars = 800, FolderPath = plots.folder.path)
   
 # ####
 # If not then do the normal comparison for choosing pident cutoff

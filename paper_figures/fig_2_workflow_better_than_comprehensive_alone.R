@@ -15,34 +15,34 @@
 
 # ---- Define File Paths and other User Choices ----
 
-mendota.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take18playwith/plots/WorkflowImprovement-BesideData-Reads.csv"
-mendota.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take18playwith/plots/WorkflowImprovement-StackedData-Reads.csv"
+mendota.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take_mendota_uniq/plots/WorkflowImprovement-BesideData-Reads.csv"
+mendota.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take_mendota_uniq/plots/WorkflowImprovement-StackedData-Reads.csv"
 
-bogs.epi.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take18playwith/plots/WorkflowImprovement-BesideData-Reads.csv"
-bogs.epi.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take18playwith/plots/WorkflowImprovement-StackedData-Reads.csv"
+bogs.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take_bogs_deblur/plots/WorkflowImprovement-BesideData-Reads.csv"
+bogs.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take_bogs_deblur/plots/WorkflowImprovement-StackedData-Reads.csv"
 
-bogs.hypo.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take18playwith/plots/WorkflowImprovement-BesideData-Reads.csv"
-bogs.hypo.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take18playwith/plots/WorkflowImprovement-StackedData-Reads.csv"
+# bogs.hypo.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take18playwith/plots/WorkflowImprovement-BesideData-Reads.csv"
+# bogs.hypo.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take18playwith/plots/WorkflowImprovement-StackedData-Reads.csv"
 
-danube.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take19/plots/WorkflowImprovement-BesideData-Reads.csv"
-danube.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take19/plots/WorkflowImprovement-StackedData-Reads.csv"
+danube.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take_danube_10/plots/WorkflowImprovement-BesideData-Reads.csv"
+danube.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take_danube_10/plots/WorkflowImprovement-StackedData-Reads.csv"
 
-taihu.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take18playwith/plots/WorkflowImprovement-BesideData-Reads.csv"
-taihu.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take18playwith/plots/WorkflowImprovement-StackedData-Reads.csv"
+# taihu.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take18playwith/plots/WorkflowImprovement-BesideData-Reads.csv"
+# taihu.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take18playwith/plots/WorkflowImprovement-StackedData-Reads.csv"
+# 
+# michigan.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take18playwith/plots/WorkflowImprovement-BesideData-Reads.csv"
+# michigan.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take18playwith/plots/WorkflowImprovement-StackedData-Reads.csv"
 
-michigan.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take18playwith/plots/WorkflowImprovement-BesideData-Reads.csv"
-michigan.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take18playwith/plots/WorkflowImprovement-StackedData-Reads.csv"
+file.paths.beside <- c(mendota.beside.file.path, bogs.beside.file.path, danube.beside.file.path)
+file.paths.stacked <- c(mendota.stacked.file.path, bogs.stacked.file.path, danube.stacked.file.path)
 
-file.paths.beside <- c(mendota.beside.file.path, bogs.epi.beside.file.path, bogs.hypo.beside.file.path, danube.beside.file.path, taihu.beside.file.path, michigan.beside.file.path)
-file.paths.stacked <- c(mendota.stacked.file.path, bogs.epi.stacked.file.path, bogs.hypo.stacked.file.path, danube.stacked.file.path, taihu.stacked.file.path, michigan.stacked.file.path)
-
-ecosystem.names <- c("mendota", "bogs.epi", "bogs.hypo", "danube", "taihu", "michigan")
+ecosystem.names <- c("mendota", "bogs", "danube")
 taxa.names <- c("kingdom", "phylum", "class", "order", "lineage", "clade", "tribe")
 
 taxa.num <- 5   # 1 = kingdom, 2 = phylum, 3 = class, 4 = order, 5 = lineage, 6 = clade, 7 = tribe
 eco.num <- 1   # 1 = mendota, 2 = bogs.epi, 3 = bogs.hyp, 4 = danube, 5 = taihu, 6 = michigan
 
-file.path.figure.2 <- "~/Desktop/Fig2.eps"
+folder.path <- "~/Desktop/figures_8-16-16/"
 
 # ---- Define Functions to Import and Format ----
 
@@ -143,15 +143,20 @@ stacked.tax.list <- reorganize.ecosystem.list.by.taxa.level(EcoList = stacked.ec
 
 # make a rough fig 2a for each ecosystem:
 for (e in 1:length(ecosystem.names)){
+  png(filename = paste(folder.path, "/fig2b/", ecosystem.names[e], ".png", sep = ""), width = 7, height = 5, units = "in", res = 100)
   label.loc <- fancy.barplot(BesideData = beside.eco.list[[e]], StackedData = stacked.eco.list[[e]], PlotTitle = ecosystem.names[e] )
   mtext(text = taxa.names, side = 1, line = 1, at = label.loc)
+  dev.off()
 }
 
 # make a rough fig 2b for each taxa level:
 
 for (t in 1:length(taxa.names)){
+  png(filename = paste(folder.path, "/fig2a/", taxa.names[t], ".png", sep = ""), width = 7, height = 5, units = "in", res = 100)
   label.loc <- fancy.barplot(BesideData = beside.tax.list[[t]], StackedData = stacked.tax.list[[t]], PlotTitle = taxa.names[t])
   mtext(text = ecosystem.names, side = 1, line = 1, at = label.loc)
+  dev.off()
 }
 
 # make the polished, 2-panel, paper figure. This one is exported at eps.
+

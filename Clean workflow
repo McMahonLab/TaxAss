@@ -53,19 +53,19 @@ NOTE: steps 1-14 can be run in a block using the bash scripts:
 	python create_fastas_given_seqIDs.py ids.below.98.all otus.fasta otus.below.98.fasta
 
 9. assign taxonomy (mothur)
-	mothur "#classify.seqs(fasta=otus.above.98.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2)"
-	mothur "#classify.seqs(fasta=otus.below.98.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
+	mothur "#classify.seqs(fasta=otus.above.98.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
+	mothur "#classify.seqs(fasta=otus.below.98.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
 
 10. combine taxonomy files (terminal)
 	cat otus.above.98.custom.wang.taxonomy otus.below.98.general.wang.taxonomy > otus.98.taxonomy
 
 11. assign taxonomy with general database only (mothur, bash)
-	mothur "#classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
+	mothur "#classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
 	cat otus.general.wang.taxonomy > otus.general.taxonomy
 
 11.5 OPTIONAL- feeds into Database_Improvement_Workflow
 	assign taxonomy to custom database with general database (mothur, bash)
-	mothur "#classify.seqs(fasta=custom.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
+	mothur "#classify.seqs(fasta=custom.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
 	cat custom.general.wang.taxonomy custom.general.taxonomy
 
 12. reformat taxonomy files (bash)
@@ -78,7 +78,7 @@ NOTE: steps 1-14 can be run in a block using the bash scripts:
 	mkdir conflicts_98
 	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70
 	
-14. OPTIONAL BUT RECOMMENDED: choose appropriate pident cutoff (R)
+14. OPTIONAL: choose appropriate pident cutoff (R)
 	note: you have to repeat steps 5, 7-10, & 12-13 with multiple pident cutoffs to do this step
 	Rscript plot_classification_disagreements.R otus.abund plots regular NA NA conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98
 
@@ -86,10 +86,10 @@ NOTE: steps 1-14 can be run in a block using the bash scripts:
 	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 final
 
 15.5 OPTIONAL: plot benefits of using this workflow (R, mothur, bash)
-	Improvement over general database only:
+	a. Improvement over general database only:
 		Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID.csv plots final.taxonomy.names final.general.names
-	Improvement over custom database only:
-		mothur "#classify.seqs(fasta=otus.fasta, template=custom.fasta, taxonomy=custom.taxonomy, method=wang, probs=T, processors=2)"
+	b. Improvement over custom database only:
+		mothur "#classify.seqs(fasta=otus.fasta, template=custom.fasta, taxonomy=custom.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
 		cat otus.custom.wang.taxonomy > otus.custom.taxonomy
 		sed 's/[[:blank:]]/\;/' <otus.custom.taxonomy >otus.custom.taxonomy.reformatted
 		mv otus.custom.taxonomy.reformatted otus.custom.taxonomy
@@ -104,8 +104,8 @@ NOTE: steps 1-14 can be run in a block using the bash scripts:
 	mkdir data ; mv otus* data
 	mkdir databases ; mv *.taxonomy *.fasta databases
 	
-Detailed explanations of commands and inputs are below:
 
+Detailed explanations of commands and inputs are below:
 
 __________________________________________________________________________________________
 
@@ -614,8 +614,8 @@ their assigned taxonomy.
 
 Full Two Commands (type in terminal):
 
-mothur "#classify.seqs(fasta=otus.above.98.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2)"
-mothur "#classify.seqs(fasta=otus.below.98.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
+mothur "#classify.seqs(fasta=otus.above.98.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
+mothur "#classify.seqs(fasta=otus.below.98.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
 
 What the first and last commands do:
 	~/mothur/mothur		this is the path to the mothur program installed on your computer.
@@ -639,11 +639,11 @@ What each flag does:
 	method=		algorithm for assigning taxonomy. default is wang.
 	probs=		T or F, show the bootstrap probabilities or not?
 	cutoff=		minimum bootstrap value for getting a name instead of unclassified
-				typically minimum is 60%
-				note: the default is no cutoff, full reporting.  I have an R script that
-				let's you apply a bootstrap cutoff after the fact if you want to see everything 1st
+				The default (v38) is =80, but you should say =0.  This workflow
+				let's you apply a bootstrap cutoff after the fact so you can see everything
+				1st, and you have the option to use a different cutoff for the two databases.
 	processors=	the number of processors on your computer to run it on
-				note: I think mothur has a bug where this only works on windows. 
+				note: mothur has a bug where this only works on windows, mac only uses 1. 
 
 What the output files are (note you have no control over the name extensions added):
 	otus.above.98.custom.wang.taxonomy
@@ -701,7 +701,7 @@ rename the output file something easy to work with using bash.
 
 Full Two Commands (type in terminal):
 
-mothur "#classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
+mothur "#classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
 cat otus.general.wang.taxonomy > otus.general.taxonomy
 
 What the commands do:
@@ -735,7 +735,7 @@ By classifying the custom database with the general database you can:
 
 Full Two Commands (Type in Terminal):
 
-mothur "#classify.seqs(fasta=custom.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2)"
+mothur "#classify.seqs(fasta=custom.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
 cat custom.general.wang.taxonomy custom.general.taxonomy
 
 What the commands do:
@@ -878,7 +878,7 @@ What the generated files in your conflicts folders are:
 
 __________________________________________________________________________________________
 
-14. choose appropriate pident cutoff (R)
+14. OPTIONAL: choose appropriate pident cutoff (R)
 
 This step generates some plots that you can use to double check that your chosen cutoff is 
 appropriate.  The plots are saved into the "plots" folder that you created in step 6.  In
@@ -1030,7 +1030,7 @@ This is what I call forcing.  These plots take longer to generate because first 
 with the custom database alone, and then you must group the classifications by taxonomic level (all other
 steps in this workflow are on an OTU-level.) However, the plots are very beautiful :)
 
-mothur "#classify.seqs(fasta=otus.fasta, template=custom.fasta, taxonomy=custom.taxonomy, method=wang, probs=T, processors=2)"
+mothur "#classify.seqs(fasta=otus.fasta, template=custom.fasta, taxonomy=custom.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
 cat otus.custom.wang.taxonomy > otus.custom.taxonomy
 
 sed 's/[[:blank:]]/\;/' <otus.custom.taxonomy >otus.custom.taxonomy.reformatted

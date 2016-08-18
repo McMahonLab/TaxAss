@@ -5,21 +5,7 @@
 tax-scripts/.RData
 
 # Databases
-databases/gg_13_5.taxonomy
-databases/gg_13_5.fasta
-databases/gg_13_8_99.taxonomy
-databases/gg_13_8_99.fasta
-databases/*.nhr
-databases/*.nin
-databases/*.nog
-databases/*.nsd
-databases/*.nsi
-databases/*.nsq
-databases/*.8mer
-databases/*.numNonZero
-databases/*.prob
-databases/*.sum
-databases/*.train
+databases/*
 
 # Data Directories
 processedData

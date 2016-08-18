@@ -1,6 +1,6 @@
 # 8-27-15 RRR
 
-# The goal of this script is to identify the best BLAST cutoff to use 
+# The goal of this script is to identify the best BLAST cutoff to use
 # in my new taxonomy assignment pipeline.
 # I will do this by comparing the taxonomy assignments of the seqIDs
 # that met different BLAST cutoff percent IDs and were classified by FW
@@ -33,6 +33,7 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 # input for troubleshooting
 # ####
 # # CONFLICT FINDING ONLY:
+# cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
 # userprefs <- c("../../take17/otus.99.taxonomy",
 #                "../../take17/otus.general.taxonomy",
 #                "../../take17/ids.above.99",
@@ -41,6 +42,7 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                80,
 #                70)
 # # FINAL TABLE GENERATION: note you do need the otus.general.taxonomy file b/c it's used to prep a file for plot_classification_improvement.R in step 16
+# cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
 # userprefs <- c("../../take18playwith/otus.99.taxonomy",
 #                "../../take18playwith/otus.general.taxonomy",
 #                "../../take18playwith/ids.above.99",
@@ -50,6 +52,7 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                70,
 #                "final")
 # # DATABASE COMPARISON: part of optional step 11.5 
+# cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
 # userprefs <- c("../../take17/custom.custom.taxonomy",
 #                "../../take17/custom.general.taxonomy",
 #                "NA",
@@ -59,6 +62,7 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                70,
 #                "database")
 # # FORCING ANALYSIS: part of optional step 15.5
+# cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
 # userprefs <- c("../../take18playwith/otus.custom.taxonomy",
 #                "../../take18playwith/otus.98.80.70.taxonomy",
 #                "../../take18playwith/ids.above.98",

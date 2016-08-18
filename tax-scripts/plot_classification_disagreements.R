@@ -19,14 +19,16 @@
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 
-# FOR PLOTTING FORCING  **don't forget to change the seqID.reads file path below!!
-userprefs <- c(NA,
-               "../../take_mendota_clust/plots",
-               "../../take_mendota_clust/conflicts_forcing",
-               "../../take_mendota_clust/otus.custom.80.taxonomy",
-               "../../take_mendota_clust/otus.98.80.80.taxonomy")
-# 
+# # FOR PLOTTING FORCING  **don't forget to change the seqID.reads file path below!!
+# cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
+# userprefs <- c(NA,
+#                "../../take_mendota_clust/plots",
+#                "../../take_mendota_clust/conflicts_forcing",
+#                "../../take_mendota_clust/otus.custom.80.taxonomy",
+#                "../../take_mendota_clust/otus.98.80.80.taxonomy")
+# # 
 # # # FOR CHOOSING CUTOFF:
+# cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
 # userprefs <- c("../../take18playwith/otus.abund",
 #                "../../take18playwith/plots",
 #                "regular",
@@ -51,7 +53,8 @@ userprefs <- c(NA,
 #                "../../take18playwith/ids.above.100",
 #                100)
 # 
-seqID.reads.file.path <- "../../take_mendota_clust/total.reads.per.seqID.csv"
+# cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
+# seqID.reads.file.path <- "../../take_mendota_clust/total.reads.per.seqID.csv"
 
 # in case you want to add the db baseline conflict back to the plots, need to specify this path below
 # and un-comment the plotting calls that use it at the end of the script.

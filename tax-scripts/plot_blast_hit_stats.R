@@ -28,6 +28,7 @@ if (length(userprefs) > 3){
   mirror.location <- "https://cran.mtu.edu"
 }
 
+# cat("fuck you forgot to comment out the file paths in plot_blast_hit_stats.R!")
 # blast.file.path <- "../../take19/otus.custom.blast.table.modified"
 # pident.cutoff <- 98
 # plots.folder.path <- "../../take19/plots"

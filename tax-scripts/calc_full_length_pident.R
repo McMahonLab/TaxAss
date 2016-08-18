@@ -28,6 +28,7 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 blast.file.path <- userprefs[1]
 hit.stats.path <- userprefs[2]
 
+# cat("fuck you forgot to comment out the file paths in calc_full_length_pident.R!")
 # blast.file.path <- "../../take19/otus.custom.blast.table"
 # hit.stats.path <- "../../take16/otus.custom.blast.table.modified"
 

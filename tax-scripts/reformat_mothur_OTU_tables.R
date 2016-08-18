@@ -28,6 +28,7 @@ path.to.mothur.file <- userprefs[1]
 mothur.extension <- userprefs[2]
 path.to.output.file <- userprefs[3]
 
+# cat("fuck you forgot to comment out the file paths in reformat_mothur_OTU_tables.R!")
 # path.to.mothur.file <- "~/Desktop/TaxonomyTrainingSets/BLASTing/StartFiles19/danube-10.count_table"
 # mothur.extension <- "count_table" # because I think..... several ones will work??? clearly .shared worked for ben!
 # path.to.output.file <- "~/Desktop/TaxonomyTrainingSets/BLASTing/StartFiles19/danube-10.otus"

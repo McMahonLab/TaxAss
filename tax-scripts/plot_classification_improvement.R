@@ -23,6 +23,7 @@ path.to.plots.folder <- userprefs[4]
 taxonomy.names.path <- userprefs[5]
 gg.names.path <- userprefs[6]
   
+# cat("fuck you forgot to comment out the file paths in find_classification_improvements.R!")
 # taxonomy.pvalues.path <- "../../take18playwith/final.taxonomy.pvalues"
 # gg.pvalues.path <- "../../take18playwith/final.general.pvalues"
 # reads.table.path <- "../../take18playwith/total.reads.per.seqID.csv"

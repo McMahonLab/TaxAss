@@ -524,15 +524,25 @@ What each argument in the R script is:
 										install the reshape package temporarily if you don't have it already   
 
 What each generated file is:
-	BLAST_hits_line_plot.png
-	BLAST_hits_used_for_pident_98.png
-	BLAST_hits_used_for_pidents_70-100.png
-	BLAST_hits_used_for_pidents_90-100.png
-	BLAST_hits_used_overall.png
+	plots/BLAST_hits_used_for_pidents_0-100.png
+	plots/BLAST_hits_used_for_pidents_0-100_only_incorrect_hits.png
+	plots/BLAST_hits_used_for_pidents_0-100.csv
+
+These plots show the percent of times that each BLAST hit was the recalculated best hit.
+The .csv file is the data table used to make the plots.
+Use these to check that returning the top 5 BLAST hits is enough, i.e. you are not missing 
+alignments that would have been better when re-calculated to full-length percent identity.
+This is shown by the re-calculated percent identity cutoff, with the idea being that if you 
+are missing "better" hits but the "better" ones are still total crap, then it doesn't matter
+if you missed them.
+Basically: look at the plot.  If it isn't almost zero for hit #5 then go back to step 2 and 
+make BLAST report more than 5 hits, for example say "-max_target_seqs 10" instead of 
+"-max_target_seqs 5". Then repeat the other steps up to here and plot again, and check that
+it's almost 0% at hit 10.  If it's still not we have a serious problem, please tell me!!
 
 note: if there is a tie where two hits are equally good at 5th place, I think BLAST will report both
 and label one of them hit # 6.  So if you have an extra hit number, it doesn't mean there's a problem.
-****Choose which plots to keep*****
+
 __________________________________________________________________________________________
 
 7. recover sequence IDs left out of blast (python, bash)
@@ -646,19 +656,33 @@ What each flag does:
 				note: mothur has a bug where this only works on windows, mac only uses 1. 
 
 What the output files are (note you have no control over the name extensions added):
-	otus.above.98.custom.wang.taxonomy
-	otus.above.98.custom.wang.tax.summary
-	otus.below.98.general.wang.taxonomy
-	otus.below.98.general.wang.tax.summary
+	otus.above.98.custom.wang.taxonomy			This is the custom taxonomy file that you keep!
+	otus.above.98.custom.wang.tax.summary		crap
+	otus.below.98.general.wang.taxonomy			This is the general taxonomy file that you keep!
+	otus.below.98.general.wang.tax.summary		crap
 
-**** add in the database files that are generated too***
+What the silently generated output files are (these are the databases mothur creates):
+	general.8mer
+	general.general.8mer.numNonZero
+	general.general.8mer.prob
+	general.tree.sum
+	general.tree.train
+	custom.8mer
+	custom.custom.8mer.numNonZero
+	custom.custom.8mer.prob
+	custom.tree.sum
+	custom.tree.train
+Note: these database files take a long time to generate and are based only on the taxonomy database,
+not on your OTU file. That means that you can re-use them and (for the general one at least) save
+20 minutes the next time you use classify.seqs with the general database. This is also why if you
+are trying multiple percent identity cutoffs you should run through one all the way first and then
+do the next ones in paralelle (as done in RunSteps_1-14.sh)
 	
 NOTE: these bootstrap percent confidence values are NOT the confidence that the taxonomy 
 assignment is *correct*, just that it is *repeatable* in that database.  This is another 
 paremeter that we could explore changing more in the future.  It likely should be different
 in the different databases also because of the different database sizes.  I left cutoff out
 in this command so that you can explore the different results of it later, in steps 13-14.
-
 
 __________________________________________________________________________________________
 

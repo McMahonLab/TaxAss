@@ -29,9 +29,9 @@ mothur.extension <- userprefs[2]
 path.to.output.file <- userprefs[3]
 
 # cat("fuck you forgot to comment out the file paths in reformat_mothur_OTU_tables.R!")
-# path.to.mothur.file <- "~/Desktop/TaxonomyTrainingSets/BLASTing/StartFiles19/danube-10.count_table"
+# path.to.mothur.file <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take_swedish_2/swedish_2.count_table"
 # mothur.extension <- "count_table" # because I think..... several ones will work??? clearly .shared worked for ben!
-# path.to.output.file <- "~/Desktop/TaxonomyTrainingSets/BLASTing/StartFiles19/danube-10.otus"
+# path.to.output.file <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take_swedish_2/otus.abund"
 
 # ---- Define Functions ----
 
@@ -39,7 +39,7 @@ import.and.format.count_table <- function(FilePath){
   count.table <- read.table(file = FilePath, header = TRUE, sep = "\t", colClasses = "character")
   # col 2 is "total", col 1 is seqID ("Representative_Sequence")
   seq.ids <- count.table[ ,1]
-  count.table <- count.table[ ,-c(1:2)]
+  count.table <- count.table[ ,-c(1:2), drop = FALSE]
   # matrices are faster
   count.table <- apply(X = count.table, MARGIN = 2, FUN = as.numeric)
   row.names(count.table) <- seq.ids

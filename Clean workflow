@@ -14,6 +14,8 @@ Summary of Steps and Commands (all commands entered in terminal window):
 		sed 's/$/;/' <NoSpaces >EndLineSemicolons
 		mv EndLineSemicolons general.taxonomy
 		rm NoSpaces
+	for aligned fasta files:
+		sed 's/-//g' <aligned.fasta >otus.fasta
 	for mothur .count_table as OTU table:
 		Rscript reformat_mothur_OTU_tables.R StupidLongMothurName.count_table count_table otus.abund
 
@@ -264,6 +266,25 @@ TACGTAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAG
 >seqID
 TACGTAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAG
 		
+Note that they should not be aligned. The dashes in aligned sequences don't work with BLAST.
+
+An Aligned file would look something like this:
+>SRR1531609.6
+GAG-G-A-A--TA-TT--GG-T-C----AA-T-G-G--GC-----GC-A--A---G-C-C-T-G-A-A-C-C-A---GC-C--A--T-GCC-G-A-G-T------G-C-A--G--GA-----------------------------T-G--A--C--G-G-TC----C---TA-TG-----G-A-T-----T-G-T-A---AA-C-T-GC--------------------TT-TT-G-T--A-CAG----G--A-A--G---AA-ACAC-T---C-C-C--T---------------------C----------------------------GT---------------------------G------------------------A-GGG-A-GC-T-T-G-A-C-G-----G-T---A-C-TG--------T-A-A-G----
+
+You can remove hyphens using this terminal command:
+
+Full Command (Type in Terminal):
+
+sed 's/-//g' <aligned.fasta >otus.fasta
+
+What the commands are:
+	sed				a stream editor, built-in bash function
+	s				tells it to do a substitution
+	g				tells it to do a global substitution (ie. every instance not just first on the line)
+	/-//			is format /find/replace/
+	aligned.fasta	the name of your aligned fasta file
+	otus.fasta		the name of the reformatted file you're creating
 
 _____________________________________________
 

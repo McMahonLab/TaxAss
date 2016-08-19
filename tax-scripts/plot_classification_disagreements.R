@@ -12,6 +12,8 @@
 # Terminal command line syntax:
 # Rscript plot_classification_disagreements.R otus.abund plots regular NA NA conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98 ...
 # Rscript plot_classification_disagreements.R NA plots conflicts_forcing otus.custom.85.taxonomy otus.98.85.70.taxonomy
+# Rscript plot_classification_disagreements.R otus.abund plots conflicts_forcing otus.custom.85.taxonomy otus.98.85.70.taxonomy
+# note: the forcing option with otus.abund specified is for if you skipped step 14 so you need to make the seqid.reads file
 
 # ####
 # Receive arguments from terminal command line
@@ -19,13 +21,13 @@
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 
-# # FOR PLOTTING FORCING  **don't forget to change the seqID.reads file path below!!
-# cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
-# userprefs <- c(NA,
-#                "../../take_mendota_clust/plots",
-#                "../../take_mendota_clust/conflicts_forcing",
-#                "../../take_mendota_clust/otus.custom.80.taxonomy",
-#                "../../take_mendota_clust/otus.98.80.80.taxonomy")
+# FOR PLOTTING FORCING  **don't forget to change the seqID.reads file path below!!
+cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!\n")
+userprefs <- c(NA, # if seqid.reads exists (i.e. you ran step 14) this is NA, otherwise it's otus.abund file path)
+               "../../take_mendota_clust/plots",
+               "../../take_mendota_clust/conflicts_forcing",
+               "../../take_mendota_clust/otus.custom.80.taxonomy",
+               "../../take_mendota_clust/otus.98.80.80.taxonomy")
 # # 
 # # # FOR CHOOSING CUTOFF:
 # cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
@@ -53,8 +55,8 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                "../../take18playwith/ids.above.100",
 #                100)
 # 
-# cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
-# seqID.reads.file.path <- "../../take_mendota_clust/total.reads.per.seqID.csv"
+cat("fuck you forgot to comment out the seqid.reads file path in plot_classification_disagreements!\n")
+seqID.reads.file.path <- "../../take_mendota_clust/total.reads.per.seqID.csv"
 
 # in case you want to add the db baseline conflict back to the plots, need to specify this path below
 # and un-comment the plotting calls that use it at the end of the script.
@@ -570,6 +572,21 @@ filter.out.low.abund <- function(TaxaList, CutoffVector){
   return(TaxaList)
 }
 
+# export as a table the total forcing stats (this made the green bar plots that are commented out now)
+export.total.forcing.stats <- function(OtuSum, ReadSum, FolderPath){
+  # the OTU summary is not in percents, the reads summary is
+  otu.tot.row <- nrow(OtuSum)
+  OtuSum <- OtuSum / OtuSum[otu.tot.row,1] * 100
+  
+  both.sum <- cbind(OtuSum, ReadSum)
+  colnames(both.sum) <- c("perc.otus.forced", "perc.reads.forced")
+  row.names(both.sum)[otu.tot.row] <- "total.reads.or.otus"
+  
+  file.name <- paste(FolderPath, "/total_percent_forcing_with_only_custom_db.csv", sep = "")
+  write.csv(x = both.sum, file = file.name, quote = FALSE, row.names = TRUE)
+  cat("Made datafile: ", file.name, "\n")
+}
+
 # ####
 # Define functions to plot the data
 # ####
@@ -973,9 +990,9 @@ if (forcing.folder.path != "regular"){
   
   forced.taxonomy <- import.taxonomy.file(FilePath = forced.taxonomy.file)
   
-  grouped.taxa <- group.seqIDs.into.taxa(TaxonomyTable = forced.taxonomy, ReadsPerSeqID = seqID.reads, UniqueUnclass = FALSE)
+  grouped.forced.taxa <- group.seqIDs.into.taxa(TaxonomyTable = forced.taxonomy, ReadsPerSeqID = seqID.reads, UniqueUnclass = FALSE)
   
-  top.taxa <- find.top.taxa.by.total.reads(TaxonomyList = grouped.taxa, NumberTopTaxa = 20, RemoveUnclass = FALSE) # only used for custom-only rank abund order (plot.most.misleading.forced.taxa)                   .                              
+  top.taxa <- find.top.taxa.by.total.reads(TaxonomyList = grouped.forced.taxa, NumberTopTaxa = 20, RemoveUnclass = FALSE) # only used for custom-only rank abund order (plot.most.misleading.forced.taxa)                   .                              
   
   final.taxonomy <- import.taxonomy.file(FilePath = final.taxonomy.file, Final = TRUE)
 
@@ -983,13 +1000,15 @@ if (forcing.folder.path != "regular"){
 
   top.final.taxa <- find.top.taxa.by.total.reads(TaxonomyList = grouped.final.taxa, NumberTopTaxa = "all", RemoveUnclass = FALSE) # all here to export all data, numbars (workflow rank abund) is determined in plot function.
 
-  top.final.taxa <- find.forcing.diffs(TopFinalList = top.final.taxa, AllForcedList = grouped.taxa)
+  top.final.taxa <- find.forcing.diffs(TopFinalList = top.final.taxa, AllForcedList = grouped.forced.taxa)
   
   top.final.taxa <- filter.out.low.abund(TaxaList = top.final.taxa, CutoffVector = c(0, .5, .5, .5, .5, .5, .5))
   
   # plot.percent.forced(ForcingTable = otus.forced, ResultsFolder = plots.folder.path, ByReads = FALSE)
   
   # plot.percent.forced(ForcingTable = reads.forced, ResultsFolder = plots.folder.path, ByReads = TRUE)
+  
+  export.total.forcing.stats(OtuSum = otus.forced, ReadSum = reads.forced, FolderPath = plots.folder.path)
   
   # plot.most.misleading.forced.otus(ReadsPerForcedSeqIDs = forced.seqID.reads, ForcedSeqIDs = forced.seqIDs, 
   #                                  ReadsPerSeqID = seqID.reads, OutputFolder = plots.folder.path, PlottingLevels = 1:7)

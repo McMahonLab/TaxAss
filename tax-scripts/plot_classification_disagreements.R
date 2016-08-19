@@ -57,6 +57,7 @@ userprefs <- c(NA, # if seqid.reads exists (i.e. you ran step 14) this is NA, ot
 # 
 cat("fuck you forgot to comment out the seqid.reads file path in plot_classification_disagreements!\n")
 seqID.reads.file.path <- "../../take_mendota_clust/total.reads.per.seqID.csv"
+present.working.directory <- "../../take_mendota_clust/"
 
 # in case you want to add the db baseline conflict back to the plots, need to specify this path below
 # and un-comment the plotting calls that use it at the end of the script.
@@ -76,6 +77,7 @@ if (length(rest.of.arguments) > 0){
 
 # this is automatically exported into the working directory when this script is run normally
 seqID.reads.file.path <- "total.reads.per.seqID.csv"
+present.working.directory <- "."
 
 # ####
 # Define functions to import and process the data
@@ -153,6 +155,13 @@ import.and.reformat.otu.table <- function(OTUtable){
   
   seqID.reads <- data.frame(seqID, reads, stringsAsFactors = FALSE)
   return(seqID.reads)
+}
+
+# check if you have seqid.reads already or need to make it
+check.for.seqID.reads <- function(PWDpath){
+  x <- list.files(path = PWDpath)
+  check <- any(x == "total.reads.per.seqID.csv")
+  return(check)
 }
 
 # import the ids.above. files that list seqIDs above the pident cutoff
@@ -974,9 +983,14 @@ export.summary.table <- function(SummaryTable, FolderPath, ByOTU = TRUE, Percent
 # first check if this is the optional "forcing plot"
 # ####
 if (forcing.folder.path != "regular"){
+  
   otus.forced <- import.forcing.conflicts(ForcingFolder = forcing.folder.path)
   
-  seqID.reads <- import.seqID.reads(FilePath = seqID.reads.file.path) # this was exported previously by this script
+  if (check.for.seqID.reads(PWDpath = present.working.directory)){
+    seqID.reads <- import.seqID.reads(FilePath = seqID.reads.file.path) # this was exported previously by this script in step 14
+  }else{
+    seqID.reads <- import.and.reformat.otu.table(OTUtable = otu.table.path) # wasn't exported if you chose pident and skipped step 14
+  }
   
   forced.seqIDs <- get.conflict.seqIDs(ConflictsFolders = forcing.folder.path, PidentsUsed = "forcing")
   

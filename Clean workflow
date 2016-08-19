@@ -1060,7 +1060,6 @@ What the arguments are:
 
 **Include the files that are generated! listed in the script too.
 
-**Bug** if you skip step 14 and just choose a pident, then the total.reads.per.seqID.csv file will not be there and it will throw an error.
 
 15.5.b. Plot folly of using custom database alone
 
@@ -1085,7 +1084,22 @@ mkdir conflicts_forcing
 Rscript find_classification_disagreements.R otus.custom.taxonomy otus.98.85.70.taxonomy ids.above.98 conflicts_forcing NA 85 70 forcing
 
 Rscript plot_classification_disagreements.R NA plots conflicts_forcing otus.custom.85.taxonomy otus.98.85.70.taxonomy
-									
+
+What the arguments are (this second time you source the script):
+1.		Rscript									same
+2.		plot_classification_disagreements.R		same
+3.		NA										can leave as NA if you ran step 14, which generated the 
+												total.reads.per.seqID.csv file. Otherwise this should be
+												otus.abund to generate that file for the first time.
+4.		plots									same
+5.		conflicts_forcing						folder of taxonomy disagreements generated in 15.5.b in
+												find.classification.disagreements.R
+6.		otus.custom.85.taxonomy					the classifications using only the custom database,
+												generated in 15.5.b by find_classification_disagreements.R
+7.		otus.98.85.70.taxonomy					the final workflow taxonomy generated in step 15
+
+
+						
 __________________________________________________________________________________________
 
 16. tidy up (bash)

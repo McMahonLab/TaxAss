@@ -21,14 +21,14 @@
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 
-# FOR PLOTTING FORCING  **don't forget to change the seqID.reads file path below!!
-cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!\n")
-userprefs <- c(NA, # if seqid.reads exists (i.e. you ran step 14) this is NA, otherwise it's otus.abund file path)
-               "../../take_mendota_clust/plots",
-               "../../take_mendota_clust/conflicts_forcing",
-               "../../take_mendota_clust/otus.custom.80.taxonomy",
-               "../../take_mendota_clust/otus.98.80.80.taxonomy")
-# # 
+# # FOR PLOTTING FORCING  **don't forget to change the seqID.reads file path below!!
+# cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!\n")
+# userprefs <- c(NA, # if seqid.reads exists (i.e. you ran step 14) this is NA, otherwise it's otus.abund file path)
+#                "../../take_mendota_clust/plots",
+#                "../../take_mendota_clust/conflicts_forcing",
+#                "../../take_mendota_clust/otus.custom.80.taxonomy",
+#                "../../take_mendota_clust/otus.98.80.80.taxonomy")
+# 
 # # # FOR CHOOSING CUTOFF:
 # cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
 # userprefs <- c("../../take18playwith/otus.abund",
@@ -55,9 +55,9 @@ userprefs <- c(NA, # if seqid.reads exists (i.e. you ran step 14) this is NA, ot
 #                "../../take18playwith/ids.above.100",
 #                100)
 # 
-cat("fuck you forgot to comment out the seqid.reads file path in plot_classification_disagreements!\n")
-seqID.reads.file.path <- "../../take_mendota_clust/total.reads.per.seqID.csv"
-present.working.directory <- "../../take_mendota_clust/"
+# cat("fuck you forgot to comment out the seqid.reads file path in plot_classification_disagreements!\n")
+# seqID.reads.file.path <- "../../take_mendota_clust/total.reads.per.seqID.csv"
+# present.working.directory <- "../../take_mendota_clust/"
 
 # in case you want to add the db baseline conflict back to the plots, need to specify this path below
 # and un-comment the plotting calls that use it at the end of the script.

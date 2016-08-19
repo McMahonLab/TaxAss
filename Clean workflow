@@ -431,7 +431,7 @@ What each argument is:
 									6 is a tabular format without headers or other info btwn rows of data, 
 									the rest specifies what goes in each tab-delimited column:
 										1 qseqid: query (OTU) sequence ID
-										2 pident: percent identity (# of matches / # "columns" in the sequence)
+										2 pident: percent identity (# of matches / # "columns" in the HSP)
 										3 length: length of alignment
 										4 qlen: full length of query sequence
 										5 qstart: index of beginning of alignment on query sequence

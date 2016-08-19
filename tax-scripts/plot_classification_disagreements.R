@@ -596,6 +596,18 @@ export.total.forcing.stats <- function(OtuSum, ReadSum, FolderPath){
   cat("Made datafile: ", file.name, "\n")
 }
 
+# exported the grouped lists so that each level is another file in a folder.
+export.grouped.list <- function(Grouped, PlotsPath, FolderName){
+  folder.path <- paste(PlotsPath, "/", FolderName, "/", sep = "")
+  dir.create(path = folder.path, showWarnings = FALSE) # the warning is if the folder already exists, but it works regardless.
+  for (t in 1:length(Grouped)){
+    file.name = paste(folder.path, t, "_grouped_by_", names(Grouped)[t], ".csv", sep = "")
+    write.csv(x = Grouped[[t]], file = file.name, quote = FALSE, row.names = FALSE)
+  }
+  cat("Made datafiles of total reads per taxon in folder: ", folder.path, "\n")
+}
+
+
 # ####
 # Define functions to plot the data
 # ####
@@ -1032,6 +1044,9 @@ if (forcing.folder.path != "regular"){
   #                                  ResultsFolder = plots.folder.path, PlottingLevels = 1:7, TotalReads = tot.reads)
 
   plot.forcing.diffs(TopTaxaList = top.final.taxa, NumBars = 800, FolderPath = plots.folder.path)
+  
+  export.grouped.list(Grouped = grouped.forced.taxa, PlotsPath = plots.folder.path, FolderName = "ForcedTaxonomyGroups")
+  export.grouped.list(Grouped = grouped.final.taxa, PlotsPath = plots.folder.path, FolderName = "FinalTaxonomyGroups")
   
 # ####
 # If not then do the normal comparison for choosing pident cutoff

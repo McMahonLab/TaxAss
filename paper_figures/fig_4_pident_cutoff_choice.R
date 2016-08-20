@@ -120,7 +120,7 @@ x.min <- min(pidents)
 x.max <- max(pidents)
 
 
-png(filename = FolderPath, width = 2.8, height = 3, units = "in", res = 100)
+png(filename = FolderPath, width = 2.8, height = 3, units = "in", res = 300)
 par(mar = c(2.3,2.65,1.8,.51))
 plot(x = pidents, y = perc.class, type = "n", ann = F, axes = F, ylim = c(y.min, y.max))
 lines(x = pidents, y = perc.class, col = "grey", lwd = 3)

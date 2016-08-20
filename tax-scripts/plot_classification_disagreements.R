@@ -55,10 +55,10 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                "../../take18playwith/ids.above.100",
 #                100)
 # 
-# JUST MAKE SEQID.READS FILE, SKIPPING STEP 14 BUT DOING 15.5.A
-cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
-userprefs <- c("../../take18playwith/otus.abund", 
-               "MakeSeqIDReadsOnly")
+# # JUST MAKE SEQID.READS FILE, SKIPPING STEP 14 BUT DOING 15.5.A
+# cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
+# userprefs <- c("../../take18playwith/otus.abund", 
+#                "MakeSeqIDReadsOnly")
 
 # cat("fuck you forgot to comment out the seqid.reads file path in plot_classification_disagreements!\n")
 # seqID.reads.file.path <- "../../take_mendota_clust/total.reads.per.seqID.csv"

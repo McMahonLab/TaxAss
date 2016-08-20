@@ -8,6 +8,7 @@
 # ---- define file paths ----
 
 blast.file.path <- "../../take_mendota_clust_2/otus.custom.blast.table"
+blast.file.path <- "../../poster_mend_unclust/otus.custom.blast.table"
 
 # !!! also source all the functions in calc_full_length_pident.R
 
@@ -61,4 +62,15 @@ ex.tables
 
 file.name <- paste("~/Desktop/TaxonomyTrainingSets/BLASTing/take_mendota_clust_2/plots/blast_recalc_example_seqID_", names(ex.tables)[1], ".csv", sep = "")
 write.csv(x = ex.tables[[1]], file = file.name, quote = FALSE, row.names = FALSE)
+
+# in the fig_5 plot script- start with th cyano example seqIDs that were 100%
+cyano.ex.seqids
+ex.seqIDs <- cyano.ex.seqids
+# source the other scropts functions
+# run through the above stuff
+# the cyanos not that interesting b/c all teh hits the same.
+
+
+
+
 

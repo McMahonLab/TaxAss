@@ -15,9 +15,9 @@
 # Rscript plot_classification_disagreements.R otus.abund plots conflicts_forcing otus.custom.85.taxonomy otus.98.85.70.taxonomy
 # note: the forcing option with otus.abund specified is for if you skipped step 14 so you need to make the seqid.reads file
 
-# ####
+# ---------------------------------------------------------------------------------------------------------------------
 # Receive arguments from terminal command line
-# ####
+# ---------------------------------------------------------------------------------------------------------------------
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 
@@ -55,6 +55,11 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                "../../take18playwith/ids.above.100",
 #                100)
 # 
+# JUST MAKE SEQID.READS FILE, SKIPPING STEP 14 BUT DOING 15.5.A
+cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
+userprefs <- c("../../take18playwith/otus.abund", 
+               "MakeSeqIDReadsOnly")
+
 # cat("fuck you forgot to comment out the seqid.reads file path in plot_classification_disagreements!\n")
 # seqID.reads.file.path <- "../../take_mendota_clust/total.reads.per.seqID.csv"
 # present.working.directory <- "../../take_mendota_clust/"
@@ -79,9 +84,9 @@ if (length(rest.of.arguments) > 0){
 seqID.reads.file.path <- "total.reads.per.seqID.csv"
 present.working.directory <- "."
 
-# ####
+# ---------------------------------------------------------------------------------------------------------------------
 # Define functions to import and process the data
-# ####
+# ---------------------------------------------------------------------------------------------------------------------
 
 # import all the conflict summary files from each folder and compile them into a matrix
 import.all.conflict.summaries <- function(ConflictFolders, PidentsUsed){
@@ -581,36 +586,11 @@ filter.out.low.abund <- function(TaxaList, CutoffVector){
   return(TaxaList)
 }
 
-# export as a table the total forcing stats (this made the green bar plots that are commented out now)
-export.total.forcing.stats <- function(OtuSum, ReadSum, FolderPath){
-  # the OTU summary is not in percents, the reads summary is
-  otu.tot.row <- nrow(OtuSum)
-  OtuSum <- OtuSum / OtuSum[otu.tot.row,1] * 100
-  
-  both.sum <- cbind(OtuSum, ReadSum)
-  colnames(both.sum) <- c("perc.otus.forced", "perc.reads.forced")
-  row.names(both.sum)[otu.tot.row] <- "total.reads.or.otus"
-  
-  file.name <- paste(FolderPath, "/total_percent_forcing_with_only_custom_db.csv", sep = "")
-  write.csv(x = both.sum, file = file.name, quote = FALSE, row.names = TRUE)
-  cat("Made datafile: ", file.name, "\n")
-}
-
-# exported the grouped lists so that each level is another file in a folder.
-export.grouped.list <- function(Grouped, PlotsPath, FolderName){
-  folder.path <- paste(PlotsPath, "/", FolderName, "/", sep = "")
-  dir.create(path = folder.path, showWarnings = FALSE) # the warning is if the folder already exists, but it works regardless.
-  for (t in 1:length(Grouped)){
-    file.name = paste(folder.path, t, "_grouped_by_", names(Grouped)[t], ".csv", sep = "")
-    write.csv(x = Grouped[[t]], file = file.name, quote = FALSE, row.names = FALSE)
-  }
-  cat("Made datafiles of total reads per taxon in folder: ", folder.path, "\n")
-}
 
 
-# ####
+# ---------------------------------------------------------------------------------------------------------------------
 # Define functions to plot the data
-# ####
+# ---------------------------------------------------------------------------------------------------------------------
 
 plot.num.forced <- function(ConflictSummaryTable, ResultsFolder, DBconflicts = as.data.frame(FALSE), ByReads = FALSE, AsPercent = FALSE, y.axis.limit = 0){
   sum.table <- ConflictSummaryTable
@@ -986,16 +966,50 @@ export.summary.table <- function(SummaryTable, FolderPath, ByOTU = TRUE, Percent
   cat("made datafile: ", file.name, "\n")
 }
 
-
-# ####
-# Use Functions
-# ####
-
-# ####
-# first check if this is the optional "forcing plot"
-# ####
-if (forcing.folder.path != "regular"){
+# export as a table the total forcing stats (this made the green bar plots that are commented out now) (forcing option)
+export.total.forcing.stats <- function(OtuSum, ReadSum, FolderPath){
+  # the OTU summary is not in percents, the reads summary is
+  otu.tot.row <- nrow(OtuSum)
+  OtuSum <- OtuSum / OtuSum[otu.tot.row,1] * 100
   
+  both.sum <- cbind(OtuSum, ReadSum)
+  colnames(both.sum) <- c("perc.otus.forced", "perc.reads.forced")
+  row.names(both.sum)[otu.tot.row] <- "total.reads.or.otus"
+  
+  file.name <- paste(FolderPath, "/total_percent_forcing_with_only_custom_db.csv", sep = "")
+  write.csv(x = both.sum, file = file.name, quote = FALSE, row.names = TRUE)
+  cat("Made datafile: ", file.name, "\n")
+}
+
+# exported the grouped lists so that each level is another file in a folder (forcing option).
+export.grouped.list <- function(Grouped, PlotsPath, FolderName){
+  folder.path <- paste(PlotsPath, "/", FolderName, "/", sep = "")
+  dir.create(path = folder.path, showWarnings = FALSE) # the warning is if the folder already exists, but it works regardless.
+  for (t in 1:length(Grouped)){
+    file.name = paste(folder.path, t, "_grouped_by_", names(Grouped)[t], ".csv", sep = "")
+    write.csv(x = Grouped[[t]], file = file.name, quote = FALSE, row.names = FALSE)
+  }
+  cat("Made datafiles of total reads per taxon in folder: ", folder.path, "\n")
+}
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+# Use Functions
+# ---------------------------------------------------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------------------------------------------------
+# first check if all you're doing is making the seqID.reads file
+# ---------------------------------------------------------------------------------------------------------------------
+if (userprefs[2] == "MakeSeqIDReadsOnly"){
+  seqID.reads <- import.and.reformat.otu.table(OTUtable = otu.table.path) 
+  write.table(x = seqID.reads, file = "total.reads.per.seqID.csv", sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
+  cat("made the datafile: ", "total.reads.per.seqID.csv")
+
+# ---------------------------------------------------------------------------------------------------------------------
+# second check if this is the optional "forcing plot"
+}else if (forcing.folder.path != "regular"){
+# ---------------------------------------------------------------------------------------------------------------------
+
   otus.forced <- import.forcing.conflicts(ForcingFolder = forcing.folder.path)
   
   if (check.for.seqID.reads(PWDpath = present.working.directory)){
@@ -1048,14 +1062,14 @@ if (forcing.folder.path != "regular"){
   export.grouped.list(Grouped = grouped.forced.taxa, PlotsPath = plots.folder.path, FolderName = "ForcedTaxonomyGroups")
   export.grouped.list(Grouped = grouped.final.taxa, PlotsPath = plots.folder.path, FolderName = "FinalTaxonomyGroups")
   
-# ####
+# ---------------------------------------------------------------------------------------------------------------------
 # If not then do the normal comparison for choosing pident cutoff
-# ####
 }else{
+# ---------------------------------------------------------------------------------------------------------------------
   
-  # ####
+  # ---------------------------------------------------------------------------------------------------------------------
   # examine custom taxonomy disagreements and contribution by number OTUs
-  # ####
+  # ---------------------------------------------------------------------------------------------------------------------
   
   otu.summaries <- import.all.conflict.summaries(ConflictFolders = pident.folders, PidentsUsed = pident.values)
   export.summary.table(SummaryTable = otu.summaries, FolderPath = plots.folder.path, ByOTU = TRUE, Percents = FALSE)
@@ -1079,9 +1093,9 @@ if (forcing.folder.path != "regular"){
   # plot.num.classified.outs(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = FALSE)
   plot.num.classified.outs(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE)
   
-  # ####
+  # ---------------------------------------------------------------------------------------------------------------------
   # examine custom taxonomy disagreements and contribution by number reads
-  # ####
+  # ---------------------------------------------------------------------------------------------------------------------
   
   seqID.reads <- import.and.reformat.otu.table(OTUtable = otu.table.path)
   
@@ -1116,15 +1130,15 @@ if (forcing.folder.path != "regular"){
   write.table(x = seqID.reads, file = "total.reads.per.seqID.csv", sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
   cat("made the datafile: ", "total.reads.per.seqID.csv")
   
-  # ####
+  # ---------------------------------------------------------------------------------------------------------------------
   # examine pident cutoff relationship to bootstrap p-values -this plot is not useful.
-  # ####
+  # ---------------------------------------------------------------------------------------------------------------------
   # fw.pvalues <- import.bootstrap.pvalues(ConflictFolders = pident.folders, PidentsUsed = pident.values, FW = TRUE)
   # gg.pvalues <- import.bootstrap.pvalues(ConflictFolders = pident.folders, PidentsUsed = pident.values, FW = FALSE)
   
   # plot.bootstrap.percents(FWpValues = fw.pvalues, GGpValues = gg.pvalues, ResultsFolder = plots.folder.path)
 }
 
-# ####
+# ---------------------------------------------------------------------------------------------------------------------
 
 

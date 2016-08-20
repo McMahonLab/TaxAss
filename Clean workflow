@@ -414,7 +414,7 @@ ________________________________________________________________________________
 3. reformat BLAST results (blast)
 
 The blast_formatter function in blast takes the outformat 11 file and reformats it to any other
-possible format.  Here we reformat to a custom table format to feed into the R script the pulls out
+possible format.  Here we reformat to a custom table format to feed into the R script that pulls out
 matching and nonmatching sequence IDs.
 However, using blast_formatter you can look at your blast results from the previous step any way you'd like!
 Just keep in mind, things like "length" have different definitions in different output formats (yeah. really.), 

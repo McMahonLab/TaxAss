@@ -184,8 +184,9 @@ michigan.hiseq.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/pos
 file.paths.beside <- c(mendota.unclust.beside.file.path, michigan.hiseq.beside.file.path, bogs.epi.beside.file.path, bogs.hypo.beside.file.path, danube.10.beside.file.path)
 file.paths.stacked <- c(mendota.unclust.stacked.file.path, michigan.hiseq.stacked.file.path, bogs.epi.stacked.file.path, bogs.hypo.stacked.file.path, danube.10.stacked.file.path)
 
-ecosystem.names <- c("eutrophic", "oligotrophic", "bog epi", "bog hypo", "river")
-taxa.names <- c("kingdom", "phylum", "class", "order", "lineage", "clade", "tribe")
+ecosystem.names <- c("eutrophic", "oligotrophic", "bog", "bog", "river")
+taxa.names <- c("kingdom", "phylum", "class", "order", "family/", "genus/", "species/")
+bar.labels.2 <- c("","","","lineage", "clade", "tribe", "", "lake", "lake", "epilimnion", "hypolimnion", "")
 
 file.path <- "~/Dropbox/Trina/8-20-16_ISME16_figures/red_orange_improvement_plot.png"
 
@@ -218,31 +219,38 @@ bar.space.beside <- c(bar.space.y[2], rep(bar.space.y[1] + bar.space.y[2] + bar.
 bar.space.stacked <- bar.space.y[2] + bar.width + bar.space.y[1]
 loc.labels <- bar.spots[seq(from = 1, to = length(bar.spots), by = 2)] + .5 * bar.width + .5 * bar.space.y[1]
 
-y.lab <- seq(0, 100, 10)
-y.label <- expression(bold("Percent Classified (% Reads)"))
-plot.1 <- "Improvemed Classifications By Taxa Level"
-plot.2 <- "Improved Classifications by Ecosystem"
+y.lab <- seq(0, 100, 20)
+y.label <- expression(bold("Percent Classified (Reads)"))
+plot.1 <- expression(bold("Lake Mendota"))
+plot.2 <- expression(bold("Genus/Clade"))
+slider <-c(0,0,0,1,1,1,0,1,1,1,1,0)
 
+legend.1 <- c(expression(bold("Left Bars: GreenGenes")), expression(bold("Right Bars: TaxAss")))
+legend.2 <- c(expression(bold("Newly-Classified")), expression(bold("Re-Classified")), expression(bold("Unchanged")))
 
-png(filename = file.path, width = 15.73, height = 6.29, units = "in", res = 600)
+png(filename = file.path, width = 16.92, height = 5.82, units = "in", res = 100)
+par(mar = c(6,1,3,0))
 barplot(y[1, ], col = col.y, border = "black", beside = FALSE, width = bar.width, space = bar.space.beside, xlim = c(0, tot.x), ylim = c(0, YaxisMax), names.arg = empty.labels, axes = FALSE)
 barplot(z, add = TRUE, col = col.z, border = "black", beside = FALSE, width = bar.width, space = bar.space.stacked, xlim = c(0, tot.x), ylim = c(0, YaxisMax), names.arg = empty.labels, axes = FALSE)
 rect(xleft = loc.labels[7] - bar.width, ybottom = -10, xright = loc.labels[7] + bar.width, ytop = 10, border = NA, col = "white", xpd = T)
-text(x = loc.labels, y = -1, labels = bar.labels, srt = 45, xpd = T, cex = 1.5, adj = 1)
-axis(side = 2, at = y.lab, labels = F, xpd = T, line = -1, lwd = 3, tick = T, lwd.ticks = 2)
-mtext(text = y.lab, side = 2, at = y.lab, line = 0, cex = 1.5)
-mtext(text = y.label, side = 2, line = 1, cex = 1.5)
-axis(side = 2, at = y.lab, labels = F, xpd = T, line = -39, lwd = 3, tick = T, lwd.ticks = 2)
-mtext(text = y.lab, side = 2, at = y.lab, line = -38, cex = 1.5)
+
+text(x = loc.labels - .5 * slider, y = -5, labels = bar.labels, srt = 40, xpd = T, cex = 1.5, adj = 1)
+text(x = loc.labels + .5 * slider, y = -5, labels = bar.labels.2, srt = 40, xpd = T, cex = 1.5, adj = 1)
+
+axis(side = 2, at = y.lab, labels = F, xpd = T, line = -4, lwd = 3, tick = T, lwd.ticks = 2)
+mtext(text = y.lab, side = 2, at = y.lab, line = -3.5, cex = 1.5)
+
+mtext(text = y.label, side = 2, line = -2, cex = 2)
+
+axis(side = 2, at = y.lab, labels = F, xpd = T, line = -48, lwd = 3, tick = T, lwd.ticks = 2)
+mtext(text = y.lab, side = 2, at = y.lab, line = -47.5, cex = 1.5)
+
+mtext(text = plot.1, side = 3, line = 1, at = 4, adj = 0, cex = 2)
+mtext(text = plot.2, side = 3, line = 1, at = 23, adj = 0, cex = 2)
+
+mtext(text = legend.1, side = 3, line = c(2,0), at = 11, adj = 0, padj = 1, cex = 2, col = "grey")
+mtext(text = legend.2, side = 3, line = c(2,0,-2), at = 29, adj = 0, padj = 1, cex = 2, col = c("red","orange","grey"))
+
 dev.off()
-
-
-
-
-
-
-
-
-
 
 

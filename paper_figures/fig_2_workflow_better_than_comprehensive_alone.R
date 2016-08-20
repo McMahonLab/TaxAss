@@ -160,3 +160,89 @@ for (t in 1:length(taxa.names)){
 
 # make the polished, 2-panel, paper figure. This one is exported at eps.
 
+
+
+
+
+# ---- Poster Figure ----
+
+mendota.unclust.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster_mend_unclust/plots/WorkflowImprovement-BesideData-Reads.csv"
+mendota.unclust.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster_mend_unclust/plots/WorkflowImprovement-StackedData-Reads.csv"
+
+bogs.epi.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster_bogs_epi/plots/WorkflowImprovement-BesideData-Reads.csv"
+bogs.epi.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster_bogs_epi/plots/WorkflowImprovement-StackedData-Reads.csv"
+
+bogs.hypo.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster_bogs_hypo/plots/WorkflowImprovement-BesideData-Reads.csv"
+bogs.hypo.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster_bogs_hypo/plots/WorkflowImprovement-StackedData-Reads.csv"
+
+danube.10.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster_danube_10/plots/WorkflowImprovement-BesideData-Reads.csv"
+danube.10.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster_danube_10/plots/WorkflowImprovement-StackedData-Reads.csv"
+
+michigan.hiseq.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster_michigan_hiseq/plots/WorkflowImprovement-BesideData-Reads.csv"
+michigan.hiseq.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster_michigan_hiseq/plots/WorkflowImprovement-StackedData-Reads.csv"
+
+file.paths.beside <- c(mendota.unclust.beside.file.path, michigan.hiseq.beside.file.path, bogs.epi.beside.file.path, bogs.hypo.beside.file.path, danube.10.beside.file.path)
+file.paths.stacked <- c(mendota.unclust.stacked.file.path, michigan.hiseq.stacked.file.path, bogs.epi.stacked.file.path, bogs.hypo.stacked.file.path, danube.10.stacked.file.path)
+
+ecosystem.names <- c("eutrophic", "oligotrophic", "bog epi", "bog hypo", "river")
+taxa.names <- c("kingdom", "phylum", "class", "order", "lineage", "clade", "tribe")
+
+file.path <- "~/Dropbox/Trina/8-20-16_ISME16_figures/red_orange_improvement_plot.png"
+
+clades.beside <- beside.tax.list$clade
+clades.stacked <- stacked.tax.list$clade
+
+mendota.beside <- beside.eco.list$eutrophic[ ,-1]
+mendota.stacked <- stacked.eco.list$eutrophic[ ,-1]
+
+all.beside <- cbind(mendota.beside, c(0,0), clades.beside)
+all.stacked <- cbind(mendota.stacked, c(0,0,0),clades.stacked)
+
+y <- all.beside
+z <- all.stacked
+YaxisMax = 100
+bar.space.y <- c(0,1)
+bar.width <- 1  # spacing and axis limits will determine what width 1 looks like, no need to change
+col.y <- "grey"
+col.z <- c("grey", "orange", "red")
+bar.labels <- c(taxa.names[-1], "", ecosystem.names)
+
+# find all values from the basic "beside" plot:
+num.sections <- ncol(y)
+bar.spots <- barplot(y, beside = TRUE, width = bar.width, space = bar.space.y, plot = FALSE)
+tot.x <- max(bar.spots) + .5 * bar.width + bar.space.y[2]
+empty.labels <- rep(x = "", times = num.sections)
+
+# calculate bar and label spacing
+bar.space.beside <- c(bar.space.y[2], rep(bar.space.y[1] + bar.space.y[2] + bar.width, length.out = num.sections - 1))
+bar.space.stacked <- bar.space.y[2] + bar.width + bar.space.y[1]
+loc.labels <- bar.spots[seq(from = 1, to = length(bar.spots), by = 2)] + .5 * bar.width + .5 * bar.space.y[1]
+
+y.lab <- seq(0, 100, 10)
+y.label <- expression(bold("Percent Classified (% Reads)"))
+plot.1 <- "Improvemed Classifications By Taxa Level"
+plot.2 <- "Improved Classifications by Ecosystem"
+
+
+png(filename = file.path, width = 15.73, height = 6.29, units = "in", res = 600)
+barplot(y[1, ], col = col.y, border = "black", beside = FALSE, width = bar.width, space = bar.space.beside, xlim = c(0, tot.x), ylim = c(0, YaxisMax), names.arg = empty.labels, axes = FALSE)
+barplot(z, add = TRUE, col = col.z, border = "black", beside = FALSE, width = bar.width, space = bar.space.stacked, xlim = c(0, tot.x), ylim = c(0, YaxisMax), names.arg = empty.labels, axes = FALSE)
+rect(xleft = loc.labels[7] - bar.width, ybottom = -10, xright = loc.labels[7] + bar.width, ytop = 10, border = NA, col = "white", xpd = T)
+text(x = loc.labels, y = -1, labels = bar.labels, srt = 45, xpd = T, cex = 1.5, adj = 1)
+axis(side = 2, at = y.lab, labels = F, xpd = T, line = -1, lwd = 3, tick = T, lwd.ticks = 2)
+mtext(text = y.lab, side = 2, at = y.lab, line = 0, cex = 1.5)
+mtext(text = y.label, side = 2, line = 1, cex = 1.5)
+axis(side = 2, at = y.lab, labels = F, xpd = T, line = -39, lwd = 3, tick = T, lwd.ticks = 2)
+mtext(text = y.lab, side = 2, at = y.lab, line = -38, cex = 1.5)
+dev.off()
+
+
+
+
+
+
+
+
+
+
+

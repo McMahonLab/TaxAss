@@ -1060,6 +1060,8 @@ What the arguments are:
 
 **Include the files that are generated! listed in the script too.
 
+*** if you skipped step 14 you can do this****  this is not well documented yet*****
+Rscript plot_classification_disagreements.R otus.abund MakeSeqIDReadsOnly
 
 15.5.b. Plot folly of using custom database alone
 

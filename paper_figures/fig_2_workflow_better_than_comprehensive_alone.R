@@ -190,8 +190,10 @@ bar.labels.2 <- c("","","","lineage", "clade", "tribe", "", "lake", "lake", "epi
 
 file.path <- "~/Dropbox/Trina/8-20-16_ISME16_figures/red_orange_improvement_plot.png"
 
-clades.beside <- beside.tax.list$clade
-clades.stacked <- stacked.tax.list$clade
+# now source function definitions and calls.
+
+clades.beside <- beside.tax.list$`family/`
+clades.stacked <- stacked.tax.list$`family/`
 
 mendota.beside <- beside.eco.list$eutrophic[ ,-1]
 mendota.stacked <- stacked.eco.list$eutrophic[ ,-1]
@@ -228,8 +230,8 @@ slider <-c(0,0,0,1,1,1,0,1,1,1,1,0)
 legend.1 <- c(expression(bold("Left Bars: GreenGenes")), expression(bold("Right Bars: TaxAss")))
 legend.2 <- c(expression(bold("Newly-Classified")), expression(bold("Re-Classified")), expression(bold("Unchanged")))
 
-png(filename = file.path, width = 16.92, height = 5.82, units = "in", res = 100)
-par(mar = c(6,1,3,0))
+png(filename = file.path, width = 16.21, height = 5.96, units = "in", res = 300)
+par(mar = c(6,.8,2.5,0))
 barplot(y[1, ], col = col.y, border = "black", beside = FALSE, width = bar.width, space = bar.space.beside, xlim = c(0, tot.x), ylim = c(0, YaxisMax), names.arg = empty.labels, axes = FALSE)
 barplot(z, add = TRUE, col = col.z, border = "black", beside = FALSE, width = bar.width, space = bar.space.stacked, xlim = c(0, tot.x), ylim = c(0, YaxisMax), names.arg = empty.labels, axes = FALSE)
 rect(xleft = loc.labels[7] - bar.width, ybottom = -10, xright = loc.labels[7] + bar.width, ytop = 10, border = NA, col = "white", xpd = T)
@@ -240,16 +242,16 @@ text(x = loc.labels + .5 * slider, y = -5, labels = bar.labels.2, srt = 40, xpd 
 axis(side = 2, at = y.lab, labels = F, xpd = T, line = -4, lwd = 3, tick = T, lwd.ticks = 2)
 mtext(text = y.lab, side = 2, at = y.lab, line = -3.5, cex = 1.5)
 
-mtext(text = y.label, side = 2, line = -2, cex = 2)
+mtext(text = y.label, side = 2, line = -1, cex = 2)
 
-axis(side = 2, at = y.lab, labels = F, xpd = T, line = -48, lwd = 3, tick = T, lwd.ticks = 2)
-mtext(text = y.lab, side = 2, at = y.lab, line = -47.5, cex = 1.5)
+axis(side = 2, at = y.lab, labels = F, xpd = T, line = -46, lwd = 3, tick = T, lwd.ticks = 2)
+mtext(text = y.lab, side = 2, at = y.lab, line = -45.5, cex = 1.5)
 
 mtext(text = plot.1, side = 3, line = 1, at = 4, adj = 0, cex = 2)
 mtext(text = plot.2, side = 3, line = 1, at = 23, adj = 0, cex = 2)
 
 mtext(text = legend.1, side = 3, line = c(2,0), at = 11, adj = 0, padj = 1, cex = 2, col = "grey")
-mtext(text = legend.2, side = 3, line = c(2,0,-2), at = 29, adj = 0, padj = 1, cex = 2, col = c("red","orange","grey"))
+mtext(text = legend.2, side = 3, line = c(2,0,-2), at = 36, adj = 1, padj = 1, cex = 2, col = c("red","orange","grey"))
 
 dev.off()
 

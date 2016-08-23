@@ -102,6 +102,12 @@ file.path.otu.summs <- "../../poster_mend_unclust/plots/conflict_summary_by_OTUs
 file.path.read.perc.summs <- "../../poster_mend_unclust/plots/conflict_summary_by_percent_reads.csv"
 output.folder.fig4 <- "~/Dropbox/Trina/8-20-16_ISME16_figures/pident_choice_mendota_unclust.png"
 
+# define functions above
+
+reads <- import.summary(FilePath = file.path.read.perc.summs)
+
+reads.class <- trim.to.perc.classified(ConflictSum = reads)
+
 PercClass = reads.class
 FolderPath = output.folder.fig4
 
@@ -123,9 +129,9 @@ x.max <- max(pidents)
 png(filename = FolderPath, width = 2.8, height = 3, units = "in", res = 300)
 par(mar = c(2.3,2.65,1.8,.51))
 plot(x = pidents, y = perc.class, type = "n", ann = F, axes = F, ylim = c(y.min, y.max))
-lines(x = pidents, y = perc.class, col = "grey", lwd = 3)
-points(x = pidents, y = perc.class, col = "grey", pch = 19, cex = .75)
 polygon(x = c(pidents[2], pidents[2:4], pidents[4]), y = c(y.min, perc.class[2:4], y.min), xpd=T, border = NA, col = adjustcolor(col = "red", alpha.f = .2))
+lines(x = pidents, y = perc.class, col = "grey", lwd = 5)
+points(x = pidents, y = perc.class, col = "grey", pch = 19, cex = .75)
 lines(x = c(98,98), y = c(y.min, perc.class[3]), col = "red", lwd = 3)
 lines(x = c(x.min, 98), y = c(perc.class[3], perc.class[3]), col = "blue", lwd = 3)
 axis(side = 1, at = pidents, labels = F, tick = TRUE, line = -.5, lwd = 3, xpd = T)

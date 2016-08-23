@@ -27,7 +27,7 @@ The important stuff:
 The other stuff you can ignore:  
 1. Scripts I use with the FreshTrain arb files are in the `arb-scripts` folder  
 2. The scripts I used for making poster/paper figures are (in progress) and in `paper_figures` folder.  
-3. A pdf of my ISME16 poster: 'RohwerISME16poster.pdf`  
+3. A pdf of my ISME16 poster: `RohwerISME16poster.pdf`  
 
 
 What if it doesn't work?

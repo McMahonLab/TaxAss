@@ -28,7 +28,8 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 blast.file.path <- userprefs[1]
 hit.stats.path <- userprefs[2]
 
-# blast.file.path <- "../../take16/otus.custom.blast.table"
+# cat("fuck you forgot to comment out the file paths in calc_full_length_pident.R!")
+# blast.file.path <- "../../take19/otus.custom.blast.table"
 # hit.stats.path <- "../../take16/otus.custom.blast.table.modified"
 
 #####
@@ -139,12 +140,12 @@ print.poem <- function(){
   # I like this poem because of it's central metaphor of a snow covered lake being like a blank page
   cat("\nFrom March 1979\n",
       "   by Tomas Tranströmer\n",
-      "   translated to english by _______\n",
-      "\nTired of all who come with words, words but no language\n",
-      "I went to the snow-covered island.\n",
-      "The wild does not have words.\n",
-      "The unwritten pages spread out on all sides!\n",
-      "I come upon the tracks of roe deer in the snow.\n",
+      "   translated to english by Robin Fulton\n",
+      "\nWeary of all who come with words, words but no language\n",
+      "I make my way to the snow-covered island.\n",
+      "The untamed has no words.\n",
+      "The unwritten pages spread out on every side!\n",
+      "I come upon the tracks of deer in the snow.\n",
       "Language but no words.\n\n", sep = "")
 }
 

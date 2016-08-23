@@ -28,6 +28,7 @@ output.file.path <- userprefs[2]
 users.cutoff <- as.numeric(userprefs[3])
 user.wants.matches <- as.logical(userprefs[4])
 
+# cat("fuck you forgot to comment out the file paths in filter_seqIDs_by_pident.R!")
 # blast.file.path <- "../../take16/otus.custom.blast.table.modified"
 # output.file.path <- "../../take16/ids.above.98"
 # users.cutoff <- as.numeric(98)

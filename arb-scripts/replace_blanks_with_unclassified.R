@@ -3,8 +3,8 @@
 # replace empty levels with the word "unclassified"
 # empty spots at genus level yield incorrect p-values in RDP classifier
 
-file.with.blanks.semicolon.delim <- "~/Desktop/TaxonomyTrainingSets/BLASTing/StartFiles12/FWonly_11Feb2016_1452.semicolons.taxonomy"
-reformatted.file.semicolon.delim <- "~/Desktop/TaxonomyTrainingSets/BLASTing/StartFiles12/custom.taxonomy.semicolons"
+file.with.blanks.semicolon.delim <- "~/Desktop/TaxonomyTrainingSets/BLASTing/Primers/v4_all_FreshTrain/FW_al"
+reformatted.file.semicolon.delim <- "~/Desktop/TaxonomyTrainingSets/BLASTing/Primers/v4_all_FreshTrain/cleaned4"
 
 
 # import taxonomy file:

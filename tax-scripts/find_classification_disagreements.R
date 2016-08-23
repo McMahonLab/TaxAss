@@ -1,6 +1,6 @@
 # 8-27-15 RRR
 
-# The goal of this script is to identify the best BLAST cutoff to use 
+# The goal of this script is to identify the best BLAST cutoff to use
 # in my new taxonomy assignment pipeline.
 # I will do this by comparing the taxonomy assignments of the seqIDs
 # that met different BLAST cutoff percent IDs and were classified by FW
@@ -33,6 +33,7 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 # input for troubleshooting
 # ####
 # # CONFLICT FINDING ONLY:
+# cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
 # userprefs <- c("../../take17/otus.99.taxonomy",
 #                "../../take17/otus.general.taxonomy",
 #                "../../take17/ids.above.99",
@@ -41,15 +42,17 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                80,
 #                70)
 # # FINAL TABLE GENERATION: note you do need the otus.general.taxonomy file b/c it's used to prep a file for plot_classification_improvement.R in step 16
-# userprefs <- c("../../take17/otus.99.taxonomy",
-#                "../../take17/otus.general.taxonomy",
-#                "../../take17/ids.above.99",
-#                "../../take17/conflicts_99",
+# cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
+# userprefs <- c("../../take18playwith/otus.99.taxonomy",
+#                "../../take18playwith/otus.general.taxonomy",
+#                "../../take18playwith/ids.above.99",
+#                "../../take18playwith/conflicts_99/",
 #                99,
 #                80,
 #                70,
 #                "final")
-# # DATABASE COMPARISON: note you have to do step 11.5 to generate the files you need for this
+# # DATABASE COMPARISON: part of optional step 11.5 
+# cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
 # userprefs <- c("../../take17/custom.custom.taxonomy",
 #                "../../take17/custom.general.taxonomy",
 #                "NA",
@@ -58,11 +61,12 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                NA,
 #                70,
 #                "database")
-# # FORCING ANALYSIS: note this isn't in the workflow, but it shows how much forcing you'd get from using FW alone
-# userprefs <- c("../../take17/otus.custom.taxonomy",
-#                "../../take17/otus.99.80.70.taxonomy",
-#                "../../take17/ids.above.99",
-#                "../../take17/conflicts_forcing/",
+# # FORCING ANALYSIS: part of optional step 15.5
+# cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
+# userprefs <- c("../../take18playwith/otus.custom.taxonomy",
+#                "../../take18playwith/otus.98.80.70.taxonomy",
+#                "../../take18playwith/ids.above.98",
+#                "../../take18playwith/conflicts_forcing/",
 #                NA,
 #                80,
 #                70,
@@ -78,6 +82,25 @@ taxonomy.pvalue.cutoff.fw <- userprefs[6]
 taxonomy.pvalue.cutoff.gg <- userprefs[7]
 final.or.database <- userprefs[8]
 if (length(userprefs) < 8){final.or.database <- "non-empty string"}
+
+
+# ####
+# Pre-determined Output File Names
+# ####
+
+# when "final" flag is used, these are exported into the working directory:
+file.name.final.taxonomy <- paste("otus.", blast.pident.cutoff, ".", taxonomy.pvalue.cutoff.fw, ".", taxonomy.pvalue.cutoff.gg, ".taxonomy", sep = "")
+file.name.workflow.pvalues <- "final.taxonomy.pvalues"
+file.name.general.pvalues <- "final.general.pvalues"
+file.name.workflow.names <- "final.taxonomy.names"
+file.name.general.names <- "final.general.names"
+
+# when forcing flag is used, these are exported into the working directory:
+file.name.custom.only.taxonomy <- paste("otus.custom.", taxonomy.pvalue.cutoff.fw, ".taxonomy", sep = "")
+
+# note- files with predetermined names that end up in results folder are not included here
+# all of the pre-determined names are used by other scripts and shouldn't be changed.  
+
 
 # ####
 # Define Functions for Import and Formatting
@@ -351,8 +374,8 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
 # Set up a summary vector to fill
 create.summary.vector <- function(Forcing = FALSE){
   if(Forcing == TRUE){
-    num.mismatches <- vector(mode = "numeric", length = 6)
-    names(num.mismatches) <- c("kingdom","phylum","class","order","lineage","clade")
+    num.mismatches <- vector(mode = "numeric", length = 7)
+    names(num.mismatches) <- c("kingdom","phylum","class","order","lineage","clade","tribe")
   }else{
     num.mismatches <- vector(mode = "numeric", length = 5)
     names(num.mismatches) <- c("kingdom","phylum","class","order","lineage")
@@ -413,15 +436,15 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   final.taxonomy <- rbind(final.taxonomy.fw.only, final.taxonomy.gg.only)
   colnames(final.taxonomy) <- c("seqID","kingdom","phylum","class","order","lineage","clade","tribe")
   
-  write.table(x = final.taxonomy, 
-              file = paste("otus.", blast.pident.cutoff, ".", taxonomy.pvalue.cutoff.fw, ".", taxonomy.pvalue.cutoff.gg, ".taxonomy", sep = ""), 
-              sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
+  write.table(x = final.taxonomy, file = file.name.final.taxonomy, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
   
   # the following will be used by the plot_classification_improvement.R script
   
   tax.nums <- view.bootstraps(TaxonomyTable = final.taxonomy)
-  write.table(x = tax.nums, file = "final.taxonomy.pvalues", sep = ",", 
-              row.names = FALSE, col.names = TRUE, quote = FALSE)
+  write.table(x = tax.nums, file = file.name.workflow.pvalues, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
+  
+  tax.names <- apply(final.taxonomy, 2, remove.parentheses)
+  write.table(x = tax.names, file = file.name.workflow.names, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
   
   gg.percents <- import.GG.names(FilePath = gg.only.tax.file.path)
   gg.percents <- reformat.gg(GGtable = gg.percents)
@@ -430,9 +453,10 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   colnames(gg.taxonomy) <- c("seqID","kingdom","phylum","class","order","lineage","clade","tribe")
   
   gg.nums <- view.bootstraps(TaxonomyTable = gg.taxonomy)
-  write.table(x = gg.nums, file = "final.general.pvalues", sep = ",", 
-              row.names = FALSE, col.names = TRUE, quote = FALSE)
+  write.table(x = gg.nums, file = file.name.general.pvalues, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
   
+  gg.names <- apply(X = gg.taxonomy, MARGIN = 2, FUN = remove.parentheses)
+  write.table(x = gg.names, file = file.name.general.names, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
 
 # ####
 # Compare databases by looking at how GG classifies the FW representative sequences
@@ -501,7 +525,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   
   # export clean fw-db-only table for forcing plots later
   fw <- apply(fw, 2, remove.parentheses)
-  write.table(x = fw, file = paste("otus.custom.", taxonomy.pvalue.cutoff.fw, ".taxonomy", sep = ""), sep = ";")
+  write.table(x = fw, file = file.name.custom.only.taxonomy, sep = ";")
   
   fw.gg.only <- apply(fw.gg.only, 2, remove.parentheses)
   gg.gg.only <- apply(gg.gg.only, 2, remove.parentheses)
@@ -513,7 +537,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   # Files written in find.conflicting.names() loop: the "TaxaLevel_conflicts.csv" that puts taxonomy tables side by side
   # File written afer loop: the "conflicts_summary.csv" that lists how many conflicts were at each level, and how many seqs were classified by FW
   num.mismatches <- create.summary.vector(Forcing = TRUE)
-  for (t in 1:6){
+  for (t in 1:7){
     num.mismatches <- find.conflicting.names(FWtable = fw.gg.only, GGtable = gg.gg.only,
                                              FWtable_percents = fw.percents.gg.only,
                                              GGtable_percents = gg.percents.gg.only, 

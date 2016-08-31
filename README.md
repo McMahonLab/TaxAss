@@ -33,7 +33,7 @@ The other stuff you can ignore:
 What if it doesn't work?
 ---
 
-Please tell me!  If you find a bug (or if you get confused) I want to fix it/help you.  If you're all github savvy you submit an issue, or you can just send me an e-mail with TaxAss in the title: rrohwer@wisc.edu
+Please tell me!  If you find a bug (or if you get confused) I want to fix it/help you.  If you're all github savvy you can submit an issue, or you can just send me an e-mail with TaxAss in the title: rrohwer@wisc.edu
 
 
 

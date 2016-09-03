@@ -5,7 +5,10 @@
 tax-scripts/.RData
 
 # Databases
-databases/*
+FreshTrain-files/gg_13_5.fasta
+FreshTrain-files/gg_13_5.taxonomy
+FreshTrain-files/FreshTrain18Aug2016
+FreshTrain-files/FreshTrain11Feb2016
 
 # Data Directories
 processedData

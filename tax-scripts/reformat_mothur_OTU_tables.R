@@ -28,10 +28,10 @@ path.to.mothur.file <- userprefs[1]
 mothur.extension <- userprefs[2]
 path.to.output.file <- userprefs[3]
 
-# cat("fuck you forgot to comment out the file paths in reformat_mothur_OTU_tables.R!")
-# path.to.mothur.file <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take_swedish_2/swedish_2.count_table"
-# mothur.extension <- "count_table" # because I think..... several ones will work??? clearly .shared worked for ben!
-# path.to.output.file <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take_swedish_2/otus.abund"
+cat("fuck you forgot to comment out the file paths in reformat_mothur_OTU_tables.R!")
+path.to.mothur.file <- "~/Desktop/danube_10/fastqfolder/danube-10.count_table"
+mothur.extension <- "count_table" # because I think..... several ones will work??? clearly .shared worked for ben!
+path.to.output.file <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take_swedish_2/otus.abund"
 
 # ---- Define Functions ----
 
@@ -50,12 +50,9 @@ import.and.format.count_table <- function(FilePath){
 
 convert.to.rel.abund <- function(OTUs){
   sample.totals <- rowSums(OTUs)
-  take.perc <- function(x){
-    x <- x / sample.totals * 100
-    return(x)
-  }
-  rel.otus <- apply(X = OTUs, MARGIN = 2, FUN = take.perc)
-  return(rel.otus)
+  # vectors are applied to matrices by stepping down rows in a column
+  norm.otus <- OTUs / sample.totals * 100
+  return(norm.otus)
 }
 
 reformat.for.workflow <- function(OTUs){

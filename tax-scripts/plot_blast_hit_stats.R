@@ -29,9 +29,9 @@ if (length(userprefs) > 3){
 }
 
 # cat("fuck you forgot to comment out the file paths in plot_blast_hit_stats.R!")
-# blast.file.path <- "../../take19/otus.custom.blast.table.modified"
+# blast.file.path <- "../../tanganyika/TaxAssTanganyika400/otus.custom.blast.table.modified"
 # pident.cutoff <- 98
-# plots.folder.path <- "../../take19/plots"
+# plots.folder.path <- "~/Desktop"
 # mirror.location <- "https://cran.mtu.edu"
 
 # ####
@@ -68,7 +68,7 @@ apply.pident.cutoff <- function(BlastTable, PidentCutoff){
   cutoff <- PidentCutoff
   
   index <- which(blast$true.pids >= cutoff)
-  blast.cutoff <- blast[index,]
+  blast.cutoff <- blast[index, ,drop=FALSE]
   
   return(blast.cutoff)
 }
@@ -157,7 +157,7 @@ bar.plot.stacked.blast.results <- function(BlastTable, CutoffVector, OutputFolde
   blast <- BlastTable
   cutoffs <- CutoffVector
   plot.folder <- OutputFolder
-  num.hits.reported <- length(unique(blast$hit.num)) # the highest blast hit number output into the table
+  num.hits.reported <- max(blast$hit.num) # the highest blast hit number output into the table
   
   # create a matrix from which to plot a stacked bar chart
   hits.matrix <- matrix(data = 0,nrow = num.hits.reported, ncol = length(cutoffs))
@@ -167,15 +167,17 @@ bar.plot.stacked.blast.results <- function(BlastTable, CutoffVector, OutputFolde
   # get hit stats for each cutoff
   for (c in 1:length(cutoffs)){
     trimmed.blast <- apply.pident.cutoff(BlastTable = blast, PidentCutoff = cutoffs[c])
-    hits <- reformat.fract.ids.vs.hit.num(BlastTable = trimmed.blast)
+    if (nrow(trimmed.blast) > 0){
+      hits <- reformat.fract.ids.vs.hit.num(BlastTable = trimmed.blast)
+    }else{
+      hits <- NULL
+    }
     
-    # at higher cutoffs some hits appear unreported, make sure these say zero so they fit in the matrix
+    # at higher cutoffs some hits are empty (not included), if no hit reported leave as zero
     for (h in 1:num.hits.reported){
-      index <- which(hits[,1] == h)
+      index <- which(hits[ ,1] == h)
       if (length(index) > 0){
         hits.matrix[h,c] <- hits[index,2]
-      }else{
-        hits.matrix[h,c] <- 0
       }
     }
   }
@@ -250,8 +252,8 @@ line.plot.overlay.blast.results <- function(BlastTable, CutoffVector, OutputFold
 get.necessary.packages()
 
 blast <- import.BLAST.hits.table(FilePath = blast.file.path)
-hits.reported <- length(unique(blast$hit.num))
 
+# hits.reported <- max(blast$hit.num)
 # # View a table, 'hit.stats', that shows the percent of times each hit was best
 # hit.stats <- reformat.fract.ids.vs.hit.num(BlastTable = blast)
 # bar.plot.blast.results(BlastHitsTable = hit.stats, OutputFolder = plots.folder.path, NumBars = hits.reported)

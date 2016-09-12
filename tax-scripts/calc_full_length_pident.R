@@ -94,44 +94,33 @@ choose.best.hit <- function(BlastTable, OutputFile){
   blast <- BlastTable
   hit.stats.path <- OutputFile
   
-  # get a list of all the unique id names, and set up blank vectors to record which are best
-  unique.qids <- unique(blast$qseqid)
-  index.best.ids <- NULL
-  hit.num.best.ids <- NULL
+  # add hit # (as a modified name) to the qseqID name in a new column
+  blast <- cbind(blast, hit.num = make.unique(blast$qseqid, sep = " "), stringsAsFactors = FALSE)
   
-  # for each unique query id name, report the index and hit number of the best "full length" hit
-  for (q in 1:length(unique.qids)){
-    index.same.ids <- which(blast$qseqid == unique.qids[q])
-    
-    # start with the first hit as the default best one
-    index.best <- index.same.ids[1]
-    hit.num <- 1
-    
-    # if there are multiple hits, replace if another is better
-    if (length(index.same.ids) > 1){
-      for (i in 2:length(index.same.ids)){
-        if (blast$true.pids[index.same.ids][i] > blast$true.pids[index.best]){
-          index.best <- index.same.ids[i]
-          hit.num <- i
-        }
-      }
-    }
-    
-    # record the blast table index of the best hit
-    index.best.ids <- c(index.best.ids, index.best)
-    # record which number hit that was.
-    hit.num.best.ids <- c(hit.num.best.ids, hit.num)
+  # reduce to only the best recalculated pident per seqID
+  blast.ag <- aggregate(x = blast[ ,6], by = list(blast[ ,1]), FUN = max, simplify = FALSE)
+  colnames(blast.ag) <- c("qseqid", "true.pids")
+  blast1 <- merge(x = blast, y = blast.ag, by = c("qseqid", "true.pids"), sort = FALSE)
+  
+  # calculate the hit number by parsing the made-unique names into numbers
+  pull.out.hit.num <- function(x){
+    hit <- strsplit(x, split = " ")
+    hit <- hit[[1]][2]
+    hit <- as.numeric(hit)
+    hit <- sum(hit, 1, na.rm = T)
+    return(hit)
   }
+  blast1$hit.num <- sapply(X = blast1$hit.num, FUN = pull.out.hit.num)
   
-  # change blast table to only contain the best hits
-  blast <- blast[index.best.ids,]
-  # add a column with the hit number
-  blast <- cbind(blast, hit.num.best.ids)
+  # reduce to only the top hit num for cases when mult hits had same true.pident
+  blast.ag1 <- aggregate(x = blast1[ ,7], by = list(blast1[ ,1]), FUN = min, simplify = FALSE)
+  colnames(blast.ag1) <- c("qseqid", "hit.num")
+  blast2 <- merge(x = blast1, y = blast.ag1, by = c("qseqid", "hit.num"), sort = FALSE)
   
-  # save this table to feed into a plotting/analysis script
-  write.table(x = blast, file = hit.stats.path, row.names = F, col.names = F, sep = "\t", quote =  FALSE)
+  # change back to the historical order (from when this was a for loop) to play nice downstream
+  blast2 <- blast2[ ,c(1,4:7,3,2)]
   
-  return(blast)
+  return(blast2)
 }
 
 # print poem to enrich the user experience
@@ -163,4 +152,4 @@ blast <- calc.full.pIDs(BlastTable = blast)
 
 blast <- choose.best.hit(BlastTable = blast, OutputFile = hit.stats.path)
 
-
+write.table(x = blast, file = hit.stats.path, row.names = F, col.names = F, sep = "\t", quote =  FALSE)

@@ -1184,11 +1184,11 @@ otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otu
 					re-run step 11 with an additional "cutoff=" flag.
 
 *pvalues total*	final*names
-				These are files generated in step 14 to use in 15.5.a:	final.general.pvalues
+				These are files generated in step 13 to use in 15.5.a:	final.general.pvalues
 																		final.taxonomy.pvalues
-																		total.reads.per.seqID.csv
 																		final.general.names
 																		final.taxonomy.names
+				This file is generated in optional step 14 or 15:	total.reads.per.seqID.csv
 
 Note: if for some reason you want to keep these files, you can either skip this step
 or instead of rm use the `mv filenames foldername` command to move them to a folder instead.

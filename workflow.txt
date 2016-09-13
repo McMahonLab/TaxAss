@@ -100,7 +100,7 @@ NOTE: steps 1-14 can be run in a block using the bash scripts:
 		Rscript plot_classification_disagreements.R NA plots conflicts_forcing otus.custom.85.taxonomy otus.98.85.70.taxonomy
 
 16. tidy up (bash)
-	rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otus.custom.taxonomy custom.general* otus.custom.[0-9]* *pvalues total*
+	rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otus.custom.taxonomy otus.custom.[0-9]* custom.general* *pvalues total* final*names
 	mkdir scripts ; mv *.py *.R *.sh scripts
 	mkdir analysis ; mv conflicts* plots analysis
 	mkdir data ; mv otus* data
@@ -199,6 +199,7 @@ OTU seqID's:
 			 BLAST will call some parts the seqID and some parts comments if they're separated.
 			 Having BLAST seqIDs that don't match the full >comment line of the fasta file will 
 		 	 throw off the python script that creates fasta files for the chosen seqIDs in step 8.
+		 	 Having any spaces will also throw off the R script that checks blast hit numbers.
 		 	 -must match between the otus.fasta file and the otus.abund file,
 			 though consistent ordering is not necessary.
 
@@ -221,9 +222,9 @@ seqID	kingdom;phylum;class;order;family;genus;species;
 
 ___________		
 
-The Green Genes taxonomy database can be reformatted this way: 
+The Greengenes taxonomy database can be reformatted this way: 
 
-Full 4 Commands (type in terminal) when general.taxonomy is the green genes taxonomy file:
+Full 4 Commands (type in terminal) when general.taxonomy is the Greengenes taxonomy file:
 
 sed 's/ //g' <general.taxonomy >NoSpaces
 sed 's/$/;/' <NoSpaces >EndLineSemicolons
@@ -1112,38 +1113,86 @@ Note: these bash commands only work if you've been using the same names as the w
 Note: go through these commands in order.
 
 
-16.1 remove intermediate files
+16.1 delete intermediate files
 
 Full Command (Type in Terminal):
 
-rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otus.custom.taxonomy custom.general* otus.custom.[0-9]* *pvalues total*
+rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otus.custom.taxonomy otus.custom.[0-9]* custom.general* *pvalues total* final*names
 
-What each of these intermediate files is and why you might want to keep them:
-custom.db.*		The blast database files (saves time if you want to re-run blast on the same taxonomy database)
+What each of these intermediate files is (and why you might want to keep them):
+custom.db.*		
+				The blast database files from step 1:	custom.db.nhr
+														custom.db.nin
+														custom.db.nog
+														custom.db.nsd
+														custom.db.nsi
+														custom.db.nsq
+				(saves time if you want to re-run blast on the same taxonomy database)
+
 custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree*
-				The mothur database files (saves time if you want to re-run classify seqs with the same taxonomy database)
-				This also removes custom.custom.taxonomy, which was only for comparison and isn't needed anymore either
+				The mothur database files from step 9:	custom.8mer
+														custom.custom.8mer.numNonZero
+														custom.custom.8mer.prob
+														custom.tree.sum
+														custom.tree.train
+														general.8mer
+														general.general.8mer.numNonZero
+														general.general.8mer.prob
+														general.tree.sum
+														general.tree.train
+				(saves time if you want to re-run classify seqs with the same taxonomy database)
+				The comparison taxonomy file from step 11.5: custom.custom.taxonomy 
+				(was only needed for database comparison)
+
 *wang* mothur.*.logfile
-				The mothur classify seqs output files (these can be regenerated relatively quickly if you save mothur db files)
+				The mothur classify seqs output files from steps 9, 11, 11.5, 15.5.b.: ex:	otus.above.98.custom.wang.tax.summary
+																							otus.above.98.custom.wang.taxonomy
+																							otus.below.98.general.wang.flip.accnos
+																							otus.below.98.general.wang.tax.summary
+																							otus.below.98.general.wang.taxonomy
+				(these were re-named if they are versions to keep.)
+				The mothur log files: ex: mothur.1471668348.logfile
+				(there is no reason to keep this, especially if you saved terminal output yourself.)
+
 otus.custom.blast*
-				The blast results (these are quick to regenerate if you have the blast database)
-ids*			lists of seqIDs (not needed once you have the fasta files)
+				The blast results from steps 2-4:	otus.custom.blast
+													otus.custom.blast.table
+													otus.custom.blast.table.modified
+				(the .table and .table.modified are easy to regenerate, the raw blast results may take longer)
+				
+ids*			
+				lists of seqIDs from steps 5 and 7: ex:	ids.above.98
+														ids.below.98
+														ids.below.98.all
+														ids.missing
+ 				(not needed once you have the fasta files)
+ 				
 otus.below*.fasta otus.above*.fasta
-				separated fasta files from the custom & general classifications (not needed post-classification.)
+				fasta files created for separate custom & general classification made in step 8: ex:	otus.above.98.fasta
+																										otus.below.98.fasta
+				(not needed post-classification.)
+
 otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otus.custom.taxonomy otus.custom.[0-9]* custom.general*
-				the classifications at different pident cutoffs and from general and custom alone and the database comparison
-				note: these files don't have p-value cutoffs applied (i.e. nothing's called unclassified). 
-				If you want to save files like these for additional analysis, 
+				classifications for pident comparisons in steps 13 and 14: ex:	otus.100.taxonomy
+																				otus.90.taxonomy
+																				otus.general.taxonomy
+				classifications for database comparisons in steps 15.5.b:	otus.custom.taxonomy
+																			otus.custom.80.taxonomy														
+				(these files don't have p-value cutoffs applied (i.e. nothing's called unclassified), so they are not final versions) 
+				For saving additional cutoff versions of your data instead of using these files do: 
 					re-run step 15 to get additional "final" versions.
 					re-run step 11 with an additional "cutoff=" flag.
-*pvalues total*	These are files generated to use in the plot improvement script
 
+*pvalues total*	final*names
+				These are files generated in step 14 to use in 15.5.a:	final.general.pvalues
+																		final.taxonomy.pvalues
+																		total.reads.per.seqID.csv
+																		final.general.names
+																		final.taxonomy.names
 
 Note: if for some reason you want to keep these files, you can either skip this step
-or type in the terminal:
-
-mkdir intermediate
-mv custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy *.general.taxonomy intermediate/
+or instead of rm use the `mv filenames foldername` command to move them to a folder instead.
+Some of these intermediate files are quite large though, so keep that in mind if your computer's filling up.
 
 
 16.2 move scripts into scripts folder
@@ -1153,7 +1202,9 @@ Full 2 commands (Type in Terminal):
 mkdir scripts
 mv *.py *.R *.sh scripts/
 
-Note: I recommend saving all the script versions you used to create your data so you could reproduce it.
+By saving all the script versions you used to create your data you can reproduce it.
+Alternatively for reproducible data note the github SHA number you retreived them from in a README.
+Find this on github, click commits tab, click clipboard icon on most recent commit to copy the SHA identifier.
 
 
 16.3 save files used in analyzing your results in analysis folder
@@ -1163,9 +1214,11 @@ Full 2 commands (Type in Terminal):
 mkdir analysis/
 mv conflicts* plots/ analysis/
 
-Note: You can delete this instead if you're all done analyzing. Instead of the two commands, type:
-
+The are the most useful files (beyond the "intermediate" ones you deleted in 16.1 for taking a
+closer look at your data after the fact. You can delete this instead if just want to get on with
+your life already. Instead of the two commands, type:
 rm -r conflicts* plots/
+
 
 16.4 save your actual data files in a folder called data
 
@@ -1174,7 +1227,10 @@ Full Two commands (Type in Terminal):
 mkdir data
 mv otus* data/
 
-Note: Yeyy!  This is what you're gonna use to actually do stuff now!!
+Yeyy!  This is what you're gonna use to actually do stuff now!!
+It includes:	otus.98.70.70.taxonomy		your final taxonomy file
+				otus.abund					the relative abundance OTU table you started with
+				otus.fasta					the OTU fasta file you started with
 
 
 16.5 save the version of the taxonomy databases you used in a databases folder
@@ -1184,9 +1240,12 @@ Full Two Commands (type in terminal):
 mkdir databases
 mv *.taxonomy *.fasta databases
 
-Note: I highly recommend you keep these versions of the databases you used so you can reproduce your data.
+Saving these versions of the databases will let you can reproduce your data. Alternatively
+you could make note of the versions you used and how you downloaded them in a README file.
+These can be relatively large files.
 
-
+If you don't care at all about being reproducible, all you really need to save is the stuff
+in the data/ folder.  That's your actual data.
 __________________________________________________________________________________________
 
 ~The end~

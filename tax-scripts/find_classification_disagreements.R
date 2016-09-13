@@ -107,13 +107,13 @@ file.name.custom.only.taxonomy <- paste("otus.custom.", taxonomy.pvalue.cutoff.f
 # Define Functions for Import and Formatting
 # -------------------------------------------------------------
 
-# Entertain user with a poem while they wait:
 print.poem <- function(){
+  # Entertain user with a poem while they wait:
   cat("\nAnd the Days Are Not Full Enough\nby Ezra Pound\n\nAnd the days are not full enough\nAnd the nights are not full enough\nAnd life slips by like a field mouse\n\tNot shaking the grass.\n\n")
 }
 
-# Import the otu taxonomies assigned with both FW and GG
 import.FW.names <- function(FilePath){
+  # Import the otu taxonomies assigned with both FW and GG
   fw.plus.gg.tax.file.path <- FilePath
   # Avoid errors from variable row lengths by checking length of all rows (fill=T only checks 1st 5 rows)
   numcol <- max(count.fields(fw.plus.gg.tax.file.path, sep=";"))
@@ -121,8 +121,8 @@ import.FW.names <- function(FilePath){
   return(fw)
 }
 
-# Import the otu taxonomies assigned with only GG, or with the workflow's GG+FW combo
 import.GG.names <- function(FilePath, final.names = FALSE){
+  # Import the otu taxonomies assigned with only GG, or with the workflow's GG+FW combo
   
   if (final.names == FALSE){
     gg.only.tax.file.path <- FilePath
@@ -139,8 +139,9 @@ import.GG.names <- function(FilePath, final.names = FALSE){
   return(gg)
 }
 
-# Reformat the blast-FW-GG workflow-assigned taxonomy table
 reformat.fw <- function(FWtable){
+  # Reformat the blast-FW-GG workflow-assigned taxonomy table
+  
   fw <- FWtable
   
   # Remove strain and empty 10th column
@@ -162,8 +163,9 @@ reformat.fw <- function(FWtable){
   return(fw)
 }
 
-# Reformat the green genes taxonomy table
 reformat.gg <- function(GGtable){
+  # Reformat the green genes taxonomy table
+  
   gg <- GGtable
   
   # Remove empty 9th column
@@ -185,8 +187,9 @@ reformat.gg <- function(GGtable){
   return(gg)
 }
 
-# Check that the order of the names is the same in each file:
 check.files.match <- function(FWtable, GGtable){
+  # Check that the order of the names is the same in each file, print warning if not.
+  
   gg <- GGtable
   fw <- FWtable
   
@@ -202,16 +205,17 @@ check.files.match <- function(FWtable, GGtable){
   }
 }
 
-# Import the freshwater sequence IDs as determined by the BLAST cutoff in workflow step 4
 import.FW.seq.IDs <- function(FilePath){
+  # Import the freshwater sequence IDs as determined by the BLAST cutoff in workflow step 4
   fw.seq.ids.file.path <- FilePath
   fw.seqs <- read.table(file = fw.seq.ids.file.path, colClasses = "character")
   colnames(fw.seqs) <- "seqID.fw"
   return(fw.seqs)
 }
 
-# Remove parentheses of % confidence so that names in each table match exactly
 remove.parentheses <- function(x){
+  # Remove parentheses of % confidence so that names in each table match exactly
+  # call this using apply
   fixed.name <- sub(pattern = '\\(.*\\)' , replacement = '', x = x)
   return(fixed.name)
 }
@@ -221,11 +225,12 @@ remove.parentheses <- function(x){
 # Define Functions for Data Analysis
 # -------------------------------------------------------------
 
-# makes all the unclassified/unknown/any other word for it names be uniformly called "unclassified"
+uniform.unclass.names <- function(TaxonomyTable){
+  # makes all the unclassified/unknown/any other word for it names be uniformly called "unclassified"
   # finds them b/c those names do not have bootstrap percents in parentheses, i.e. the (70)
   # also changes k__(100) etc to unclassified
   # this is used in the function do.bootstrap.cutoff()
-uniform.unclass.names <- function(TaxonomyTable){
+  
   tax <- TaxonomyTable
   
   # find 'odd entries' that don't have bootstrap percents after them, like Unknown
@@ -258,9 +263,10 @@ uniform.unclass.names <- function(TaxonomyTable){
   return(tax)
 }
 
-# makes empty spots in the database be called unclassified.  more error prone b/c have to guess odd names!
-# do this separately for the database b/c it doesn't have parentheses (it is the FW training set)
 uniform.unclass.names.database <- function(TaxonomyDatabase){
+  # makes empty spots in the database be called unclassified.  more error prone b/c have to guess odd names!
+  # do this separately for the database b/c it doesn't have parentheses (it is the FW training set)
+  
   tax <- TaxonomyDatabase
   
   # There's a lot of ways to guess that the database might have weird blanks....
@@ -277,28 +283,29 @@ uniform.unclass.names.database <- function(TaxonomyDatabase){
   return(tax)
 }
 
-# Given a single taxonomy name, pull out the bootstrap percent.
-  # text = k__Bacteria(100) returns (as character) 100, But text = "unclassified" returns (as character) "unclassified"
 pull.out.percent <- function(text){
+  # Given a single taxonomy name, pull out the bootstrap percent.
+  # text = k__Bacteria(100) returns (as character) 100, But text = "unclassified" returns (as character) "unclassified"
   text <- sub(pattern = '.*\\(', replacement = '\\(', x = text)
   text <- sub(pattern = '\\(', replacement = '', x = text)
   text <- sub(pattern = '\\)', replacement = '', x = text)
   return(text)
 }
 
-# When the value supplied is FALSE, the text is changed to "unclassified"
-  # This is used in do.bootstrap.cutoff()
 make.unclassified <- function(text,val){
+  # When the value supplied is FALSE, the text is changed to "unclassified"
+  # This is used in do.bootstrap.cutoff()
   if (val == F){
     text <- "unclassified"
   }
   return(text)
 }
 
-# Apply classification bootstrap value cutoff 
+do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
+  # Apply classification bootstrap value cutoff 
   # Everything below the supplied cutoff value is changed to "unclassified"
   # (by bootstrap cutoff I mean the stat that's the % of times it got classified into that taxonomy cluster)
-do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
+  
   tax <- as.matrix(TaxonomyTable)
   cutoff <- as.numeric(BootstrapCutoff)
   
@@ -322,8 +329,9 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   return(tax)
 }
 
-# Find seqs misclassified at a given phylogenetic level, t
 find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_percents, TaxaLevel, tracker, forcing = FALSE){
+  # Find seqs misclassified at a given phylogenetic level, t
+  
   fw <- FWtable
   gg <- GGtable
   fw.percents <- FWtable_percents
@@ -357,8 +365,8 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
   return(num.mismatches)
 }
 
-# Set up a summary vector to fill
 create.summary.vector <- function(Forcing = FALSE){
+  # Set up a summary vector to fill
   if(Forcing == TRUE){
     num.mismatches <- vector(mode = "numeric", length = 7)
     names(num.mismatches) <- c("kingdom","phylum","class","order","lineage","clade","tribe")
@@ -369,8 +377,8 @@ create.summary.vector <- function(Forcing = FALSE){
   return(num.mismatches)
 }
 
-# Format and export the summary vector
 export.summary.stats <- function(SummaryVector, FW_seqs, ALL_seqs, FolderPath){
+  # Format and export the summary vector
   num.mismatches <- SummaryVector
   fw.fw.only <- FW_seqs
   fw.percents <- ALL_seqs
@@ -381,8 +389,9 @@ export.summary.stats <- function(SummaryVector, FW_seqs, ALL_seqs, FolderPath){
   write.csv(num.mismatches, file = paste(results.folder.path, "/", "conflicts_summary.csv", sep=""), row.names = FALSE)
 }
 
-# Check how high the freshwater bootstrap values end up given your cutoff.
 view.bootstraps <- function(TaxonomyTable){
+  # Check how high the freshwater bootstrap values end up given your cutoff.
+  
   tax <- TaxonomyTable
   
   # create a matrix of bootstrap numbers, copy from do.bootstrap.cutoff()

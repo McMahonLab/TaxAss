@@ -1,4 +1,5 @@
 # 8-27-15 RRR
+# -------------------------------------------------------------
 
 # The goal of this script is to identify the best BLAST cutoff to use
 # in my new taxonomy assignment pipeline.
@@ -16,9 +17,9 @@
   # the fw.only means that only the seqIDs that the workflow assigned with fw are included in the table
 
 
-# ####
+# -------------------------------------------------------------
 # Receive arguments from terminal command line
-# ####
+# -------------------------------------------------------------
 
 # Example syntax for pident comparison, final taxonomy generation, and database comparison, respectively:
 
@@ -29,18 +30,18 @@
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 
-# ####
+# -------------------------------------------------------------
 # input for troubleshooting
-# ####
-# # CONFLICT FINDING ONLY:
-# cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-# userprefs <- c("../../take17/otus.99.taxonomy",
-#                "../../take17/otus.general.taxonomy",
-#                "../../take17/ids.above.99",
-#                "../../take17/conflicts_99",
-#                99,
-#                80,
-#                70)
+# -------------------------------------------------------------
+# CONFLICT FINDING ONLY:
+cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
+userprefs <- c("../../poster_danube/otus.98.taxonomy",
+               "../../poster_danube/otus.general.taxonomy",
+               "../../poster_danube/ids.above.98",
+               "../../poster_danube/conflicts_98/",
+               98,
+               80,
+               70)
 # # FINAL TABLE GENERATION: note you do need the otus.general.taxonomy file b/c it's used to prep a file for plot_classification_improvement.R in step 16
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
 # userprefs <- c("../../take18playwith/otus.99.taxonomy",
@@ -71,7 +72,7 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                80,
 #                70,
 #                "forcing")
-# ####
+# -------------------------------------------------------------
 
 fw.plus.gg.tax.file.path <- userprefs[1]
 gg.only.tax.file.path <- userprefs[2]
@@ -84,9 +85,9 @@ final.or.database <- userprefs[8]
 if (length(userprefs) < 8){final.or.database <- "non-empty string"}
 
 
-# ####
+# -------------------------------------------------------------
 # Pre-determined Output File Names
-# ####
+# -------------------------------------------------------------
 
 # when "final" flag is used, these are exported into the working directory:
 file.name.final.taxonomy <- paste("otus.", blast.pident.cutoff, ".", taxonomy.pvalue.cutoff.fw, ".", taxonomy.pvalue.cutoff.gg, ".taxonomy", sep = "")
@@ -102,9 +103,9 @@ file.name.custom.only.taxonomy <- paste("otus.custom.", taxonomy.pvalue.cutoff.f
 # all of the pre-determined names are used by other scripts and shouldn't be changed.  
 
 
-# ####
+# -------------------------------------------------------------
 # Define Functions for Import and Formatting
-# ####
+# -------------------------------------------------------------
 
 # Entertain user with a poem while they wait:
 print.poem <- function(){
@@ -205,7 +206,7 @@ check.files.match <- function(FWtable, GGtable){
 import.FW.seq.IDs <- function(FilePath){
   fw.seq.ids.file.path <- FilePath
   fw.seqs <- read.table(file = fw.seq.ids.file.path, colClasses = "character")
-  fw.seqs <- fw.seqs[ ,1]
+  colnames(fw.seqs) <- "seqID.fw"
   return(fw.seqs)
 }
 
@@ -216,24 +217,9 @@ remove.parentheses <- function(x){
 }
 
 
-# ####
+# -------------------------------------------------------------
 # Define Functions for Data Analysis
-# ####
-
-# Find index of sequences that were classified by the freshwater database. returns a vector of indeces.
-find.fw.indeces <- function(TaxonomyTable, SeqIDs){
-  tax <- TaxonomyTable
-  ids <- SeqIDs
-  
-  # when seqIDs are numbers written as characters, sometimes one file could have whitespace placeholders for
-  # for the shorter characters.  But can't just change to numeric, in case some files have non-number seqIDs
-  
-  index <- NULL
-  for (e in 1:length(ids)){
-    index <- c(index, which(tax[,1] == ids[e]))
-  }
-  return(index)
-}
+# -------------------------------------------------------------
 
 # makes all the unclassified/unknown/any other word for it names be uniformly called "unclassified"
   # finds them b/c those names do not have bootstrap percents in parentheses, i.e. the (70)
@@ -410,14 +396,14 @@ view.bootstraps <- function(TaxonomyTable){
 }
 
 
-# ####
+# -------------------------------------------------------------
 # Use Functions
-# ####
+# -------------------------------------------------------------
 
-# ####
+# -------------------------------------------------------------
 # Generate a final taxonomy file:
 if (final.or.database == "final" | final.or.database == "Final" | final.or.database == "FINAL"){
-# ####  
+# -------------------------------------------------------------  
   cat("\n\ngenerating final file- woohoo!\n\n")
   print.poem()
   
@@ -425,10 +411,11 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   fw.percents <- reformat.fw(FWtable = fw.percents)
   
   fw.seq.ids <- import.FW.seq.IDs(FilePath = fw.seq.ids.file.path)
-  fw.indeces <- find.fw.indeces(TaxonomyTable = fw.percents, SeqIDs = fw.seq.ids)
   
-  fw.percents.fw.only <- fw.percents[fw.indeces, ]
-  fw.percents.gg.only <- fw.percents[-fw.indeces, ]
+  fw.percents.fw.only <- merge(x = fw.percents, y = fw.seq.ids, by = "seqID.fw", sort = TRUE)
+  fw.percents.fw.only <- as.matrix(fw.percents.fw.only)
+  gg.percents.fw.only <- merge(x = gg.percents, y = fw.seq.ids, by.x = "seqID.gg", by.y = "seqID.fw", sort = TRUE)
+  gg.percents.fw.only <- as.matrix(gg.percents.fw.only)
   
   final.taxonomy.fw.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.fw.only, BootstrapCutoff = taxonomy.pvalue.cutoff.fw)
   final.taxonomy.gg.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.gg.only, BootstrapCutoff = taxonomy.pvalue.cutoff.gg)
@@ -458,10 +445,10 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   gg.names <- apply(X = gg.taxonomy, MARGIN = 2, FUN = remove.parentheses)
   write.table(x = gg.names, file = file.name.general.names, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
 
-# ####
+# -------------------------------------------------------------
 # Compare databases by looking at how GG classifies the FW representative sequences
 }else if (final.or.database == "database"){
-# ####
+# -------------------------------------------------------------
   cat("\n\ndoing database comparison\n\n")
   
   fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path)
@@ -493,10 +480,10 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
 
   
 
-# ####
+# -------------------------------------------------------------
 # Look at how bad it'd be if you used only the custom database instead of the workflow
 }else if (final.or.database == "forcing"){
-# ####  
+# -------------------------------------------------------------  
   cat("\n\nexamining how the custom database would have classified the dissimilar sequences that didn't belong in it \n(i.e. good thing you used my workflow!)\n\n")
   
   fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path)
@@ -508,10 +495,11 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   check.files.match(FWtable = fw.percents, GGtable = gg.percents)
   
   fw.seq.ids <- import.FW.seq.IDs(FilePath = fw.seq.ids.file.path)
-  fw.indeces <- find.fw.indeces(TaxonomyTable = fw.percents, SeqIDs = fw.seq.ids)
   
-  fw.percents.gg.only <- fw.percents[-fw.indeces, ]
-  gg.percents.gg.only <- gg.percents[-fw.indeces, ]
+  fw.percents.fw.only <- merge(x = fw.percents, y = fw.seq.ids, by = "seqID.fw", sort = TRUE)
+  fw.percents.fw.only <- as.matrix(fw.percents.fw.only)
+  gg.percents.fw.only <- merge(x = gg.percents, y = fw.seq.ids, by.x = "seqID.gg", by.y = "seqID.fw", sort = TRUE)
+  gg.percents.fw.only <- as.matrix(gg.percents.fw.only)
   
   check.files.match(FWtable = fw.percents.gg.only, GGtable = gg.percents.gg.only)
   
@@ -547,10 +535,10 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw.gg.only, ALL_seqs = fw.percents, FolderPath = results.folder.path)
 
   
-# #### 
+# ------------------------------------------------------------- 
 # Only compare the classifications made by the fw database to the gg classifications, not full tax tables
 }else{
-# ####  
+# -------------------------------------------------------------  
   cat("\n\ncomparing seqIDs the workflow classified with custom database to how general database would have classified them.\n\n")
   
   fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path)
@@ -562,10 +550,11 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   check.files.match(FWtable = fw.percents, GGtable = gg.percents)
   
   fw.seq.ids <- import.FW.seq.IDs(FilePath = fw.seq.ids.file.path)
-  fw.indeces <- find.fw.indeces(TaxonomyTable = fw.percents, SeqIDs = fw.seq.ids)
   
-  fw.percents.fw.only <- fw.percents[fw.indeces,]
-  gg.percents.fw.only <- gg.percents[fw.indeces,]
+  fw.percents.fw.only <- merge(x = fw.percents, y = fw.seq.ids, by = "seqID.fw", sort = TRUE)
+  fw.percents.fw.only <- as.matrix(fw.percents.fw.only)
+  gg.percents.fw.only <- merge(x = gg.percents, y = fw.seq.ids, by.x = "seqID.gg", by.y = "seqID.fw", sort = TRUE)
+  gg.percents.fw.only <- as.matrix(gg.percents.fw.only)
   
   check.files.match(FWtable = fw.percents.fw.only, GGtable = gg.percents.fw.only)
   

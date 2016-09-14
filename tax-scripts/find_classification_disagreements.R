@@ -42,14 +42,14 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                98,
 #                80,
 #                70)
-# # FINAL TABLE GENERATION: note you do need the otus.general.taxonomy file b/c it's used to prep a file for plot_classification_improvement.R in step 16
+# FINAL TABLE GENERATION: note you do need the otus.general.taxonomy file b/c it's used to prep a file for plot_classification_improvement.R in step 16
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-# userprefs <- c("../../take18playwith/otus.99.taxonomy",
-#                "../../take18playwith/otus.general.taxonomy",
-#                "../../take18playwith/ids.above.99",
-#                "../../take18playwith/conflicts_99/",
-#                99,
-#                80,
+# userprefs <- c("../../poster_danube/otus.98.taxonomy",
+#                "../../poster_danube/otus.general.taxonomy",
+#                "../../poster_danube/ids.above.98",
+#                "../../poster_danube/conflicts_98",
+#                98,
+#                85,
 #                70,
 #                "final")
 # # DATABASE COMPARISON: part of optional step 11.5 
@@ -214,6 +214,18 @@ remove.parentheses <- function(x){
 # -------------------------------------------------------------
 # Define Functions for Data Analysis
 # -------------------------------------------------------------
+
+find.fw.seqid.indeces <- function(FullTable, FWids){
+  gg.and.fw <- FullTable
+  fw.ids <- FWids
+  # duplicate marks the 2nd occurance as TRUE
+  # combine the ids (fw ids first, all ids second) into one vector with duplicate ids
+  # index of FW in all ids is the index of the duplicates - the number of fw ids
+  all.ids <- c(fw.ids[ ,1], gg.and.fw[ ,1])
+  index <- which(duplicated(all.ids) == TRUE)
+  index <- index - nrow(fw.ids)
+  return(index)
+}
 
 uniform.unclass.names <- function(TaxonomyTable){
   # makes all the unclassified/unknown/any other word for it names be uniformly called "unclassified"
@@ -401,11 +413,10 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   fw.percents <- reformat.fw(FWtable = fw.percents)
   
   fw.seq.ids <- import.FW.seq.IDs(FilePath = fw.seq.ids.file.path)
+  fw.indeces <- find.fw.seqid.indeces(FullTable = fw.percents, FWids = fw.seq.ids)
   
-  fw.percents.fw.only <- merge(x = fw.percents, y = fw.seq.ids, by = "seqID.fw", sort = TRUE)
-  fw.percents.fw.only <- as.matrix(fw.percents.fw.only)
-  gg.percents.fw.only <- merge(x = gg.percents, y = fw.seq.ids, by.x = "seqID.gg", by.y = "seqID.fw", sort = TRUE)
-  gg.percents.fw.only <- as.matrix(gg.percents.fw.only)
+  fw.percents.fw.only <- fw.percents[fw.indeces, ]
+  fw.percents.gg.only <- fw.percents[-fw.indeces, ]
   
   final.taxonomy.fw.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.fw.only, BootstrapCutoff = taxonomy.pvalue.cutoff.fw)
   final.taxonomy.gg.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.gg.only, BootstrapCutoff = taxonomy.pvalue.cutoff.gg)
@@ -485,11 +496,10 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   check.files.match(FWtable = fw.percents, GGtable = gg.percents)
   
   fw.seq.ids <- import.FW.seq.IDs(FilePath = fw.seq.ids.file.path)
+  fw.indeces <- find.fw.seqid.indeces(FullTable = fw.percents, FWids = fw.seq.ids)
   
-  fw.percents.fw.only <- merge(x = fw.percents, y = fw.seq.ids, by = "seqID.fw", sort = TRUE)
-  fw.percents.fw.only <- as.matrix(fw.percents.fw.only)
-  gg.percents.fw.only <- merge(x = gg.percents, y = fw.seq.ids, by.x = "seqID.gg", by.y = "seqID.fw", sort = TRUE)
-  gg.percents.fw.only <- as.matrix(gg.percents.fw.only)
+  fw.percents.gg.only <- fw.percents[-fw.indeces, ]
+  gg.percents.gg.only <- gg.percents[-fw.indeces, ]
   
   check.files.match(FWtable = fw.percents.gg.only, GGtable = gg.percents.gg.only)
   
@@ -540,11 +550,10 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   check.files.match(FWtable = fw.percents, GGtable = gg.percents)
   
   fw.seq.ids <- import.FW.seq.IDs(FilePath = fw.seq.ids.file.path)
+  fw.indeces <- find.fw.seqid.indeces(FullTable = fw.percents, FWids = fw.seq.ids)
   
-  fw.percents.fw.only <- merge(x = fw.percents, y = fw.seq.ids, by = "seqID.fw", sort = TRUE)
-  fw.percents.fw.only <- as.matrix(fw.percents.fw.only)
-  gg.percents.fw.only <- merge(x = gg.percents, y = fw.seq.ids, by.x = "seqID.gg", by.y = "seqID.fw", sort = TRUE)
-  gg.percents.fw.only <- as.matrix(gg.percents.fw.only)
+  fw.percents.fw.only <- fw.percents[fw.indeces, ]
+  gg.percents.fw.only <- gg.percents[fw.indeces, ]
   
   check.files.match(FWtable = fw.percents.fw.only, GGtable = gg.percents.fw.only)
   

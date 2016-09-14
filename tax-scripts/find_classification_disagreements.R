@@ -42,7 +42,7 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                98,
 #                80,
 #                70)
-# # # FINAL TABLE GENERATION: note you do need the otus.general.taxonomy file b/c it's used to prep a file for plot_classification_improvement.R in step 16
+# # FINAL TABLE GENERATION: note you do need the otus.general.taxonomy file b/c it's used to prep a file for plot_classification_improvement.R in step 16
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
 # userprefs <- c("../../take18playwith/otus.99.taxonomy",
 #                "../../take18playwith/otus.general.taxonomy",
@@ -142,20 +142,15 @@ import.GG.names <- function(FilePath, final.names = FALSE){
 reformat.fw <- function(FWtable){
   # Reformat the blast-FW-GG workflow-assigned taxonomy table
   
-  fw <- FWtable
+  fw <- as.matrix(FWtable)
   
   # Remove strain and empty 10th column
   fw <- fw[,-c(9,10)]
-  
-  # Rename columns
   colnames(fw) <- c("seqID.fw","kingdom.fw","phylum.fw","class.fw","order.fw","linege.fw","clade.fw","tribe.fw")
   
   # Reorder sequence IDs so can match them to the other file
   index <- order(fw[,1])
   fw <- fw[index,]
-  
-  # Convert into a matrix for faster processing
-  fw <- as.matrix(fw)
   
   # Remove row names that will not match between the data tables
   row.names(fw) <- NULL
@@ -166,20 +161,15 @@ reformat.fw <- function(FWtable){
 reformat.gg <- function(GGtable){
   # Reformat the green genes taxonomy table
   
-  gg <- GGtable
+  gg <- as.matrix(GGtable)
   
   # Remove empty 9th column
   gg <- gg[,1:8]
-  
-  # Rename columns
   colnames(gg) <- c("seqID.gg","kingdom.gg","phylum.gg","class.gg","order.gg","family.gg","genus.gg","species.gg")
   
   # Reorder sequence IDs so can match them to the other file
   index <- order(gg[,1])
   gg <- gg[index,]
-  
-  # Convert into a character matrix (from dataframe w/ seqID's integer) instead of a dataframe for faster processing
-  gg <- as.matrix(gg)
   
   # Remove row names that will not match between the data tables
   row.names(gg) <- NULL

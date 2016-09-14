@@ -42,7 +42,7 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                98,
 #                80,
 #                70)
-# FINAL TABLE GENERATION: note you do need the otus.general.taxonomy file b/c it's used to prep a file for plot_classification_improvement.R in step 16
+# # FINAL TABLE GENERATION: note you do need the otus.general.taxonomy file b/c it's used to prep a file for plot_classification_improvement.R in step 16
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
 # userprefs <- c("../../poster_danube/otus.98.taxonomy",
 #                "../../poster_danube/otus.general.taxonomy",
@@ -52,7 +52,7 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                85,
 #                70,
 #                "final")
-# # DATABASE COMPARISON: part of optional step 11.5 
+# # DATABASE COMPARISON: part of optional step 11.5
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
 # userprefs <- c("../../take17/custom.custom.taxonomy",
 #                "../../take17/custom.general.taxonomy",
@@ -64,12 +64,12 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                "database")
 # # FORCING ANALYSIS: part of optional step 15.5
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-# userprefs <- c("../../take18playwith/otus.custom.taxonomy",
-#                "../../take18playwith/otus.98.80.70.taxonomy",
-#                "../../take18playwith/ids.above.98",
-#                "../../take18playwith/conflicts_forcing/",
+# userprefs <- c("../../poster_mend_unclust/otus.custom.taxonomy",
+#                "../../poster_mend_unclust/otus.98.70.70.taxonomy",
+#                "../../poster_mend_unclust/ids.above.98",
+#                "../../poster_mend_unclust/conflicts_forcing",
 #                NA,
-#                80,
+#                70,
 #                70,
 #                "forcing")
 # -------------------------------------------------------------
@@ -317,7 +317,9 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   
   # make all names in the taxonomy table unclassified if they're below the bootstrap cutoff
   index <- which(tax.TF == 0)
-  tax[index] <- "unclassified"
+  tax.names <- tax[ ,-1]
+  tax.names[index] <- "unclassified"
+  tax[ ,-1] <- tax.names
     
   return(tax)
 }
@@ -487,8 +489,8 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
 # -------------------------------------------------------------  
   cat("\n\nexamining how the custom database would have classified the dissimilar sequences that didn't belong in it \n(i.e. good thing you used my workflow!)\n\n")
   
-  fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path)
-  gg.percents <- import.GG.names(FilePath = gg.only.tax.file.path, final.names = TRUE)
+  fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path) # fw.plus.gg.tax.file.path is actually FW-only here
+  gg.percents <- import.GG.names(FilePath = gg.only.tax.file.path, final.names = TRUE) # gg.only.tax.file.path is final workflow taxonomy (fw+gg)
   
   gg.percents <- reformat.gg(GGtable = gg.percents)
   fw.percents <- reformat.fw(FWtable = fw.percents)
@@ -504,9 +506,10 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   check.files.match(FWtable = fw.percents.gg.only, GGtable = gg.percents.gg.only)
   
   gg.gg.only <- do.bootstrap.cutoff(TaxonomyTable = gg.percents.gg.only, BootstrapCutoff = taxonomy.pvalue.cutoff.gg)
-  
+   
   # Need a custom-only table with bootstrap applied for custom-only forcing plot in plot_classification_disagreements.R with forcing argument
   fw <- do.bootstrap.cutoff(TaxonomyTable = fw.percents, BootstrapCutoff = taxonomy.pvalue.cutoff.fw)
+  
   fw.gg.only <- fw[-fw.indeces, ]
   
   check.files.match(FWtable = fw.gg.only, GGtable = gg.gg.only)

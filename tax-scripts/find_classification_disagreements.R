@@ -33,16 +33,16 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 # -------------------------------------------------------------
 # input for troubleshooting
 # -------------------------------------------------------------
-# CONFLICT FINDING ONLY:
-cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-userprefs <- c("../../poster_danube/otus.98.taxonomy",
-               "../../poster_danube/otus.general.taxonomy",
-               "../../poster_danube/ids.above.98",
-               "../../poster_danube/conflicts_98/",
-               98,
-               80,
-               70)
-# # FINAL TABLE GENERATION: note you do need the otus.general.taxonomy file b/c it's used to prep a file for plot_classification_improvement.R in step 16
+# # CONFLICT FINDING ONLY:
+# cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
+# userprefs <- c("../../poster_danube/otus.98.taxonomy",
+#                "../../poster_danube/otus.general.taxonomy",
+#                "../../poster_danube/ids.above.98",
+#                "../../poster_danube/conflicts_98/",
+#                98,
+#                80,
+#                70)
+# # # FINAL TABLE GENERATION: note you do need the otus.general.taxonomy file b/c it's used to prep a file for plot_classification_improvement.R in step 16
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
 # userprefs <- c("../../take18playwith/otus.99.taxonomy",
 #                "../../take18playwith/otus.general.taxonomy",
@@ -292,15 +292,6 @@ pull.out.percent <- function(text){
   return(text)
 }
 
-make.unclassified <- function(text,val){
-  # When the value supplied is FALSE, the text is changed to "unclassified"
-  # This is used in do.bootstrap.cutoff()
-  if (val == F){
-    text <- "unclassified"
-  }
-  return(text)
-}
-
 do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   # Apply classification bootstrap value cutoff 
   # Everything below the supplied cutoff value is changed to "unclassified"
@@ -319,13 +310,13 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   tax.nums <- apply(X = tax.nums, MARGIN = 2, FUN = as.numeric)
   tax.TF <- tax.nums >= cutoff
   
-  # make all names in the taxonomy table unclassified if they're below the bootstrap cutoff
-  for (r in 1:nrow(tax)){
-    for (c in 2:ncol(tax)){
-      tax[r,c] <- make.unclassified(text = tax[r,c], val = tax.TF[r,c-1])
-    }
-  }
+  # make sure you never get a "classified" under an "unclassified" (this may not be necessary)
+  tax.TF <- t(apply(X = tax.TF, MARGIN = 1, FUN = cummin))
   
+  # make all names in the taxonomy table unclassified if they're below the bootstrap cutoff
+  index <- which(tax.TF == 0)
+  tax[index] <- "unclassified"
+    
   return(tax)
 }
 
@@ -570,8 +561,6 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   fw.fw.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.fw.only, BootstrapCutoff = taxonomy.pvalue.cutoff.fw)
   gg.fw.only <- do.bootstrap.cutoff(TaxonomyTable = gg.percents.fw.only, BootstrapCutoff = taxonomy.pvalue.cutoff.gg)
   
-  check.files.match(FWtable = fw.fw.only, GGtable = gg.fw.only)
-  
   fw.fw.only <- apply(fw.fw.only, 2, remove.parentheses)
   gg.fw.only <- apply(gg.fw.only, 2, remove.parentheses)
   
@@ -599,18 +588,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+# ---- Old stuff ----
 
 # # Generate a file of the fw-assigned taxonomies, and a matching table of just their bootstrap values
 #   # File written: the "fw_classified_bootstraps.csv" that lists the bootstrap of all sequences classified by freshwater
@@ -625,4 +603,4 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
 # gg.bootstraps <- view.bootstraps(TaxonomyTable = gg.percents.fw.only)
 # write.csv(gg.bootstraps, file = paste(results.folder.path, "/", "gg_classified_bootstraps.csv", sep=""), row.names = FALSE)
 # write.csv(gg.percents.fw.only, file = paste(results.folder.path, "/", "gg_classified_taxonomies.csv", sep=""), row.names = FALSE)
-
+# ----

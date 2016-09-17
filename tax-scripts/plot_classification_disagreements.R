@@ -30,46 +30,45 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                "../../take_mendota_clust/otus.98.80.80.taxonomy")
 # 
 # FOR CHOOSING CUTOFF:
-cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
-userprefs <- c("../../poster_mend_unclust/otus.abund",
-               "../../poster_mend-check/plots",
-               "regular",
-               NA,
-               NA,
-               "../../poster_mend_unclust/conflicts_90",
-               "../../poster_mend_unclust/ids.above.90",
-               90,
-               "../../poster_mend_unclust/conflicts_91",
-               "../../poster_mend_unclust/ids.above.91",
-               91,
-               "../../poster_mend_unclust/conflicts_92",
-               "../../poster_mend_unclust/ids.above.92",
-               92,
-               "../../poster_mend_unclust/conflicts_93",
-               "../../poster_mend_unclust/ids.above.93",
-               93,
-               "../../poster_mend_unclust/conflicts_94",
-               "../../poster_mend_unclust/ids.above.94",
-               94,
-               "../../poster_mend_unclust/conflicts_95",
-               "../../poster_mend_unclust/ids.above.95",
-               95,
-               "../../poster_mend_unclust/conflicts_96",
-               "../../poster_mend_unclust/ids.above.96",
-               96,
-               "../../poster_mend_unclust/conflicts_97",
-               "../../poster_mend_unclust/ids.above.97",
-               97,
-               "../../poster_mend_unclust/conflicts_98",
-               "../../poster_mend_unclust/ids.above.98",
-               98,
-               "../../poster_mend_unclust/conflicts_99",
-               "../../poster_mend_unclust/ids.above.99",
-               99,
-               "../../poster_mend_unclust/conflicts_100",
-               "../../poster_mend_unclust/ids.above.100",
-               100)
-
+# cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
+# userprefs <- c("../../poster_mend_unclust/otus.abund",
+#                "../../poster_mend-check/plots",
+#                "regular",
+#                NA,
+#                NA,
+#                "../../poster_mend_unclust/conflicts_90",
+#                "../../poster_mend_unclust/ids.above.90",
+#                90,
+#                "../../poster_mend_unclust/conflicts_91",
+#                "../../poster_mend_unclust/ids.above.91",
+#                91,
+#                "../../poster_mend_unclust/conflicts_92",
+#                "../../poster_mend_unclust/ids.above.92",
+#                92,
+#                "../../poster_mend_unclust/conflicts_93",
+#                "../../poster_mend_unclust/ids.above.93",
+#                93,
+#                "../../poster_mend_unclust/conflicts_94",
+#                "../../poster_mend_unclust/ids.above.94",
+#                94,
+#                "../../poster_mend_unclust/conflicts_95",
+#                "../../poster_mend_unclust/ids.above.95",
+#                95,
+#                "../../poster_mend_unclust/conflicts_96",
+#                "../../poster_mend_unclust/ids.above.96",
+#                96,
+#                "../../poster_mend_unclust/conflicts_97",
+#                "../../poster_mend_unclust/ids.above.97",
+#                97,
+#                "../../poster_mend_unclust/conflicts_98",
+#                "../../poster_mend_unclust/ids.above.98",
+#                98,
+#                "../../poster_mend_unclust/conflicts_99",
+#                "../../poster_mend_unclust/ids.above.99",
+#                99,
+#                "../../poster_mend_unclust/conflicts_100",
+#                "../../poster_mend_unclust/ids.above.100",
+#                100)
 # # JUST MAKE SEQID.READS FILE, SKIPPING STEP 14 BUT DOING 15.5.A
 # cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
 # userprefs <- c("../../take18playwith/otus.abund", 
@@ -312,10 +311,11 @@ add.totals.to.read.summaries <- function(ReadSummaryTable, AbundanceTable, Piden
     # for each seqID classified with FW
     fw.reads[p] <- 0
     if (length(fw.ids[[p]]) > 0){
-      for (s in 1:length(fw.ids[[p]])){
-        index <- which(seqID.reads[,1] == fw.ids[[p]][s])
-        fw.reads[p] <- fw.reads[p] + seqID.reads[index,2]
-      } 
+      ids.subset <- fw.ids[[p]]
+      reads.ids <- seqID.reads[ ,1]
+      index <- duplicated(c(ids.subset, reads.ids))
+      index <- index[-c(1:length(ids.subset))]
+      fw.reads[p] <- sum(seqID.reads[index,2])
     }
     names(fw.reads)[p] <- paste("pident", pident.values[p], sep = "")
   }

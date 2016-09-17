@@ -270,22 +270,16 @@ find.reads.per.seqID <- function(ReadsTable, ConflictsList, Forcing = FALSE){
 generate.summary.table.of.reads <- function(ReadsList, Forcing = FALSE){
   # collapse the list of total reads per seqID into a table of total reads: taxa level x pident
   reads.list <- ReadsList
-  
-  # forcing plots go to tribe level
-  if (Forcing == TRUE){
-    num.taxa.levels <- 7
-  }else{
-    num.taxa.levels <- 5
-  }
-  
+ 
   # Set up empty matrix to fill
-  reads.summary <- matrix(0, nrow = num.taxa.levels, ncol = length(reads.list))
+  num.taxa.levels <- length(reads.list[[1]])
+  num.pidents <- length(reads.list)
+  reads.summary <- matrix(0, nrow = num.taxa.levels, ncol = num.pidents)
   row.names(reads.summary) <- names(reads.list[[1]])
   colnames(reads.summary) <- names(reads.list)
   
   #For each outer list's list (pident)
   for (p in 1:length(reads.list)){
-    
     # For each inner list's vector (taxa level)
     taxa.sum <- NULL
     for (t in 1:num.taxa.levels){

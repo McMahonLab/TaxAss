@@ -203,20 +203,16 @@ import.ids.above <- function(FilePaths, PidentsUsed){
   return(fw.ids)
 }
 
-get.conflict.seqIDs <- function(ConflictsFolders, PidentsUsed){
+get.conflict.seqIDs <- function(ConflictsFolders, PidentsUsed, TaxaLevels){
   # import files comparing conflicts at each level, record the seqIDs into a list of lists
   # structure: outer list- each pident, inner lists- seqIDs at each taxa level
   pident.folders <- ConflictsFolders
   pident.values <- PidentsUsed
+  num.taxa.levels <- TaxaLevels
   
-  # forcing plots go to tribe level
-  if (pident.values[1] == "forcing"){
-    num.taxa.levels <- 7
-    conflict.ids.start <- list(Kingdom = NULL, Phylum = NULL, Class = NULL, Order = NULL, Lineage = NULL, Clade = NULL, Tribe = NULL)
-  }else{
-    num.taxa.levels <- 5
-    conflict.ids.start <- list(Kingdom = NULL, Phylum = NULL, Class = NULL, Order = NULL, Lineage = NULL)
-  }
+  # forcing plots go to tribe (7) level, conflicts plots go to lineage (5) level
+  conflict.ids.start <- list(Kingdom = NULL, Phylum = NULL, Class = NULL, Order = NULL, Lineage = NULL, Clade = NULL, Tribe = NULL)
+  conflict.ids.start <- conflict.ids.start[1:num.taxa.levels]
   
   all.pidents <- list(NULL)
   # for each pident folder
@@ -1035,7 +1031,7 @@ if (userprefs[2] == "MakeSeqIDReadsOnly"){
     seqID.reads <- import.and.reformat.otu.table(OTUtable = otu.table.path) # wasn't exported if you chose pident and skipped step 14
   }
   
-  forced.seqIDs <- get.conflict.seqIDs(ConflictsFolders = forcing.folder.path, PidentsUsed = "forcing")
+  forced.seqIDs <- get.conflict.seqIDs(ConflictsFolders = forcing.folder.path, PidentsUsed = "forcing", TaxaLevels = 7)
   
   forced.seqID.reads <- find.reads.per.seqID(ReadsTable = seqID.reads, ConflictsList = forced.seqIDs, Forcing = TRUE)
   
@@ -1116,7 +1112,7 @@ if (userprefs[2] == "MakeSeqIDReadsOnly"){
   
   seqID.reads <- import.and.reformat.otu.table(OTUtable = otu.table.path)
   
-  conflict.seqIDs <- get.conflict.seqIDs(ConflictsFolders = pident.folders, PidentsUsed = pident.values)
+  conflict.seqIDs <- get.conflict.seqIDs(ConflictsFolders = pident.folders, PidentsUsed = pident.values, TaxaLevels = 5)
   
   conflict.seqID.reads <- find.reads.per.seqID(ReadsTable = seqID.reads, ConflictsList = conflict.seqIDs)
   

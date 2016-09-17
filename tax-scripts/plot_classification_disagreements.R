@@ -245,17 +245,21 @@ find.reads.per.seqID <- function(ReadsTable, ConflictsList, Forcing = FALSE){
   # for each upper list level (pident folder)
   pidents.list <- list(NULL)
   for (p in 1:length(conflict.ids)){
-  
+
     # for each inner list level (taxonomy level)
     taxa.list <- taxa.list.start
     for (t in 1:num.taxa.levels){
-      # for each seqID
+      # find the total reads corresponding to each of the conflict seqIDs
       if (length(conflict.ids[[p]][[t]]) > 0){
-        for (s in 1:length(conflict.ids[[p]][[t]])){
-          index <- which(otu.reads$seqID == conflict.ids[[p]][[t]][s])
-          taxa.list[[t]] <- c(taxa.list[[t]], otu.reads[index,2])
-        }
-      }else taxa.list[[t]] <- 0
+        conf.ids <- conflict.ids[[p]][[t]]
+        reads.ids <- otu.reads$seqID
+        combined.ids <- c(conf.ids, reads.ids)
+        index <- duplicated(combined.ids)
+        index <- index[-c(1:length(conf.ids))]
+        taxa.list[[t]] <- otu.reads[index,2]
+      }else{
+        taxa.list[[t]] <- 0
+      }
     }
     # assign element p of the outer list the inner list it contains
     pidents.list[[p]] <- taxa.list

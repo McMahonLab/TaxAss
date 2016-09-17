@@ -238,14 +238,9 @@ find.reads.per.seqID <- function(ReadsTable, ConflictsList, Forcing = FALSE){
   otu.reads <- ReadsTable
   conflict.ids <- ConflictsList
   
-  # forcing plots go to tribe level
-  if (Forcing == TRUE){
-    num.taxa.levels <- 7
-    taxa.list.start <- list(Kingdom = NULL, Phylum = NULL, Class = NULL, Order = NULL, Lineage = NULL, Clade = NULL, Tribe = NULL)
-  }else{
-    num.taxa.levels <- 5
-    taxa.list.start <- list(Kingdom = NULL, Phylum = NULL, Class = NULL, Order = NULL, Lineage = NULL)
-  }
+  taxa.list.start <- list(Kingdom = NULL, Phylum = NULL, Class = NULL, Order = NULL, Lineage = NULL, Clade = NULL, Tribe = NULL)
+  num.taxa.levels <- length(conflict.ids[[1]])
+  taxa.list.start <- taxa.list.start[1:num.taxa.levels]
   
   # for each upper list level (pident folder)
   pidents.list <- list(NULL)

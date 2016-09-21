@@ -35,21 +35,21 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 # -------------------------------------------------------------
 # # CONFLICT FINDING ONLY:
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-# userprefs <- c("../../poster_danube/otus.98.taxonomy",
-#                "../../poster_danube/otus.general.taxonomy",
-#                "../../poster_danube/ids.above.98",
-#                "../../poster_danube/conflicts_98/",
+# userprefs <- c("../../poster_mend-check/otus.98.taxonomy",
+#                "../../poster_mend-check/otus.general.taxonomy",
+#                "../../poster_mend-check/ids.above.98",
+#                "../../poster_mend-check/conflicts_98/",
 #                98,
-#                80,
+#                70,
 #                70)
-# # FINAL TABLE GENERATION: note you do need the otus.general.taxonomy file b/c it's used to prep a file for plot_classification_improvement.R in step 16
+# # FINAL TABLE GENERATION: note you do need the otus.general.taxonomy file b/c it's used to prep a file for plot_classification_improvement.R in step 15
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-# userprefs <- c("../../poster_danube/otus.98.taxonomy",
-#                "../../poster_danube/otus.general.taxonomy",
-#                "../../poster_danube/ids.above.98",
-#                "../../poster_danube/conflicts_98",
+# userprefs <- c("../../poster_mend-check/otus.98.taxonomy",
+#                "../../poster_mend-check/otus.general.taxonomy",
+#                "../../poster_mend-check/ids.above.98",
+#                "../../poster_mend-check/conflicts_98",
 #                98,
-#                85,
+#                70,
 #                70,
 #                "final")
 # # DATABASE COMPARISON: part of optional step 11.5
@@ -88,6 +88,7 @@ if (length(userprefs) < 8){final.or.database <- "non-empty string"}
 # -------------------------------------------------------------
 # Pre-determined Output File Names
 # -------------------------------------------------------------
+# all of the pre-determined names are used by other scripts and shouldn't be changed. 
 
 # when "final" flag is used, these are exported into the working directory:
 file.name.final.taxonomy <- paste("otus.", blast.pident.cutoff, ".", taxonomy.pvalue.cutoff.fw, ".", taxonomy.pvalue.cutoff.gg, ".taxonomy", sep = "")
@@ -99,8 +100,10 @@ file.name.general.names <- "final.general.names"
 # when forcing flag is used, these are exported into the working directory:
 file.name.custom.only.taxonomy <- paste("otus.custom.", taxonomy.pvalue.cutoff.fw, ".taxonomy", sep = "")
 
-# note- files with predetermined names that end up in results folder are not included here
-# all of the pre-determined names are used by other scripts and shouldn't be changed.  
+# when script is used for conflict finding, these are exported into the conflicts folder:
+file.name.bootstrap.pvalues <- paste(results.folder.path,"bootstrap_pvalues.csv", sep = "/")
+file.name.summary.stats <- paste(results.folder.path, "conflicts_summary.csv", sep = "/")
+# the conflict file names at each taxa level are created inside of find.conflicting.names()
 
 
 # -------------------------------------------------------------
@@ -306,7 +309,7 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   tax <- uniform.unclass.names(TaxonomyTable = tax)
   
   # create a matrix of bootstrap numbers and then a T/F matrix
-  tax.nums <- apply(tax[,2:ncol(tax)],2,pull.out.percent)
+  tax.nums <- apply(tax[ ,2:ncol(tax)], 2, pull.out.percent)
   index <- which(tax.nums == "unclassified")
   tax.nums[index] <- 0
   tax.nums <- apply(X = tax.nums, MARGIN = 2, FUN = as.numeric)
@@ -324,15 +327,15 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   return(tax)
 }
 
-find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_percents, TaxaLevel, tracker, forcing = FALSE){
+find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_percents, TaxaLevel, tracker, FolderPath, forcing = FALSE){
   # Find seqs misclassified at a given phylogenetic level, t
-  
   fw <- FWtable
   gg <- GGtable
   fw.percents <- FWtable_percents
   gg.percents <- GGtable_percents
   t <- TaxaLevel
   num.mismatches <- tracker
+  results.folder.path <- FolderPath
   
   taxa.names <- c("kingdom","phylum","class","order","lineage","clade","tribe")
   
@@ -372,21 +375,18 @@ create.summary.vector <- function(Forcing = FALSE){
   return(num.mismatches)
 }
 
-export.summary.stats <- function(SummaryVector, FW_seqs, ALL_seqs, FolderPath){
+export.summary.stats <- function(SummaryVector, FW_seqs, ALL_seqs, FileName){
   # Format and export the summary vector
   num.mismatches <- SummaryVector
   fw.fw.only <- FW_seqs
   fw.percents <- ALL_seqs
-  results.folder.path <- FolderPath
   num.mismatches <- c(num.mismatches,"numFWseqs" = nrow(fw.fw.only))
   num.mismatches <- c(num.mismatches, "numALLseqs" = nrow(fw.percents))
   num.mismatches <- data.frame("TaxaLevel" = names(num.mismatches),"NumConflicts" = num.mismatches, row.names = NULL)
-  write.csv(num.mismatches, file = paste(results.folder.path, "/", "conflicts_summary.csv", sep=""), row.names = FALSE)
+  write.csv(num.mismatches, file = FileName, row.names = FALSE)
 }
 
 view.bootstraps <- function(TaxonomyTable){
-  # Check how high the freshwater bootstrap values end up given your cutoff.
-  
   tax <- TaxonomyTable
   
   # create a matrix of bootstrap numbers, copy from do.bootstrap.cutoff()
@@ -394,7 +394,7 @@ view.bootstraps <- function(TaxonomyTable){
   index <- which(tax.nums == "unclassified")
   tax.nums[index] <- 0
   tax.nums <- apply(X = tax.nums, MARGIN = 2, FUN = as.numeric)
-  tax.nums <- cbind(tax[,1],tax.nums)
+  tax.nums <- cbind(tax[ ,1],tax.nums)
   colnames(tax.nums)[1] <- colnames(tax)[1]
   return(tax.nums)
 }
@@ -476,7 +476,8 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
     num.mismatches <- find.conflicting.names(FWtable = fw, GGtable = gg,
                                              FWtable_percents = fw.percents, 
                                              GGtable_percents = gg.percents, 
-                                             TaxaLevel = t, tracker = num.mismatches)
+                                             TaxaLevel = t, tracker = num.mismatches,
+                                             FolderPath = results.folder.path)
   }
   export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw, ALL_seqs = fw, FolderPath = results.folder.path)
   
@@ -533,7 +534,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
                                              FWtable_percents = fw.percents.gg.only,
                                              GGtable_percents = gg.percents.gg.only, 
                                              TaxaLevel = t, tracker = num.mismatches,
-                                             forcing = TRUE)
+                                             FolderPath = results.folder.path, forcing = TRUE)
   }
   export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw.gg.only, ALL_seqs = fw.percents, FolderPath = results.folder.path)
 
@@ -560,10 +561,11 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   
   check.files.match(FWtable = fw.percents.fw.only, GGtable = gg.percents.fw.only)
   
-  fw.fw.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.fw.only, BootstrapCutoff = taxonomy.pvalue.cutoff.fw)
+  # save the bootstrap-applied fw-table fw.cutoff.fw.only for creating tax.nums below
+  fw.cutoff.fw.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.fw.only, BootstrapCutoff = taxonomy.pvalue.cutoff.fw)
   gg.fw.only <- do.bootstrap.cutoff(TaxonomyTable = gg.percents.fw.only, BootstrapCutoff = taxonomy.pvalue.cutoff.gg)
   
-  fw.fw.only <- apply(fw.fw.only, 2, remove.parentheses)
+  fw.fw.only <- apply(fw.cutoff.fw.only, 2, remove.parentheses)
   gg.fw.only <- apply(gg.fw.only, 2, remove.parentheses)
   
   check.files.match(FWtable = fw.fw.only, GGtable = gg.fw.only)
@@ -577,9 +579,21 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
     num.mismatches <- find.conflicting.names(FWtable = fw.fw.only, GGtable = gg.fw.only,
                                              FWtable_percents = fw.percents.fw.only,
                                              GGtable_percents = gg.percents.fw.only, 
-                                             TaxaLevel = t, tracker = num.mismatches)
+                                             TaxaLevel = t, tracker = num.mismatches,
+                                             FolderPath = results.folder.path)
   }
-  export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw.fw.only, ALL_seqs = fw.percents, FolderPath = results.folder.path)
+  export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw.fw.only, ALL_seqs = fw.percents, FileName = file.name.summary.stats)
+  # ----
+  # the following will be used by the plot_classification_disagreements step to help choose a good pident: 
+  
+  fw.percents.gg.only <- fw.percents[-fw.indeces, ]
+  fw.percents.gg.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.gg.only, BootstrapCutoff = taxonomy.pvalue.cutoff.gg)
+  
+  workflow.taxonomy <- rbind(fw.cutoff.fw.only, fw.percents.gg.only)
+  
+  tax.nums <- view.bootstraps(TaxonomyTable = workflow.taxonomy)
+  write.csv(x = tax.nums, file = file.name.bootstrap.pvalues, quote = FALSE, row.names = FALSE)
+  
 }
 
 

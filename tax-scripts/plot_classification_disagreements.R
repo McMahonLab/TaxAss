@@ -30,53 +30,49 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                "../../take_mendota_clust/otus.98.80.80.taxonomy")
 # 
 # FOR CHOOSING CUTOFF:
-# cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
-# userprefs <- c("../../poster_mend_unclust/otus.abund",
-#                "../../poster_mend-check/plots",
-#                "regular",
-#                NA,
-#                NA,
-#                "../../poster_mend_unclust/conflicts_90",
-#                "../../poster_mend_unclust/ids.above.90",
-#                90,
-#                "../../poster_mend_unclust/conflicts_91",
-#                "../../poster_mend_unclust/ids.above.91",
-#                91,
-#                "../../poster_mend_unclust/conflicts_92",
-#                "../../poster_mend_unclust/ids.above.92",
-#                92,
-#                "../../poster_mend_unclust/conflicts_93",
-#                "../../poster_mend_unclust/ids.above.93",
-#                93,
-#                "../../poster_mend_unclust/conflicts_94",
-#                "../../poster_mend_unclust/ids.above.94",
-#                94,
-#                "../../poster_mend_unclust/conflicts_95",
-#                "../../poster_mend_unclust/ids.above.95",
-#                95,
-#                "../../poster_mend_unclust/conflicts_96",
-#                "../../poster_mend_unclust/ids.above.96",
-#                96,
-#                "../../poster_mend_unclust/conflicts_97",
-#                "../../poster_mend_unclust/ids.above.97",
-#                97,
-#                "../../poster_mend_unclust/conflicts_98",
-#                "../../poster_mend_unclust/ids.above.98",
-#                98,
-#                "../../poster_mend_unclust/conflicts_99",
-#                "../../poster_mend_unclust/ids.above.99",
-#                99,
-#                "../../poster_mend_unclust/conflicts_100",
-#                "../../poster_mend_unclust/ids.above.100",
-#                100)
+cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
+userprefs <- c("../../poster_mend-check/otus.abund",
+               "../../poster_mend-check/plots",
+               "regular",
+               NA,
+               NA,
+               "../../poster_mend-check/conflicts_90",
+               "../../poster_mend-check/ids.above.90",
+               90,
+               "../../poster_mend-check/conflicts_91",
+               "../../poster_mend-check/ids.above.91",
+               91,
+               "../../poster_mend-check/conflicts_92",
+               "../../poster_mend-check/ids.above.92",
+               92,
+               "../../poster_mend-check/conflicts_93",
+               "../../poster_mend-check/ids.above.93",
+               93,
+               "../../poster_mend-check/conflicts_94",
+               "../../poster_mend-check/ids.above.94",
+               94,
+               "../../poster_mend-check/conflicts_95",
+               "../../poster_mend-check/ids.above.95",
+               95,
+               "../../poster_mend-check/conflicts_96",
+               "../../poster_mend-check/ids.above.96",
+               96,
+               "../../poster_mend-check/conflicts_97",
+               "../../poster_mend-check/ids.above.97",
+               97,
+               "../../poster_mend-check/conflicts_98",
+               "../../poster_mend-check/ids.above.98",
+               98,
+               "../../poster_mend-check/conflicts_99",
+               "../../poster_mend-check/ids.above.99",
+               99,
+               "../../poster_mend-check/conflicts_100",
+               "../../poster_mend-check/ids.above.100",
+               100)
 # # JUST MAKE SEQID.READS FILE, SKIPPING STEP 14 BUT DOING 15.5.A
 # cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
 # userprefs <- c("../../take18playwith/otus.abund", 
 #                "MakeSeqIDReadsOnly")
-
-# cat("fuck you forgot to comment out the seqid.reads file path in plot_classification_disagreements!\n")
-# seqID.reads.file.path <- "../../take_mendota_clust/total.reads.per.seqID.csv"
-# present.working.directory <- "../../take_mendota_clust/"
 
 # in case you want to add the db baseline conflict back to the plots, need to specify this path below
 # and un-comment the plotting calls that use it at the end of the script.
@@ -94,9 +90,14 @@ if (length(rest.of.arguments) > 0){
   pident.values <- as.numeric(rest.of.arguments[seq(from = 1, to = length(rest.of.arguments), by = 3)+2])
 }
 
-# this is automatically exported into the working directory when this script is run normally
-seqID.reads.file.path <- "total.reads.per.seqID.csv"
-present.working.directory <- "."
+# # this is automatically exported into the working directory when this script is run normally
+# seqID.reads.file.path <- "total.reads.per.seqID.csv"
+# present.working.directory <- "."
+
+cat("fuck you forgot to comment out the seqid.reads file path in plot_classification_disagreements!\n")
+seqID.reads.file.path <- "../../take_mendota_clust/total.reads.per.seqID.csv"
+present.working.directory <- "../../take_mendota_clust/"
+
 
 # ---------------------------------------------------------------------------------------------------------------------
 # Define functions to import and process the data
@@ -591,6 +592,83 @@ filter.out.low.abund <- function(TaxaList, CutoffVector){
   return(TaxaList)
 }
 
+import.pvalues.above.bootstrap.cutoff <- function(FolderPaths, Pidents){
+  pident.folders <- FolderPaths
+  pident.values <- Pidents
+  
+  tax.nums.list <- list(NULL)
+  for (p in 1:length(pident.values)){
+    file.name <- paste(pident.folders[p],"bootstrap_pvalues.csv", sep = "/")
+    tax.nums.list[[p]] <- read.csv(file = file.name, header = T, colClasses = "character")
+    names(tax.nums.list)[p] <- paste("pident", pident.values[p], sep = "_")
+  }
+  return(tax.nums.list)
+}
+
+convert.to.yes.no.classified <- function(PvaluesList){
+  tax.nums <- PvaluesList
+  for(p in 1:length(tax.nums)){
+    t.n <- apply(X = tax.nums[[p]][ ,-1], MARGIN = 2, FUN = as.numeric)
+    t.n <- t.n != 0
+    t.n <- apply(X = t.n, MARGIN = 2, FUN = as.numeric)
+    tax.nums[[p]][ ,-1] <- t.n
+  }
+  return(tax.nums)
+}
+
+combine.tax.nums.with.seqid.reads <- function(PvaluesList, TotReadsTable){
+  seqID.reads <- TotReadsTable
+  tax.TF <- PvaluesList
+  
+  # put seqIDs in same order in all tables
+  index.reads <- order(seqID.reads[ ,1])
+  seqID.reads <- seqID.reads[index.reads, ]
+  
+  index.pvals <- NULL
+  check.order <- NULL
+  for (p in 1:length(tax.TF)){
+    index.pvals <- order(tax.TF[[p]][ ,1])
+    tax.TF[[p]] <- tax.TF[[p]][index.pvals, ]
+    check.order[p] <- all.equal(tax.TF[[p]][ ,1], seqID.reads[ ,1])
+  }
+  if (all(check.order != TRUE)){
+    cat("Fuck there's something messed up w/ the tax.nums indexing in function combine.tax.nums.with.seqid.reads()")
+  }
+  
+  # add read counts to the tax.nums tables
+  for (p in 1:length(tax.TF)){
+    tax.TF[[p]] <- cbind(seqID.reads, tax.TF[[p]][ ,-1])
+  }
+  return(tax.TF)
+}
+
+calc.reads.per.name <- function(TaxReadsList){
+  tax.reads <- TaxReadsList
+  for (p in 1:length(tax.reads)){
+    tax <- tax.reads[[p]][ ,-c(1:2)]
+    tax <- as.matrix(tax)
+    reads <- tax.reads[[p]][ ,2]
+    t.r <- tax * reads
+    tax.reads[[p]] <- data.frame(tax.reads[[p]][ ,1], t.r, stringsAsFactors = FALSE)
+  }
+  return(tax.reads)
+}
+
+create.summary.matrix <- function(TaxList){
+  tax.sum <- matrix(0, nrow = length(TaxList), ncol = ncol(TaxList[[1]]) - 1)
+  row.names(tax.sum) <- names(TaxList)
+  colnames(tax.sum) <- colnames(TaxList[[1]][ ,-1])
+  for (p in 1:length(TaxList)){
+    tax <- TaxList[[p]][ ,-1]
+    tax.sum[p, ] <- colSums(tax)
+  }
+  return(tax.sum)
+}
+
+convert.to.percent <- function(TaxSum, Total){
+  TaxSum <- TaxSum / Total * 100
+  return(TaxSum)
+}
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -997,6 +1075,66 @@ export.grouped.list <- function(Grouped, PlotsPath, FolderName){
   cat("Made datafiles of total reads per taxon in folder: ", folder.path, "\n")
 }
 
+plot.total.classified <- function(SummaryMatrix, PidentValues, FolderPath, DataType){
+  pidents <- PidentValues
+  sum.named <- SummaryMatrix
+  
+  line.col <- rainbow(n = ncol(sum.named), v = .4)
+  x.lim <- c(min(pidents), max(pidents))
+  y.lim <- c(40,100)
+  y.label <- paste("Percent Classified (", DataType, ")", sep = "")
+  x.label <- "Percent Identity Cutoff"
+  plot.title <- expression(bold("Choose a percent identity cutoff that maximizes classification"))
+  plot.filename <- paste(FolderPath, "/Percent_", DataType, "_Classified_by_Pident.png", sep = "")
+  taxa.levels <- sub(pattern = ".fw", replacement = "", x = colnames(sum.named))
+  
+  png(filename = plot.filename, width = 10, height = 5, units = "in", res = 100)
+  
+  par(mfrow = c(1,ncol(sum.named)), omi = c(.4,.3,.3,.1), mai = c(.2,.3,.3,0))
+  for (t in 1:ncol(sum.named)){
+    ass <- sum.named[ ,t]
+    # basic plot
+    plot(x = pidents, y = ass, col = line.col[t], type = "l", ann = F, lwd = 3, axes = F)
+    mtext(text = taxa.levels[t], side = 3, line = .5, outer = F, cex = 1.2, col = line.col[t])
+    
+    # vertical max line
+    index <- which(ass == max(ass))
+    max.names <- pidents[index]
+    abline(v = max.names, col = adjustcolor(col = line.col[t], alpha.f = .3), lwd = 3)
+    
+    # x axis labels
+    x.lab.cols <- rep("black", times = length(pidents))
+    x.lab.cols[index] <- line.col[t]
+    x.lab.cex <- rep(.7, times = length(pidents))
+    x.lab.cex[index] <- 2
+    x.lab.line <- rep(.5, times = length(pidents))
+    x.lab.line[index] <- 1.5
+    empty.x.labels <- rep("", times = length(pidents))
+    axis(side = 1, at = pidents, labels = empty.x.labels)
+    mtext(text = pidents, side = 1, line = x.lab.line, at = pidents, col = x.lab.cols, cex = x.lab.cex)
+    
+    # y axis labels
+    span <- max(ass) - min(ass)
+    y.ax <- c(min(ass), min(ass) + (span * 1/3), min(ass) + (span * 2/3), max(ass))
+    y.ax.lab <- round(x = y.ax, digits = 0)
+    empty.y.labels <- rep("", times = length(y.ax))
+    axis(side = 2, at = y.ax, labels = empty.y.labels)
+    mtext(text = y.ax.lab, side = 2, line = .7, at = y.ax)
+  } 
+  mtext(text = plot.title, side = 3, line = .5, outer = T, cex = 1.2)
+  mtext(text = x.label, side = 1, line = 1.5, outer = T, cex = 1.2)
+  mtext(text = y.label, side = 2, line = .5, outer = T, cex = 1.2)
+  
+  unnecessary.message <- dev.off()
+  cat("made plot: ", plot.filename)
+}
+
+export.total.classified.summary <- function(SummaryMatrix, FolderPath, DataType){
+  data.filename <- paste(FolderPath, "/Percent_", DataType, "_Classified_by_Pident.csv", sep = "")
+  colnames(SummaryMatrix) <- sub(pattern = ".fw", replacement = "", x = colnames(SummaryMatrix))
+  write.csv(x = SummaryMatrix, file = data.filename, quote = F)
+  cat("Made Datafile: ", data.filename)
+}
 
 # ---------------------------------------------------------------------------------------------------------------------
 # Use Functions
@@ -1135,6 +1273,38 @@ if (userprefs[2] == "MakeSeqIDReadsOnly"){
   # export the reads per seqID for use in the plot_classification_improvement.R script
   write.table(x = seqID.reads, file = "total.reads.per.seqID.csv", sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
   cat("made the datafile: ", "total.reads.per.seqID.csv")
+  
+  # ---------------------------------------------------------------------------------------------------------------------
+  # examine total percent of dataset that is classified by read and OTU
+  # ---------------------------------------------------------------------------------------------------------------------
+  
+  tax.nums <- import.pvalues.above.bootstrap.cutoff(FolderPaths = pident.folders, Pidents = pident.values)
+  tax.TF <- convert.to.yes.no.classified(PvaluesList = tax.nums)
+  
+  tax.reads <- combine.tax.nums.with.seqid.reads(PvaluesList = tax.TF, TotReadsTable = seqID.reads)
+  tax.reads <- calc.reads.per.name(TaxReadsList = tax.reads)
+  
+  otus.named <- create.summary.matrix(TaxList = tax.TF)
+  reads.named <- create.summary.matrix(TaxList = tax.reads)
+  
+  otus.named <- convert.to.percent(TaxSum = otus.named, Total = nrow(seqID.reads))
+  reads.named <- convert.to.percent(TaxSum = reads.named, Total = sum(seqID.reads[ ,2]))
+  
+  export.total.classified.summary(SummaryMatrix = otus.named, FolderPath = plots.folder.path, DataType = "OTUs")
+  export.total.classified.summary(SummaryMatrix = reads.named, FolderPath = plots.folder.path, DataType = "Reads")
+  
+  # plot.total.classified(SummaryMatrix = reads.named, PidentValues = pident.values, FolderPath = plots.folder.path, DataType = "Reads")
+  # k and p mostly all classified, t shows forcing
+  plot.total.classified(SummaryMatrix = reads.named[ ,-c(1:2,7)], PidentValues = pident.values, FolderPath = plots.folder.path, DataType = "Reads")
+  # trim down the total pidents (for when I did 90:100)
+  # plot.total.classified(SummaryMatrix = reads.named[-c(1:5),-c(1:2,7)], PidentValues = pident.values[-c(1:5)], FolderPath = plots.folder.path, DataType = "Reads")
+
+  # plot.total.classified(SummaryMatrix = otus.named, PidentValues = pident.values, FolderPath = plots.folder.path, DataType = "OTUs")
+  # only see diversity lost with lowering pident at the phylum level- that's probably the cyanos
+  plot.total.classified(SummaryMatrix = otus.named[-c(1:5),2:4], PidentValues = pident.values[-c(1:5)], FolderPath = plots.folder.path, DataType = "OTUs")
+  # otherwise you actually see forcing at the OTU-level. as more OTUs are put into FW, more OTUs are classified. 
+  # these gains must be from stuff forced into a classification in FW, but unclassified in GG.
+  
   
   # ---------------------------------------------------------------------------------------------------------------------
   # examine pident cutoff relationship to bootstrap p-values -this plot is not useful.

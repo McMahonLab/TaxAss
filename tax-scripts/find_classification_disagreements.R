@@ -64,10 +64,10 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                "database")
 # # FORCING ANALYSIS: part of optional step 15.5
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-# userprefs <- c("../../poster_mend_unclust/otus.custom.taxonomy",
-#                "../../poster_mend_unclust/otus.98.70.70.taxonomy",
-#                "../../poster_mend_unclust/ids.above.98",
-#                "../../poster_mend_unclust/conflicts_forcing",
+# userprefs <- c("../../poster_mend-check/otus.custom.taxonomy",
+#                "../../poster_mend-check/otus.98.70.70.taxonomy",
+#                "../../poster_mend-check/ids.above.98",
+#                "../../poster_mend-check/conflicts_forcing",
 #                NA,
 #                70,
 #                70,
@@ -246,11 +246,11 @@ uniform.unclass.names <- function(TaxonomyTable){
   empty.entries <- unique(sub(x = empty.entries, pattern = '\\(\\d{0,3}\\)', replacement = ""))
   
   if ((length(odd.entries) + length(empty.entries)) > 0){
-  cat("\nNote: These names in your taxonomy table are missing a bootstrap taxonomy assignment value or name:\n\n",
+  cat("Note: These names in your taxonomy table are missing a bootstrap taxonomy assignment value or name:\n",
       odd.entries, " ", empty.entries,
-      "\n\nThese names will be renamed as \"unclassified\". If that seems incorrect",
+      "\nThese names will be renamed as \"unclassified\". If that seems incorrect",
       "then you have to figure out why the parentheses are missing from them.", 
-      "\nHave ALL your names here? Check that in the classify.seqs() mothur commands probs=T\n\n")
+      "\nHave ALL your names here? Check that in the classify.seqs() mothur command probs=T\n")
   }
   
   # Change odd entries those names to unclassified (sometimes, for example, they might be "unknown")
@@ -479,7 +479,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
                                              TaxaLevel = t, tracker = num.mismatches,
                                              FolderPath = results.folder.path)
   }
-  export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw, ALL_seqs = fw, FolderPath = results.folder.path)
+  export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw, ALL_seqs = fw, FileName = file.name.summary.stats)
   
 
   
@@ -488,7 +488,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
 # Look at how bad it'd be if you used only the custom database instead of the workflow
 }else if (final.or.database == "forcing"){
 # -------------------------------------------------------------  
-  cat("\n\nexamining how the custom database would have classified the dissimilar sequences that didn't belong in it \n(i.e. good thing you used my workflow!)\n\n")
+  cat("examining how the custom database would have classified the dissimilar sequences that didn't belong in it \n(i.e. good thing you used my workflow!)\n")
   
   fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path) # fw.plus.gg.tax.file.path is actually FW-only here
   gg.percents <- import.GG.names(FilePath = gg.only.tax.file.path, final.names = TRUE) # gg.only.tax.file.path is final workflow taxonomy (fw+gg)
@@ -518,6 +518,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   # export clean fw-db-only table for forcing plots later
   fw <- apply(fw, 2, remove.parentheses)
   write.table(x = fw, file = file.name.custom.only.taxonomy, sep = ";")
+  cat("Made datafile: ", file.name.custom.only.taxonomy, "\n")
   
   fw.gg.only <- apply(fw.gg.only, 2, remove.parentheses)
   gg.gg.only <- apply(gg.gg.only, 2, remove.parentheses)
@@ -536,7 +537,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
                                              TaxaLevel = t, tracker = num.mismatches,
                                              FolderPath = results.folder.path, forcing = TRUE)
   }
-  export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw.gg.only, ALL_seqs = fw.percents, FolderPath = results.folder.path)
+  export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw.gg.only, ALL_seqs = fw.percents, FileName = file.name.summary.stats)
 
   
 # ------------------------------------------------------------- 
@@ -583,9 +584,9 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
                                              FolderPath = results.folder.path)
   }
   export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw.fw.only, ALL_seqs = fw.percents, FileName = file.name.summary.stats)
-  # ----
+# ----
   # the following will be used by the plot_classification_disagreements step to help choose a good pident: 
-  
+# ----
   fw.percents.gg.only <- fw.percents[-fw.indeces, ]
   fw.percents.gg.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.gg.only, BootstrapCutoff = taxonomy.pvalue.cutoff.gg)
   

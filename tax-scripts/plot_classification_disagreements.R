@@ -21,13 +21,13 @@
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 
-# FOR PLOTTING FORCING  **don't forget to change the seqID.reads file path below!!
-cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!\n")
-userprefs <- c(NA, # if seqid.reads exists (i.e. you ran step 14) this is NA, otherwise it's otus.abund file path)
-               "../../poster_mend-check/plots",
-               "../../poster_mend-check/conflicts_forcing",
-               "../../poster_mend-check/otus.custom.70.taxonomy",
-               "../../poster_mend-check/otus.98.70.70.taxonomy")
+# # FOR PLOTTING FORCING  **don't forget to change the seqID.reads file path below!!
+# cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!\n")
+# userprefs <- c(NA, # if seqid.reads exists (i.e. you ran step 14) this is NA, otherwise it's otus.abund file path)
+#                "../../poster_mend-check/plots",
+#                "../../poster_mend-check/conflicts_forcing",
+#                "../../poster_mend-check/otus.custom.70.taxonomy",
+#                "../../poster_mend-check/otus.98.70.70.taxonomy")
 
 # # FOR CHOOSING CUTOFF:
 # cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
@@ -94,9 +94,9 @@ if (length(rest.of.arguments) > 0){
 seqID.reads.file.path <- "total.reads.per.seqID.csv"
 present.working.directory <- "."
 
-cat("fuck you forgot to comment out the seqid.reads file path in plot_classification_disagreements!\n")
-seqID.reads.file.path <- "../../poster_mend-check/total.reads.per.seqID.csv"
-present.working.directory <- "../../poster_mend-check/"
+# cat("fuck you forgot to comment out the seqid.reads file path in plot_classification_disagreements!\n")
+# seqID.reads.file.path <- "../../poster_mend-check/total.reads.per.seqID.csv"
+# present.working.directory <- "../../poster_mend-check/"
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -996,22 +996,29 @@ plot.forcing.diffs <- function(TopTaxaList, NumBars, FolderPath, PlottingLevels 
     plot.name <- paste(FolderPath, "/", t, "-Forcing_Diffs-", names(stacked.data)[t], ".png", sep = "")
     csv.name <- paste(FolderPath, "/", t, "-Forcing_Diffs-", names(stacked.data)[t], ".csv", sep = "")
     
-    # # long names go off the plot
-    # taxa.names <- sub(pattern = ".*__", replacement = "", x = colnames(stacked.data[[t]]))
-    # taxa.names <- substr(x = taxa.names, start = 1, stop = 20)
-    # 
-    # # make the y axis not have crazy big numbers on it, put them in rounded percents
-    # max.bar <- max(stacked.data[[t]][1, ] + stacked.data[[t]][2, ])
+    # really long names go off the plot
+    taxa.names <- sub(pattern = ".*__", replacement = "", x = colnames(stacked.data[[t]]))
+    # this ends up looking weird b/c the label are not monospaced font so some of the "short" names get cut off too.
+    # for (n in 1:length(taxa.names)){
+    #   if (nchar(taxa.names[n], type = "chars") > 20){
+    #     taxa.names[n] <- substr(x = taxa.names[n], start = 1, stop = 19)
+    #     taxa.names[n] <- paste(taxa.names[n], "-", sep = "")
+    #   }
+    # }
+    colnames(stacked.data[[t]]) <- taxa.names
+
+    # # adjust y-axis to go to the max value
+    # max.bar <- max(stacked.data[[t]][1, ] + stacked.data[[t]][2, ]) # grey bar + red bar
     # y.axis.ticks <- c(0, max.bar * (1/4), max.bar * (1/2), max.bar * (3/4), max.bar)
     # y.axis.labels <- round(x = y.axis.ticks / tot.reads * 100, digits = 0)
-    
-    # make to plots!
-    # png(filename = plot.name, width = 7, height = 5, units = "in", res = 100)
+
+    # make the plots!
+    png(filename = plot.name, width = 7, height = 5, units = "in", res = 100)
     par(mar = c(10,5,5,2))
     barplot(height = stacked.data[[t]], beside = FALSE, col = c("grey","red","blue"), main = names(stacked.data)[t], las = 2, ylab = "Relative Abundance (% reads)", border = NA)
-    legend(x = "topright", legend = c("Gained from forcing", "Lost from forcing"), fill = c("red", "blue"), border = FALSE, bty = "n", inset = .05)
-    # unnecessary.message <- dev.off()
-    # cat("made plot: ", plot.name, "\n")
+    legend(x = "topright", legend = c("Forced Into", "Forced Out Of"), fill = c("red", "blue"), border = FALSE, bty = "n", inset = .05)
+    unnecessary.message <- dev.off()
+    cat("made plot: ", plot.name, "\n")
     
     # export the data! ... do the full data not just stacked data:
     write.csv(x = top.taxa[[t]], file = csv.name, quote = FALSE, row.names = FALSE)
@@ -1202,8 +1209,8 @@ if (userprefs[2] == "MakeSeqIDReadsOnly"){
 
   plot.forcing.diffs(TopTaxaList = top.final.taxa, NumBars = 800, FolderPath = plots.folder.path)
   
-  export.grouped.list(Grouped = grouped.forced.taxa, PlotsPath = plots.folder.path, FolderName = "ForcedTaxonomyGroups")
-  export.grouped.list(Grouped = grouped.final.taxa, PlotsPath = plots.folder.path, FolderName = "FinalTaxonomyGroups")
+  # export.grouped.list(Grouped = grouped.forced.taxa, PlotsPath = plots.folder.path, FolderName = "ForcedTaxonomyGroups")
+  # export.grouped.list(Grouped = grouped.final.taxa, PlotsPath = plots.folder.path, FolderName = "FinalTaxonomyGroups")
   
 # ---------------------------------------------------------------------------------------------------------------------
 # If not then do the normal comparison for choosing pident cutoff

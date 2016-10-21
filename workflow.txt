@@ -849,16 +849,16 @@ This script also allows the user to choose a bootstrap %confidence cutoff under 
 the lower assignments are unclassified.  The script does not include unclassified names in 
 its reporting of disagreements.  This allows you ignore taxonomy assignment conflicts when
 you don't trust the assignment anyway, and you can decide what you trust (60% is generally
-considered the minimum cutoff you should use.)
+considered the minimum cutoff you should use, 80% is the default in the mothur MiSeq SOP.)
 
 Additionally, this script generates a final version of your taxonomy file with the applied 
-bootstrap cutoff implemented.  The version made in step 9 contains all the taxonomy assignments,
+bootstrap cutoff implemented.  The version made in step 10 contains all the taxonomy assignments,
 even ones with very low bootstrap p-values.  This generates a .taxonomy file with the cutoff
 applied, so that everything under that cutoff is named "unclassified."  Note that you can 
 apply this cutoff in step 9 using the "cutoff = #" flag with the mothur command classify.seqs().
 I didn't do it there though to make these analysis steps more flexible. The format of this file
-is semicolon delimited, which is slightly different than the mothur output files that are tab 
-semicolon deliminited between taxonomy levels but tab delimited between the seqID column and
+is comma delimited, which is slightly different than the mothur output files that are 
+semicolon deliminited between taxonomy levels and tab delimited between the seqID column and
 the taxonomy names.
 
 Note: you must create a new folder to save these results in before running the script.

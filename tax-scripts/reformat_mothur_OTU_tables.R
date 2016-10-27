@@ -65,7 +65,7 @@ reformat.for.workflow <- function(OTUs){
 
 export.workflow.table <- function(OTUs, FilePath){
   write.table(x = OTUs, file = FilePath, quote = FALSE, sep = "\t", row.names = FALSE)
-  cat("Reformatted OTU table saved as", FilePath)
+  cat("Reformatted OTU table saved as", FilePath, "/n")
 }
 
 import.and.format.shared <- function(FilePath){

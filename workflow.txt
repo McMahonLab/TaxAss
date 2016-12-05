@@ -44,7 +44,7 @@ NOTE: steps 1-14 can be run in a block using the bash scripts:
 
 6. check that BLAST settings are appropriate (R)
 	mkdir plots
-	RScript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
+	Rscript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
 
 7. recover sequence IDs left out of blast (python, bash)
 	python find_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table.modified ids.missing
@@ -58,7 +58,7 @@ NOTE: steps 1-14 can be run in a block using the bash scripts:
 	mothur "#classify.seqs(fasta=otus.above.98.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
 	mothur "#classify.seqs(fasta=otus.below.98.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
 
-10. combine taxonomy files (terminal)
+10. combine taxonomy files (bash)
 	cat otus.above.98.custom.wang.taxonomy otus.below.98.general.wang.taxonomy > otus.98.taxonomy
 
 11. assign taxonomy with general database only (mothur, bash)
@@ -524,7 +524,7 @@ be a problem.  Generate some plots with the R script plot_blast_hit_stats.R.
 
 Full Two Commands (type in the terminal)
 mkdir plots
-RScript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
+Rscript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
 
 What mkdir bash command does:
 	mkdir		stands for "make directory", this creates a new folder

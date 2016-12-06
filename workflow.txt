@@ -249,11 +249,16 @@ Syntax of commands and what each argument does:
 				simply keeping the edited file the same name  
 	rm filename
 		rm		this removes (aka deletes) the file named filename
-		
+
+***** add to just use the shell script reformat_greengenes.sh instead. ****		
 ___________
 
-The Silva database... ***add formatting advice***
-			*************
+The Silva database... 
+
+***** made shell script reformat_silva.sh but it doesn't work b/c silva is stupid. 
+there's no way to make a compatible file without opening it in ARB and exporting in a different format yourself.
+mothur and qiime did it for you, but they're also out of date. wtf SILVA? literally noone could use that format for anything.
+(see analysis notes 12-5-16 for this saga) *****
 
 ______________________
 

@@ -97,7 +97,7 @@ NOTE: steps 1-14 can be run in a block using the bash scripts:
 		mv otus.custom.taxonomy.reformatted otus.custom.taxonomy
 		mkdir conflicts_forcing
 		Rscript find_classification_disagreements.R otus.custom.taxonomy otus.98.85.70.taxonomy ids.above.98 conflicts_forcing NA 85 70 forcing
-		Rscript plot_classification_disagreements.R NA plots conflicts_forcing otus.custom.85.taxonomy otus.98.85.70.taxonomy
+		Rscript plot_classification_disagreements.R otus.abund plots conflicts_forcing otus.custom.85.taxonomy otus.98.85.70.taxonomy
 
 16. tidy up (bash)
 	rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otus.custom.taxonomy otus.custom.[0-9]* custom.general* *pvalues total* final*names
@@ -1086,7 +1086,7 @@ mv otus.custom.taxonomy.reformatted otus.custom.taxonomy
 mkdir conflicts_forcing
 Rscript find_classification_disagreements.R otus.custom.taxonomy otus.98.85.70.taxonomy ids.above.98 conflicts_forcing NA 85 70 forcing
 
-Rscript plot_classification_disagreements.R NA plots conflicts_forcing otus.custom.85.taxonomy otus.98.85.70.taxonomy
+Rscript plot_classification_disagreements.R otus.abund plots conflicts_forcing otus.custom.85.taxonomy otus.98.85.70.taxonomy
 
 What the arguments are (this second time you source the script):
 1.		Rscript									same

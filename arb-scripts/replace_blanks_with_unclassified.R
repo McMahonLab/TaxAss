@@ -3,9 +3,19 @@
 # replace empty levels with the word "unclassified"
 # empty spots at genus level yield incorrect p-values in RDP classifier
 
-file.with.blanks.semicolon.delim <- "~/Desktop/TaxonomyTrainingSets/BLASTing/Primers/v4_all_FreshTrain/FW_al"
-reformatted.file.semicolon.delim <- "~/Desktop/TaxonomyTrainingSets/BLASTing/Primers/v4_all_FreshTrain/cleaned4"
+# syntax from command line:
 
+# Rscript replace_blanks_with_unclassified.R inputfile outputfile
+
+# ---- Import Files ----
+
+# # cat("\nfuck you forgot to comment out the file paths!!!\n")
+# file.with.blanks.semicolon.delim <- "~/Desktop/TaxonomyTrainingSets/BLASTing/SILVA_downloads/12-7-16_format_mothur_silva/semicolons.tax"
+# reformatted.file.semicolon.delim <- "~/Desktop/TaxonomyTrainingSets/BLASTing/SILVA_downloads/12-7-16_format_mothur_silva/allranks.tax"
+
+userprefs <- commandArgs(trailingOnly = TRUE)
+file.with.blanks.semicolon.delim <- userprefs[1] 
+reformatted.file.semicolon.delim <- userprefs[2]
 
 # import taxonomy file:
 numcol <- max(count.fields(file.with.blanks.semicolon.delim, sep=";", quote=""))
@@ -16,6 +26,8 @@ taxonomy.unformatted <- read.table(file = file.with.blanks.semicolon.delim, head
 taxonomy <- taxonomy.unformatted[ ,1:8]
 taxonomy <- as.matrix(taxonomy)
 index <- which(taxonomy[ ,-1] == "")
+taxonomy[ ,-1][index] <- "unclassified"
+index <- which(is.na(taxonomy[ ,-1]))
 taxonomy[ ,-1][index] <- "unclassified"
 
 # export new version- this is semicolon delim.

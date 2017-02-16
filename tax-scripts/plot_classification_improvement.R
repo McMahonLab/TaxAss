@@ -24,12 +24,12 @@ taxonomy.names.path <- userprefs[5]
 gg.names.path <- userprefs[6]
   
 # cat("fuck you forgot to comment out the file paths in find_classification_improvements.R!")
-# taxonomy.pvalues.path <- "../../take18playwith/final.taxonomy.pvalues"
-# gg.pvalues.path <- "../../take18playwith/final.general.pvalues"
-# reads.table.path <- "../../take18playwith/total.reads.per.seqID.csv"
-# path.to.plots.folder <- "../../take18playwith/plots"
-# taxonomy.names.path <- "../../take18playwith/final.taxonomy.names"
-# gg.names.path <- "../../take18playwith/final.general.names"
+# taxonomy.pvalues.path <- "../../mouse2/final.taxonomy.pvalues"
+# gg.pvalues.path <- "../../mouse2/final.general.pvalues"
+# reads.table.path <- "../../mouse2/total.reads.per.seqID.csv"
+# path.to.plots.folder <- "../../mouse2/plots"
+# taxonomy.names.path <- "../../mouse2/final.taxonomy.names"
+# gg.names.path <- "../../mouse2/final.general.names"
 
 
 # ---- Define functions to import and format data ----
@@ -64,10 +64,10 @@ check.orders.match <- function(Vector1, Vector2){
     cat("uh oh major problem, the number of seqIDs is different in your two tables!")
   }
   # second check that they are in the same order
-  if (all.equal(Vector1, Vector2)){
+  if (all.equal(Vector1, Vector2) == TRUE){
     cat("orders match- good.")
   }else{
-    cat("crap something's wrong, they didn't end up in the same order.  must fix.")
+    cat("crap something's wrong, the seqIDs didn't end up in the same order, or they don't match.  must fix.")
   }
 }
 

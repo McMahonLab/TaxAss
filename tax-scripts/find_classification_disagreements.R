@@ -194,7 +194,7 @@ check.files.match <- function(FWtable, GGtable){
   
   order.check <- all.equal(fw[,1], gg[,1])
   if (order.check != TRUE){
-    cat("\n\nWARNING!! The Indexing of your files is messed up!!\nYou have to fix this or all your results will be wrong!\n(somehow the seqID order is not the same in both, even though the reformatting functions in this script are supposed to do that.)\n\n")
+    cat("\n\nWARNING!! The Indexing of your files is messed up!!\nYou have to fix this or all your results will be wrong!\n(somehow the seqID order is not the same in both, even though the reformatting functions in this script are supposed to do that. Possibly the seqID names don't match btwn your abund and fasta starting files.)\n\n")
   }
 }
 

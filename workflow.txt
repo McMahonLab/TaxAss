@@ -292,6 +292,8 @@ What the commands are:
 	aligned.fasta	the name of your aligned fasta file
 	otus.fasta		the name of the reformatted file you're creating
 
+NOTE: this removes hyphens from everywhere, so if you had hyphens in your seqID names you have to also remove
+hyphens from the names in your abund file. SeqIDs must match exactly btwn the two files (tho order doesn't matter)
 _____________________________________________
 
 II. Your OTU files:

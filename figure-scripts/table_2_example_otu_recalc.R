@@ -1,6 +1,8 @@
 # Table 1 BLAST must be recalculated example:
 # RRR 8-19-16 ----
 
+# draft 3- this is now Table 2. did not recalculate, just copied from poster.
+
 # find an example of 5 blast hits 
 # that get re-calculated to something else 
 # and the best hit is not the first one.

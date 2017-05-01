@@ -6,7 +6,7 @@
 
 # purpose: are blast settings OK, or are they not returning full length hits that would make our cutoff.
 
-# The script generates bar plots and csv tables of the results and saves them in the plots.folder.path
+# The script generates bar plots and csv tables of the results and saves them in a BLAST folder within the plots.folder.path
 
 # Note: it will make plots with data for other cutoffs not supplied by the user.
 # The script is calculating those for the given table, it's not a hard-coding mistake.
@@ -28,11 +28,14 @@ if (length(userprefs) > 3){
   mirror.location <- "https://cran.mtu.edu"
 }
 
+blast.plots.folder <- paste(plots.folder.path, "step_4_BLAST", sep = "/")
+
 # cat("fuck you forgot to comment out the file paths in plot_blast_hit_stats.R!")
-# blast.file.path <- "../../tanganyika/TaxAssTanganyika400/otus.custom.blast.table.modified"
+# blast.file.path <- "../../ME_plot_test/otus.custom.blast.table.modified"
 # pident.cutoff <- 98
-# plots.folder.path <- "~/Desktop"
+# plots.folder.path <- "../../ME_plot_test/plots"
 # mirror.location <- "https://cran.mtu.edu"
+# blast.plots.folder <- paste(plots.folder.path, "step_4_BLAST", sep = "/")
 
 # ####
 # Install Necessary Packages
@@ -47,11 +50,20 @@ get.necessary.packages <- function(){
   }else{
     library("reshape", lib.loc = library.path)
   }
+  cat("\n")
 }
 
 # ####
 # Define Functions for Handling Data
 # ####
+
+# create directories to hold plots
+make.plot.directory <- function(FolderPath){
+  if (!dir.exists(FolderPath)){
+    dir.create(FolderPath)
+    cat("made folder: ", FolderPath, "\n")
+  }
+}
 
 # import the blast table generated in find_seqIDs_with_pident
 import.BLAST.hits.table <- function(FilePath){
@@ -251,26 +263,30 @@ line.plot.overlay.blast.results <- function(BlastTable, CutoffVector, OutputFold
 
 get.necessary.packages()
 
+make.plot.directory(FolderPath = plots.folder.path)
+
+make.plot.directory(FolderPath = blast.plots.folder)
+
 blast <- import.BLAST.hits.table(FilePath = blast.file.path)
 
 # hits.reported <- max(blast$hit.num)
 # # View a table, 'hit.stats', that shows the percent of times each hit was best
 # hit.stats <- reformat.fract.ids.vs.hit.num(BlastTable = blast)
-# bar.plot.blast.results(BlastHitsTable = hit.stats, OutputFolder = plots.folder.path, NumBars = hits.reported)
+# bar.plot.blast.results(BlastHitsTable = hit.stats, OutputFolder = blast.plots.folder, NumBars = hits.reported)
 
 # # View a table, 'cutoff.hit.stats', that shows the percent of time each hit was best 
 # # after the blast results have been sorted for users chosen cutoff (the one supplied in command line)
 # blast.cutoff <- apply.pident.cutoff(BlastTable = blast, PidentCutoff = pident.cutoff)
 # cutoff.hit.stats <- reformat.fract.ids.vs.hit.num(BlastTable = blast.cutoff)
-# bar.plot.blast.results(BlastHitsTable = cutoff.hit.stats, Cutoff = pident.cutoff, OutputFolder = plots.folder.path, NumBars = hits.reported)
+# bar.plot.blast.results(BlastHitsTable = cutoff.hit.stats, Cutoff = pident.cutoff, OutputFolder = blast.plots.folder, NumBars = hits.reported)
 
 # # View a plot of overlayed lines showing how the proportion of best hits changes with different cutoffs
-# line.plot.overlay.blast.results(BlastTable = blast, CutoffVector = 90:100, OutputFolder = plots.folder.path)
+# line.plot.overlay.blast.results(BlastTable = blast, CutoffVector = 90:100, OutputFolder = blast.plots.folder)
 
 # View stacked bar chart to see how the proportion of best hits changes with different cutoffs
-bar.plot.stacked.blast.results(BlastTable = blast, CutoffVector = c(0,90:100), OutputFolder = plots.folder.path)
-# bar.plot.stacked.blast.results(BlastTable = blast, CutoffVector = 70:100, OutputFolder = plots.folder.path)
-bar.plot.stacked.blast.results(BlastTable = blast, CutoffVector = c(0,90:100), OutputFolder = plots.folder.path, Reverse = TRUE)
+bar.plot.stacked.blast.results(BlastTable = blast, CutoffVector = c(0,90:100), OutputFolder = blast.plots.folder)
+# bar.plot.stacked.blast.results(BlastTable = blast, CutoffVector = 70:100, OutputFolder = blast.plots.folder)
+bar.plot.stacked.blast.results(BlastTable = blast, CutoffVector = c(0,90:100), OutputFolder = blast.plots.folder, Reverse = TRUE)
 
 
 # Note how that plot levels off as you look way lower on the pidents.

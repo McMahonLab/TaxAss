@@ -43,7 +43,6 @@ NOTE: steps 1-14 can be run in a block using the bash scripts:
 	Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.below.98 98 FALSE
 
 6. check that BLAST settings are appropriate (R)
-	mkdir plots
 	Rscript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
 
 7. recover sequence IDs left out of blast (python, bash)
@@ -529,14 +528,9 @@ The likelihood of incorrect results because of BLAST choosing HSPs that are not 
 as the length of your OTU sequences increases.  This step tries to check if this might
 be a problem.  Generate some plots with the R script plot_blast_hit_stats.R.
 
-Full Two Commands (type in the terminal)
-mkdir plots
-Rscript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
+Full Command (type in the terminal)
 
-What mkdir bash command does:
-	mkdir		stands for "make directory", this creates a new folder
-	plots		the name of the new folder you are creating
-				this is where step 6 and step 14 will save plots generated for checking the cutoff
+Rscript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
 
 What each argument in the R script is:
 	RScript								sources an R script and allows it to accept arguments from the command line
@@ -544,6 +538,7 @@ What each argument in the R script is:
 	otus.custom.blast.table.modified	the modified blast table produced in step 4.
 	98									the pident cutoff you chose to filter your sequences by
 	plots								the folder your generated plots will be saved in
+										this folder is created if it doesn't exist already
 	https://cran.mtu.edu				this is an OPTIONAL argument for those who
 										1. don't have the "reshape" R package installed already
 										2. live far away from the midwestern USA

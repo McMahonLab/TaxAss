@@ -23,7 +23,7 @@ path.to.plots.folder <- userprefs[4]
 taxonomy.names.path <- userprefs[5]
 gg.names.path <- userprefs[6]
 
-improvement.plots.folder <- paste(path.to.plots.folder, "step_15_5a_Improvement_over_general", sep = "/")
+improvement.plots.folder <- paste(path.to.plots.folder, "step_15_5a_Improvement_over_general-only", sep = "/")
   
 # cat("fuck you forgot to comment out the file paths in find_classification_improvements.R!")
 # taxonomy.pvalues.path <- "../../ME_plot_test/final.taxonomy.pvalues"

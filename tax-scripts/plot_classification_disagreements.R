@@ -1054,7 +1054,7 @@ plot.forcing.diffs <- function(TopTaxaList, NumBars, FolderPath, PlottingLevels 
     png(filename = plot.name, width = 7, height = 5, units = "in", res = 100)
     par(mar = c(10,5,5,2))
     barplot(height = stacked.data[[t]], beside = FALSE, col = c("grey","red","blue"), main = names(stacked.data)[t], las = 2, ylab = "Relative Abundance (% reads)", border = NA)
-    legend(x = "topright", legend = c("Forced Into", "Forced Out Of"), fill = c("red", "blue"), border = FALSE, bty = "n", inset = .05)
+    legend(x = "topright", legend = c("Added Inaccuracy", "Lost Diversity"), fill = c("red", "blue"), border = FALSE, bty = "n", inset = .05)
     unnecessary.message <- dev.off()
     cat("made plot: ", plot.name, "\n")
     
@@ -1198,7 +1198,7 @@ if (userprefs[2] == "MakeSeqIDReadsOnly"){
 }else if (forcing.folder.path != "regular"){
 # ---------------------------------------------------------------------------------------------------------------------
 
-  plots.folder.path <- paste(plots.folder.path, "step_15_5b_Improvement_over_custom", sep = "/")
+  plots.folder.path <- paste(plots.folder.path, "step_15_5b_Improvement_over_custom-only", sep = "/")
   make.plot.directory(FolderPath = plots.folder.path)
   
   otus.forced <- import.forcing.conflicts(ForcingFolder = forcing.folder.path)

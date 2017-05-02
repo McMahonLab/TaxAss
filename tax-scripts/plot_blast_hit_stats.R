@@ -28,7 +28,7 @@ if (length(userprefs) > 3){
   mirror.location <- "https://cran.mtu.edu"
 }
 
-blast.plots.folder <- paste(plots.folder.path, "step_4_BLAST", sep = "/")
+blast.plots.folder <- paste(plots.folder.path, "step_4_check_BLAST_settings", sep = "/")
 
 # cat("fuck you forgot to comment out the file paths in plot_blast_hit_stats.R!")
 # blast.file.path <- "../../ME_plot_test/otus.custom.blast.table.modified"

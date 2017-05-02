@@ -21,13 +21,13 @@
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 
-# # FOR PLOTTING FORCING  **don't forget to change the seqID.reads file path below!!
-# cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!\n")
-# userprefs <- c(NA, # if seqid.reads exists (i.e. you ran step 14) this is NA, otherwise it's otus.abund file path)
-#                "../../poster_mend-check/plots",
-#                "../../poster_mend-check/conflicts_forcing",
-#                "../../poster_mend-check/otus.custom.70.taxonomy",
-#                "../../poster_mend-check/otus.98.70.70.taxonomy")
+# FOR PLOTTING FORCING  **don't forget to change the seqID.reads file path below!!
+cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!\n")
+userprefs <- c(NA, # if seqid.reads exists (i.e. you ran step 14) this is NA, otherwise it's otus.abund file path)
+               "../../ME_plot_test/plots",
+               "../../ME_plot_test/conflicts_forcing",
+               "../../ME_plot_test/otus.custom.85.taxonomy",
+               "../../ME_plot_test/otus.98.85.70.taxonomy")
 
 # # FOR CHOOSING CUTOFF:
 # cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
@@ -94,9 +94,9 @@ if (length(rest.of.arguments) > 0){
 seqID.reads.file.path <- "total.reads.per.seqID.csv"
 present.working.directory <- "."
 
-# cat("fuck you forgot to comment out the seqid.reads file path in plot_classification_disagreements!\n")
-# seqID.reads.file.path <- "../../poster_mend-check/total.reads.per.seqID.csv"
-# present.working.directory <- "../../poster_mend-check/"
+cat("fuck you forgot to comment out the seqid.reads file path in plot_classification_disagreements!\n")
+seqID.reads.file.path <- "../../ME_plot_test/total.reads.per.seqID.csv"
+present.working.directory <- "../../ME_plot_test/"
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -668,6 +668,29 @@ convert.to.percent <- function(TaxSum, Total){
   return(TaxSum)
 }
 
+find.alpha.diversity <- function(Taxonomy){
+  alpha.div <-NULL
+  for (t in 1:ncol(Taxonomy)){
+    alpha.div[t] <- length(unique(Taxonomy[ ,t]))
+  }
+  names(alpha.div) <- colnames(Taxonomy)
+  return(alpha.div)
+}
+
+find.percent.classified <- function(GroupedTaxaList){
+  # note: unclassifieds can't have been made unique
+  perc.class <- NULL
+  for (t in 1:length(GroupedTaxaList)){
+    index <- which(GroupedTaxaList[[t]][ ,t] == "unclassified")
+    if (length(index) > 0){
+      perc.class[t] <- sum(GroupedTaxaList[[t]][-index, t + 1])
+    }else{
+      perc.class[t] <- sum(GroupedTaxaList[[t]][ ,t + 1])
+    }
+  }
+  names(perc.class) <- names(GroupedTaxaList)
+  return(perc.class)
+}
 
 # ---------------------------------------------------------------------------------------------------------------------
 # Define functions to plot the data
@@ -1211,6 +1234,16 @@ if (userprefs[2] == "MakeSeqIDReadsOnly"){
   
   # export.grouped.list(Grouped = grouped.forced.taxa, PlotsPath = plots.folder.path, FolderName = "ForcedTaxonomyGroups")
   # export.grouped.list(Grouped = grouped.final.taxa, PlotsPath = plots.folder.path, FolderName = "FinalTaxonomyGroups")
+  
+  # Export stats on alpha diversity and percent classified using only the FW database:
+  fw.unique.unclass <- make.unclassifieds.unique(Taxonomy = forced.taxonomy[ ,-1])
+  fw.alpha <- find.alpha.diversity(Taxonomy = fw.unique.unclass)
+  
+  fw.perc.class <- find.percent.classified(GroupedTaxaList = grouped.forced.taxa)
+  
+  # **** next have to combine those two and export as a table!! ***
+  
+  
   
 # ---------------------------------------------------------------------------------------------------------------------
 # If not then do the normal comparison for choosing pident cutoff

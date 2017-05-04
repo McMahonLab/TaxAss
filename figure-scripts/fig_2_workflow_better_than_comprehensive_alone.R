@@ -165,6 +165,8 @@ save.to <- "~/Dropbox/PhD/Write It/draft 3/draft_3_figure_files/fig_2.eps"
 setEPS()
 postscript(file = save.to, width = 6.875, height = 3, title = "TaxAss Fig 2", colormodel = "srgb", family = "Helvetica")
 
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
+
 par(mfrow = c(1,2), mai = c(.7, .05, .33, 0), omi = c(.11, .36, 0, .65)) # bottom, left, top, right
 
 # 2a.
@@ -176,43 +178,39 @@ z <- z[ ,-1]
 plot.title <- "Mendota by Taxa Level"
 x.axis.labels <- c("Phylum", "Class", "Order", "Family/Lineage", "Genus/Clade", "Species/Tribe")
 
-# guts of generating plot (same for both panels)
-consistent.guts <- function(){
-  y.axis.label <- "Reads Classified (%)"
-  y.ticks <- c(0,20,40,60,80,100)
-  col.y <- "grey"
-  col.z <- c("grey", "orange", "red")
-  
-  YaxisMax = 100
-  bar.space.y <- c(0,1)
-  bar.width <- 1  # spacing and axis limits will determine what width 1 looks like, no need to change
-  
-  # find all values from the basic "beside" plot:
-  num.sections <- ncol(y)
-  bar.spots <- barplot(y, beside = TRUE, width = bar.width, space = bar.space.y, plot = FALSE)
-  tot.x <- max(bar.spots) + .5 * bar.width + bar.space.y[2]
-  empty.labels <- rep(x = "", times = num.sections)
-  
-  # calculate bar and label spacing
-  bar.space.beside <- c(bar.space.y[2], rep(bar.space.y[1] + bar.space.y[2] + bar.width, length.out = num.sections - 1))
-  bar.space.stacked <- bar.space.y[2] + bar.width + bar.space.y[1]
-  loc.labels <- bar.spots[seq(from = 1, to = length(bar.spots), by = 2)] + .5 * bar.width + .5 * bar.space.y[1]
-}
-consistent.guts()
+# guts of generating plot (same for both panels) ------------------------------------------------
+y.axis.label <- "Reads Classified (%)"
+y.ticks <- c(0,20,40,60,80,100)
+col.y <- "grey"
+col.z <- c("grey", "orange", "red")
+
+YaxisMax = 100
+bar.space.y <- c(0,1)
+bar.width <- 1  # spacing and axis limits will determine what width 1 looks like, no need to change
+
+# find all values from the basic "beside" plot:
+num.sections <- ncol(y)
+bar.spots <- barplot(y, beside = TRUE, width = bar.width, space = bar.space.y, plot = FALSE)
+tot.x <- max(bar.spots) + .5 * bar.width + bar.space.y[2]
+empty.labels <- rep(x = "", times = num.sections)
+
+# calculate bar and label spacing
+bar.space.beside <- c(bar.space.y[2], rep(bar.space.y[1] + bar.space.y[2] + bar.width, length.out = num.sections - 1))
+bar.space.stacked <- bar.space.y[2] + bar.width + bar.space.y[1]
+loc.labels <- bar.spots[seq(from = 1, to = length(bar.spots), by = 2)] + .5 * bar.width + .5 * bar.space.y[1]
 
 # adjustments of labels etc (same for both panels)
-consistent.adjustments <- function(){
-  barplot(y[1, ], col = col.y, border = "black", beside = FALSE, width = bar.width, space = bar.space.beside, xlim = c(0, tot.x), ylim = c(0, YaxisMax), names.arg = empty.labels, axes = FALSE)
-  barplot(z, add = TRUE, col = col.z, border = "black", beside = FALSE, width = bar.width, space = bar.space.stacked, xlim = c(0, tot.x), ylim = c(0, YaxisMax), names.arg = empty.labels, axes = FALSE)           
-  # Y axis
-  axis(side = 2, at = y.ticks, labels = FALSE, line = -1, tck = -.03)
-  mtext(text = y.ticks, at = y.ticks, side = 2, line = -.5, cex = .8, las = 1)
-  # X axis
-  text(x = loc.labels - .5, y = -4, labels = x.axis.labels, srt = -30, xpd = NA, cex = .8, adj = 0)
-  # Title
-  mtext(text = plot.title, side = 3, line = .7, cex = 1, at = 1, adj = 0)
-}
-consistent.adjustments()
+barplot(y[1, ], col = col.y, border = "black", beside = FALSE, width = bar.width, space = bar.space.beside, xlim = c(0, tot.x), ylim = c(0, YaxisMax), names.arg = empty.labels, axes = FALSE)
+barplot(z, add = TRUE, col = col.z, border = "black", beside = FALSE, width = bar.width, space = bar.space.stacked, xlim = c(0, tot.x), ylim = c(0, YaxisMax), names.arg = empty.labels, axes = FALSE)           
+# Y axis
+axis(side = 2, at = y.ticks, labels = FALSE, line = -1, tck = -.03)
+mtext(text = y.ticks, at = y.ticks, side = 2, line = -.5, cex = .8, las = 1)
+# X axis
+text(x = loc.labels - .5, y = -4, labels = x.axis.labels, srt = -30, xpd = NA, cex = .8, adj = 0)
+# Title
+mtext(text = plot.title, side = 3, line = .7, cex = 1, at = 1, adj = 0)
+# ----------------------------------------------------------------------------------------------------
+
 # Y label
 mtext(text = y.axis.label, side = 2, line = 1, cex = 1.1)
 
@@ -231,8 +229,39 @@ z <- stacked.tax.list$`Genus/Clade`
 plot.title <- "Genus/Clade by Ecosystem"
 x.axis.labels <- colnames(z)
 
-consistent.guts()
-consistent.adjustments()
+# don't change this section, change above then copy to here ------------------------------------------------
+y.axis.label <- "Reads Classified (%)"
+y.ticks <- c(0,20,40,60,80,100)
+col.y <- "grey"
+col.z <- c("grey", "orange", "red")
+
+YaxisMax = 100
+bar.space.y <- c(0,1)
+bar.width <- 1  # spacing and axis limits will determine what width 1 looks like, no need to change
+
+# find all values from the basic "beside" plot:
+num.sections <- ncol(y)
+bar.spots <- barplot(y, beside = TRUE, width = bar.width, space = bar.space.y, plot = FALSE)
+tot.x <- max(bar.spots) + .5 * bar.width + bar.space.y[2]
+empty.labels <- rep(x = "", times = num.sections)
+
+# calculate bar and label spacing
+bar.space.beside <- c(bar.space.y[2], rep(bar.space.y[1] + bar.space.y[2] + bar.width, length.out = num.sections - 1))
+bar.space.stacked <- bar.space.y[2] + bar.width + bar.space.y[1]
+loc.labels <- bar.spots[seq(from = 1, to = length(bar.spots), by = 2)] + .5 * bar.width + .5 * bar.space.y[1]
+
+# adjustments of labels etc (same for both panels)
+barplot(y[1, ], col = col.y, border = "black", beside = FALSE, width = bar.width, space = bar.space.beside, xlim = c(0, tot.x), ylim = c(0, YaxisMax), names.arg = empty.labels, axes = FALSE)
+barplot(z, add = TRUE, col = col.z, border = "black", beside = FALSE, width = bar.width, space = bar.space.stacked, xlim = c(0, tot.x), ylim = c(0, YaxisMax), names.arg = empty.labels, axes = FALSE)           
+# Y axis
+axis(side = 2, at = y.ticks, labels = FALSE, line = -1, tck = -.03)
+mtext(text = y.ticks, at = y.ticks, side = 2, line = -.5, cex = .8, las = 1)
+# X axis
+text(x = loc.labels - .5, y = -4, labels = x.axis.labels, srt = -30, xpd = NA, cex = .8, adj = 0)
+# Title
+mtext(text = plot.title, side = 3, line = .7, cex = 1, at = 1, adj = 0)
+# ----------------------------------------------------------------------------------------------------
+
 
 # legend stacked 
 stacked.legend <- c("Newly-Classified", "Re-Classified", "Unchanged")

@@ -160,14 +160,14 @@ for (t in 1:length(taxa.names)){
 }
 
 # ---- Paper Figure 2----
-save.to <- "~/Dropbox/PhD/Write It/draft 3/draft_3_figure_files/fig_2.eps"
+save.to <- "~/Dropbox/PhD/Write It/draft 4/fig_2.pdf"
 
-setEPS()
-postscript(file = save.to, width = 6.875, height = 3, title = "TaxAss Fig 2", colormodel = "srgb", family = "Helvetica")
+# setEPS()
+# postscript(file = save.to, width = 6.875, height = 3, title = "TaxAss Fig 2", colormodel = "srgb", family = "Helvetica")
 
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
 
-par(mfrow = c(1,2), mai = c(.7, .05, .33, 0), omi = c(.11, .36, 0, .65)) # bottom, left, top, right
+par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
 
 # 2a.
 y <- beside.eco.list$Mendota
@@ -214,14 +214,6 @@ mtext(text = plot.title, side = 3, line = .7, cex = 1, at = 1, adj = 0)
 # Y label
 mtext(text = y.axis.label, side = 2, line = 1, cex = 1.1)
 
-# legend beside 
-beside.legend <- c("Left Bar: Greegenes", "Right Bar: TaxAss")
-text(x = -1, y = c(-30, -40), labels = beside.legend, adj = 0, xpd = NA, cex = .8)
-rect(xleft = -2.5, xright = -1.5, ybottom = -32, ytop = -27, col = col.z[1], xpd = NA)
-rect(xleft = -2.5, xright = -1.5, ybottom = -42, ytop = -40.3, col = col.z[1], xpd = NA)
-rect(xleft = -2.5, xright = -1.5, ybottom = -40.4, ytop = -38.6, col = col.z[2], xpd = NA)
-rect(xleft = -2.5, xright = -1.5, ybottom = -38.7, ytop = -37, col = col.z[3], xpd = NA)
-
 # 2b. 
 y <- beside.tax.list$`Genus/Clade`
 z <- stacked.tax.list$`Genus/Clade`
@@ -262,13 +254,20 @@ text(x = loc.labels - .5, y = -4, labels = x.axis.labels, srt = -30, xpd = NA, c
 mtext(text = plot.title, side = 3, line = .7, cex = 1, at = 1, adj = 0)
 # ----------------------------------------------------------------------------------------------------
 
+# legend beside 
+beside.legend <- c("Left Bar: Greegenes", "Right Bar: TaxAss")
+text(x = 16.8, y = c(102, 92), labels = beside.legend, adj = 0, xpd = NA, cex = .8)
+rect(xleft = 15.5, xright = 16.5, ybottom = 100, ytop = 105, col = col.z[1], xpd = NA)
+rect(xleft = 15.5, xright = 16.5, ybottom = 90, ytop = 91.7, col = col.z[1], xpd = NA)
+rect(xleft = 15.5, xright = 16.5, ybottom = 91.6, ytop = 93.3, col = col.z[2], xpd = NA)
+rect(xleft = 15.5, xright = 16.5, ybottom = 93.2, ytop = 95, col = col.z[3], xpd = NA)
 
 # legend stacked 
 stacked.legend <- c("Newly-Classified", "Re-Classified", "Unchanged")
-text(x = 16.8, y = c(92,82,72), labels = stacked.legend, adj = 0, xpd = NA, cex = .8)
-rect(xleft = 15.5, xright = 16.5, ybottom = 90, ytop = 95, col = col.z[3])
-rect(xleft = 15.5, xright = 16.5, ybottom = 80, ytop = 85, col = col.z[2])
-rect(xleft = 15.5, xright = 16.5, ybottom = 70, ytop = 75, col = col.z[1])
+text(x = 16.8, y = c(77,67,57), labels = stacked.legend, adj = 0, xpd = NA, cex = .8)
+rect(xleft = 15.5, xright = 16.5, ybottom = 75, ytop = 80, col = col.z[3])
+rect(xleft = 15.5, xright = 16.5, ybottom = 65, ytop = 70, col = col.z[2])
+rect(xleft = 15.5, xright = 16.5, ybottom = 55, ytop = 60, col = col.z[1])
 
 dev.off()
 

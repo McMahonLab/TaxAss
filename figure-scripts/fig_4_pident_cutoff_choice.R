@@ -9,8 +9,8 @@
 
 # ---- Define File Paths ----
 
-file.path.otu.summs <- "../../poster/poster_mend_unclust/plots/conflict_summary_by_OTUs.csv"
-file.path.otu.perc.summs <- "../../poster/poster_mend_unclust/plots/conflict_summary_by_percent_OTUs.csv"
+# file.path.otu.summs <- "../../poster/poster_mend_unclust/plots/conflict_summary_by_OTUs.csv"
+# file.path.otu.perc.summs <- "../../poster/poster_mend_unclust/plots/conflict_summary_by_percent_OTUs.csv"
 
 file.path.read.perc.summs <- "../../ME_GG/analysis/plots/conflict_summary_by_percent_reads.csv"
 file.path.reads.class <- "../../ME_GG/analysis/plots/Percent_Reads_Classified_by_Pident.csv"
@@ -160,18 +160,20 @@ plot.total.classified(SummaryMatrix =reads.tot.class.plot, PidentValues = pident
 save.to <- "~/Dropbox/PhD/Write It/draft 4/fig_4.pdf"
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
 layout(mat = matrix(c(1,2,3,4,5,5), nrow = 1))
-par(omi = c(.2,.3,.2,.2)) # bottom, left, top, right
+par(omi = c(0,.4,0,0)) # bottom, left, top, right
 # 4a ----
-par(mai = c(.2,.2,.2,.2)) # bottom, left, top, right
+par(mai = c(.3,0,.4,.2)) # bottom, left, top, right
+# ----
 pidents <- pident.values
 sum.named <- reads.tot.class.plot
 
 line.col <- "grey" 
 pointer.col <- adjustcolor(col = "red", alpha.f = .3)
 x.lim <- c(min(pidents), max(pidents))
-y.label <- "Total Classifications (% Reads)"
+y.label <- "Reads Classified (%)"
 x.label <- "Percent Identity Cutoff"
-taxa.levels <- c("Class","Order","Family/Lineage","Genus/Clade")
+taxa.levels <- c("Class","Order","Family/\nLineage","Genus/\nClade")
+big.title <- "Total Classifications"
 
 # Class ----
 ass <- sum.named[ ,1]
@@ -185,28 +187,26 @@ repeat.these <- function(){
   plot(x = pidents, y = ass, col = line.col, type = "n", ann = F, lwd = 3, axes = F, ylim = y.lim)
   points(x = pidents, y = ass, col = line.col, pch = 19)
   lines(x = pidents, y = ass, col = line.col, lwd = 3)
-  mtext(text = plot.title, side = 3, line = .5, outer = F, cex = 1)
-  
   # vertical max line
   index <- which(ass == max(ass))
   max.names <- pidents[index]
   lines(x = c(pidents[index],pidents[index]),y = c(y.lim[1], ass[index]), col = pointer.col, lwd = 3)
-  
-  # x axis labels
-  x.lab.cols <- rep("black", times = length(pidents))
-  x.lab.cols[index] <- "red"
-  x.lab.cex <- rep(.7, times = length(pidents))
-  x.lab.cex[index] <- .7
-  x.lab.line <- rep(.5, times = length(pidents))
-  x.lab.line[index] <- .5
-  empty.x.labels <- rep("", times = length(pidents))
-  axis(side = 1, at = pidents, labels = empty.x.labels)
-  mtext(text = pidents, side = 1, line = x.lab.line, at = pidents, col = x.lab.cols, cex = x.lab.cex)
-  
-  axis(side = 2, at = y.ticks, labels = F, tck = -.03, line = .25)
-  mtext(text = y.tick.labs, side = 2, at = y.ticks, las = 2, line = .5, cex = .7)
+  # x axis 
+  x.lab.text <- c(100,expression(bold("99")),98,97,96,95)
+  axis(side = 1, at = pidents, labels = F, tck = -.035, line = -.5)
+  mtext(text = x.lab.text, side = 1, line = -.3, at = pidents, col = "black", cex = .6)
+  # Y Axis
+  axis(side = 2, at = y.ticks, labels = F, tck = -.03, line = .2)
+  mtext(text = y.tick.labs, side = 2, at = y.ticks, las = 2, line = .5, cex = .6)
+  # plot title
+  mtext(text = plot.title, side = 3, line = 1, outer = F, cex = .8, padj = 1)
 }
 repeat.these()
+
+# ----
+# box(which = "plot", col=adjustcolor("purple", alpha.f = .5), lwd = 3)
+# box(which = "figure", col=adjustcolor("orange", alpha.f = .5), lwd = 3)
+
 # Order ----
 ass <- sum.named[ ,2]
 plot.title <- taxa.levels[2]
@@ -230,22 +230,29 @@ ass <- sum.named[ ,4]
 plot.title <- taxa.levels[4]
 min(ass)
 max(ass)
-y.lim <- c(55,70)
-y.ticks <- c(55,57.5,60,62.5,65,67.5,70)
-y.tick.labs <- c(55,"",60,"",65,"",70)
+y.lim <- c(57.5,70)
+y.ticks <- c(57.5,60,62.5,65,67.5,70)
+y.tick.labs <- c("",60,"",65,"",70)
 repeat.these()
 
 # ----
-mtext(text = x.label, side = 1, line = 1.5, outer = T, cex = 1)
-mtext(text = y.label, side = 2, line = .5, outer = T, cex = 1)
+mtext(text = x.label, side = 1, line = -1.1, outer = T, at = .3, cex = .8)
+mtext(text = y.label, side = 2, line = 1.9, outer = T, cex = .8)
+mtext(text = big.title, side = 3, line = -1.3, outer = T, at = .3)
+
+# box(which = "inner", col=adjustcolor("red", alpha.f = .5), lwd = 3)
+# box(which = "outer", col=adjustcolor("blue", alpha.f = .5), lwd = 3)
+# box(which = "plot", col=adjustcolor("purple", alpha.f = .5), lwd = 3)
+# box(which = "figure", col=adjustcolor("orange", alpha.f = .5), lwd = 3)
 
 # 4b ----
-par(mai = c(.2,.2,.2,.2)) # bottom, left, top, right
+par(mai = c(.3,.6,.27,.05)) # bottom, left, top, right
+# ----
 perc.class <- reads.fw.class[ ,2]
 chosen.cutoff <- 99
-plot.title <- "Proportion FreshTrain"
+plot.title <- "FreshTrain Classifications"
 x.label <- "Percent Identity Cutoff"
-y.label <- paste("FreshTrain Classifications (% Reads)")
+y.label <- paste("Reads in FreshTrain Group (%)")
 min(perc.class)
 max(perc.class)
 y.lim <- c(45,80)
@@ -259,17 +266,19 @@ points(x = pidents, y = perc.class, col = "grey", pch = 19, cex = 1)
 index <- which(pidents == chosen.cutoff)
 cutoff.perc <- perc.class[index]
 lines(x = c(chosen.cutoff,chosen.cutoff),y = c(y.lim[1], cutoff.perc), col = pointer.col, lwd = 3)
+# ----
 # X Axis
-axis(side = 1, at = pidents, labels = F)
-mtext(text = pidents, side = 1, line = .5, at = pidents, cex = .7)
+boldeable.text <- c(100,expression(bold("99")),98, 97, 96, 95)
+axis(side = 1, at = pidents, labels = F, tck = -.03, line = -.5)
+mtext(text = boldeable.text, side = 1, line = -.2, at = pidents, cex = .7)
 # Y Axis
-axis(side = 2, at = y.ticks, labels = F, tck = -.03, line = .25)
+axis(side = 2, at = y.ticks, labels = F, tck = -.03, line = 0, tck = -.03)
 mtext(text = y.tick.labs, side = 2, at = y.ticks, las = 2, line = .5, cex = .7)
 # Labels
-mtext(text = plot.title, side = 3, line = 0, at = 95, cex = 1, adj = 0)
-mtext(text = x.label, side = 1, line = 0, at = 95, cex = 1, adj = 0)
-mtext(text = y.label, side = 2, line = 0, at = 50, adj = 0)
-
+mtext(text = plot.title, side = 3, line = 1.6, at = 100.2, cex = 1, adj = 1, padj = 1)
+mtext(text = x.label, side = 1, line = 1.1, at = 95, adj = 0, cex = .8)
+mtext(text = y.label, side = 2, line = 2, at = 48, adj = 0, cex = .8)
+#----
 dev.off()
 
 #

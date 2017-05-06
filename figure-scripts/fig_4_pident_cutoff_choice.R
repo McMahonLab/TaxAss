@@ -11,12 +11,12 @@
 
 file.path.otu.summs <- "../../poster/poster_mend_unclust/plots/conflict_summary_by_OTUs.csv"
 file.path.otu.perc.summs <- "../../poster/poster_mend_unclust/plots/conflict_summary_by_percent_OTUs.csv"
-file.path.read.perc.summs <- "../../poster/poster_mend_unclust/plots/conflict_summary_by_percent_reads.csv"
 
+file.path.read.perc.summs <- "../../ME_GG/analysis/plots/conflict_summary_by_percent_reads.csv"
 file.path.reads.class <- "../../ME_GG/analysis/plots/Percent_Reads_Classified_by_Pident.csv"
 
-output.folder.supp <- "~/Desktop/test/supp"
-output.folder.fig4 <- "~/Desktop/test/fig4"
+# output.folder.supp <- "~/Desktop/test/supp"
+# output.folder.fig4 <- "~/Desktop/test/fig4"
 
 
 # ---- Define Functions ----
@@ -157,24 +157,122 @@ reads.tot.class.plot <- reads.tot.class[ ,-c(1:3,8)]
 plot.total.classified(SummaryMatrix =reads.tot.class.plot, PidentValues = pident.values)
 
 # ---- PAPER ----
-
+save.to <- "~/Dropbox/PhD/Write It/draft 4/fig_4.pdf"
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
+layout(mat = matrix(c(1,2,3,4,5,5), nrow = 1))
+par(omi = c(.2,.3,.2,.2)) # bottom, left, top, right
 # 4a ----
-draft.3.data.4a <- "../../ME_GG/analysis/plots/Percent_Reads_Classified_by_Pident.csv"
-draft.3.fig.4a <- "~/Dropbox/PhD/Write It/draft 3/draft_3_figure_files/fig_4a_max_classified.png"
+par(mai = c(.2,.2,.2,.2)) # bottom, left, top, right
+pidents <- pident.values
+sum.named <- reads.tot.class.plot
 
-reads.tot.class <- import.classified.summary(FilePath = draft.3.data.4a)
-pident.values <- reads.tot.class[ ,1]
-reads.tot.class.plot <- reads.tot.class[ ,-c(1:3,8)]
-plot.total.classified(SummaryMatrix =reads.tot.class.plot, PidentValues = pident.values, FilePath = draft.3.fig.4a)
+line.col <- "grey" 
+pointer.col <- adjustcolor(col = "red", alpha.f = .3)
+x.lim <- c(min(pidents), max(pidents))
+y.label <- "Total Classifications (% Reads)"
+x.label <- "Percent Identity Cutoff"
+taxa.levels <- c("Class","Order","Family/Lineage","Genus/Clade")
+
+# Class ----
+ass <- sum.named[ ,1]
+plot.title <- taxa.levels[1]
+min(ass)
+max(ass)
+y.lim <- c(90,95)
+y.ticks <- c(90,91,92,93,94,95)
+y.tick.labs <- c("",91,"",93,"",95)
+repeat.these <- function(){
+  plot(x = pidents, y = ass, col = line.col, type = "n", ann = F, lwd = 3, axes = F, ylim = y.lim)
+  points(x = pidents, y = ass, col = line.col, pch = 19)
+  lines(x = pidents, y = ass, col = line.col, lwd = 3)
+  mtext(text = plot.title, side = 3, line = .5, outer = F, cex = 1)
+  
+  # vertical max line
+  index <- which(ass == max(ass))
+  max.names <- pidents[index]
+  lines(x = c(pidents[index],pidents[index]),y = c(y.lim[1], ass[index]), col = pointer.col, lwd = 3)
+  
+  # x axis labels
+  x.lab.cols <- rep("black", times = length(pidents))
+  x.lab.cols[index] <- "red"
+  x.lab.cex <- rep(.7, times = length(pidents))
+  x.lab.cex[index] <- .7
+  x.lab.line <- rep(.5, times = length(pidents))
+  x.lab.line[index] <- .5
+  empty.x.labels <- rep("", times = length(pidents))
+  axis(side = 1, at = pidents, labels = empty.x.labels)
+  mtext(text = pidents, side = 1, line = x.lab.line, at = pidents, col = x.lab.cols, cex = x.lab.cex)
+  
+  axis(side = 2, at = y.ticks, labels = F, tck = -.03, line = .25)
+  mtext(text = y.tick.labs, side = 2, at = y.ticks, las = 2, line = .5, cex = .7)
+}
+repeat.these()
+# Order ----
+ass <- sum.named[ ,2]
+plot.title <- taxa.levels[2]
+min(ass)
+max(ass)
+y.lim <- c(85,90)
+y.ticks <- c(85,86,87,88,89,90)
+y.tick.labs <- c("",86,"",88,"",90)
+repeat.these()
+# Family ----
+ass <- sum.named[ ,3]
+plot.title <- taxa.levels[3]
+min(ass)
+max(ass)
+y.lim <- c(75,85)
+y.ticks <- c(75,77,79,81,83,85)
+y.tick.labs <- c("",77,"",81,"",85)
+repeat.these()
+# Genus ----
+ass <- sum.named[ ,4]
+plot.title <- taxa.levels[4]
+min(ass)
+max(ass)
+y.lim <- c(55,70)
+y.ticks <- c(55,57.5,60,62.5,65,67.5,70)
+y.tick.labs <- c(55,"",60,"",65,"",70)
+repeat.these()
+
+# ----
+mtext(text = x.label, side = 1, line = 1.5, outer = T, cex = 1)
+mtext(text = y.label, side = 2, line = .5, outer = T, cex = 1)
 
 # 4b ----
-draft.3.data.4b <- "../../ME_GG/analysis/plots/conflict_summary_by_percent_reads.csv"
-draft.3.fig.4b <- "~/Dropbox/PhD/Write It/draft 3/draft_3_figure_files/fig_4b_percent_fw.png"
+par(mai = c(.2,.2,.2,.2)) # bottom, left, top, right
+perc.class <- reads.fw.class[ ,2]
+chosen.cutoff <- 99
+plot.title <- "Proportion FreshTrain"
+x.label <- "Percent Identity Cutoff"
+y.label <- paste("FreshTrain Classifications (% Reads)")
+min(perc.class)
+max(perc.class)
+y.lim <- c(45,80)
+y.ticks <- c(45,50,55,60,65,70,75,80)
+y.tick.labs <- c("",50,"",60,"",70,"",80)
 
-reads <- import.conflict.summary(FilePath = draft.3.data.4b)
-reads.fw.class <- trim.to.perc.classified(ConflictSum = reads)
-plot.perc.classified(PercClass = reads.fw.class, Cutoff = 99, FilePath = draft.3.fig.4b)
+plot(x = pidents, y = perc.class, type = "n", axes = F, ann = F, ylim = y.lim)
+lines(x = pidents, y = perc.class, col = "grey", lwd = 3)
+points(x = pidents, y = perc.class, col = "grey", pch = 19, cex = 1)
+# red line
+index <- which(pidents == chosen.cutoff)
+cutoff.perc <- perc.class[index]
+lines(x = c(chosen.cutoff,chosen.cutoff),y = c(y.lim[1], cutoff.perc), col = pointer.col, lwd = 3)
+# X Axis
+axis(side = 1, at = pidents, labels = F)
+mtext(text = pidents, side = 1, line = .5, at = pidents, cex = .7)
+# Y Axis
+axis(side = 2, at = y.ticks, labels = F, tck = -.03, line = .25)
+mtext(text = y.tick.labs, side = 2, at = y.ticks, las = 2, line = .5, cex = .7)
+# Labels
+mtext(text = plot.title, side = 3, line = 0, at = 95, cex = 1, adj = 0)
+mtext(text = x.label, side = 1, line = 0, at = 95, cex = 1, adj = 0)
+mtext(text = y.label, side = 2, line = 0, at = 50, adj = 0)
 
+dev.off()
+
+#
 # ---- ISME16 POSTER ----
 
 file.path.read.perc.summs <- "../../poster_mend_unclust/plots/conflict_summary_by_percent_reads.csv"

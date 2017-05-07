@@ -189,7 +189,7 @@ mtext(text = y.tick.labels, side = 2, at = y.axis.ticks, line = -.35, las = 1, c
 # Title
 mtext(text = plot.title, side = 3, line = .8, cex = 1, at = 3, adj = 0)
 # ----
-legend.text <- c("Prevented Inaccuracy", "Maintained Diversity")
+legend.text <- c("Prevented Inaccuracy", "Maintained Richness")
 text(x = 17, y = c(20.8,17.8), labels = legend.text, adj = 0, xpd = NA, cex = 1.1)
 rect(xleft = 15.5, xright = 16.5, ybottom = 20, ytop = 22, col = bar.colors[2], border = F, xpd = NA)
 rect(xleft = 15.5, xright = 16.5, ybottom = 17, ytop = 19, col = bar.colors[3], border = F, xpd = NA)

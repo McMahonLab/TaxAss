@@ -9,13 +9,13 @@
 
 # ---- Define File Paths ----
 
-# file.path.otu.summs <- "../../poster/poster_mend_unclust/plots/conflict_summary_by_OTUs.csv"
-# file.path.otu.perc.summs <- "../../poster/poster_mend_unclust/plots/conflict_summary_by_percent_OTUs.csv"
+file.path.otu.summs <- "../../poster/poster_mend_unclust/plots/conflict_summary_by_OTUs.csv"
+file.path.otu.perc.summs <- "../../poster/poster_mend_unclust/plots/conflict_summary_by_percent_OTUs.csv"
 
 file.path.read.perc.summs <- "../../ME_GG/analysis/plots/conflict_summary_by_percent_reads.csv"
 file.path.reads.class <- "../../ME_GG/analysis/plots/Percent_Reads_Classified_by_Pident.csv"
 
-# output.folder.supp <- "~/Desktop/test/supp"
+output.folder.supp <- "~/Desktop/test/supp"
 # output.folder.fig4 <- "~/Desktop/test/fig4"
 
 
@@ -30,6 +30,8 @@ import.conflict.summary <- function(FilePath){
 
 make.supplemental.table.1 <- function(ConflictsSum, FolderPath = NULL){
   otus <- ConflictsSum[1:4, ]
+  index <- order(otus[1,-1])
+  otus <- otus[ ,c(1,index+1)]
   # only make a file if a folder is specified
   if (!is.null(FolderPath)){
     file.name <- paste(FolderPath, "Supplemental_Table_1.csv", sep = "")
@@ -157,6 +159,8 @@ reads.tot.class.plot <- reads.tot.class[ ,-c(1:3,8)]
 plot.total.classified(SummaryMatrix =reads.tot.class.plot, PidentValues = pident.values)
 
 # ---- PAPER ----
+
+# ---- Fig 4 ----
 save.to <- "~/Dropbox/PhD/Write It/draft 4/fig_4.pdf"
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
 layout(mat = matrix(c(1,2,3,4,5,5), nrow = 1))
@@ -280,6 +284,11 @@ mtext(text = x.label, side = 1, line = 1.1, at = 95, adj = 0, cex = .8)
 mtext(text = y.label, side = 2, line = 2, at = 48, adj = 0, cex = .8)
 #----
 dev.off()
+
+# ---- Supp Table 1 ----
+save.to <- "~/Dropbox/PhD/Write It/draft 3/draft_3_figure_files/sup_table_1_forcing_check.csv"
+supp.table.1 <- make.supplemental.table.1(ConflictsSum = otus, FolderPath = save.to)
+supp.table.1
 
 #
 # ---- ISME16 POSTER ----

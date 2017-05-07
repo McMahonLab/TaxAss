@@ -242,7 +242,7 @@ repeat.these()
 # ----
 mtext(text = x.label, side = 1, line = -1.1, outer = T, at = .3, cex = .8)
 mtext(text = y.label, side = 2, line = 1.9, outer = T, cex = .8)
-mtext(text = big.title, side = 3, line = -1.3, outer = T, at = .3)
+mtext(text = big.title, side = 3, line = -1.3, outer = T, at = -.02, adj = 0)
 
 # box(which = "inner", col=adjustcolor("red", alpha.f = .5), lwd = 3)
 # box(which = "outer", col=adjustcolor("blue", alpha.f = .5), lwd = 3)

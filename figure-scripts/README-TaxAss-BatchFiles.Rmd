@@ -1,0 +1,49 @@
+---
+title: "README-TaxAss-BatchFiles"
+author: "Robin Rohwer"
+date: "September 12, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "/Users/athena/Desktop/TaxAssData/TaxAss-BatchFiles")
+```
+
+## Reproduce Data Processing in TaxAss Paper  
+### Download versions of programs and databases used in this paper:
+Program       | Version             | Download From
+--------------|---------------------|-------------------------  
+mothur        | v.1.39.5            | mothur.org  
+Silva Seed    | v128                | mothur.org (but included in batch folder here)   
+SraToolkit    | 2.7.0-mac64         | ncbi.nlm.nih.gov  
+BLAST         | 2.2.31+             | ncbi.nlm.nih.gov  
+vsearch       | 2.4.3-macos-x86_64  | github.com/torognes/vsearch
+TaxAss        | SHA **??????????**  | github.com/McMahonLab/TaxAss
+FreshTrain    | 18Aug2016           | github.com/McMahonLab/TaxAss
+Greengenes    | 13_5                | greengenes.secondgenome.com/downloads/database/13_5
+
+### There are folders for processing the data from each ecosystem:  
+
+```{bash}
+pwd
+ls
+```
+
+## Download and QC raw data  
+
+The QC folder contains all the necessary starting files and scripts. Script annotations include more details.  
+### Mendota: 
+```{bash, eval=F}
+cd Mendota/
+cd QC-Mendota/
+./qc_mendota.sh > terminaloutput_mendota.txt
+# you can check for error messages in the terminal output file
+./deletemothurbarf.sh terminaloutput_mendota.txt > terminaloutput_mendota.txt
+```
+
+
+## Run QC'ed data through TaxAss  
+This includes the optional steps of TaxAss, where different pidents are compared and then the best one is chosen.  
+
+

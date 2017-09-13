@@ -126,9 +126,14 @@ $(document).ready(function () {
 
 <div id="reproduce-data-processing-in-taxass-paper" class="section level2">
 <h2>Reproduce Data Processing in TaxAss Paper</h2>
-<div id="download-versions-of-programs-and-databases-used-in-this-paper" class="section level3">
-<h3>Download versions of programs and databases used in this paper:</h3>
-<table>
+<div id="download-versions-of-programs-and-databases-used-in-this-paper" class="section level4">
+<h4>Download versions of programs and databases used in this paper:</h4>
+<table style="width:88%;">
+<colgroup>
+<col width="20%"></col>
+<col width="30%"></col>
+<col width="36%"></col>
+</colgroup>
 <thead>
 <tr class="header">
 <th>Program</th>
@@ -143,70 +148,138 @@ $(document).ready(function () {
 <td>mothur.org</td>
 </tr>
 <tr class="even">
-<td>Silva Seed</td>
-<td>v128</td>
-<td>mothur.org (but included in batch folder here)</td>
-</tr>
-<tr class="odd">
 <td>SraToolkit</td>
 <td>2.7.0-mac64</td>
 <td>ncbi.nlm.nih.gov</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>BLAST</td>
 <td>2.2.31+</td>
 <td>ncbi.nlm.nih.gov</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>vsearch</td>
 <td>2.4.3-macos-x86_64</td>
 <td>github.com/torognes/vsearch</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>TaxAss</td>
 <td>SHA <strong>??????????</strong></td>
-<td>github.com/McMahonLab/TaxAss</td>
+<td>github.com/McMahonLab/TaxAss/tax-scripts <br> (And included in these batch files)</td>
 </tr>
+</tbody>
+</table>
+<table>
+<colgroup>
+<col width="20%"></col>
+<col width="13%"></col>
+<col width="29%"></col>
+<col width="36%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Database</th>
+<th>Version</th>
+<th>File Name</th>
+<th>Download From</th>
+</tr>
+</thead>
+<tbody>
 <tr class="odd">
 <td>FreshTrain</td>
 <td>18Aug2016</td>
-<td>github.com/McMahonLab/TaxAss</td>
+<td>FreshTrain18Aug2016.zip</td>
+<td>github.com/McMahonLab/TaxAss/FreshTrain-files</td>
 </tr>
 <tr class="even">
 <td>Greengenes</td>
-<td>13_5</td>
-<td>greengenes.secondgenome.com/downloads/database/13_5</td>
+<td>May 2013</td>
+<td>gg_13_5.fasta <br> gg_13_5_taxonomy.txt</td>
+<td>greengenes.secondgenome.com/downloads</td>
+</tr>
+<tr class="odd">
+<td>Silva Seed</td>
+<td>v128</td>
+<td>silva.seed_v128.align</td>
+<td>mothur.org</td>
 </tr>
 </tbody>
 </table>
 </div>
-<div id="there-are-folders-for-processing-the-data-from-each-ecosystem" class="section level3">
-<h3>There are folders for processing the data from each ecosystem:</h3>
-<pre class="bash"><code>pwd
-ls</code></pre>
-<pre><code>## /Users/athena/Desktop/TaxAssData/TaxAss-BatchFiles
-## Danube
-## Mendota
-## Michigan
-## MouseGut
-## TroutBogEpi
-## TroutBogHypo
+<div id="add-these-programs-to-your-path-after-installing" class="section level4">
+<h4>Add these programs to your path after installing:</h4>
+<ul>
+<li>mothur<br />
+</li>
+<li>SraToolkit<br />
+</li>
+<li>BLAST (probably automatically installs to path)</li>
+</ul>
+<p>The TaxAss tax-scripts are already in each ecosystem folder here. Otherwise you would add them to your working directory (not on the path).</p>
+</div>
+<div id="download-the-reference-databases-into-the-existing-folder-called-referencedatabases" class="section level4">
+<h4>Download the reference databases into the existing folder called ReferenceDatabases:</h4>
+<ul>
+<li>FreshTrain<br />
+</li>
+<li>Greengenes<br />
+</li>
+<li>Silva seed</li>
+</ul>
+<p>Unzip the files, and move them so that they are not nested within other folders after expanding. Do not change any names. This is what the contents of <code>ReferenceDatabases</code> should look like:</p>
+<pre class="bash"><code>ls ReferenceDatabases/</code></pre>
+<pre><code>## FreshTrain18Aug2016.fasta
+## FreshTrain18Aug2016.taxonomy
+## README.txt
+## gg_13_5.fasta
+## gg_13_5_taxonomy.txt
 ## silva.seed_v128.align</code></pre>
 </div>
+<div id="notes-on-these-batch-files" class="section level4">
+<h4>Notes on these batch files:</h4>
+<ul>
+<li>QC downloads raw fastq files and converts them to fasta files using standard QC settings.<br />
+</li>
+<li>TaxAss runs the full TaxAss workflow, including optional steps to identify a good percent identity cutoff.<br />
+</li>
+<li><p>Quickie TaxAss runs only one pident, skipping optional checks.</p></li>
+<li><p>These batch files are “all inclusive” because they’re just meant to provide reproducible results. If you’re running TaxAss on your own data and want to run as a batch file, you should adjust the provided batch files within the tax-scripts folder with names <code>RunSteps_*.sh</code>.</p></li>
+</ul>
 </div>
-<div id="download-and-qc-raw-data" class="section level2">
-<h2>Download and QC raw data</h2>
-<p>The QC folder contains all the necessary starting files and scripts. Script annotations include more details.<br />
-### Mendota:</p>
-<pre class="bash"><code>cd Mendota/
-cd QC-Mendota/
-./qc_mendota.sh &gt; terminaloutput_mendota.txt
-# you can check for error messages in the terminal output file
-./deletemothurbarf.sh terminaloutput_mendota.txt &gt; terminaloutput_mendota.txt</code></pre>
 </div>
-<div id="run-qced-data-through-taxass" class="section level2">
-<h2>Run QC’ed data through TaxAss</h2>
-<p>This includes the optional steps of TaxAss, where different pidents are compared and then the best one is chosen.</p>
+<div id="process-lake-mendota" class="section level2">
+<h2>Process Lake Mendota!</h2>
+<ul>
+<li>Note that script annotations include more details.<br />
+</li>
+<li>Sending the terminal output to a text file allows you to check for errors later. Deleting the 1000’s of lines of numbers mothur prints while processing makes the output readable.</li>
+</ul>
+<pre class="bash"><code>cd Mendota/QC-Mendota/
+./qc_mendota.sh &gt; terminaloutput.txt
+./deletemothurbarf.sh terminaloutput.txt &gt; terminaloutput.txt
+
+cd ../TaxAss-Mendota/
+./taxass_mendota.sh &gt; terminaloutput.txt
+./deletemothurbarf.sh terminaloutput.txt &gt; terminaloutput.txt
+
+cd ../Quickie-TaxAss-Mendota/
+./taxass_mendota_99.sh &gt; terminaloutput.txt
+./deletemothurbarf.sh terminaloutput.txt &gt; terminaloutput.txt</code></pre>
+</div>
+<div id="process-trout-bog-epilimnion" class="section level2">
+<h2>Process Trout Bog Epilimnion!</h2>
+</div>
+<div id="process-trout-bog-hypolimnion" class="section level2">
+<h2>Process Trout Bog Hypolimnion!</h2>
+</div>
+<div id="process-lake-michigan" class="section level2">
+<h2>Process Lake Michigan!</h2>
+</div>
+<div id="process-danube-river" class="section level2">
+<h2>Process Danube River!</h2>
+</div>
+<div id="process-mouse-gut" class="section level2">
+<h2>Process Mouse Gut!</h2>
 </div>
 
 

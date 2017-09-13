@@ -2,14 +2,17 @@
 
 # RRR 12-6-16
 # This reformats the greengenes download taxonomy file into a mothur (and TaxAss) compatible format:
+# It also renames the reformatted file to general.taxonomy and deletes the original
 # This is explained in step 0 of TaxAss directions
 
 ggfile=$"$1"
 
 sed 's/ //g' <$ggfile >NoSpaces
+rm $ggfile
 sed 's/$/;/' <NoSpaces >EndLineSemicolons
-mv EndLineSemicolons $ggfile
 rm NoSpaces
+mv EndLineSemicolons general.taxonomy
+
 
 exit
 

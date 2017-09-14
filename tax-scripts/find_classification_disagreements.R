@@ -21,10 +21,11 @@
 # Receive arguments from terminal command line
 # -------------------------------------------------------------
 
-# Example syntax for pident comparison, final taxonomy generation, and database comparison, respectively:
+# Example syntax for pident comparison, final taxonomy generation, final taxonomy w/out comparisons to general-only, database comparison, and forcing analysis, respectively:
 
 # Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 
 # Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 final
+# Rscript find_classification_disagreements.R otus.98.taxonomy quickie ids.above.98 conflicts_98 98 85 70 final
 # Rscript find_classification_disagreements.R custom.custom.taxonomy custom.general.taxonomy NA conflicts_database NA NA 70 database
 # Rscript find_classification_disagreements.R otus.custom.taxonomy otus.98.85.70.taxonomy ids.above.98 conflicts_forcing NA 85 70 forcing
 
@@ -42,15 +43,15 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                98,
 #                70,
 #                70)
-# # FINAL TABLE GENERATION: note you do need the otus.general.taxonomy file b/c it's used to prep a file for plot_classification_improvement.R in step 15
+# FINAL TABLE GENERATION: note you do need the otus.general.taxonomy file b/c it's used to prep a file for plot_classification_improvement.R in step 15
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-# userprefs <- c("../../poster_mend-check/otus.98.taxonomy",
-#                "../../poster_mend-check/otus.general.taxonomy",
-#                "../../poster_mend-check/ids.above.98",
-#                "../../poster_mend-check/conflicts_98",
+# userprefs <- c("~/Desktop/TaxAssData/TaxAss-BatchFiles/Mendota/TaxAss-Mendota/otus.98.taxonomy",
+#                "~/Desktop/TaxAssData/TaxAss-BatchFiles/Mendota/TaxAss-Mendota/otus.general.taxonomy", # make this one "quickie" if skipping general-only classification
+#                "~/Desktop/TaxAssData/TaxAss-BatchFiles/Mendota/TaxAss-Mendota/ids.above.98",
+#                "~/Desktop/TaxAssData/TaxAss-BatchFiles/Mendota/TaxAss-Mendota/conflicts_98",
 #                98,
-#                70,
-#                70,
+#                80,
+#                80,
 #                "final")
 # # DATABASE COMPARISON: part of optional step 11.5
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
@@ -429,25 +430,27 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   write.table(x = final.taxonomy, file = file.name.final.taxonomy, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
   
   # the following will be used by the plot_classification_improvement.R script
+  if (gg.only.tax.file.path != "quickie"){
+    tax.nums <- view.bootstraps(TaxonomyTable = final.taxonomy)
+    write.table(x = tax.nums, file = file.name.workflow.pvalues, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
+    
+    tax.names <- apply(final.taxonomy, 2, remove.parentheses)
+    write.table(x = tax.names, file = file.name.workflow.names, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
+    
+    gg.percents <- import.GG.names(FilePath = gg.only.tax.file.path)
+    gg.percents <- reformat.gg(GGtable = gg.percents)
+    
+    gg.taxonomy <- do.bootstrap.cutoff(TaxonomyTable = gg.percents, BootstrapCutoff = taxonomy.pvalue.cutoff.gg)
+    colnames(gg.taxonomy) <- c("seqID","kingdom","phylum","class","order","lineage","clade","tribe")
+    
+    gg.nums <- view.bootstraps(TaxonomyTable = gg.taxonomy)
+    write.table(x = gg.nums, file = file.name.general.pvalues, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
+    
+    gg.names <- apply(X = gg.taxonomy, MARGIN = 2, FUN = remove.parentheses)
+    write.table(x = gg.names, file = file.name.general.names, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
+  }
   
-  tax.nums <- view.bootstraps(TaxonomyTable = final.taxonomy)
-  write.table(x = tax.nums, file = file.name.workflow.pvalues, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
   
-  tax.names <- apply(final.taxonomy, 2, remove.parentheses)
-  write.table(x = tax.names, file = file.name.workflow.names, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
-  
-  gg.percents <- import.GG.names(FilePath = gg.only.tax.file.path)
-  gg.percents <- reformat.gg(GGtable = gg.percents)
-  
-  gg.taxonomy <- do.bootstrap.cutoff(TaxonomyTable = gg.percents, BootstrapCutoff = taxonomy.pvalue.cutoff.gg)
-  colnames(gg.taxonomy) <- c("seqID","kingdom","phylum","class","order","lineage","clade","tribe")
-  
-  gg.nums <- view.bootstraps(TaxonomyTable = gg.taxonomy)
-  write.table(x = gg.nums, file = file.name.general.pvalues, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
-  
-  gg.names <- apply(X = gg.taxonomy, MARGIN = 2, FUN = remove.parentheses)
-  write.table(x = gg.names, file = file.name.general.names, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
-
 # -------------------------------------------------------------
 # Compare databases by looking at how GG classifies the FW representative sequences
 }else if (final.or.database == "database"){
@@ -488,7 +491,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
 # Look at how bad it'd be if you used only the custom database instead of the workflow
 }else if (final.or.database == "forcing"){
 # -------------------------------------------------------------  
-  cat("examining how the custom database would have classified the dissimilar sequences that didn't belong in it \n(i.e. good thing you used my workflow!)\n")
+  cat("examining how the custom database would have classified the dissimilar sequences that didn't belong in it\n")
   
   fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path) # fw.plus.gg.tax.file.path is actually FW-only here
   gg.percents <- import.GG.names(FilePath = gg.only.tax.file.path, final.names = TRUE) # gg.only.tax.file.path is final workflow taxonomy (fw+gg)

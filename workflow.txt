@@ -84,8 +84,11 @@ NOTE: steps 1-14 can be run in a block using the bash scripts:
 	Rscript plot_classification_disagreements.R otus.abund plots regular NA NA conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98
 
 15. generate final taxonomy file (R)
+	If doing OPTIONAL steps:
 	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 final
-
+	If skipping optional steps:
+	Rscript find_classification_disagreements.R otus.98.taxonomy quickie ids.above.98 conflicts_98 98 85 70 final
+	
 15.5 OPTIONAL: plot benefits of using this workflow (R, mothur, bash)
 	a. Improvement over general database only:
 		Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID.csv plots final.taxonomy.names final.general.names
@@ -999,6 +1002,10 @@ of all of the classifications.
 
 Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 final
 
+note: if you are skipping step 15.5.a or if you skipped steps 11-14 (optional checks), source this way:
+
+Rscript find_classification_disagreements.R otus.98.taxonomy quickie ids.above.98 conflicts_98 98 85 70 final
+
 What the arguments are this (3rd) time you source the script:
 1.	Rscript									this opens R to accept arguments from the command line
 2.	find_classification_disagreements.R		this is the R script you're sourcing
@@ -1009,6 +1016,8 @@ What the arguments are this (3rd) time you source the script:
 											It's not used for the final file generation, but it 
 											is used in this step to generate a file for step 16,
 											so that's why you still need to specify the path.
+4.  quickie									use this option if you skipped optional checks 11-14, 
+											or if you're skipping optional step 15.5.a
 5.	ids.above.98							this is the path to the file created in step 4 that
 											contains all of the sequence IDs above or equal to 
 											your pident cutoff

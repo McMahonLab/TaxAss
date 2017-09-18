@@ -12,7 +12,7 @@
 
 pident=("100" "99" "98" "97" "96" "95")
 fwbootstrap=("80")
-ggbootstrap=("70")
+ggbootstrap=("80")
 
 # First Run steps 1-13 to generate databases and folders exactly following workflow
 # Note: still gotta do the reformatting manually (step 0)

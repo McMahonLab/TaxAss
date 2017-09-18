@@ -6,9 +6,9 @@
 
 # Choose final pident.
 
-pident=("98")
-fwbootstrap=("85")
-ggbootstrap=("70")
+pident=("99")
+fwbootstrap=("80")
+ggbootstrap=("80")
 
 # 15
 Rscript find_classification_disagreements.R otus.$pident.taxonomy otus.general.taxonomy ids.above.$pident conflicts_$pident $pident $fwbootstrap $ggbootstrap final &&

@@ -197,12 +197,15 @@ I. General notes on the seqIDs in all files:
 
 OTU seqID's:
 			-cannot contain any whitespace
-			 BLAST will call some parts the seqID and some parts comments if they're separated.
-			 Having BLAST seqIDs that don't match the full >comment line of the fasta file will 
-		 	 throw off the python script that creates fasta files for the chosen seqIDs in step 8.
-		 	 Having any spaces will also throw off the R script that checks blast hit numbers.
+			 	BLAST will call some parts the seqID and some parts comments if they're separated.
+			 	Having BLAST seqIDs that don't match the full >comment line of the fasta file will 
+		 	 	throw off the python script that creates fasta files for the chosen seqIDs in step 8.
+		 	 	Having any spaces will also throw off the R script that checks blast hit numbers.
 		 	 -must match between the otus.fasta file and the otus.abund file,
-			 though consistent ordering is not necessary.
+			 	though consistent ordering is not necessary.
+			 -cannot contain semicolons
+			 	The taxonomy file format produced by mothur is semicolon delimited, so semicolons in
+			 	file names will throw off all R scripts by adding an extra column.
 
 
 _____________________________________________

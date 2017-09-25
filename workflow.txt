@@ -206,6 +206,9 @@ OTU seqID's:
 			 -cannot contain semicolons
 			 	The taxonomy file format produced by mothur is semicolon delimited, so semicolons in
 			 	file names will throw off all R scripts by adding an extra column.
+			 -cannot contain dashes
+			 	If there are dashes it makes it difficult to switch between aligned and unaligned
+			 	fasta files because you can't simply remove all dashes without changing the seqID names
 
 
 _____________________________________________
@@ -268,7 +271,7 @@ ______________________
 
 2. .fasta files:
 
-These should be in fasta format (note the carrot before the seqID, a new line separateing 
+These should be in fasta format (note the carrot before the seqID, a new line separating 
 seqID from sequence, sequence can be one line or multiple lines.) example format:
 		
 >seqID

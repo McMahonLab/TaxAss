@@ -244,42 +244,83 @@ $(document).ready(function () {
 </li>
 <li><p>Quickie TaxAss runs only one pident, skipping optional checks.</p></li>
 <li><p>These batch files are “all inclusive” because they’re just meant to provide reproducible results. If you’re running TaxAss on your own data and want to run as a batch file, you should adjust the provided batch files within the tax-scripts folder with names <code>RunSteps_*.sh</code>.</p></li>
+<li>Note that script annotations include more details, especially the QC scripts which are not included as part of the TaxAss workflow.<br />
+</li>
+<li><p>Sending the terminal output to a text file allows you to check for errors later. Deleting the 1000’s of lines of numbers mothur prints while processing (“mothur barf”) makes the output readable.</p></li>
 </ul>
 </div>
 </div>
 <div id="process-lake-mendota" class="section level2">
 <h2>Process Lake Mendota!</h2>
-<ul>
-<li>Note that script annotations include more details.<br />
-</li>
-<li>Sending the terminal output to a text file allows you to check for errors later. Deleting the 1000’s of lines of numbers mothur prints while processing makes the output readable.</li>
-</ul>
 <pre class="bash"><code>cd Mendota/QC-Mendota/
-./qc_mendota.sh &gt; terminaloutput.txt
-./deletemothurbarf.sh terminaloutput.txt &gt; terminaloutput.txt
+./qc_mendota.sh &gt; terminal_output.txt
+./deletemothurbarf.sh terminal_output.txt &gt; terminal_output_qc.txt ; rm terminal_output.txt
 
 cd ../TaxAss-Mendota/
-./taxass_mendota.sh &gt; terminaloutput.txt
-./deletemothurbarf.sh terminaloutput.txt &gt; terminaloutput.txt
+./taxass_mendota.sh 
 
 cd ../Quickie-TaxAss-Mendota/
-./taxass_mendota_99.sh &gt; terminaloutput.txt
-./deletemothurbarf.sh terminaloutput.txt &gt; terminaloutput.txt</code></pre>
+./taxass_mendota_99.sh </code></pre>
 </div>
 <div id="process-trout-bog-epilimnion" class="section level2">
 <h2>Process Trout Bog Epilimnion!</h2>
+<pre class="bash"><code>cd TroutBogEpi/QC-TroutBogEpi/
+./qc_bogs.sh &gt; terminal_output.txt
+./deletemothurbarf.sh terminal_output.txt &gt; terminal_output_qc.txt ; rm terminal_output.txt
+
+cd ../TaxAss-TroutBogEpi/
+./taxass_bogs.sh 
+
+cd ../Quickie-TaxAss-TroutBogEpi/
+./taxass_bogs_99.sh </code></pre>
 </div>
 <div id="process-trout-bog-hypolimnion" class="section level2">
 <h2>Process Trout Bog Hypolimnion!</h2>
+<pre class="bash"><code>cd TroutBogHypo/QC-TroutBogHypo/
+./qc_bogs.sh &gt; terminal_output.txt
+./deletemothurbarf.sh terminal_output.txt &gt; terminal_output_qc.txt ; rm terminal_output.txt
+
+cd ../TaxAss-TroutBogHypo/
+./taxass_bogs.sh 
+
+cd ../Quickie-TaxAss-TroutBogHypo/
+./taxass_bogs_99.sh </code></pre>
 </div>
 <div id="process-lake-michigan" class="section level2">
 <h2>Process Lake Michigan!</h2>
+<pre class="bash"><code>cd Michigan/QC-Michigan/
+./qc_michigan.sh &gt; terminal_output.txt
+./deletemothurbarf.sh terminal_output.txt &gt; terminal_output_qc.txt ; rm terminal_output.txt
+
+cd ../TaxAss-Michigan/
+./taxass_michigan.sh 
+
+cd ../Quickie-TaxAss-Michigan/
+./taxass_michigan_99.sh </code></pre>
 </div>
 <div id="process-danube-river" class="section level2">
 <h2>Process Danube River!</h2>
+<pre class="bash"><code>cd Danube/QC-Danube/
+./qc_danube.sh &gt; terminal_output.txt
+./deletemothurbarf.sh terminal_output.txt &gt; terminal_output_qc.txt ; rm terminal_output.txt
+
+cd ../TaxAss-Danube/
+./taxass_danube.sh 
+
+cd ../Quickie-TaxAss-Danube/
+./taxass_danube_99.sh </code></pre>
 </div>
 <div id="process-mouse-gut" class="section level2">
 <h2>Process Mouse Gut!</h2>
+<p>This data is the full version of the example used in mothur’s MiSeq SOP (aka the “stability” study for those of you who’ve also memorized it). Go to the MiSeq SOP: <a href="https://www.mothur.org/wiki/MiSeq_SOP" class="uri">https://www.mothur.org/wiki/MiSeq_SOP</a> and scroll down to the “Logistics” section. Then click the “full dataset” link and it will open a download window. Download into the <code>TaxAss-BatchFiles/MouseGut/QC-MouseGut/</code> folder.</p>
+<pre class="bash"><code>cd MouseGut/QC-MouseGut
+# download dataset from mothur's website into this folder
+tar -xvf StabilityNoMetaG.tar
+rm Mock* # delete mock community samples- not real mousegut data
+gunzip *.gz
+./qc_mousegut.sh &gt; terminal_output.txt
+./deletemothurbarf.sh terminal_output.txt &gt; terminal_output_qc.txt ; rm terminal_output.txt
+</code></pre>
 </div>
 
 

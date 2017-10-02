@@ -51,43 +51,92 @@ ls ReferenceDatabases/
 - TaxAss runs the full TaxAss workflow, including optional steps to identify a good percent identity cutoff.  
 - Quickie TaxAss runs only one pident, skipping optional checks.  
   
-- These batch files are "all inclusive" because they're just meant to provide reproducible results. If you're running TaxAss on your own data and want to run as a batch file, you should adjust the provided batch files within the tax-scripts folder with names `RunSteps_*.sh`.
+- These batch files are "all inclusive" because they're just meant to provide reproducible results. If you're running TaxAss on your own data and want to run as a batch file, you should adjust the provided batch files within the tax-scripts folder with names `RunSteps_*.sh`.  
+  
+- Note that script annotations include more details, especially the QC scripts which are not included as part of the TaxAss workflow.  
+- Sending the terminal output to a text file allows you to check for errors later. Deleting the 1000's of lines of numbers mothur prints while processing ("mothur barf") makes the output readable.  
+
 
 
 ## Process Lake Mendota!
-
-- Note that script annotations include more details.  
-- Sending the terminal output to a text file allows you to check for errors later. Deleting the 1000's of lines of numbers mothur prints while processing makes the output readable.  
-
-
 ```{bash, eval=F}
 cd Mendota/QC-Mendota/
-./qc_mendota.sh > terminaloutput.txt
-./deletemothurbarf.sh terminaloutput.txt > terminaloutput.txt
+./qc_mendota.sh > terminal_output.txt
+./deletemothurbarf.sh terminal_output.txt > terminal_output_qc.txt ; rm terminal_output.txt
 
 cd ../TaxAss-Mendota/
-./taxass_mendota.sh > terminaloutput.txt
-./deletemothurbarf.sh terminaloutput.txt > terminaloutput.txt
+./taxass_mendota.sh 
 
 cd ../Quickie-TaxAss-Mendota/
-./taxass_mendota_99.sh > terminaloutput.txt
-./deletemothurbarf.sh terminaloutput.txt > terminaloutput.txt
+./taxass_mendota_99.sh 
 ```
 
 ## Process Trout Bog Epilimnion!
+```{bash, eval=F}
+cd TroutBogEpi/QC-TroutBogEpi/
+./qc_bogs.sh > terminal_output.txt
+./deletemothurbarf.sh terminal_output.txt > terminal_output_qc.txt ; rm terminal_output.txt
 
+cd ../TaxAss-TroutBogEpi/
+./taxass_bogs.sh 
+
+cd ../Quickie-TaxAss-TroutBogEpi/
+./taxass_bogs_99.sh 
+```
 
 ## Process Trout Bog Hypolimnion!
+```{bash, eval=F}
+cd TroutBogHypo/QC-TroutBogHypo/
+./qc_bogs.sh > terminal_output.txt
+./deletemothurbarf.sh terminal_output.txt > terminal_output_qc.txt ; rm terminal_output.txt
 
+cd ../TaxAss-TroutBogHypo/
+./taxass_bogs.sh 
 
-## Process Lake Michigan!
+cd ../Quickie-TaxAss-TroutBogHypo/
+./taxass_bogs_99.sh 
+```
 
+## Process Lake Michigan!  
+```{bash, eval=F}
+cd Michigan/QC-Michigan/
+./qc_michigan.sh > terminal_output.txt
+./deletemothurbarf.sh terminal_output.txt > terminal_output_qc.txt ; rm terminal_output.txt
+
+cd ../TaxAss-Michigan/
+./taxass_michigan.sh 
+
+cd ../Quickie-TaxAss-Michigan/
+./taxass_michigan_99.sh 
+```
 
 ## Process Danube River!  
+```{bash, eval=F}
+cd Danube/QC-Danube/
+./qc_danube.sh > terminal_output.txt
+./deletemothurbarf.sh terminal_output.txt > terminal_output_qc.txt ; rm terminal_output.txt
+
+cd ../TaxAss-Danube/
+./taxass_danube.sh 
+
+cd ../Quickie-TaxAss-Danube/
+./taxass_danube_99.sh 
+```
+
+## Process Mouse Gut!  
+This data is the full version of the example used in mothur's MiSeq SOP (aka the "stability" study for those of you who've also memorized it). Go to the MiSeq SOP: https://www.mothur.org/wiki/MiSeq_SOP and scroll down to the "Logistics" section. Then click the "full dataset" link and it will open a download window. Download into the `TaxAss-BatchFiles/MouseGut/QC-MouseGut/` folder.  
+
+```{bash, eval = F}
+cd MouseGut/QC-MouseGut
+# download dataset from mothur's website into this folder
+tar -xvf StabilityNoMetaG.tar
+rm Mock* # delete mock community samples- not real mousegut data
+gunzip *.gz
+./qc_mousegut.sh > terminal_output.txt
+./deletemothurbarf.sh terminal_output.txt > terminal_output_qc.txt ; rm terminal_output.txt
 
 
-## Process Mouse Gut!
-
+```
 
 
 

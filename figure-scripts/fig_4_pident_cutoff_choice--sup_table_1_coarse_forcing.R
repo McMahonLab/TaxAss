@@ -1,9 +1,9 @@
 # RRR 8-15-16 ----
 
 # fig 4 is the plot showing how you can identify a good percent identity cutoff
+# it shows the percent identity cutoff that results in the maximum reads classified at different taxa levels
 
-# fig 4a shows the percent identity cutoff that results in the maximum reads classified at different taxa levels
-# fig 4b shows the diminishing returns of lowering the cutoff as fewer reads at added to the FW classification
+# fig 4b was cut from the paper- shows the diminishing returns of lowering the cutoff as fewer reads are added to the FW classification
 
 # Supp Table 1 is the sanity check- make sure there aren't any phyla or classes being forced
 
@@ -15,8 +15,8 @@ file.path.otu.perc.summs <- "../../poster/poster_mend_unclust/plots/conflict_sum
 file.path.read.perc.summs <- "../../ME_GG/analysis/plots/conflict_summary_by_percent_reads.csv"
 file.path.reads.class <- "../../ME_GG/analysis/plots/Percent_Reads_Classified_by_Pident.csv"
 
-output.folder.supp <- "~/Desktop/test/supp"
-# output.folder.fig4 <- "~/Desktop/test/fig4"
+output.folder.supp <- "~/Desktop/test/taxassfigs/"
+output.folder.fig4 <- "~/Desktop/test/taxassfigs/"
 
 
 # ---- Define Functions ----
@@ -151,7 +151,7 @@ make.supplemental.table.1(ConflictsSum = otus)
 
 reads <- import.conflict.summary(FilePath = file.path.read.perc.summs)
 reads.fw.class <- trim.to.perc.classified(ConflictSum = reads)
-plot.perc.classified(PercClass = reads.fw.class, Cutoff = 98)
+plot.perc.classified(PercClass = reads.fw.class, Cutoff = 99)
 
 reads.tot.class <- import.classified.summary(FilePath = file.path.reads.class)
 pident.values <- reads.tot.class[ ,1]
@@ -161,12 +161,11 @@ plot.total.classified(SummaryMatrix =reads.tot.class.plot, PidentValues = pident
 # ---- PAPER ----
 
 # ---- Fig 4 ----
-save.to <- "~/Dropbox/PhD/Write It/draft 4/fig_4.pdf"
+save.to <- "~/Desktop/test/taxassfigs/fig4.pdf"
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
-layout(mat = matrix(c(1,2,3,4,5,5), nrow = 1))
-par(omi = c(0,.4,0,0)) # bottom, left, top, right
-# 4a ----
-par(mai = c(.3,0,.4,.2)) # bottom, left, top, right
+layout(mat = matrix(c(1,2,3,4), nrow = 1))
+par(omi = c(.05,.18,.1,.1), mai = c(.3,.3,.4,0)) # bottom, left, top, right
+
 # ----
 pidents <- pident.values
 sum.named <- reads.tot.class.plot
@@ -177,7 +176,7 @@ x.lim <- c(min(pidents), max(pidents))
 y.label <- "Reads Classified (%)"
 x.label <- "Percent Identity Cutoff"
 taxa.levels <- c("Class","Order","Family/\nLineage","Genus/\nClade")
-big.title <- "Total Classifications"
+big.title <- "Percent Identity Cutoff Where Total Classifications Are Maximized"
 
 # Class ----
 ass <- sum.named[ ,1]
@@ -198,10 +197,10 @@ repeat.these <- function(){
   # x axis 
   x.lab.text <- c(100,expression(bold("99")),98,97,96,95)
   axis(side = 1, at = pidents, labels = F, tck = -.035, line = -.5)
-  mtext(text = x.lab.text, side = 1, line = -.3, at = pidents, col = "black", cex = .6)
+  mtext(text = x.lab.text, side = 1, line = -.2, at = pidents, col = "black", cex = .6)
   # Y Axis
   axis(side = 2, at = y.ticks, labels = F, tck = -.03, line = .2)
-  mtext(text = y.tick.labs, side = 2, at = y.ticks, las = 2, line = .5, cex = .6)
+  mtext(text = y.tick.labs, side = 2, at = y.ticks, las = 2, line = .65, cex = .6)
   # plot title
   mtext(text = plot.title, side = 3, line = 1, outer = F, cex = .8, padj = 1)
 }
@@ -240,16 +239,28 @@ y.tick.labs <- c("",60,"",65,"",70)
 repeat.these()
 
 # ----
-mtext(text = x.label, side = 1, line = -1.1, outer = T, at = .3, cex = .8)
-mtext(text = y.label, side = 2, line = 1.9, outer = T, cex = .8)
-mtext(text = big.title, side = 3, line = -1.3, outer = T, at = -.02, adj = 0)
+mtext(text = x.label, side = 1, line = -.8, outer = T, cex = .8)
+mtext(text = y.label, side = 2, line = 0, outer = T, cex = .8)
+mtext(text = big.title, side = 3, line = -.7, outer = T, at = .08, adj = 0)
 
 # box(which = "inner", col=adjustcolor("red", alpha.f = .5), lwd = 3)
 # box(which = "outer", col=adjustcolor("blue", alpha.f = .5), lwd = 3)
 # box(which = "plot", col=adjustcolor("purple", alpha.f = .5), lwd = 3)
 # box(which = "figure", col=adjustcolor("orange", alpha.f = .5), lwd = 3)
 
-# 4b ----
+#----
+dev.off()
+
+#
+
+# ---- Supp Table 1 ----
+save.to <- "~/Dropbox/PhD/Write It/draft 3/draft_3_figure_files/sup_table_1_forcing_check.csv"
+supp.table.1 <- make.supplemental.table.1(ConflictsSum = otus, FolderPath = save.to)
+supp.table.1
+
+
+# ---- deceased panel 4b (killed by coauthors. apparently it's incomprehensible) ----
+
 par(mai = c(.3,.6,.27,.05)) # bottom, left, top, right
 # ----
 perc.class <- reads.fw.class[ ,2]
@@ -282,21 +293,13 @@ mtext(text = y.tick.labs, side = 2, at = y.ticks, las = 2, line = .5, cex = .7)
 mtext(text = plot.title, side = 3, line = 1.6, at = 100.2, cex = 1, adj = 1, padj = 1)
 mtext(text = x.label, side = 1, line = 1.1, at = 95, adj = 0, cex = .8)
 mtext(text = y.label, side = 2, line = 2, at = 48, adj = 0, cex = .8)
-#----
-dev.off()
 
-# ---- Supp Table 1 ----
-save.to <- "~/Dropbox/PhD/Write It/draft 3/draft_3_figure_files/sup_table_1_forcing_check.csv"
-supp.table.1 <- make.supplemental.table.1(ConflictsSum = otus, FolderPath = save.to)
-supp.table.1
-
-#
 # ---- ISME16 POSTER ----
 
 file.path.read.perc.summs <- "../../poster_mend_unclust/plots/conflict_summary_by_percent_reads.csv"
 output.folder.fig4 <- "~/Dropbox/Trina/8-20-16_ISME16_figures/pident_choice_mendota_unclust.png"
 
-# define functions ----
+# define functions for poster ----
 
 import.summary <- function(FilePath){
   sumry <- read.csv(file = FilePath, header = FALSE, colClasses = "character")
@@ -315,7 +318,7 @@ trim.to.perc.classified <- function(ConflictSum){
   return(perc.class)
 }
 
-# use functions ----
+# use functions for poster ----
 
 reads <- import.summary(FilePath = file.path.read.perc.summs)
 

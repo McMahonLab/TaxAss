@@ -235,6 +235,26 @@ $(document).ready(function () {
 ## gg_13_5_taxonomy.txt
 ## silva.seed_v128.align</code></pre>
 </div>
+<div id="navegate-into-the-main-taxass-batchfiles-folder-within-the-terminal." class="section level4">
+<h4>Navegate into the main TaxAss-BatchFiles folder within the terminal.</h4>
+<p>These notes assume starting in that folder as the present working directory at the beginning of each of the following “Process …” steps.</p>
+<pre class="bash"><code>pwd</code></pre>
+<pre><code>## /Users/athena/Desktop/TaxAssData/TaxAss-BatchFiles</code></pre>
+<p>This main direcory contains lake-specific folders for processing each dataset.</p>
+<pre class="bash"><code>ls</code></pre>
+<pre><code>## Danube
+## Mendota
+## Michigan
+## MouseGut
+## ReferenceDatabases
+## TroutBogEpi
+## TroutBogHypo</code></pre>
+<p>Each lake-specific folder contains separate folders for different processing steps. For example:</p>
+<pre class="bash"><code>ls Mendota/</code></pre>
+<pre><code>## QC-Mendota
+## Quickie-TaxAss-Mendota
+## TaxAss-Mendota</code></pre>
+</div>
 <div id="notes-on-these-batch-files" class="section level4">
 <h4>Notes on these batch files:</h4>
 <ul>
@@ -265,26 +285,26 @@ cd ../Quickie-TaxAss-Mendota/
 <div id="process-trout-bog-epilimnion" class="section level2">
 <h2>Process Trout Bog Epilimnion!</h2>
 <pre class="bash"><code>cd TroutBogEpi/QC-TroutBogEpi/
-./qc_bogs.sh &gt; terminal_output.txt
+./qc_bog_epi.sh &gt; terminal_output.txt
 ./deletemothurbarf.sh terminal_output.txt &gt; terminal_output_qc.txt ; rm terminal_output.txt
 
 cd ../TaxAss-TroutBogEpi/
-./taxass_bogs.sh 
+./taxass_bog_epi.sh 
 
 cd ../Quickie-TaxAss-TroutBogEpi/
-./taxass_bogs_99.sh </code></pre>
+./taxass_bog_epi_99.sh </code></pre>
 </div>
 <div id="process-trout-bog-hypolimnion" class="section level2">
 <h2>Process Trout Bog Hypolimnion!</h2>
 <pre class="bash"><code>cd TroutBogHypo/QC-TroutBogHypo/
-./qc_bogs.sh &gt; terminal_output.txt
+./qc_bog_hypo.sh &gt; terminal_output.txt
 ./deletemothurbarf.sh terminal_output.txt &gt; terminal_output_qc.txt ; rm terminal_output.txt
 
 cd ../TaxAss-TroutBogHypo/
-./taxass_bogs.sh 
+./taxass_bog_hypo.sh 
 
 cd ../Quickie-TaxAss-TroutBogHypo/
-./taxass_bogs_99.sh </code></pre>
+./taxass_bog_hypo_99.sh </code></pre>
 </div>
 <div id="process-lake-michigan" class="section level2">
 <h2>Process Lake Michigan!</h2>
@@ -321,6 +341,10 @@ gunzip *.gz
 ./qc_mousegut.sh &gt; terminal_output.txt
 ./deletemothurbarf.sh terminal_output.txt &gt; terminal_output_qc.txt ; rm terminal_output.txt
 </code></pre>
+<p><br> <br></p>
+<div id="now-youre-all-done-replicating-the-data-processing-used-in-the-taxass-manuscript.-go-use-taxass-on-your-own-datasets" class="section level5">
+<h5>Now you’re all done replicating the data processing used in the TaxAss manuscript. Go use TaxAss on your own datasets!!!</h5>
+</div>
 </div>
 
 

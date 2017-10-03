@@ -46,6 +46,20 @@ Unzip the files, and move them so that they are not nested within other folders 
 ls ReferenceDatabases/
 ```
 
+#### Navegate into the main TaxAss-BatchFiles folder within the terminal.  
+These notes assume starting in that folder as the present working directory at the beginning of each of the following "Process ..." steps.
+```{bash, eval=T}
+pwd
+```
+This main direcory contains lake-specific folders for processing each dataset.
+```{bash, eval=T}
+ls
+```
+Each lake-specific folder contains separate folders for different processing steps. For example:
+```{bash, eval=T}
+ls Mendota/
+```
+
 #### Notes on these batch files:  
 - QC downloads raw fastq files and converts them to fasta files using standard QC settings.  
 - TaxAss runs the full TaxAss workflow, including optional steps to identify a good percent identity cutoff.  
@@ -74,27 +88,27 @@ cd ../Quickie-TaxAss-Mendota/
 ## Process Trout Bog Epilimnion!
 ```{bash, eval=F}
 cd TroutBogEpi/QC-TroutBogEpi/
-./qc_bogs.sh > terminal_output.txt
+./qc_bog_epi.sh > terminal_output.txt
 ./deletemothurbarf.sh terminal_output.txt > terminal_output_qc.txt ; rm terminal_output.txt
 
 cd ../TaxAss-TroutBogEpi/
-./taxass_bogs.sh 
+./taxass_bog_epi.sh 
 
 cd ../Quickie-TaxAss-TroutBogEpi/
-./taxass_bogs_99.sh 
+./taxass_bog_epi_99.sh 
 ```
 
 ## Process Trout Bog Hypolimnion!
 ```{bash, eval=F}
 cd TroutBogHypo/QC-TroutBogHypo/
-./qc_bogs.sh > terminal_output.txt
+./qc_bog_hypo.sh > terminal_output.txt
 ./deletemothurbarf.sh terminal_output.txt > terminal_output_qc.txt ; rm terminal_output.txt
 
 cd ../TaxAss-TroutBogHypo/
-./taxass_bogs.sh 
+./taxass_bog_hypo.sh 
 
 cd ../Quickie-TaxAss-TroutBogHypo/
-./taxass_bogs_99.sh 
+./taxass_bog_hypo_99.sh 
 ```
 
 ## Process Lake Michigan!  
@@ -138,5 +152,8 @@ gunzip *.gz
 
 ```
 
+<br>
+<br>
 
+##### Now you're all done replicating the data processing used in the TaxAss manuscript. Go use TaxAss on your own datasets!!!
 

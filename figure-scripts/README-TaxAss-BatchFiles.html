@@ -338,6 +338,7 @@ cd ../Quickie-TaxAss-Danube/
 tar -xvf StabilityNoMetaG.tar
 rm Mock* # delete mock community samples- not real mousegut data
 gunzip *.gz
+rm StabilityNoMetaG.tar # delete large file
 ./qc_mousegut.sh &gt; terminal_output.txt
 ./deletemothurbarf.sh terminal_output.txt &gt; terminal_output_qc.txt ; rm terminal_output.txt
 </code></pre>

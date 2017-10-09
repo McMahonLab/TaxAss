@@ -51,7 +51,7 @@ These notes assume starting in that folder as the present working directory at t
 ```{bash, eval=T}
 pwd
 ```
-This main direcory contains lake-specific folders for processing each dataset.
+This main direcory contains lake-specific folders for processing each dataset, in addition to the ReferenceDatabases folder you downloaded files into yourself and the `tax-scripts` folder taken from the TaxAss github repository version **SHA##########** 
 ```{bash, eval=T}
 ls
 ```

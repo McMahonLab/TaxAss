@@ -21,13 +21,13 @@
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 
-# # FOR PLOTTING FORCING  **don't forget to change the seqID.reads file path below!!
+# FOR PLOTTING FORCING  **don't forget to change the seqID.reads file path below!!
 # cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!\n")
 # userprefs <- c(NA, # if seqid.reads exists (i.e. you ran step 14) this is NA, otherwise it's otus.abund file path)
-#                "../../poster_mend-check/plots",
-#                "../../poster_mend-check/conflicts_forcing",
-#                "../../poster_mend-check/otus.custom.70.taxonomy",
-#                "../../poster_mend-check/otus.98.70.70.taxonomy")
+#                "../../ME_plot_test/plots",
+#                "../../ME_plot_test/conflicts_forcing",
+#                "../../ME_plot_test/otus.custom.85.taxonomy",
+#                "../../ME_plot_test/otus.98.85.70.taxonomy")
 
 # # FOR CHOOSING CUTOFF:
 # cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
@@ -95,13 +95,20 @@ seqID.reads.file.path <- "total.reads.per.seqID.csv"
 present.working.directory <- "."
 
 # cat("fuck you forgot to comment out the seqid.reads file path in plot_classification_disagreements!\n")
-# seqID.reads.file.path <- "../../poster_mend-check/total.reads.per.seqID.csv"
-# present.working.directory <- "../../poster_mend-check/"
+# seqID.reads.file.path <- "../../ME_plot_test/total.reads.per.seqID.csv"
+# present.working.directory <- "../../ME_plot_test/"
 
 
 # ---------------------------------------------------------------------------------------------------------------------
 # Define functions to import and process the data
 # ---------------------------------------------------------------------------------------------------------------------
+
+make.plot.directory <- function(FolderPath){
+  if (!dir.exists(FolderPath)){
+    dir.create(FolderPath)
+    cat("made folder: ", FolderPath, "\n")
+  }
+}
 
 import.all.conflict.summaries <- function(ConflictFolders, PidentsUsed){
   # import all the conflict summary files from each folder and compile them into a matrix
@@ -668,6 +675,37 @@ convert.to.percent <- function(TaxSum, Total){
   return(TaxSum)
 }
 
+find.alpha.diversity <- function(Taxonomy){
+  alpha.div <-NULL
+  for (t in 1:ncol(Taxonomy)){
+    alpha.div[t] <- length(unique(Taxonomy[ ,t]))
+  }
+  names(alpha.div) <- colnames(Taxonomy)
+  return(alpha.div)
+}
+
+find.percent.classified <- function(GroupedTaxaList){
+  # note: unclassifieds can't have been made unique
+  perc.class <- NULL
+  for (t in 1:length(GroupedTaxaList)){
+    index <- which(GroupedTaxaList[[t]][ ,t] == "unclassified")
+    if (length(index) > 0){
+      perc.class[t] <- sum(GroupedTaxaList[[t]][-index, t + 1])
+    }else{
+      perc.class[t] <- sum(GroupedTaxaList[[t]][ ,t + 1])
+    }
+  }
+  names(perc.class) <- names(GroupedTaxaList)
+  return(perc.class)
+}
+
+export.fw.stats <- function(AlphaDiv, PercClass, FolderPath){
+  file.name <- paste(FolderPath, "Custom-only_classification_stats.csv", sep = "/")
+  fw.stats <- data.frame(Percent.Reads.Classified = PercClass, Alpha.Diversity = AlphaDiv)
+  write.csv(x = fw.stats, file = file.name, quote = FALSE)
+  cat("Made Datafile: ", file.name, "\n")
+  return(fw.stats)
+}
 
 # ---------------------------------------------------------------------------------------------------------------------
 # Define functions to plot the data
@@ -1016,7 +1054,7 @@ plot.forcing.diffs <- function(TopTaxaList, NumBars, FolderPath, PlottingLevels 
     png(filename = plot.name, width = 7, height = 5, units = "in", res = 100)
     par(mar = c(10,5,5,2))
     barplot(height = stacked.data[[t]], beside = FALSE, col = c("grey","red","blue"), main = names(stacked.data)[t], las = 2, ylab = "Relative Abundance (% reads)", border = NA)
-    legend(x = "topright", legend = c("Forced Into", "Forced Out Of"), fill = c("red", "blue"), border = FALSE, bty = "n", inset = .05)
+    legend(x = "topright", legend = c("Added Inaccuracy", "Lost Diversity"), fill = c("red", "blue"), border = FALSE, bty = "n", inset = .05)
     unnecessary.message <- dev.off()
     cat("made plot: ", plot.name, "\n")
     
@@ -1160,6 +1198,9 @@ if (userprefs[2] == "MakeSeqIDReadsOnly"){
 }else if (forcing.folder.path != "regular"){
 # ---------------------------------------------------------------------------------------------------------------------
 
+  plots.folder.path <- paste(plots.folder.path, "step_15_5b_Improvement_over_custom-only", sep = "/")
+  make.plot.directory(FolderPath = plots.folder.path)
+  
   otus.forced <- import.forcing.conflicts(ForcingFolder = forcing.folder.path)
   
   if (check.for.seqID.reads(PWDpath = present.working.directory)){
@@ -1198,7 +1239,7 @@ if (userprefs[2] == "MakeSeqIDReadsOnly"){
   
   # plot.percent.forced(ForcingTable = reads.forced, ResultsFolder = plots.folder.path, ByReads = TRUE)
   
-  export.total.forcing.stats(OtuSum = otus.forced, ReadSum = reads.forced, FolderPath = plots.folder.path)
+  # export.total.forcing.stats(OtuSum = otus.forced, ReadSum = reads.forced, FolderPath = plots.folder.path)
   
   # plot.most.misleading.forced.otus(ReadsPerForcedSeqIDs = forced.seqID.reads, ForcedSeqIDs = forced.seqIDs, 
   #                                  ReadsPerSeqID = seqID.reads, OutputFolder = plots.folder.path, PlottingLevels = 1:7)
@@ -1212,6 +1253,14 @@ if (userprefs[2] == "MakeSeqIDReadsOnly"){
   # export.grouped.list(Grouped = grouped.forced.taxa, PlotsPath = plots.folder.path, FolderName = "ForcedTaxonomyGroups")
   # export.grouped.list(Grouped = grouped.final.taxa, PlotsPath = plots.folder.path, FolderName = "FinalTaxonomyGroups")
   
+  # Export stats on alpha diversity and percent classified using only the FW database:
+  fw.unique.unclass <- make.unclassifieds.unique(Taxonomy = forced.taxonomy[ ,-1])
+  fw.alpha <- find.alpha.diversity(Taxonomy = fw.unique.unclass)
+  
+  fw.perc.class <- find.percent.classified(GroupedTaxaList = grouped.forced.taxa)
+  
+  fw.stats <- export.fw.stats(AlphaDiv = fw.alpha, PercClass = fw.perc.class, FolderPath = plots.folder.path)
+  
 # ---------------------------------------------------------------------------------------------------------------------
 # If not then do the normal comparison for choosing pident cutoff
 # ---------------------------------------------------------------------------------------------------------------------
@@ -1219,6 +1268,9 @@ if (userprefs[2] == "MakeSeqIDReadsOnly"){
 # ---------------------------------------------------------------------------------------------------------------------
   
 # examine custom taxonomy disagreements and contribution by number OTUs -----------------------------------------------
+  
+  plots.folder.path <- paste(plots.folder.path, "step_14_Choose_pident_cutoff", sep = "/")
+  make.plot.directory(FolderPath = plots.folder.path)
   
   otu.summaries <- import.all.conflict.summaries(ConflictFolders = pident.folders, PidentsUsed = pident.values)
   export.summary.table(SummaryTable = otu.summaries, FolderPath = plots.folder.path, ByOTU = TRUE, Percents = FALSE)

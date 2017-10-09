@@ -12,7 +12,7 @@
 
 pident=("100" "99" "98" "97" "96" "95")
 fwbootstrap=("80")
-ggbootstrap=("70")
+ggbootstrap=("80")
 
 # First Run steps 1-13 to generate databases and folders exactly following workflow
 # Note: still gotta do the reformatting manually (step 0)
@@ -29,7 +29,6 @@ Rscript calc_full_length_pident.R otus.custom.blast.table otus.custom.blast.tabl
 Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.above.${pident[0]} ${pident[0]} TRUE &&
 Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.below.${pident[0]} ${pident[0]} FALSE &&
 # 6
-mkdir plots 
 RScript plot_blast_hit_stats.R otus.custom.blast.table.modified ${pident[0]} plots &&
 # 7
 python find_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table.modified ids.missing &&

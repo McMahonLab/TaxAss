@@ -43,7 +43,6 @@ NOTE: steps 1-14 can be run in a block using the bash scripts:
 	Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.below.98 98 FALSE
 
 6. check that BLAST settings are appropriate (R)
-	mkdir plots
 	Rscript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
 
 7. recover sequence IDs left out of blast (python, bash)
@@ -86,7 +85,9 @@ NOTE: steps 1-14 can be run in a block using the bash scripts:
 
 15. generate final taxonomy file (R)
 	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 final
-
+		If skipping optional steps 11-14 or 15.5.a.:
+		Rscript find_classification_disagreements.R otus.98.taxonomy quickie ids.above.98 conflicts_98 98 85 70 final
+	
 15.5 OPTIONAL: plot benefits of using this workflow (R, mothur, bash)
 	a. Improvement over general database only:
 		Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID.csv plots final.taxonomy.names final.general.names
@@ -101,7 +102,7 @@ NOTE: steps 1-14 can be run in a block using the bash scripts:
 
 16. tidy up (bash)
 	rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otus.custom.taxonomy otus.custom.[0-9]* custom.general* *pvalues total* final*names
-	mkdir scripts ; mv *.py *.R *.sh scripts
+	mkdir scripts ; mv *.py *.R *.sh *.md scripts
 	mkdir analysis ; mv conflicts* plots analysis
 	mkdir data ; mv otus* data
 	mkdir databases ; mv *.taxonomy *.fasta databases
@@ -196,12 +197,18 @@ I. General notes on the seqIDs in all files:
 
 OTU seqID's:
 			-cannot contain any whitespace
-			 BLAST will call some parts the seqID and some parts comments if they're separated.
-			 Having BLAST seqIDs that don't match the full >comment line of the fasta file will 
-		 	 throw off the python script that creates fasta files for the chosen seqIDs in step 8.
-		 	 Having any spaces will also throw off the R script that checks blast hit numbers.
+			 	BLAST will call some parts the seqID and some parts comments if they're separated.
+			 	Having BLAST seqIDs that don't match the full >comment line of the fasta file will 
+		 	 	throw off the python script that creates fasta files for the chosen seqIDs in step 8.
+		 	 	Having any spaces will also throw off the R script that checks blast hit numbers.
 		 	 -must match between the otus.fasta file and the otus.abund file,
-			 though consistent ordering is not necessary.
+			 	though consistent ordering is not necessary.
+			 -cannot contain semicolons
+			 	The taxonomy file format produced by mothur is semicolon delimited, so semicolons in
+			 	file names will throw off all R scripts by adding an extra column.
+			 -cannot contain dashes
+			 	If there are dashes it makes it difficult to switch between aligned and unaligned
+			 	fasta files because you can't simply remove all dashes without changing the seqID names
 
 
 _____________________________________________
@@ -264,7 +271,7 @@ ______________________
 
 2. .fasta files:
 
-These should be in fasta format (note the carrot before the seqID, a new line separateing 
+These should be in fasta format (note the carrot before the seqID, a new line separating 
 seqID from sequence, sequence can be one line or multiple lines.) example format:
 		
 >seqID
@@ -294,6 +301,11 @@ What the commands are:
 
 NOTE: this removes hyphens from everywhere, so if you had hyphens in your seqID names you have to also remove
 hyphens from the names in your abund file. SeqIDs must match exactly btwn the two files (tho order doesn't matter)
+
+So may also want to do:
+
+sed 's/-//g' <names-with-dashed.count_table >otus.count_table
+
 _____________________________________________
 
 II. Your OTU files:
@@ -529,14 +541,9 @@ The likelihood of incorrect results because of BLAST choosing HSPs that are not 
 as the length of your OTU sequences increases.  This step tries to check if this might
 be a problem.  Generate some plots with the R script plot_blast_hit_stats.R.
 
-Full Two Commands (type in the terminal)
-mkdir plots
-Rscript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
+Full Command (type in the terminal)
 
-What mkdir bash command does:
-	mkdir		stands for "make directory", this creates a new folder
-	plots		the name of the new folder you are creating
-				this is where step 6 and step 14 will save plots generated for checking the cutoff
+Rscript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
 
 What each argument in the R script is:
 	RScript								sources an R script and allows it to accept arguments from the command line
@@ -544,6 +551,7 @@ What each argument in the R script is:
 	otus.custom.blast.table.modified	the modified blast table produced in step 4.
 	98									the pident cutoff you chose to filter your sequences by
 	plots								the folder your generated plots will be saved in
+										this folder is created if it doesn't exist already
 	https://cran.mtu.edu				this is an OPTIONAL argument for those who
 										1. don't have the "reshape" R package installed already
 										2. live far away from the midwestern USA
@@ -1004,6 +1012,10 @@ of all of the classifications.
 
 Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 final
 
+note: if you are skipping step 15.5.a or if you skipped steps 11-14 (optional checks), source this way:
+
+Rscript find_classification_disagreements.R otus.98.taxonomy quickie ids.above.98 conflicts_98 98 85 70 final
+
 What the arguments are this (3rd) time you source the script:
 1.	Rscript									this opens R to accept arguments from the command line
 2.	find_classification_disagreements.R		this is the R script you're sourcing
@@ -1014,6 +1026,8 @@ What the arguments are this (3rd) time you source the script:
 											It's not used for the final file generation, but it 
 											is used in this step to generate a file for step 16,
 											so that's why you still need to specify the path.
+4.  quickie									use this option if you skipped optional checks 11-14, 
+											or if you're skipping optional step 15.5.a
 5.	ids.above.98							this is the path to the file created in step 4 that
 											contains all of the sequence IDs above or equal to 
 											your pident cutoff
@@ -1207,7 +1221,7 @@ Some of these intermediate files are quite large though, so keep that in mind if
 Full 2 commands (Type in Terminal):
 
 mkdir scripts
-mv *.py *.R *.sh scripts/
+mv *.py *.R *.sh *.md scripts/
 
 By saving all the script versions you used to create your data you can reproduce it.
 Alternatively for reproducible data note the github SHA number you retreived them from in a README.

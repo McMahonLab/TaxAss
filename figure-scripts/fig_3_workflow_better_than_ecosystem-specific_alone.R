@@ -131,8 +131,78 @@ plot.forcing.diffs(PlotData = forcing.data)
 
 # ---- PAPER ----
 
-plot.forcing.diffs(PlotData = forcing.data, FolderPath = "~/Dropbox/PhD/Write It/draft 3/draft_3_figure_files/")
+save.to <- "~/Dropbox/PhD/Write It/draft 4/fig_3.pdf"
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
+layout(mat = matrix(c(1,2,2), nrow = 1))
+par(mai = c(.55, .2, .24, 0), omi = c(0, .27, .05, .27)) # bottom, left, top, right
 
+# ---- 3a ----
+panel.data <- forcing.data$phylum
+plot.title <- "Phylum Rank Abundance"
+max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
+max.bar # choose axis max based on this
+y.axis.ticks <- c(0,5,10,15,20,25,30,35,40)
+y.tick.labels <- c(0,"", 10, "", 20,"",30,"",40)
+y.axis.label <- "Relative Abundance (% reads)"
+y.max <- 40
+
+# stays same for both panels ----
+bar.labels <- colnames(panel.data)
+empty.labels <- rep("", length(bar.labels))
+bar.colors <- c("grey", "red", "blue")
+loc.labels <- barplot(height = panel.data, beside = F, col = bar.colors, las = 2, border = NA, names.arg = empty.labels, axes = F, ylim = c(0,y.max))
+
+# X axis----
+text(x = loc.labels - .1, y = -1, labels = bar.labels, srt = -30, xpd = NA, cex = .95, adj = 0)
+# Y axis
+axis(side = 2, at = y.axis.ticks, labels = F, line = -.2, xpd = T, tck = -.02)
+mtext(text = y.tick.labels, side = 2, at = y.axis.ticks, line = .2, las = 1, cex = .7)
+# Title
+mtext(text = plot.title, side = 3, line = .8, cex = 1, at = .5, adj = 0)
+# Y label
+mtext(text = y.axis.label, side = 2, line = 2.1, cex = 1)
+# 
+# box(which = "plot", col=adjustcolor("purple", alpha.f = .5), lwd = 3)
+# box(which = "figure", col=adjustcolor("orange", alpha.f = .5), lwd = 3)
+
+# ---- 3b ----
+panel.data <- forcing.data$lineage
+panel.data <- panel.data[ ,1:20]
+plot.title <- "Family/Lineage Rank Abundance"
+max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
+max.bar # choose axis max based on this
+y.axis.ticks <- c(0,5,10,15,20,25,30)
+y.tick.labels <- c(0,"",10,"",20,"",30)
+
+# stays same for both panels ----
+bar.labels <- colnames(panel.data)
+empty.labels <- rep("", length(bar.labels))
+bar.colors <- c("grey", "red", "blue")
+loc.labels <- barplot(height = panel.data, beside = F, col = bar.colors, las = 2, border = NA, names.arg = empty.labels, axes = F)
+
+# X axis----
+lab.y <- c(-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1) # put lowercase ones higher
+text(x = loc.labels - .1, y = -.9, labels = bar.labels, srt = -30, xpd = NA, cex = .9, adj = 0)
+# Y axis
+axis(side = 2, at = y.axis.ticks, labels = F, line = -.75, xpd = T, tck = -.02)
+mtext(text = y.tick.labels, side = 2, at = y.axis.ticks, line = -.35, las = 1, cex = .7)
+# Title
+mtext(text = plot.title, side = 3, line = .8, cex = 1, at = 3, adj = 0)
+# ----
+legend.text <- c("Prevented Inaccuracy", "Maintained Richness")
+text(x = 17, y = c(20.8,17.8), labels = legend.text, adj = 0, xpd = NA, cex = 1.1)
+rect(xleft = 15.5, xright = 16.5, ybottom = 20, ytop = 22, col = bar.colors[2], border = F, xpd = NA)
+rect(xleft = 15.5, xright = 16.5, ybottom = 17, ytop = 19, col = bar.colors[3], border = F, xpd = NA)
+
+# box(which = "inner", col=adjustcolor("red", alpha.f = .5), lwd = 3)
+# box(which = "outer", col=adjustcolor("blue", alpha.f = .5), lwd = 3)
+# box(which = "plot", col=adjustcolor("purple", alpha.f = .5), lwd = 3)
+# box(which = "figure", col=adjustcolor("orange", alpha.f = .5), lwd = 3)
+#----
+dev.off()
+
+
+#
 # ---- POSTER ----
 # note: ran scripts from plot_classification_disagreements.R to re-generate data to plot,
 # but now plot_classification_disagreements.R is updated to export a nice csv of the data

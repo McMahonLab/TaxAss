@@ -36,8 +36,8 @@ mouse.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/mouse2/analy
 file.paths.beside <- c(mendota.beside.file.path, michigan.beside.file.path, danube.beside.file.path, bogs.beside.file.path, bogs.hypo.beside.file.path, mouse.beside.file.path)
 file.paths.stacked <- c(mendota.stacked.file.path, michigan.stacked.file.path, danube.stacked.file.path, bogs.stacked.file.path, bogs.hypo.stacked.file.path, mouse.stacked.file.path)
 
-ecosystem.names <- c("mendota", "michigan", "danube", "bog.epi", "bog.hypo", "mouse")
-taxa.names <- c("kingdom", "phylum", "class", "order", "lineage", "clade", "tribe")
+ecosystem.names <- c("Mendota", "Michigan", "Danube", "Bog Epilimnion", "Bog Hypolimnion", "Mouse Gut")
+taxa.names <- c("Kingdom", "Phylum", "Class", "Order", "Family/Lineage", "Genus/Clade", "Species/Tribe")
 
 # taxa.num <- 5   # 1 = kingdom, 2 = phylum, 3 = class, 4 = order, 5 = lineage, 6 = clade, 7 = tribe
 # eco.num <- 1   # 1 = mendota, 2 = bogs.epi, 3 = bogs.hyp, 4 = danube, 5 = taihu, 6 = michigan
@@ -141,32 +141,137 @@ stacked.tax.list <- make.empty.list.structure(ListNames = taxa.names)
 beside.tax.list <- reorganize.ecosystem.list.by.taxa.level(EcoList = beside.eco.list, TaxaList = beside.tax.list)
 stacked.tax.list <- reorganize.ecosystem.list.by.taxa.level(EcoList = stacked.eco.list, TaxaList = stacked.tax.list)
 
-# ---- Use Functions to Plot all Combinations Quickly ----
+# ---- Use Functions for Quick Look at All Combinations ----
 
 # make a rough fig 2a for each ecosystem:
 for (e in 1:length(ecosystem.names)){
-  png(filename = paste(folder.path, "/fig_2a_", e, "-", ecosystem.names[e], ".png", sep = ""), width = 7, height = 5, units = "in", res = 100)
+  # png(filename = paste(folder.path, "/fig_2a_", e, "-", ecosystem.names[e], ".png", sep = ""), width = 7, height = 5, units = "in", res = 100)
   label.loc <- fancy.barplot(BesideData = beside.eco.list[[e]], StackedData = stacked.eco.list[[e]], PlotTitle = ecosystem.names[e] )
   mtext(text = taxa.names, side = 1, line = 1, at = label.loc)
-  dev.off()
+  # dev.off()
 }
 
 # make a rough fig 2b for each taxa level:
 for (t in 1:length(taxa.names)){
-  png(filename = paste(folder.path, "/fig_2b_", t, "-", taxa.names[t], ".png", sep = ""), width = 7, height = 5, units = "in", res = 100)
+  # png(filename = paste(folder.path, "/fig_2b_", t, "-", taxa.names[t], ".png", sep = ""), width = 7, height = 5, units = "in", res = 100)
   label.loc <- fancy.barplot(BesideData = beside.tax.list[[t]], StackedData = stacked.tax.list[[t]], PlotTitle = taxa.names[t])
   mtext(text = ecosystem.names, side = 1, line = 1, at = label.loc)
-  dev.off()
+  # dev.off()
 }
 
-# ---- Paper Figure ----
+# ---- Paper Figure 2----
+save.to <- "~/Dropbox/PhD/Write It/draft 4/fig_2.pdf"
 
-#note: requires eps formatting
+# setEPS()
+# postscript(file = save.to, width = 6.875, height = 3, title = "TaxAss Fig 2", colormodel = "srgb", family = "Helvetica")
 
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
 
+par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
 
+# 2a.
+y <- beside.eco.list$Mendota
+z <- stacked.eco.list$Mendota
+y <- y[ ,-1]
+z <- z[ ,-1]
 
+plot.title <- "Mendota by Taxa Level"
+x.axis.labels <- c("Phylum", "Class", "Order", "Family/Lineage", "Genus/Clade", "Species/Tribe")
 
+# guts of generating plot (same for both panels) ------------------------------------------------
+y.axis.label <- "Reads Classified (%)"
+y.ticks <- c(0,20,40,60,80,100)
+col.y <- "grey"
+col.z <- c("grey", "orange", "red")
+
+YaxisMax = 100
+bar.space.y <- c(0,1)
+bar.width <- 1  # spacing and axis limits will determine what width 1 looks like, no need to change
+
+# find all values from the basic "beside" plot:
+num.sections <- ncol(y)
+bar.spots <- barplot(y, beside = TRUE, width = bar.width, space = bar.space.y, plot = FALSE)
+tot.x <- max(bar.spots) + .5 * bar.width + bar.space.y[2]
+empty.labels <- rep(x = "", times = num.sections)
+
+# calculate bar and label spacing
+bar.space.beside <- c(bar.space.y[2], rep(bar.space.y[1] + bar.space.y[2] + bar.width, length.out = num.sections - 1))
+bar.space.stacked <- bar.space.y[2] + bar.width + bar.space.y[1]
+loc.labels <- bar.spots[seq(from = 1, to = length(bar.spots), by = 2)] + .5 * bar.width + .5 * bar.space.y[1]
+
+# adjustments of labels etc (same for both panels)
+barplot(y[1, ], col = col.y, border = "black", beside = FALSE, width = bar.width, space = bar.space.beside, xlim = c(0, tot.x), ylim = c(0, YaxisMax), names.arg = empty.labels, axes = FALSE)
+barplot(z, add = TRUE, col = col.z, border = "black", beside = FALSE, width = bar.width, space = bar.space.stacked, xlim = c(0, tot.x), ylim = c(0, YaxisMax), names.arg = empty.labels, axes = FALSE)           
+# Y axis
+axis(side = 2, at = y.ticks, labels = FALSE, line = -1, tck = -.03)
+mtext(text = y.ticks, at = y.ticks, side = 2, line = -.5, cex = .8, las = 1)
+# X axis
+text(x = loc.labels - .5, y = -4, labels = x.axis.labels, srt = -30, xpd = NA, cex = .8, adj = 0)
+# Title
+mtext(text = plot.title, side = 3, line = .7, cex = 1, at = 1, adj = 0)
+# ----------------------------------------------------------------------------------------------------
+
+# Y label
+mtext(text = y.axis.label, side = 2, line = 1, cex = 1.1)
+
+# 2b. 
+y <- beside.tax.list$`Genus/Clade`
+z <- stacked.tax.list$`Genus/Clade`
+
+plot.title <- "Genus/Clade by Ecosystem"
+x.axis.labels <- colnames(z)
+
+# don't change this section, change above then copy to here ------------------------------------------------
+y.axis.label <- "Reads Classified (%)"
+y.ticks <- c(0,20,40,60,80,100)
+col.y <- "grey"
+col.z <- c("grey", "orange", "red")
+
+YaxisMax = 100
+bar.space.y <- c(0,1)
+bar.width <- 1  # spacing and axis limits will determine what width 1 looks like, no need to change
+
+# find all values from the basic "beside" plot:
+num.sections <- ncol(y)
+bar.spots <- barplot(y, beside = TRUE, width = bar.width, space = bar.space.y, plot = FALSE)
+tot.x <- max(bar.spots) + .5 * bar.width + bar.space.y[2]
+empty.labels <- rep(x = "", times = num.sections)
+
+# calculate bar and label spacing
+bar.space.beside <- c(bar.space.y[2], rep(bar.space.y[1] + bar.space.y[2] + bar.width, length.out = num.sections - 1))
+bar.space.stacked <- bar.space.y[2] + bar.width + bar.space.y[1]
+loc.labels <- bar.spots[seq(from = 1, to = length(bar.spots), by = 2)] + .5 * bar.width + .5 * bar.space.y[1]
+
+# adjustments of labels etc (same for both panels)
+barplot(y[1, ], col = col.y, border = "black", beside = FALSE, width = bar.width, space = bar.space.beside, xlim = c(0, tot.x), ylim = c(0, YaxisMax), names.arg = empty.labels, axes = FALSE)
+barplot(z, add = TRUE, col = col.z, border = "black", beside = FALSE, width = bar.width, space = bar.space.stacked, xlim = c(0, tot.x), ylim = c(0, YaxisMax), names.arg = empty.labels, axes = FALSE)           
+# Y axis
+axis(side = 2, at = y.ticks, labels = FALSE, line = -1, tck = -.03)
+mtext(text = y.ticks, at = y.ticks, side = 2, line = -.5, cex = .8, las = 1)
+# X axis
+text(x = loc.labels - .5, y = -4, labels = x.axis.labels, srt = -30, xpd = NA, cex = .8, adj = 0)
+# Title
+mtext(text = plot.title, side = 3, line = .7, cex = 1, at = 1, adj = 0)
+# ----------------------------------------------------------------------------------------------------
+
+# legend beside 
+beside.legend <- c("Left Bar: Greegenes", "Right Bar: TaxAss")
+text(x = 16.8, y = c(102, 92), labels = beside.legend, adj = 0, xpd = NA, cex = .8)
+rect(xleft = 15.5, xright = 16.5, ybottom = 100, ytop = 105, col = col.z[1], xpd = NA)
+rect(xleft = 15.5, xright = 16.5, ybottom = 90, ytop = 91.7, col = col.z[1], xpd = NA)
+rect(xleft = 15.5, xright = 16.5, ybottom = 91.6, ytop = 93.3, col = col.z[2], xpd = NA)
+rect(xleft = 15.5, xright = 16.5, ybottom = 93.2, ytop = 95, col = col.z[3], xpd = NA)
+
+# legend stacked 
+stacked.legend <- c("Newly-Classified", "Re-Classified", "Unchanged")
+text(x = 16.8, y = c(77,67,57), labels = stacked.legend, adj = 0, xpd = NA, cex = .8)
+rect(xleft = 15.5, xright = 16.5, ybottom = 75, ytop = 80, col = col.z[3])
+rect(xleft = 15.5, xright = 16.5, ybottom = 65, ytop = 70, col = col.z[2])
+rect(xleft = 15.5, xright = 16.5, ybottom = 55, ytop = 60, col = col.z[1])
+
+dev.off()
+
+#
 # ---- Poster Figure ----
 
 mendota.unclust.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster_mend_unclust/plots/WorkflowImprovement-BesideData-Reads.csv"
@@ -258,4 +363,4 @@ mtext(text = legend.2, side = 3, line = c(2,0,-2), at = 36, adj = 1, padj = 1, c
 
 dev.off()
 
-
+# end ----

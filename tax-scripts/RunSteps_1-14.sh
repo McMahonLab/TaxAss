@@ -29,7 +29,7 @@ Rscript calc_full_length_pident.R otus.custom.blast.table otus.custom.blast.tabl
 Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.above.${pident[0]} ${pident[0]} TRUE &&
 Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.below.${pident[0]} ${pident[0]} FALSE &&
 # 6
-RScript plot_blast_hit_stats.R otus.custom.blast.table.modified ${pident[0]} plots &&
+Rscript plot_blast_hit_stats.R otus.custom.blast.table.modified ${pident[0]} plots &&
 # 7
 python find_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table.modified ids.missing &&
 cat ids.below.${pident[0]} ids.missing > ids.below.${pident[0]}.all &&

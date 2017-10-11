@@ -1223,7 +1223,7 @@ if (userprefs[2] == "MakeSeqIDReadsOnly"){
   
   grouped.forced.taxa <- group.taxa(Taxonomy = forced.taxonomy[ ,-1], Abunds = seqID.reads[ ,2], UniqueUnclass = FALSE)
   
-  top.taxa <- find.top.taxa.by.total.reads(TaxonomyList = grouped.forced.taxa, NumberTopTaxa = 20, RemoveUnclass = FALSE) # only used for custom-only rank abund order (plot.most.misleading.forced.taxa)                   .                              
+  # top.taxa <- find.top.taxa.by.total.reads(TaxonomyList = grouped.forced.taxa, NumberTopTaxa = 20, RemoveUnclass = FALSE) # only used for custom-only rank abund order (plot.most.misleading.forced.taxa)                   .                              
   
   final.taxonomy <- import.taxonomy.file(FilePath = final.taxonomy.file, Final = TRUE)
 

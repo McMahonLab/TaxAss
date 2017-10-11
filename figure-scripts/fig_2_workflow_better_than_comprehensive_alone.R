@@ -14,23 +14,23 @@
 
 # ---- Define File Paths and other User Choices ----
 
-mendota.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/ME_GG/analysis/plots/WorkflowImprovement-BesideData-Reads.csv"
-mendota.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/ME_GG/analysis/plots/WorkflowImprovement-StackedData-Reads.csv"
+mendota.beside.file.path <- "~/Desktop/TaxAss-BatchFiles-go/Mendota/TaxAss-Mendota/analysis/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-BesideData-Reads.csv"
+mendota.stacked.file.path <- "~/Desktop/TaxAss-BatchFiles-go/Mendota/TaxAss-Mendota/analysis/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-StackedData-Reads.csv"
 
-michigan.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster/poster_mend_unclust/plots/WorkflowImprovement-BesideData-Reads.csv"
-michigan.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster/poster_mend_unclust/plots/WorkflowImprovement-StackedData-Reads.csv"
+michigan.beside.file.path <- "~/Desktop/TaxAss-BatchFiles-go/Michigan/TaxAss-Michigan/analysis/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-BesideData-Reads.csv"
+michigan.stacked.file.path <- "~/Desktop/TaxAss-BatchFiles-go/Michigan/TaxAss-Michigan/analysis/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-StackedData-Reads.csv"
 
-danube.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/danube/plots/WorkflowImprovement-BesideData-Reads.csv"
-danube.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/danube/plots/WorkflowImprovement-StackedData-Reads.csv"
+danube.beside.file.path <- "~/Desktop/TaxAss-BatchFiles-go/Danube/TaxAss-Danube/analysis/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-BesideData-Reads.csv"
+danube.stacked.file.path <- "~/Desktop/TaxAss-BatchFiles-go/Danube/TaxAss-Danube/analysis/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-StackedData-Reads.csv"
 
-bogs.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster/poster_bogs_epi/plots/WorkflowImprovement-BesideData-Reads.csv"
-bogs.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster/poster_bogs_epi/plots/WorkflowImprovement-StackedData-Reads.csv"
+bogs.beside.file.path <- "~/Desktop/TaxAss-BatchFiles-go/TroutBogEpi/TaxAss-TroutBogEpi/analysis/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-BesideData-Reads.csv"
+bogs.stacked.file.path <- "~/Desktop/TaxAss-BatchFiles-go/TroutBogEpi/TaxAss-TroutBogEpi/analysis/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-StackedData-Reads.csv"
 
-bogs.hypo.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster/poster_bogs_hypo/plots/WorkflowImprovement-BesideData-Reads.csv"
-bogs.hypo.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster/poster_bogs_hypo/plots/WorkflowImprovement-StackedData-Reads.csv"
+bogs.hypo.beside.file.path <- "~/Desktop/TaxAss-BatchFiles-go/TroutBogHypo/TaxAss-TroutBogHypo/analysis/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-BesideData-Reads.csv"
+bogs.hypo.stacked.file.path <- "~/Desktop/TaxAss-BatchFiles-go/TroutBogHypo/TaxAss-TroutBogHypo/analysis/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-StackedData-Reads.csv"
 
-mouse.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/mouse2/analysis/plots/WorkflowImprovement-BesideData-Reads.csv"
-mouse.stacked.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/mouse2/analysis/plots/WorkflowImprovement-StackedData-Reads.csv"
+mouse.beside.file.path <- "~/Desktop/TaxAss-BatchFiles-go/MouseGut/TaxAss-MouseGut/analysis/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-BesideData-Reads.csv"
+mouse.stacked.file.path <- "~/Desktop/TaxAss-BatchFiles-go/MouseGut/TaxAss-MouseGut/analysis/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-StackedData-Reads.csv"
 
 
 file.paths.beside <- c(mendota.beside.file.path, michigan.beside.file.path, danube.beside.file.path, bogs.beside.file.path, bogs.hypo.beside.file.path, mouse.beside.file.path)
@@ -42,7 +42,7 @@ taxa.names <- c("Kingdom", "Phylum", "Class", "Order", "Family/Lineage", "Genus/
 # taxa.num <- 5   # 1 = kingdom, 2 = phylum, 3 = class, 4 = order, 5 = lineage, 6 = clade, 7 = tribe
 # eco.num <- 1   # 1 = mendota, 2 = bogs.epi, 3 = bogs.hyp, 4 = danube, 5 = taihu, 6 = michigan
 
-folder.path <- "~/Dropbox/PhD/Write It/draft 3/draft_3_figure_files/"
+folder.path <- "~/Desktop/" # for quick looks export
 
 # ---- Define Functions to Import and Format ----
 
@@ -160,7 +160,7 @@ for (t in 1:length(taxa.names)){
 }
 
 # ---- Paper Figure 2----
-save.to <- "~/Dropbox/PhD/Write It/draft 4/fig_2.pdf"
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Figure_2.pdf"
 
 # setEPS()
 # postscript(file = save.to, width = 6.875, height = 3, title = "TaxAss Fig 2", colormodel = "srgb", family = "Helvetica")

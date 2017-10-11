@@ -14,25 +14,41 @@
 #     - loss of diversity of forced into "unclassified"
 #     - added inaccuracy if forced into confident classification
 
-# TaxAss generates the data fed into this plot in optional step _____.
-# It has already been filtered to only include the ___ most abundant OTUs.
+# TaxAss generates the data fed into this plot in optional step 15.5.b.
+# It has already been filtered to only include bars with a max height (grey + blue + red) > .5 % abund
+# The paper figure further caps the total # bars to 20 (32 > .5% at lineage)
 
 # ---- file paths ----
 
 # note: the exported csv's are already filtered to be only the top taxa. cutoff = .5 % rel abundance (max bar any color) I think.
 
-mendota.forcing.folder <- "~/Desktop/TaxonomyTrainingSets/BLASTing/ME_GG/analysis/plots/Forcing_csvs/"
+mendota.forcing.folder <- "~/Desktop/TaxAss-BatchFiles-go/Mendota/TaxAss-Mendota/analysis/plots/step_15_5b_Improvement_over_custom-only/"
 
-danube.forcing.folder <- "~/Desktop/TaxonomyTrainingSets/BLASTing/danube/plots/"
+danube.forcing.folder <- "~/Desktop/TaxAss-BatchFiles-go/Danube/TaxAss-Danube/analysis/plots/step_15_5b_Improvement_over_custom-only/"
 
-mouse.forcing.folder <- "~/Desktop/TaxonomyTrainingSets/BLASTing/mouse2/analysis/plots/"
+mouse.forcing.folder <- "~/Desktop/TaxAss-BatchFiles-go/MouseGut/TaxAss-MouseGut/analysis/plots/step_15_5b_Improvement_over_custom-only/"
+
+michigan.forcing.folder <- "~/Desktop/TaxAss-BatchFiles-go/Michigan/TaxAss-Michigan/analysis/plots/step_15_5b_Improvement_over_custom-only/"
+
+bog.epi.forcing.folder <- "~/Desktop/TaxAss-BatchFiles-go/TroutBogEpi/TaxAss-TroutBogEpi/analysis/plots/step_15_5b_Improvement_over_custom-only/"
+
+bog.hypo.forcing.folder <- "~/Desktop/TaxAss-BatchFiles-go/TroutBogHypo/TaxAss-TroutBogHypo/analysis/plots/step_15_5b_Improvement_over_custom-only/"
 
 # choose one:
 forcing.folder <- mendota.forcing.folder
 
-forcing.files <- paste(forcing.folder, list.files(path = forcing.folder), sep = "")
+
+
 
 # ---- define functions ----
+
+get.csv.filenames <- function(Folder){
+  csv.files <- list.files(path = Folder)
+  index <- grep(pattern = "*.csv", x = csv.files)
+  forcing.files <- paste(Folder, csv.files[index], sep = "")
+  forcing.files <- forcing.files[1:7] # don't include additional summary files
+  return(forcing.files)
+}
 
 import.forcing.files <- function(FilePaths){
   forcing <- list(NULL)
@@ -121,6 +137,8 @@ plot.forcing.diffs <- function(PlotData, FolderPath = NULL, PlottingLevels = 1:l
 
 # ---- use functions for quick look at all taxa levels ----
 
+forcing.files <- get.csv.filenames(Folder = forcing.folder)
+
 forcing.data <- import.forcing.files(FilePaths = forcing.files)
 
 forcing.data <- extract.plot.data(TopTaxaList = forcing.data)
@@ -131,7 +149,7 @@ plot.forcing.diffs(PlotData = forcing.data)
 
 # ---- PAPER ----
 
-save.to <- "~/Dropbox/PhD/Write It/draft 4/fig_3.pdf"
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Figure_3.pdf"
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
 layout(mat = matrix(c(1,2,2), nrow = 1))
 par(mai = c(.55, .2, .24, 0), omi = c(0, .27, .05, .27)) # bottom, left, top, right

@@ -9,14 +9,14 @@
 
 # ---- Define File Paths ----
 
-file.path.otu.summs <- "../../poster/poster_mend_unclust/plots/conflict_summary_by_OTUs.csv"
-file.path.otu.perc.summs <- "../../poster/poster_mend_unclust/plots/conflict_summary_by_percent_OTUs.csv"
+file.path.otu.summs <- "~/Desktop/TaxAss-BatchFiles-go/Mendota/TaxAss-Mendota/analysis/plots/step_14_Choose_pident_cutoff/conflict_summary_by_OTUs.csv"
+file.path.otu.perc.summs <- "~/Desktop/TaxAss-BatchFiles-go/Mendota/TaxAss-Mendota/analysis/plots/step_14_Choose_pident_cutoff/conflict_summary_by_percent_OTUs.csv"
 
-file.path.read.perc.summs <- "../../ME_GG/analysis/plots/conflict_summary_by_percent_reads.csv"
-file.path.reads.class <- "../../ME_GG/analysis/plots/Percent_Reads_Classified_by_Pident.csv"
+file.path.read.perc.summs <- "~/Desktop/TaxAss-BatchFiles-go/Mendota/TaxAss-Mendota/analysis/plots/step_14_Choose_pident_cutoff/conflict_summary_by_percent_reads.csv"
+file.path.reads.class <- "~/Desktop/TaxAss-BatchFiles-go/Mendota/TaxAss-Mendota/analysis/plots/step_14_Choose_pident_cutoff/Percent_Reads_Classified_by_Pident.csv"
 
-output.folder.supp <- "~/Desktop/test/taxassfigs/"
-output.folder.fig4 <- "~/Desktop/test/taxassfigs/"
+output.folder.supp <- "~/Dropbox/PhD/Write It/draft 6/new_figs/"
+output.folder.fig4 <- "~/Dropbox/PhD/Write It/draft 6/new_figs/"
 
 
 # ---- Define Functions ----
@@ -161,7 +161,7 @@ plot.total.classified(SummaryMatrix =reads.tot.class.plot, PidentValues = pident
 # ---- PAPER ----
 
 # ---- Fig 4 ----
-save.to <- "~/Desktop/test/taxassfigs/fig4.pdf"
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Figure_4.pdf"
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
 layout(mat = matrix(c(1,2,3,4), nrow = 1))
 par(omi = c(.05,.18,.1,.1), mai = c(.3,.3,.4,0)) # bottom, left, top, right
@@ -183,9 +183,9 @@ ass <- sum.named[ ,1]
 plot.title <- taxa.levels[1]
 min(ass)
 max(ass)
-y.lim <- c(90,95)
-y.ticks <- c(90,91,92,93,94,95)
-y.tick.labs <- c("",91,"",93,"",95)
+y.lim <- c(85,95)
+y.ticks <- c(85, 87.5, 90, 92.5, 95)
+y.tick.labs <- c("85","","90","","95")
 repeat.these <- function(){
   plot(x = pidents, y = ass, col = line.col, type = "n", ann = F, lwd = 3, axes = F, ylim = y.lim)
   points(x = pidents, y = ass, col = line.col, pch = 19)
@@ -215,27 +215,27 @@ ass <- sum.named[ ,2]
 plot.title <- taxa.levels[2]
 min(ass)
 max(ass)
-y.lim <- c(85,90)
-y.ticks <- c(85,86,87,88,89,90)
-y.tick.labs <- c("",86,"",88,"",90)
+y.lim <- c(80,90)
+y.ticks <- c(80,82.5,85,87.5,90)
+y.tick.labs <- c("80","","85","","90")
 repeat.these()
 # Family ----
 ass <- sum.named[ ,3]
 plot.title <- taxa.levels[3]
 min(ass)
 max(ass)
-y.lim <- c(75,85)
-y.ticks <- c(75,77,79,81,83,85)
-y.tick.labs <- c("",77,"",81,"",85)
+y.lim <- c(70,80)
+y.ticks <- c(70,72.5,75,77.5,80)
+y.tick.labs <- c("70","","75","","80")
 repeat.these()
 # Genus ----
 ass <- sum.named[ ,4]
 plot.title <- taxa.levels[4]
 min(ass)
 max(ass)
-y.lim <- c(57.5,70)
-y.ticks <- c(57.5,60,62.5,65,67.5,70)
-y.tick.labs <- c("",60,"",65,"",70)
+y.lim <- c(55,65)
+y.ticks <- c(55,57.5,60,62.5,65)
+y.tick.labs <- c("55","",60,"",65)
 repeat.these()
 
 # ----

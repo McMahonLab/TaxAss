@@ -105,14 +105,26 @@ plot.total.classified <- function(SummaryMatrix, PidentValues, FilePath = NULL){
   par(mfrow = c(1,ncol(sum.named)), omi = c(.4,.3,.3,.1), mai = c(.2,.3,.3,0))
   for (t in 1:ncol(sum.named)){
     ass <- sum.named[ ,t]
+    
+    # make y axis at least 5 percentage points range so plots less misleading
+    y.max <- max(ass)
+    y.min <- min(ass)
+    y.range <- y.max - y.min
+    if (y.range < 5){
+      half.range <- y.range / 2
+      extend.by <- 2.5 - half.range
+      y.min <- y.min - extend.by
+      y.max <- y.max + extend.by
+    }
+    
     # basic plot
-    plot(x = pidents, y = ass, col = line.col[t], type = "l", ann = F, lwd = 3, axes = F)
+    plot(x = pidents, y = ass, col = line.col[t], type = "l", ann = F, lwd = 3, axes = F, ylim = c(y.min, y.max))
     mtext(text = taxa.levels[t], side = 3, line = .5, outer = F, cex = 1.2, col = line.col[t])
     
     # vertical max line
     index <- which(ass == max(ass))
     max.names <- pidents[index]
-    abline(v = max.names, col = adjustcolor(col = line.col[t], alpha.f = .3), lwd = 3)
+    lines(x = c(max.names, max.names), y = c(0, max(ass)), col = adjustcolor(col = line.col[t], alpha.f = .3), lwd = 3)
     
     # x axis labels
     x.lab.cols <- rep("black", times = length(pidents))
@@ -126,8 +138,8 @@ plot.total.classified <- function(SummaryMatrix, PidentValues, FilePath = NULL){
     mtext(text = pidents, side = 1, line = x.lab.line, at = pidents, col = x.lab.cols, cex = x.lab.cex)
     
     # y axis labels
-    span <- max(ass) - min(ass)
-    y.ax <- c(min(ass), min(ass) + (span * 1/3), min(ass) + (span * 2/3), max(ass))
+    span <- y.max - y.min
+    y.ax <- c(y.min, y.min + (span * 1/3), y.min + (span * 2/3), y.max)
     y.ax.lab <- round(x = y.ax, digits = 0)
     empty.y.labels <- rep("", times = length(y.ax))
     axis(side = 2, at = y.ax, labels = empty.y.labels)
@@ -143,7 +155,6 @@ plot.total.classified <- function(SummaryMatrix, PidentValues, FilePath = NULL){
   }
 }
 
-
 # ---- Use Functions for quick looks ----
 
 otus <- import.conflict.summary(FilePath = file.path.otu.summs)
@@ -155,7 +166,7 @@ plot.perc.classified(PercClass = reads.fw.class, Cutoff = 99)
 
 reads.tot.class <- import.classified.summary(FilePath = file.path.reads.class)
 pident.values <- reads.tot.class[ ,1]
-reads.tot.class.plot <- reads.tot.class[ ,-c(1:3,8)]
+reads.tot.class.plot <- reads.tot.class[ ,-(1:2)]  #[ ,-c(1:3,8)]
 plot.total.classified(SummaryMatrix =reads.tot.class.plot, PidentValues = pident.values)
 
 # ---- PAPER ----
@@ -163,29 +174,29 @@ plot.total.classified(SummaryMatrix =reads.tot.class.plot, PidentValues = pident
 # ---- Fig 4 ----
 save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Figure_4.pdf"
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
-layout(mat = matrix(c(1,2,3,4), nrow = 1))
-par(omi = c(.05,.18,.1,.1), mai = c(.3,.3,.4,0)) # bottom, left, top, right
+# layout(mat = matrix(c(1,2,3,4), nrow = 1))
+par(mfrow = c(1,6), omi = c(.05,.18,.1,.1), mai = c(.3,.3,.4,0)) # bottom, left, top, right
 
 # ----
 pidents <- pident.values
 sum.named <- reads.tot.class.plot
 
 line.col <- "purple4" 
-pointer.col <- adjustcolor(col = "red", alpha.f = 0) # fully transparent, doesn't appear
+pointer.col <- adjustcolor(col = "purple4", alpha.f = .1) 
 x.lim <- c(min(pidents), max(pidents))
 y.label <- "Reads Classified (%)"
 x.label <- "Percent Identity Cutoff"
-taxa.levels <- c("Class","Order","Family/\nLineage","Genus/\nClade")
+taxa.levels <- c("Phylum","Class","Order","Family/\nLineage","Genus/\nClade","Species/Tribe")
 big.title <- "Percent Identity Cutoff Where Total Classifications Are Maximized"
 
-# Class ----
+# Phylum ----  
 ass <- sum.named[ ,1]
 plot.title <- taxa.levels[1]
 min(ass)
 max(ass)
-y.lim <- c(85,95)
-y.ticks <- c(85, 87.5, 90, 92.5, 95)
-y.tick.labs <- c("85","","90","","95")
+y.lim <- c(90,100)
+y.ticks <- c(90,92.5,95,97.5,100)
+y.tick.labs <- c("90","","95","","100")
 repeat.these <- function(){
   plot(x = pidents, y = ass, col = line.col, type = "n", ann = F, lwd = 3, axes = F, ylim = y.lim)
   points(x = pidents, y = ass, col = line.col, pch = 19)
@@ -206,13 +217,24 @@ repeat.these <- function(){
 }
 repeat.these()
 
+
+# Class ----
+ass <- sum.named[ ,2]
+plot.title <- taxa.levels[2]
+min(ass)
+max(ass)
+y.lim <- c(85,95)
+y.ticks <- c(85, 87.5, 90, 92.5, 95)
+y.tick.labs <- c("85","","90","","95")
+repeat.these()
+
 # ----
 # box(which = "plot", col=adjustcolor("purple", alpha.f = .5), lwd = 3)
 # box(which = "figure", col=adjustcolor("orange", alpha.f = .5), lwd = 3)
 
 # Order ----
-ass <- sum.named[ ,2]
-plot.title <- taxa.levels[2]
+ass <- sum.named[ ,3]
+plot.title <- taxa.levels[3]
 min(ass)
 max(ass)
 y.lim <- c(80,90)
@@ -220,8 +242,8 @@ y.ticks <- c(80,82.5,85,87.5,90)
 y.tick.labs <- c("80","","85","","90")
 repeat.these()
 # Family ----
-ass <- sum.named[ ,3]
-plot.title <- taxa.levels[3]
+ass <- sum.named[ ,4]
+plot.title <- taxa.levels[4]
 min(ass)
 max(ass)
 y.lim <- c(70,80)
@@ -229,14 +251,25 @@ y.ticks <- c(70,72.5,75,77.5,80)
 y.tick.labs <- c("70","","75","","80")
 repeat.these()
 # Genus ----
-ass <- sum.named[ ,4]
-plot.title <- taxa.levels[4]
+ass <- sum.named[ ,5]
+plot.title <- taxa.levels[5]
 min(ass)
 max(ass)
 y.lim <- c(55,65)
 y.ticks <- c(55,57.5,60,62.5,65)
 y.tick.labs <- c("55","",60,"",65)
 repeat.these()
+# Species ----
+# Genus ----
+ass <- sum.named[ ,6]
+plot.title <- taxa.levels[6]
+min(ass)
+max(ass)
+y.lim <- c(35,45)
+y.ticks <- c(35,37.5,40,42.5,45)
+y.tick.labs <- c("35","",40,"",45)
+repeat.these()
+
 
 # ----
 mtext(text = x.label, side = 1, line = -.8, outer = T, cex = .8)

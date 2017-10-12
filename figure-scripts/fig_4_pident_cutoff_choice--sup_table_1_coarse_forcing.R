@@ -170,8 +170,8 @@ par(omi = c(.05,.18,.1,.1), mai = c(.3,.3,.4,0)) # bottom, left, top, right
 pidents <- pident.values
 sum.named <- reads.tot.class.plot
 
-line.col <- "grey" 
-pointer.col <- adjustcolor(col = "red", alpha.f = .3)
+line.col <- "purple4" 
+pointer.col <- adjustcolor(col = "red", alpha.f = 0) # fully transparent, doesn't appear
 x.lim <- c(min(pidents), max(pidents))
 y.label <- "Reads Classified (%)"
 x.label <- "Percent Identity Cutoff"
@@ -195,12 +195,12 @@ repeat.these <- function(){
   max.names <- pidents[index]
   lines(x = c(pidents[index],pidents[index]),y = c(y.lim[1], ass[index]), col = pointer.col, lwd = 3)
   # x axis 
-  x.lab.text <- c(100,expression(bold("99")),98,97,96,95)
+  x.lab.text <- c(100,99,98,97,96,95) # expression(bold("99")) if wanted to bold the chosen pident
   axis(side = 1, at = pidents, labels = F, tck = -.035, line = -.5)
-  mtext(text = x.lab.text, side = 1, line = -.2, at = pidents, col = "black", cex = .6)
+  mtext(text = x.lab.text, side = 1, line = -.2, at = pidents, col = "black", cex = .7)
   # Y Axis
   axis(side = 2, at = y.ticks, labels = F, tck = -.03, line = .2)
-  mtext(text = y.tick.labs, side = 2, at = y.ticks, las = 2, line = .65, cex = .6)
+  mtext(text = y.tick.labs, side = 2, at = y.ticks, las = 2, line = .65, cex = .7)
   # plot title
   mtext(text = plot.title, side = 3, line = 1, outer = F, cex = .8, padj = 1)
 }

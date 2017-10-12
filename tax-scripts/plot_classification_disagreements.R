@@ -1124,7 +1124,6 @@ plot.total.classified <- function(SummaryMatrix, PidentValues, FolderPath, DataT
   
   line.col <- rainbow(n = ncol(sum.named), v = .4)
   x.lim <- c(min(pidents), max(pidents))
-  y.lim <- c(40,100)
   y.label <- paste("Percent Classified (", DataType, ")", sep = "")
   x.label <- "Percent Identity Cutoff"
   plot.title <- expression(bold("Choose a percent identity cutoff that maximizes classification"))
@@ -1136,14 +1135,26 @@ plot.total.classified <- function(SummaryMatrix, PidentValues, FolderPath, DataT
   par(mfrow = c(1,ncol(sum.named)), omi = c(.4,.3,.3,.1), mai = c(.2,.3,.3,0))
   for (t in 1:ncol(sum.named)){
     ass <- sum.named[ ,t]
+    
+    # make y axis at least 5 percentage points range so plots less misleading
+    y.max <- max(ass)
+    y.min <- min(ass)
+    y.range <- y.max - y.min
+    if (y.range < 5){
+      half.range <- y.range / 2
+      extend.by <- 2.5 - half.range
+      y.min <- y.min - extend.by
+      y.max <- y.max + extend.by
+    }
+    
     # basic plot
-    plot(x = pidents, y = ass, col = line.col[t], type = "l", ann = F, lwd = 3, axes = F)
+    plot(x = pidents, y = ass, col = line.col[t], type = "l", ann = F, lwd = 3, axes = F, ylim = c(y.min, y.max))
     mtext(text = taxa.levels[t], side = 3, line = .5, outer = F, cex = 1.2, col = line.col[t])
     
     # vertical max line
     index <- which(ass == max(ass))
     max.names <- pidents[index]
-    abline(v = max.names, col = adjustcolor(col = line.col[t], alpha.f = .3), lwd = 3)
+    lines(x = c(max.names, max.names), y = c(0, max(ass)), col = adjustcolor(col = line.col[t], alpha.f = .3), lwd = 3)
     
     # x axis labels
     x.lab.cols <- rep("black", times = length(pidents))
@@ -1157,8 +1168,8 @@ plot.total.classified <- function(SummaryMatrix, PidentValues, FolderPath, DataT
     mtext(text = pidents, side = 1, line = x.lab.line, at = pidents, col = x.lab.cols, cex = x.lab.cex)
     
     # y axis labels
-    span <- max(ass) - min(ass)
-    y.ax <- c(min(ass), min(ass) + (span * 1/3), min(ass) + (span * 2/3), max(ass))
+    span <- y.max - y.min
+    y.ax <- c(y.min, y.min + (span * 1/3), y.min + (span * 2/3), y.max)
     y.ax.lab <- round(x = y.ax, digits = 0)
     empty.y.labels <- rep("", times = length(y.ax))
     axis(side = 2, at = y.ax, labels = empty.y.labels)
@@ -1350,14 +1361,14 @@ if (userprefs[2] == "MakeSeqIDReadsOnly"){
   
   # plot.total.classified(SummaryMatrix = reads.named, PidentValues = pident.values, FolderPath = plots.folder.path, DataType = "Reads")
   # k and p mostly all classified, t shows forcing
-  plot.total.classified(SummaryMatrix = reads.named[ ,-c(1:2,7)], PidentValues = pident.values, FolderPath = plots.folder.path, DataType = "Reads")
+  plot.total.classified(SummaryMatrix = reads.named[ ,-1], PidentValues = pident.values, FolderPath = plots.folder.path, DataType = "Reads")
   # trim down the total pidents (for when I did 90:100)
   # plot.total.classified(SummaryMatrix = reads.named[-c(1:5),-c(1:2,7)], PidentValues = pident.values[-c(1:5)], FolderPath = plots.folder.path, DataType = "Reads")
 
   # The plots by OTU are not very helpful b/c of the strong effects of forcing
   # plot.total.classified(SummaryMatrix = otus.named, PidentValues = pident.values, FolderPath = plots.folder.path, DataType = "OTUs")
   # only see diversity lost with lowering pident at the phylum level- that's probably the cyanos
-  plot.total.classified(SummaryMatrix = otus.named[ ,2:4], PidentValues = pident.values, FolderPath = plots.folder.path, DataType = "OTUs")
+  plot.total.classified(SummaryMatrix = otus.named[ ,-1], PidentValues = pident.values, FolderPath = plots.folder.path, DataType = "OTUs")
   # otherwise you actually see forcing at the OTU-level. as more OTUs are put into FW, more OTUs are classified. 
   # these gains must be from stuff forced into a classification in FW, but unclassified in GG.
   

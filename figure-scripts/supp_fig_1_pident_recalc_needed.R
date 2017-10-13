@@ -158,7 +158,7 @@ taxa <- import.taxa.table(FilePath = file.path.taxa.table)
 fw.taxa <- import.taxa.table(FilePath = file.path.FW_only.taxa.table, Delimitor = ";")
 seqid.reads <- import.seqID.reads(FilePath = file.path.seqid.reads)
 
-# ---- Quick Looks ----
+# ---- Quick Looks (can skip to paper sections w/out sourcing) ----
 
 # before & after pidents for all OTUs
 density.overlay(BlastData = blast$pident, WorkflowData = blast$true.pids, PlotTitle = "All OTUs")
@@ -220,13 +220,16 @@ histogram.overlay(BlastData = actino.blast$pident, WorkflowData = actino.blast$t
 
 # ---- Supplemental Figure 1 ----
 
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_1.pdf"
+
 cyano.blast <- pull.out.taxon(Blast = blast, Taxonomy = taxa, TaxaName = "p__Cyanobacteria", TaxaLevel = 3) 
 blast.pid <- cyano.blast$pident
 recalc.pid <- cyano.blast$true.pids
 
 plot.title <- "Cyanobacteria Percent Identity Recalculations"
 x.label <- "Percent Identity"
-legend.labels <- c("BLAST percent identity (pident)", "TaxAss recalculated percent identity")
+y.label <- "Frequency"
+legend.labels <- c("TaxAss recalculated percent identity", "BLAST percent identity (pident)")
 
 col.blast <- "red"
 col.recalc <- "black"
@@ -239,37 +242,39 @@ hist.info.b <- hist(blast.pid, plot = F, breaks = hist.info$breaks)
 hist.info.r <- hist(recalc.pid, plot = F, breaks = hist.info$breaks)
 
 max.y <- max(hist.info.b$counts, hist.info.r$counts) 
-max.y.axis <- max.y + 0 # was being stupid and cutting it off, use to adjust y axis
 min.x <- min(blast.pid, recalc.pid)
 
 # start plotting
-save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_1.pdf"
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
-par(mai = c(.5, .5, .5, .2), omi = c(0, 0, 0, 0)) # bottom, left, top, right
+par(mai = c(.4, .4, .3, .05), omi = c(0, 0, 0, 0)) # bottom, left, top, right
 # add data 
-hist(blast.pid, breaks = hist.info$breaks, freq = TRUE, ylim = c(0, max.y.axis), xlim = c(min.x, 100), xpd = NA, border = col.blast, col = col.blast.shade, ann = FALSE, axes = FALSE)
+hist(blast.pid, breaks = hist.info$breaks, freq = TRUE, ylim = c(0, max.y), xlim = c(min.x, 100), xpd = NA, border = col.blast, col = col.blast.shade, ann = FALSE, axes = FALSE)
 par(new = TRUE)
-hist(recalc.pid, breaks = hist.info$breaks, freq = TRUE, ylim = c(0, max.y.axis), xlim = c(min.x, 100), border = col.recalc, col = col.recalc.shade, ann = FALSE, axes = FALSE)
+hist(recalc.pid, breaks = hist.info$breaks, freq = TRUE, ylim = c(0, max.y), xlim = c(min.x, 100), border = col.recalc, col = col.recalc.shade, ann = FALSE, axes = FALSE)
 # add axes
 x.ticks <- axis(side = 1, labels = FALSE, line = -.25, tck = -.025)
-mtext(text = x.ticks, side = 1, line = .5, at = x.ticks)
-y.ticks <- c(0,max.y, max.y.axis)
-axis(side = 2, at = y.ticks)
-
-abline(h = max.y)
-
+mtext(text = x.ticks, side = 1, line = 0, at = x.ticks)
+y.ticks <- axis(side = 2, labels = FALSE, line = -1, tck = -.025)
+mtext(text = y.ticks, side = 2, line = -.6, at = y.ticks, las = 1)
+max.y 
+max(y.ticks) # pretty close, close enough
 # add titles
-
+mtext(text = plot.title, side = 3, line = .5, cex = 1.2)
+mtext(text = x.label, side = 1, line = 1, cex = 1)
+mtext(text = y.label, side = 2, line = 1.1, cex = 1)
 # add legend
+text(x = 38, y = c(203,233), labels = legend.labels, adj = 0, xpd = NA, cex = .9)
+rect(xleft = 35, xright = 37, ybottom = 225, ytop = 245, col = col.blast.shade, border = col.blast, xpd = NA)
+rect(xleft = 35, xright = 37, ybottom = 195, ytop = 215, col = col.recalc.shade, border = col.recalc, xpd = NA)
 
-mtext(text = legend.labels, side = 3, line = c(-3,-4), at = min.x, col = c(col.blast, col.recalc), adj = 0)
-# main = plot.title, xlab = x.label
-
-box(which = "plot", col=adjustcolor("purple", alpha.f = .5), lwd = 3)
-box(which = "figure", col=adjustcolor("orange", alpha.f = .5), lwd = 3)
-
+# box(which = "plot", col=adjustcolor("purple", alpha.f = .5), lwd = 3)
+# box(which = "figure", col=adjustcolor("orange", alpha.f = .5), lwd = 3)
 
 dev.off()
+
+
+
+
 
 set.seed(1)
 wtf.1 <- rnorm(n = 500, mean = 50, sd = 30)

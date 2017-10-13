@@ -187,7 +187,7 @@ x.lim <- c(min(pidents), max(pidents))
 y.label <- "Reads Classified (%)"
 x.label <- "Percent Identity Cutoff"
 taxa.levels <- c("Phylum","Class","Order","Family/\nLineage","Genus/\nClade","Species/Tribe")
-big.title <- "Percent Identity Cutoff Where Total Classifications Are Maximized"
+big.title <- "Percent Identity Cutoff Where Classifications Are Maximized"
 
 # Phylum ----  
 ass <- sum.named[ ,1]
@@ -206,9 +206,9 @@ repeat.these <- function(){
   max.names <- pidents[index]
   lines(x = c(pidents[index],pidents[index]),y = c(y.lim[1], ass[index]), col = pointer.col, lwd = 3)
   # x axis 
-  x.lab.text <- c(100,99,98,97,96,95) # expression(bold("99")) if wanted to bold the chosen pident
+  x.lab.text <- c(100,99,98,97,96,95) # expression(bold("98")) if wanted to bold the chosen pident
   axis(side = 1, at = pidents, labels = F, tck = -.035, line = -.5)
-  mtext(text = x.lab.text, side = 1, line = -.2, at = pidents, col = "black", cex = .7)
+  mtext(text = x.lab.text, side = 1, line = -.2, at = pidents, col = "black", cex = .6)
   # Y Axis
   axis(side = 2, at = y.ticks, labels = F, tck = -.03, line = .2)
   mtext(text = y.tick.labs, side = 2, at = y.ticks, las = 2, line = .65, cex = .7)
@@ -216,7 +216,6 @@ repeat.these <- function(){
   mtext(text = plot.title, side = 3, line = 1, outer = F, cex = .8, padj = 1)
 }
 repeat.these()
-
 
 # Class ----
 ass <- sum.named[ ,2]
@@ -260,7 +259,6 @@ y.ticks <- c(55,57.5,60,62.5,65)
 y.tick.labs <- c("55","",60,"",65)
 repeat.these()
 # Species ----
-# Genus ----
 ass <- sum.named[ ,6]
 plot.title <- taxa.levels[6]
 min(ass)
@@ -274,7 +272,7 @@ repeat.these()
 # ----
 mtext(text = x.label, side = 1, line = -.8, outer = T, cex = .8)
 mtext(text = y.label, side = 2, line = 0, outer = T, cex = .8)
-mtext(text = big.title, side = 3, line = -.7, outer = T, at = .08, adj = 0)
+mtext(text = big.title, side = 3, line = -.7, outer = T, at = .15, adj = 0)
 
 # box(which = "inner", col=adjustcolor("red", alpha.f = .5), lwd = 3)
 # box(which = "outer", col=adjustcolor("blue", alpha.f = .5), lwd = 3)

@@ -2,7 +2,7 @@
 
 # draft 3- this is now sup fig 1. see end of script. RRR
 
-# fig 5 demonstrates why a pident conversion is important.
+# this demonstrates why a pident conversion is important.
 # fig 5a is a histogram of corrects vs. uncorrected Lake Mendota cyano reads' pidents
 # fig 5b is signle stacked bar that shows what those cyano reads above the uncorrected pident would have been classified as by the FreshTrain
 
@@ -67,9 +67,9 @@ histogram.overlay <- function(BlastData, WorkflowData, NumBreaks, MinX = "min", 
     MinX <- min(BlastData, WorkflowData)
   }
   hist.info <- hist(c(BlastData, WorkflowData), plot = F, breaks = NumBreaks)
-  hist.info.b <- hist(BlastData, plot = F, breaks = NumBreaks)
-  hist.info.w <- hist(WorkflowData, plot = F, breaks = NumBreaks)
-  max.y <- max(hist.info.b$counts, hist.info.w$counts) + 150 # was being stupid and cutting it off, use to adjust y axis
+  hist.info.b <- hist(BlastData, plot = F, breaks = hist.info$breaks)
+  hist.info.w <- hist(WorkflowData, plot = F, breaks = hist.info$breaks)
+  max.y <- max(hist.info.b$counts, hist.info.w$counts)
   col.blast <- c("black", adjustcolor("black", alpha.f = .2))
   col.wkflow <- c("red", adjustcolor("red", alpha.f = .2))
   
@@ -146,24 +146,27 @@ single.stacked.bar <- function(FWCdata, DataType, Direction){
   barplot(fwc.matrix, las = 2, beside = FALSE, col = phyla.colors, axes = FALSE)
   axis(side = 2, at = y.intersects[-c(4:6)], las = 2, labels = y.labels)
   mtext(text = y.label, side = 2, line = 2.5)
-  mtext(text = plot.title, side = 3, at = 1.2, line = 2.5, cex = 1.2)
+  mtext(text = plot.title, side = 3, at = .5, line = 2.5, cex = 1.2)
   mtext(text = x.label, side = 1, at = 1.2, line = .5)
   mtext(text = rownames(fwc.matrix), side = 4, at = legend.locs, line = 0, las = 2, col = phyla.colors)
 }
 
-# ---- Use Functions ----
+# ---- Import Data ----
 
 blast <- import.blast.table(FilePath = file.path.blast.table)
 taxa <- import.taxa.table(FilePath = file.path.taxa.table)
 fw.taxa <- import.taxa.table(FilePath = file.path.FW_only.taxa.table, Delimitor = ";")
 seqid.reads <- import.seqID.reads(FilePath = file.path.seqid.reads)
 
-# look at all OTUs
+# ---- Quick Looks ----
+
+# before & after pidents for all OTUs
 density.overlay(BlastData = blast$pident, WorkflowData = blast$true.pids, PlotTitle = "All OTUs")
 density.overlay(BlastData = blast$pident, WorkflowData = blast$true.pids, MinX = 90, PlotTitle = "All OTUs")
 histogram.overlay(BlastData = blast$pident, WorkflowData = blast$true.pids, PlotTitle = "All OTUs", NumBreaks = 100, MinX = "min")
 histogram.overlay(BlastData = blast$pident, WorkflowData = blast$true.pids, PlotTitle = "All OTUs", NumBreaks = 100, MinX = 90)
 
+# which taxa excluded by pident recalc? (not very useful)
 removed.seqids <- find.seqIDs.conversion.removed(BlastData = blast, Cutoff = 98)
 forced.into.taxonomy <- find.taxonomies( SeqIDs = removed.seqids, Tax = fw.taxa)
 forced.into.phyla.perc.otus <- count.up.tax.names.by.otu(ForcedTax = forced.into.taxonomy, TaxLevel = 3, TotReads = seqid.reads)
@@ -187,26 +190,27 @@ barplot(true.taxonomy[1:5], las = 2, ylab = "percent all reads", main = "breakdo
 fw.taxonomy <- count.up.tax.names.by.read(ForcedTax = fw.taxa, TaxLevel = 3, TotReads = seqid.reads)
 barplot(fw.taxonomy[1:5], las = 2, ylab = "percent all reads", main = "breakdown of all-FW taxonomy")
 
-
-
-# look only at phylum cyanobacteria OTUs
-cyano.blast <- pull.out.taxon(Blast = blast, Taxonomy = taxa, TaxaName = "p__Cyanobacteria", TaxaLevel = 3)
+# look only at phylum cyanobacteria OTUs (==> supp figure 1)
+cyano.blast <- pull.out.taxon(Blast = blast, Taxonomy = taxa, TaxaName = "p__Cyanobacteria", TaxaLevel = 3) 
 density.overlay(BlastData = cyano.blast$pident, WorkflowData = cyano.blast$true.pids, PlotTitle = "Cyanobacteria")
 histogram.overlay(BlastData = cyano.blast$pident, WorkflowData = cyano.blast$true.pids, NumBreaks = 100, PlotTitle = "Cyanobacteria")
 histogram.overlay(BlastData = cyano.blast$pident, WorkflowData = cyano.blast$true.pids, NumBreaks = 100, PlotTitle = "Cyanobacteria", MinX = 97)
+mtext(text = "no cyanos matching at cutoff after correction, some did before pident recalc", side = 1, line = 5)
 histogram.overlay(BlastData = cyano.blast$pident, WorkflowData = cyano.blast$true.pids, NumBreaks = 100, PlotTitle = "Cyanobacteria", MinX = 90)
+mtext(text = "no cyanos matching at cutoff after correction, some did before pident recalc", side = 1, line = 5)
 
 # potential example tables for pident recalculation:
 index.high.cyanos <- which(cyano.blast$pident >= 98)
 cyano.blast.ex <- cyano.blast[index.high.cyanos, ]
 cyano.ex.seqids <- cyano.blast.ex$qseqid # feed this into the table1_example_recalculation.R script!!
+cyano.ex.seqids
 
+# what would those cyanos be forced into? (the ones with high BLAST hits)
 cyano.forced <- find.taxonomies(SeqIDs = cyano.blast$qseqid, Tax = fw.taxa)
 cyano.phyla <- count.up.tax.names.by.read(ForcedTax = cyano.forced, TotReads = seqid.reads, TaxLevel = 3)
 barplot(cyano.phyla, beside = FALSE, las =2, cex.names = .5)
 
-
-# look only at phylum actionbacteria OTUs
+# look only at phylum actionbacteria OTUs (only some changed by pident recalc, most full-length matches already)
 actino.blast <- pull.out.taxon(Blast = blast, Taxonomy = taxa, TaxaName = "p__Actinobacteria", TaxaLevel = 3)
 density.overlay(BlastData = actino.blast$pident, WorkflowData = actino.blast$true.pids, PlotTitle = "Actinobacteria")
 histogram.overlay(BlastData = actino.blast$pident, WorkflowData = actino.blast$true.pids, NumBreaks = 100, PlotTitle = "Actinobacteria")
@@ -214,7 +218,67 @@ density.overlay(BlastData = actino.blast$pident, WorkflowData = actino.blast$tru
 histogram.overlay(BlastData = actino.blast$pident, WorkflowData = actino.blast$true.pids, NumBreaks = 100, PlotTitle = "Actinobacteria", MinX = 97)
 
 
-# ---- Generate Figure Plot ----
+# ---- Supplemental Figure 1 ----
 
-# line 193 right now for draft 3 supp fig 1
+cyano.blast <- pull.out.taxon(Blast = blast, Taxonomy = taxa, TaxaName = "p__Cyanobacteria", TaxaLevel = 3) 
+blast.pid <- cyano.blast$pident
+recalc.pid <- cyano.blast$true.pids
 
+plot.title <- "Cyanobacteria Percent Identity Recalculations"
+x.label <- "Percent Identity"
+legend.labels <- c("BLAST percent identity (pident)", "TaxAss recalculated percent identity")
+
+col.blast <- "red"
+col.recalc <- "black"
+col.blast.shade <- adjustcolor(col.blast, alpha.f = .2)
+col.recalc.shade <- adjustcolor(col.recalc, alpha.f = .2)
+
+num.breaks <- 100
+hist.info <- hist(c(blast.pid, recalc.pid), plot = F, breaks = num.breaks)
+hist.info.b <- hist(blast.pid, plot = F, breaks = hist.info$breaks)
+hist.info.r <- hist(recalc.pid, plot = F, breaks = hist.info$breaks)
+
+max.y <- max(hist.info.b$counts, hist.info.r$counts) 
+max.y.axis <- max.y + 0 # was being stupid and cutting it off, use to adjust y axis
+min.x <- min(blast.pid, recalc.pid)
+
+# start plotting
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_1.pdf"
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
+par(mai = c(.5, .5, .5, .2), omi = c(0, 0, 0, 0)) # bottom, left, top, right
+# add data 
+hist(blast.pid, breaks = hist.info$breaks, freq = TRUE, ylim = c(0, max.y.axis), xlim = c(min.x, 100), xpd = NA, border = col.blast, col = col.blast.shade, ann = FALSE, axes = FALSE)
+par(new = TRUE)
+hist(recalc.pid, breaks = hist.info$breaks, freq = TRUE, ylim = c(0, max.y.axis), xlim = c(min.x, 100), border = col.recalc, col = col.recalc.shade, ann = FALSE, axes = FALSE)
+# add axes
+x.ticks <- axis(side = 1, labels = FALSE, line = -.25, tck = -.025)
+mtext(text = x.ticks, side = 1, line = .5, at = x.ticks)
+y.ticks <- c(0,max.y, max.y.axis)
+axis(side = 2, at = y.ticks)
+
+abline(h = max.y)
+
+# add titles
+
+# add legend
+
+mtext(text = legend.labels, side = 3, line = c(-3,-4), at = min.x, col = c(col.blast, col.recalc), adj = 0)
+# main = plot.title, xlab = x.label
+
+box(which = "plot", col=adjustcolor("purple", alpha.f = .5), lwd = 3)
+box(which = "figure", col=adjustcolor("orange", alpha.f = .5), lwd = 3)
+
+
+dev.off()
+
+set.seed(1)
+wtf.1 <- rnorm(n = 500, mean = 50, sd = 30)
+wtf.2 <- rnorm(n = 500, mean = 90, sd = 5)
+hist.list <- hist(c(wtf.1, wtf.2), breaks = 100)
+hist.list.1 <- hist(wtf.1, breaks = hist.list$breaks)
+hist.list.2 <- hist(wtf.2, breaks = hist.list$breaks)
+max.y <- max(hist.list.1$counts, hist.list.2$counts)
+hist(wtf.1, breaks = hist.list$breaks, ylim = c(0, max.y))
+par(new = T)
+hist(wtf.2, breaks = hist.list$breaks, ylim = c(0, max.y))
+abline(h = max.y)

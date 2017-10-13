@@ -1,10 +1,15 @@
 # RRR 8-9-16 ----
 
-# draft 3- this is now sup fig 1. see end of script. RRR
+# Supplemental Figure 1 demonstrates why a pident conversion is important.
+# It takes the example of cyanobacteria, a phylum we know is present in the lake
+# and absent from the FreshTrain. It shows that without recalculating the BLAST
+# pident some cyanos would be included in the FreshTrain classification.
 
-# this demonstrates why a pident conversion is important.
-# fig 5a is a histogram of corrects vs. uncorrected Lake Mendota cyano reads' pidents
-# fig 5b is signle stacked bar that shows what those cyano reads above the uncorrected pident would have been classified as by the FreshTrain
+# In the "quick looks" the phylum these cyano reads would be forced into is shown,
+# but it's not actually very interesting or pretty. The entire dataset's pidents
+# vs. pident recalcs are also shown, but effect is most obvious with cyano phylum.
+
+
 
 # ---- Define File Paths ----
 
@@ -276,14 +281,3 @@ dev.off()
 
 
 
-set.seed(1)
-wtf.1 <- rnorm(n = 500, mean = 50, sd = 30)
-wtf.2 <- rnorm(n = 500, mean = 90, sd = 5)
-hist.list <- hist(c(wtf.1, wtf.2), breaks = 100)
-hist.list.1 <- hist(wtf.1, breaks = hist.list$breaks)
-hist.list.2 <- hist(wtf.2, breaks = hist.list$breaks)
-max.y <- max(hist.list.1$counts, hist.list.2$counts)
-hist(wtf.1, breaks = hist.list$breaks, ylim = c(0, max.y))
-par(new = T)
-hist(wtf.2, breaks = hist.list$breaks, ylim = c(0, max.y))
-abline(h = max.y)

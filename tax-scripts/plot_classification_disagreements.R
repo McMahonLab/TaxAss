@@ -1201,7 +1201,7 @@ if (userprefs[2] == "MakeSeqIDReadsOnly"){
 # ---------------------------------------------------------------------------------------------------------------------
   seqID.reads <- import.and.reformat.otu.table(OTUtable = otu.table.path) 
   write.table(x = seqID.reads, file = "total.reads.per.seqID.csv", sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
-  cat("made the datafile: ", "total.reads.per.seqID.csv")
+  cat("made the datafile: ", "total.reads.per.seqID.csv \n")
 
 # ---------------------------------------------------------------------------------------------------------------------
 # second check if this is the optional "forcing plot"

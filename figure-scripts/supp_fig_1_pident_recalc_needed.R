@@ -236,26 +236,27 @@ min.x <- min(blast.pid, recalc.pid)
 
 # start plotting
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
-par(mai = c(.4, .4, .3, .05), omi = c(0, 0, 0, 0)) # bottom, left, top, right
+par(mai = c(.4, .55, .3, 0), omi = c(0, 0, 0, 0)) # bottom, left, top, right
 # add data 
 hist(blast.pid, breaks = hist.info$breaks, freq = TRUE, ylim = c(0, max.y), xlim = c(min.x, 100), xpd = NA, border = col.blast, col = col.blast.shade, ann = FALSE, axes = FALSE)
 par(new = TRUE)
 hist(recalc.pid, breaks = hist.info$breaks, freq = TRUE, ylim = c(0, max.y), xlim = c(min.x, 100), border = col.recalc, col = col.recalc.shade, ann = FALSE, axes = FALSE)
 # add axes
-x.ticks <- axis(side = 1, labels = FALSE, line = -.25, tck = -.025)
+x.ticks <- axis(side = 1, labels = FALSE, line = -.25, tck = -.025, lwd = 0, lwd.ticks = 1)
 mtext(text = x.ticks, side = 1, line = 0, at = x.ticks)
-y.ticks <- axis(side = 2, labels = FALSE, line = -1, tck = -.025)
-mtext(text = y.ticks, side = 2, line = -.6, at = y.ticks, las = 1)
-max.y 
-max(y.ticks) # pretty close, close enough
+axis(side = 1, at = c(min.x, 100), labels = FALSE, line = -.25, tck = 0) # make line extend full range
+y.ticks <- c(0,1000,2000,3000) # manually make fewer total ticks
+axis(side = 2, at = y.ticks, labels = FALSE, line = -1, tck = -.025, lwd = 0, lwd.ticks = 1)
+mtext(text = y.ticks, side = 2, line = -.5, at = y.ticks, las = 1)
+axis(side = 2, at = c(0,max.y), labels = FALSE, line = -1, tck = 0)
 # add titles
-mtext(text = plot.title, side = 3, line = .5, cex = 1.2)
+mtext(text = plot.title, side = 3, line = .5, cex = 1.2, at = 60)
 mtext(text = x.label, side = 1, line = 1, cex = 1)
-mtext(text = y.label, side = 2, line = 1.1, cex = 1)
+mtext(text = y.label, side = 2, line = 1.8, cex = 1)
 # add legend
-text(x = 38, y = c(203,233), labels = legend.labels, adj = 0, xpd = NA, cex = .9)
-rect(xleft = 35, xright = 37, ybottom = 225, ytop = 245, col = col.blast.shade, border = col.blast, xpd = NA)
-rect(xleft = 35, xright = 37, ybottom = 195, ytop = 215, col = col.recalc.shade, border = col.recalc, xpd = NA)
+text(x = 48, y = c(2800,3100), labels = legend.labels, adj = 0, xpd = NA, cex = .9)
+rect(xleft = 46, xright = 47, ybottom = 3050, ytop = 3200, col = col.blast.shade, border = col.blast, xpd = NA)
+rect(xleft = 46, xright = 47, ybottom = 2750, ytop = 2900, col = col.recalc.shade, border = col.recalc, xpd = NA)
 
 # box(which = "plot", col=adjustcolor("purple", alpha.f = .5), lwd = 3)
 # box(which = "figure", col=adjustcolor("orange", alpha.f = .5), lwd = 3)

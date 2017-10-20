@@ -47,12 +47,10 @@ pull.out.taxon <- function(Blast, Taxonomy, TaxaName, TaxaLevel){
   # for the level, this is the column in the taxonomy table: 2=k, 3=p, 4=c, 5=o, 6=l/f, 7=c/g, 8=t/s
   tax.index <- which(Taxonomy[ ,TaxaLevel] == TaxaName)
   seq.ids <- Taxonomy[tax.index,1]
-  blast.index <- NULL
-  for(s in 1:length(seq.ids)){
-    temp.index <- which(Blast[ ,1] == seq.ids[s])
-    blast.index <- c(blast.index, temp.index)
-  }
-  blast.subset <- Blast[blast.index, ]
+  seq.ids <- data.frame(qseqid = seq.ids, stringsAsFactors = F)
+  blast.subset <- merge(x = seq.ids, y = Blast)
+  cat("There were ", nrow(seq.ids), " ", TaxaName, " in the final taxonomy file.\n", 
+      nrow(blast.subset), " or ", nrow(blast.subset) / nrow(seq.ids) * 100, "% had a blast result reported.\n")
   return(blast.subset)
 }
 
@@ -91,11 +89,9 @@ find.seqIDs.conversion.removed <- function(BlastData, Cutoff, FWTax){
 }
 
 find.taxonomies <- function(SeqIDs, Tax){
-  index <- NULL
-  for (s in 1:length(SeqIDs)){
-    index <- c(index, which(Tax[ ,1] == SeqIDs[s]))
-  }
-  seqids.tax <- Tax[index, ]
+  seqids <- data.frame(seqID.fw = SeqIDs, stringsAsFactors = F)
+  tax <- as.data.frame(Tax, stringsAsFactors = F)
+  seqids.tax <- merge(x = seqids, y = tax)
   return(seqids.tax)
 }
 
@@ -113,22 +109,11 @@ count.up.tax.names.by.otu <- function(ForcedTax, TaxLevel, TotReads){
 }
 
 count.up.tax.names.by.read <- function(ForcedTax, TaxLevel, TotReads){
-  tax.names <- unique(ForcedTax[ ,TaxLevel])
-  tax.nums <- NULL
-  for (n in 1:length(tax.names)){
-    index.tax <- which(ForcedTax[ ,TaxLevel] == tax.names[n])
-    seq.ids <- ForcedTax[index.tax, 1]
-    reads <- 0
-    for(s in 1:length(seq.ids)){
-      index.reads <- which(TotReads[ ,1] == seq.ids[s])
-      reads <- reads + TotReads[index.reads,2]
-    }
-    tax.nums[n] <- reads
-  }
-  names(tax.nums) <- tax.names
-  tot.reads <- sum(TotReads[ ,2])
-  tax.nums.norm <- tax.nums / tot.reads * 100
-  return(tax.nums.norm)
+  tax.tots <- merge(x = ForcedTax, y = TotReads, by.x = "seqID.fw", by.y = "seqID")
+  tax.level <- tax.tots[ ,c(TaxLevel,9)]
+  level.tots <- aggregate(x = tax.level[ ,2], by = list(tax.level[ ,1]), FUN = sum)
+  colnames(level.tots) <- c("Forced.Into", "Perc.Dataset.Reads")
+  return(level.tots)
 }
 
 single.stacked.bar <- function(FWCdata, DataType, Direction){
@@ -163,7 +148,7 @@ taxa <- import.taxa.table(FilePath = file.path.taxa.table)
 fw.taxa <- import.taxa.table(FilePath = file.path.FW_only.taxa.table, Delimitor = ";")
 seqid.reads <- import.seqID.reads(FilePath = file.path.seqid.reads)
 
-# ---- Quick Looks (can skip to paper sections w/out sourcing) ----
+# ---- Quick Looks (can skip to paper figure section w/out sourcing) ----
 
 # before & after pidents for all OTUs
 density.overlay(BlastData = blast$pident, WorkflowData = blast$true.pids, PlotTitle = "All OTUs")
@@ -208,13 +193,12 @@ mtext(text = "no cyanos matching at cutoff after correction, some did before pid
 index.high.cyanos <- which(cyano.blast$pident >= 98)
 cyano.blast.ex <- cyano.blast[index.high.cyanos, ]
 nrow(cyano.blast.ex) # only 22 sequences
-summary(cyano.blast.ex[ ,-1])
-cyano.blast.ex # all ~32 bp alignment, all 1st hit
+summary(cyano.blast.ex[ ,-1]) # most very short, all 1st hit
 
 # what would those cyanos be forced into? (the ones with high BLAST hits)
 cyano.forced <- find.taxonomies(SeqIDs = cyano.blast$qseqid, Tax = fw.taxa)
 cyano.phyla <- count.up.tax.names.by.read(ForcedTax = cyano.forced, TotReads = seqid.reads, TaxLevel = 3)
-barplot(cyano.phyla, beside = FALSE, las =2, cex.names = .5)
+barplot(cyano.phyla$Perc.Dataset.Reads, names.arg = cyano.phyla$Forced.Into, beside = FALSE, las =2, cex.names = .5) # mostly just unclassified
 
 # look only at phylum actionbacteria OTUs (only some changed by pident recalc, most full-length matches already)
 actino.blast <- pull.out.taxon(Blast = blast, Taxonomy = taxa, TaxaName = "p__Actinobacteria", TaxaLevel = 3)

@@ -220,6 +220,145 @@ rect(xleft = 15.5, xright = 16.5, ybottom = 17, ytop = 19, col = bar.colors[3], 
 dev.off()
 
 
+# ---- Paper Supplemental Figures ----
+
+# Michigan ----
+forcing.folder <- michigan.forcing.folder
+# Run "quick look" section to load data
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_3_Michigan.pdf"
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
+layout(mat = matrix(c(1,2,2), nrow = 1))
+par(mai = c(.55, .2, .24, 0), omi = c(0, .27, .05, .4)) # bottom, left, top, right
+panel.data <- forcing.data$phylum
+plot.title <- "Phylum Rank Abundance"
+max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
+max.bar # choose axis max based on this
+y.axis.ticks <- c(0,5,10,15,20,25,30)
+y.tick.labels <- c(0,"", 10, "", 20,"",30)
+y.axis.label <- "Relative Abundance (% reads)"
+y.max <- 30
+# Run paper figure line 167 to 186
+panel.data <- forcing.data$lineage
+panel.data <- panel.data[ ,1:20]
+plot.title <- "Family/Lineage Rank Abundance"
+max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
+max.bar # choose axis max based on this
+y.axis.ticks <- c(0,5,10,15,20,25,30,35)
+y.tick.labels <- c(0,"",10,"",20,"",30,"")
+# Run paper figure lines 195 to 219
+mtext(text = expression(bold("Lake Michigan")), side = 3, line = -5, at = 18, cex = 2)
+dev.off()
+
+# Danube ----
+forcing.folder <- danube.forcing.folder
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_3_Danube.pdf"
+# Run "quick look" section to load data
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
+layout(mat = matrix(c(1,2,2), nrow = 1))
+par(mai = c(.55, .2, .24, 0), omi = c(0, .27, .05, .2)) # bottom, left, top, right
+panel.data <- forcing.data$phylum
+plot.title <- "Phylum Rank Abundance"
+max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
+max.bar # choose axis max based on this
+y.axis.ticks <- c(0,5,10,15,20,25,30)
+y.tick.labels <- c(0,"", 10, "", 20,"",30)
+y.axis.label <- "Relative Abundance (% reads)"
+y.max <- 30
+# Run paper figure line 167 to 186
+panel.data <- forcing.data$lineage
+panel.data <- panel.data[ ,1:20]
+plot.title <- "Family/Lineage Rank Abundance"
+max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
+max.bar # choose axis max based on this
+y.axis.ticks <- c(0,5,10,15,20,25,30,35,40)
+y.tick.labels <- c(0,"",10,"",20,"",30,"",40)
+# Run paper figure lines 195 to 219
+mtext(text = expression(bold("Danube River")), side = 3, line = -5, at = 18, cex = 2)
+dev.off()
+
+# Bog Epi ----
+forcing.folder <- bog.epi.forcing.folder
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_3_Bog_Epi.pdf"
+# Run "quick look" section to load data
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
+layout(mat = matrix(c(1,2,2), nrow = 1))
+par(mai = c(.55, .2, .24, 0), omi = c(0, .27, .05, .6)) # bottom, left, top, right
+panel.data <- forcing.data$phylum
+plot.title <- "Phylum Rank Abundance"
+max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
+max.bar # choose axis max based on this
+y.axis.ticks <- c(0,5,10,15,20,25,30,35,40,45,50)
+y.tick.labels <- c(0,"", 10, "", 20,"",30,"",40,"",50)
+y.axis.label <- "Relative Abundance (% reads)"
+y.max <- 50
+# Run paper figure line 167 to 186
+panel.data <- forcing.data$lineage
+panel.data <- panel.data[ ,1:20]
+plot.title <- "Family/Lineage Rank Abundance"
+max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
+max.bar # choose axis max based on this
+y.axis.ticks <- c(0,5,10,15,20,25,30,35,40,45)
+y.tick.labels <- c(0,"",10,"",20,"",30,"",40,"")
+# Run paper figure lines 195 to 219
+mtext(text = expression(bold("Bog Epilimnion")), side = 3, line = -5, at = 18, cex = 2)
+dev.off()
+
+# Bog Hypo ----
+forcing.folder <- bog.epi.forcing.folder
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_3_Bog_Hypo.pdf"
+# Run "quick look" section to load data
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
+layout(mat = matrix(c(1,2,2), nrow = 1))
+par(mai = c(.55, .2, .24, 0), omi = c(0, .27, .05, .6)) # bottom, left, top, right
+panel.data <- forcing.data$phylum
+plot.title <- "Phylum Rank Abundance"
+max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
+max.bar # choose axis max based on this
+y.axis.ticks <- c(0,5,10,15,20,25,30,35,40,45,50)
+y.tick.labels <- c(0,"", 10, "", 20,"",30,"",40,"",50)
+y.axis.label <- "Relative Abundance (% reads)"
+y.max <- 50
+# Run paper figure line 167 to 186
+panel.data <- forcing.data$lineage
+panel.data <- panel.data[ ,1:20]
+plot.title <- "Family/Lineage Rank Abundance"
+max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
+max.bar # choose axis max based on this
+y.axis.ticks <- c(0,5,10,15,20,25,30,35,40,45)
+y.tick.labels <- c(0,"",10,"",20,"",30,"",40,"")
+# Run paper figure lines 195 to 219
+mtext(text = expression(bold("Bog Hypolimnion")), side = 3, line = -5, at = 18, cex = 2)
+dev.off()
+
+# Mouse Gut ----
+forcing.folder <- mouse.forcing.folder
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_3_Mouse_Gut.pdf"
+# Run "quick look" section to load data
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
+layout(mat = matrix(c(1,2,2), nrow = 1))
+par(mai = c(.55, .2, .24, 0), omi = c(0, .27, .05, .6)) # bottom, left, top, right
+panel.data <- forcing.data$phylum
+plot.title <- "Phylum Rank Abundance"
+max.bar <- max(panel.data[1, ] + panel.data[3, ]) # grey bar + BLUE bar
+max.bar # choose axis max based on this
+y.axis.ticks <- c(0,10,20,30,40,50,60,70)
+y.tick.labels <- c(0,"",20,"",40,"",60,"")
+y.axis.label <- "Relative Abundance (% reads)"
+y.max <- 70
+# Run paper figure line 167 to 186
+panel.data <- forcing.data$lineage
+plot.title <- "Family/Lineage Rank Abundance"
+max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
+max.bar # choose axis max based on this
+y.axis.ticks <- c(0,10,20,30,40,50,60,70,80,90,100)
+y.tick.labels <- c(0,"",20,"",40,"",60,"",80,"",100)
+# Run paper figure lines 195 to 202
+text(x = loc.labels - .1, y = -1.1, labels = bar.labels, srt = -30, xpd = NA, cex = .9, adj = 0)
+# Run paper figure lines 204 to 219
+# just paste the stupid legend on later.
+mtext(text = expression(bold("Mouse Gut")), side = 3, line = -5, at = 9, cex = 2)
+dev.off()
+
 #
 # ---- POSTER ----
 # note: ran scripts from plot_classification_disagreements.R to re-generate data to plot,

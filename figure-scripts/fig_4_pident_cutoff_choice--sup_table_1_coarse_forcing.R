@@ -284,11 +284,239 @@ dev.off()
 
 #
 
-# ---- Supp Table 1 ----
+# ---- Supplemental Figure 4 ----
+
+# these figures source and load their own data, then jump btwn following figure lines and different y axes.
+
+# Michigan ----
+file.path.reads.class <- "~/Desktop/TaxAss-BatchFiles-go/Michigan/TaxAss-Michigan/analysis/plots/step_14_Choose_pident_cutoff/Percent_Reads_Classified_by_Pident.csv"
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_4_Michigan.pdf"
+reads.tot.class <- import.classified.summary(FilePath = file.path.reads.class)
+pident.values <- reads.tot.class[ ,1]
+reads.tot.class.plot <- reads.tot.class[ ,-(1:2)]  #[ ,-c(1:3,8)]
+# Run Figure Script lines 176-243
+# Family 
+ass <- sum.named[ ,4]
+plot.title <- taxa.levels[4]
+min(ass)
+max(ass)
+y.lim <- c(65,75)
+y.ticks <- c(65,67.5,70,72.5,75)
+y.tick.labs <- c("65","","70","","75")
+repeat.these()
+# Genus 
+ass <- sum.named[ ,5]
+plot.title <- taxa.levels[5]
+min(ass)
+max(ass)
+y.lim <- c(50,60)
+y.ticks <- c(50,52.5,55,57.5,60)
+y.tick.labs <- c("50","",55,"",60)
+repeat.these()
+# Run Figure Script lines 261-274
+big.title <- "Lake Michigan"
+mtext(text = big.title, side = 3, line = -.7, outer = T)
+dev.off()
+
+# Danube ----
+file.path.reads.class <- "~/Desktop/TaxAss-BatchFiles-go/Danube/TaxAss-Danube/analysis/plots/step_14_Choose_pident_cutoff/Percent_Reads_Classified_by_Pident.csv"
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_4_Danube.pdf"
+reads.tot.class <- import.classified.summary(FilePath = file.path.reads.class)
+pident.values <- reads.tot.class[ ,1]
+reads.tot.class.plot <- reads.tot.class[ ,-(1:2)]  #[ ,-c(1:3,8)]
+# Run Figure Script lines 176-220
+# Class
+ass <- sum.named[ ,2]
+plot.title <- taxa.levels[2]
+min(ass)
+max(ass)
+y.lim <- c(90,100)
+y.ticks <- c(90,92.5,95,97.5,100)
+y.tick.labs <- c("90","","95","","100")
+repeat.these()
+# Order
+ass <- sum.named[ ,3]
+plot.title <- taxa.levels[3]
+min(ass)
+max(ass)
+y.lim <- c(85,95)
+y.ticks <- c(85, 87.5, 90, 92.5, 95)
+y.tick.labs <- c("85","","90","","95")
+repeat.these()
+# Family
+ass <- sum.named[ ,4]
+plot.title <- taxa.levels[4]
+min(ass)
+max(ass)
+y.lim <- c(65,75)
+y.ticks <- c(65,67.5,70,72.5,75)
+y.tick.labs <- c("65","","70","","75")
+repeat.these()
+# Genus 
+ass <- sum.named[ ,5]
+plot.title <- taxa.levels[5]
+min(ass)
+max(ass)
+y.lim <- c(35,55)
+y.ticks <- c(35,37.5,40,42.5,45,47.5,50,52.5,55)
+y.tick.labs <- c("35","",40,"",45,"",50,"",55)
+repeat.these()
+# Species
+ass <- sum.named[ ,6]
+plot.title <- taxa.levels[6]
+min(ass)
+max(ass)
+y.lim <- c(15,40)
+y.ticks <- c(15,17.5,20,22.5,25,27.5,30,32.5,35,37.5,40)
+y.tick.labs <- c("15","",20,"",25,"",30,"",35,"",40)
+repeat.these()
+# Run Figure Script lines 273-274
+big.title <- "Danube River"
+mtext(text = big.title, side = 3, line = -.7, outer = T)
+dev.off()
+
+# Bog Epi ----
+file.path.reads.class <- "~/Desktop/TaxAss-BatchFiles-go/TroutBogEpi/TaxAss-TroutBogEpi/analysis/plots/step_14_Choose_pident_cutoff/Percent_Reads_Classified_by_Pident.csv"
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_4_Bog_Epi.pdf"
+reads.tot.class <- import.classified.summary(FilePath = file.path.reads.class)
+pident.values <- reads.tot.class[ ,1]
+reads.tot.class.plot <- reads.tot.class[ ,-(1:2)]  #[ ,-c(1:3,8)]
+# Run Figure Script lines 176-234
+# Order
+ass <- sum.named[ ,3]
+plot.title <- taxa.levels[3]
+min(ass)
+max(ass)
+y.lim <- c(75,85)
+y.ticks <- c(75,77.5,80,82.5,85)
+y.tick.labs <- c("75","","80","","85")
+repeat.these()
+# Family
+ass <- sum.named[ ,4]
+plot.title <- taxa.levels[4]
+min(ass)
+max(ass)
+y.lim <- c(60,70)
+y.ticks <- c(60,62.5,65,67.5,70)
+y.tick.labs <- c("60","","65","","70")
+repeat.these()
+# Genus
+ass <- sum.named[ ,5]
+plot.title <- taxa.levels[5]
+min(ass)
+max(ass)
+y.lim <- c(40,50)
+y.ticks <- c(40,42.5,45,47.5,50)
+y.tick.labs <- c("40","","45","","50")
+repeat.these()
+# Species
+ass <- sum.named[ ,6]
+plot.title <- taxa.levels[6]
+min(ass)
+max(ass)
+y.lim <- c(20,35)
+y.ticks <- c(20,22.5,25,27.5,30,32.5,35)
+y.tick.labs <- c("20","",25,"",30,"",35)
+repeat.these()
+# Run Figure Script lines 273-274
+big.title <- "Trout Bog Epilimnion"
+mtext(text = big.title, side = 3, line = -.7, outer = T)
+dev.off()
+
+# Bog Hypo ----
+file.path.reads.class <- "~/Desktop/TaxAss-BatchFiles-go/TroutBogHypo/TaxAss-TroutBogHypo/analysis/plots/step_14_Choose_pident_cutoff/Percent_Reads_Classified_by_Pident.csv"
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_4_Bog_Hypo.pdf"
+reads.tot.class <- import.classified.summary(FilePath = file.path.reads.class)
+pident.values <- reads.tot.class[ ,1]
+reads.tot.class.plot <- reads.tot.class[ ,-(1:2)]  #[ ,-c(1:3,8)]
+# Run Figure Script lines 176-252
+# Genus
+ass <- sum.named[ ,5]
+plot.title <- taxa.levels[5]
+min(ass)
+max(ass)
+y.lim <- c(40,50)
+y.ticks <- c(40,42.5,45,47.5,50)
+y.tick.labs <- c("40","",45,"",50)
+repeat.these()
+# Species
+ass <- sum.named[ ,6]
+plot.title <- taxa.levels[6]
+min(ass)
+max(ass)
+y.lim <- c(20,30)
+y.ticks <- c(20,22.5,25,27.5,30)
+y.tick.labs <- c("20","",25,"",30)
+repeat.these()
+# Run Figure Script lines 273-274
+big.title <- "Trout Bog Hypolimnion"
+mtext(text = big.title, side = 3, line = -.7, outer = T)
+dev.off()
+
+# Mouse Gut ----
+file.path.reads.class <- "~/Desktop/TaxAss-BatchFiles-go/MouseGut/TaxAss-MouseGut/analysis/plots/step_14_Choose_pident_cutoff/Percent_Reads_Classified_by_Pident.csv"
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_4_Mouse_Gut.pdf"
+reads.tot.class <- import.classified.summary(FilePath = file.path.reads.class)
+pident.values <- reads.tot.class[ ,1]
+reads.tot.class.plot <- reads.tot.class[ ,-(1:2)]  #[ ,-c(1:3,8)]
+# Run Figure Script lines 176-220
+# Class
+ass <- sum.named[ ,2]
+plot.title <- taxa.levels[2]
+min(ass)
+max(ass)
+y.lim <- c(90,100)
+y.ticks <- c(90,92.5,95,97.5,100)
+y.tick.labs <- c("90","","95","","100")
+repeat.these()
+# Order
+ass <- sum.named[ ,3]
+plot.title <- taxa.levels[3]
+min(ass)
+max(ass)
+y.lim <- c(90,100)
+y.ticks <- c(90,92.5,95,97.5,100)
+y.tick.labs <- c("90","","95","","100")
+repeat.these()
+# Family
+ass <- sum.named[ ,4]
+plot.title <- taxa.levels[4]
+min(ass)
+max(ass)
+y.lim <- c(80,90)
+y.ticks <- c(80,82.5,85,87.5,90)
+y.tick.labs <- c("80","","85","","90")
+repeat.these()
+# Genus
+ass <- sum.named[ ,5]
+plot.title <- taxa.levels[5]
+min(ass)
+max(ass)
+y.lim <- c(15,25)
+y.ticks <- c(15,17.5,20,22.5,25)
+y.tick.labs <- c("15","",20,"",25)
+repeat.these()
+# Species
+ass <- sum.named[ ,6]
+plot.title <- taxa.levels[6]
+min(ass)
+max(ass)
+y.lim <- c(0,10)
+y.ticks <- c(0,2.5,5,7.5,10)
+y.tick.labs <- c("0","",5,"",10)
+repeat.these()
+# Run Figure Script lines 273-274
+big.title <- "Mouse Gut"
+mtext(text = big.title, side = 3, line = -.7, outer = T)
+dev.off()
+
+# 
+# ---- old version of Supp Table 1 ----
 save.to <- "~/Dropbox/PhD/Write It/draft 3/draft_3_figure_files/sup_table_1_forcing_check.csv"
 supp.table.1 <- make.supplemental.table.1(ConflictsSum = otus, FolderPath = save.to)
 supp.table.1
-
+# actually now this is only at the chosen taxa level.
+# Directions in their own figure-script
 
 # ---- deceased panel 4b (killed by coauthors. apparently it's incomprehensible) ----
 
@@ -325,6 +553,7 @@ mtext(text = plot.title, side = 3, line = 1.6, at = 100.2, cex = 1, adj = 1, pad
 mtext(text = x.label, side = 1, line = 1.1, at = 95, adj = 0, cex = .8)
 mtext(text = y.label, side = 2, line = 2, at = 48, adj = 0, cex = .8)
 
+#
 # ---- ISME16 POSTER ----
 
 file.path.read.perc.summs <- "../../poster_mend_unclust/plots/conflict_summary_by_percent_reads.csv"

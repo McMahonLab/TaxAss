@@ -272,6 +272,226 @@ rect(xleft = 15.5, xright = 16.5, ybottom = 55, ytop = 60, col = col.z[1])
 dev.off()
 
 #
+# ---- Paper Figure 2 supplemental ----
+# same fig with other datasets. split into 1 panel each. easiest way, just crop off an empty plot.new at end.
+
+# Mendota ----
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_2_Mendota.pdf"
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Supplemental Fig 2", colormodel = "srgb")
+par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
+# 2a.
+y <- beside.eco.list$Mendota
+z <- stacked.eco.list$Mendota
+y <- y[ ,-1]
+z <- z[ ,-1]
+plot.title <- "Mendota by Taxa Level"
+x.axis.labels <- c("Phylum", "Class", "Order", "Family/Lineage", "Genus/Clade", "Species/Tribe")
+
+# ***** RUN "GUTS" section, line 181 *****
+
+mtext(text = y.axis.label, side = 2, line = 1, cex = 1.1)
+# empty side:
+plot.new()
+dev.off()
+
+# Michigan ----
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_2_Michigan.pdf"
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Supplemental Fig 2", colormodel = "srgb")
+par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
+# 2a.
+y <- beside.eco.list$Michigan
+z <- stacked.eco.list$Michigan
+y <- y[ ,-1]
+z <- z[ ,-1]
+plot.title <- "Michigan by Taxa Level"
+x.axis.labels <- c("Phylum", "Class", "Order", "Family/Lineage", "Genus/Clade", "Species/Tribe")
+
+# ***** RUN "GUTS" section, line 181 *****
+
+mtext(text = y.axis.label, side = 2, line = 1, cex = 1.1)
+# empty side:
+plot.new()
+dev.off()
+
+# Danube ----
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_2_Danube.pdf"
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Supplemental Fig 2", colormodel = "srgb")
+par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
+# 2a.
+y <- beside.eco.list$Danube
+z <- stacked.eco.list$Danube
+y <- y[ ,-1]
+z <- z[ ,-1]
+plot.title <- "Danube by Taxa Level"
+x.axis.labels <- c("Phylum", "Class", "Order", "Family/Lineage", "Genus/Clade", "Species/Tribe")
+
+# ***** RUN "GUTS" section, line 181 *****
+
+mtext(text = y.axis.label, side = 2, line = 1, cex = 1.1)
+# empty side:
+plot.new()
+dev.off()
+
+# Bog Epi ----
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_2_BogEpi.pdf"
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Supplemental Fig 2", colormodel = "srgb")
+par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
+# 2a.
+y <- beside.eco.list$`Bog Epilimnion`
+z <- stacked.eco.list$`Bog Epilimnion`
+y <- y[ ,-1]
+z <- z[ ,-1]
+plot.title <- "Bog Epilimnion by Taxa Level"
+x.axis.labels <- c("Phylum", "Class", "Order", "Family/Lineage", "Genus/Clade", "Species/Tribe")
+
+# ***** RUN "GUTS" section, line 181 *****
+
+mtext(text = y.axis.label, side = 2, line = 1, cex = 1.1)
+# empty side:
+plot.new()
+dev.off()
+
+
+# Bog Hypo ----
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_2_BogHypo.pdf"
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Supplemental Fig 2", colormodel = "srgb")
+par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
+# 2a.
+y <- beside.eco.list$`Bog Hypolimnion`
+z <- stacked.eco.list$`Bog Hypolimnion`
+y <- y[ ,-1]
+z <- z[ ,-1]
+plot.title <- "Bog Hypolimnion by Taxa Level"
+x.axis.labels <- c("Phylum", "Class", "Order", "Family/Lineage", "Genus/Clade", "Species/Tribe")
+
+# ***** RUN "GUTS" section, line 181 *****
+
+mtext(text = y.axis.label, side = 2, line = 1, cex = 1.1)
+# empty side:
+plot.new()
+dev.off()
+
+# Mouse Gut ----
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_2_MouseGut.pdf"
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Supplemental Fig 2", colormodel = "srgb")
+par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
+# 2a.
+y <- beside.eco.list$`Mouse Gut`
+z <- stacked.eco.list$`Mouse Gut`
+y <- y[ ,-1]
+z <- z[ ,-1]
+plot.title <- "Mouse Gut by Taxa Level"
+x.axis.labels <- c("Phylum", "Class", "Order", "Family/Lineage", "Genus/Clade", "Species/Tribe")
+
+# ***** RUN "GUTS" section, line 181 *****
+
+mtext(text = y.axis.label, side = 2, line = 1, cex = 1.1)
+# empty side:
+plot.new()
+dev.off()
+
+# Phylum ----
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_2_Phylum.pdf"
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Supplemental Fig 2", colormodel = "srgb")
+par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
+# 2b. 
+y <- beside.tax.list$Phylum
+z <- stacked.tax.list$Phylum
+plot.title <- "Phylum by Ecosystem"
+x.axis.labels <- colnames(z)
+
+# ***** RUN "GUTS" section, line 181 *****
+
+mtext(text = y.axis.label, side = 2, line = 1, cex = 1.1)
+# empty side:
+plot.new()
+dev.off()
+# Class ----
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_2_Class.pdf"
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Supplemental Fig 2", colormodel = "srgb")
+par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
+# 2b. 
+y <- beside.tax.list$Class
+z <- stacked.tax.list$Class
+plot.title <- "Class by Ecosystem"
+x.axis.labels <- colnames(z)
+
+# ***** RUN "GUTS" section, line 181 *****
+
+mtext(text = y.axis.label, side = 2, line = 1, cex = 1.1)
+# empty side:
+plot.new()
+dev.off()
+
+# Order ----
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_2_Order.pdf"
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Supplemental Fig 2", colormodel = "srgb")
+par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
+# 2b. 
+y <- beside.tax.list$Order
+z <- stacked.tax.list$Order
+plot.title <- "Order by Ecosystem"
+x.axis.labels <- colnames(z)
+
+# ***** RUN "GUTS" section, line 181 *****
+
+mtext(text = y.axis.label, side = 2, line = 1, cex = 1.1)
+# empty side:
+plot.new()
+dev.off()
+
+# Family/Lineage ----
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_2_Lineage.pdf"
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Supplemental Fig 2", colormodel = "srgb")
+par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
+# 2b. 
+y <- beside.tax.list$`Family/Lineage`
+z <- stacked.tax.list$`Family/Lineage`
+plot.title <- "Family/Lineage by Ecosystem"
+x.axis.labels <- colnames(z)
+
+# ***** RUN "GUTS" section, line 181 *****
+
+mtext(text = y.axis.label, side = 2, line = 1, cex = 1.1)
+# empty side:
+plot.new()
+dev.off()
+
+# Genus/Clade ----
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_2_Clade.pdf"
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Supplemental Fig 2", colormodel = "srgb")
+par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
+# 2b. 
+y <- beside.tax.list$`Genus/Clade`
+z <- stacked.tax.list$`Genus/Clade`
+plot.title <- "Genus/Clade by Ecosystem"
+x.axis.labels <- colnames(z)
+
+# ***** RUN "GUTS" section, line 181 *****
+
+mtext(text = y.axis.label, side = 2, line = 1, cex = 1.1)
+# empty side:
+plot.new()
+dev.off()
+
+# Species/Tribe ----
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_2_Tribe.pdf"
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Supplemental Fig 2", colormodel = "srgb")
+par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
+# 2b. 
+y <- beside.tax.list$`Species/Tribe`
+z <- stacked.tax.list$`Species/Tribe`
+plot.title <- "Species/Tribe by Ecosystem"
+x.axis.labels <- colnames(z)
+
+# ***** RUN "GUTS" section, line 181 *****
+
+mtext(text = y.axis.label, side = 2, line = 1, cex = 1.1)
+# empty side:
+plot.new()
+dev.off()
+
+#
 # ---- Poster Figure ----
 
 mendota.unclust.beside.file.path <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster_mend_unclust/plots/WorkflowImprovement-BesideData-Reads.csv"

@@ -200,6 +200,28 @@ cyano.forced <- find.taxonomies(SeqIDs = cyano.blast$qseqid, Tax = fw.taxa)
 cyano.phyla <- count.up.tax.names.by.read(ForcedTax = cyano.forced, TotReads = seqid.reads, TaxLevel = 3)
 barplot(cyano.phyla$Perc.Dataset.Reads, names.arg = cyano.phyla$Forced.Into, beside = FALSE, las =2, cex.names = .5) # mostly just unclassified
 
+# what is the overall impact of forcing on cyanos? (including ones excluded from BLAST results)
+index <- order(taxa[ ,1])
+taxa <- taxa[index, ]
+index <- order(seqid.reads[ ,1])
+seqid.reads <- seqid.reads[index, ]
+index <- order(fw.taxa[ ,1])
+fw.taxa <- fw.taxa[index, ]
+all.equal(taxa[ ,1], seqid.reads[ ,1], fw.taxa[ ,1])
+index.cyanos <- which(taxa[ ,3] == "p__Cyanobacteria")
+cyanos.all.taxa <- taxa[index.cyanos, ]
+cyanos.all.reads <- seqid.reads[index.cyanos, ]
+cyanos.all.fw <- fw.taxa[index.cyanos, ]
+all.equal(cyanos.all.taxa[ ,1], cyanos.all.reads[ ,1], cyanos.all.fw[ ,1])
+unique(cyanos.all.taxa[ ,3])
+unique(cyanos.all.fw[ ,3])
+cyanos.all.forced.into <- data.frame(cyanos.all.fw, cyanos.all.reads[ ,2], stringsAsFactors = F)
+cyanos.all.forced.into <- aggregate(x = cyanos.all.forced.into[ ,9], by = list(cyanos.all.forced.into[ ,3]), FUN = sum)
+barplot(cyanos.all.forced.into$x, names.arg = cyanos.all.forced.into$Group.1)
+perc.cyano.classifications <- cyanos.all.forced.into$x / sum(cyanos.all.forced.into$x) * 100
+names(perc.cyano.classifications) <- cyanos.all.forced.into$Group.1
+perc.cyano.classifications
+
 # look only at phylum actionbacteria OTUs (only some changed by pident recalc, most full-length matches already)
 actino.blast <- pull.out.taxon(Blast = blast, Taxonomy = taxa, TaxaName = "p__Actinobacteria", TaxaLevel = 3)
 density.overlay(BlastData = actino.blast$pident, WorkflowData = actino.blast$true.pids, PlotTitle = "Actinobacteria")

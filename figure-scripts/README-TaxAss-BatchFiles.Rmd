@@ -42,22 +42,41 @@ The TaxAss tax-scripts are already in each ecosystem folder here. Otherwise you 
 
 Unzip the files, and move them so that they are not nested within other folders after expanding. Do not change any names. This is what the contents of `ReferenceDatabases` should look like:
 
-```{bash, eval=T}
+```{bash, eval=F}
 ls ReferenceDatabases/
+
+# FreshTrain18Aug2016.fasta
+# FreshTrain18Aug2016.taxonomy
+# README.txt
+# gg_13_5.fasta
+# gg_13_5_taxonomy.txt
+# silva.seed_v128.align
+
 ```
 
 #### Navegate into the main TaxAss-BatchFiles folder within the terminal.  
-These notes assume starting in that folder as the present working directory at the beginning of each of the following "Process ..." steps.
-```{bash, eval=T}
-pwd
-```
+These notes assume starting in that folder as the present working directory at the beginning of each of the following "Process ..." steps.  
+  
 This main direcory contains lake-specific folders for processing each dataset, in addition to the ReferenceDatabases folder you downloaded files into yourself and the `tax-scripts` folder taken from the TaxAss github repository version **SHA##########** 
-```{bash, eval=T}
+```{bash, eval= F}
 ls
+
+# Danube/
+# Mendota/
+# Michigan/
+# MouseGut/
+# ReferenceDatabases/
+# TroutBogEpi/
+# TroutBogHypo/
+# tax-scripts/
 ```
 Each lake-specific folder contains separate folders for different processing steps. For example:
-```{bash, eval=T}
+```{bash, eval=F}
 ls Mendota/
+
+# QC-Mendota/
+# Quickie-TaxAss-Mendota/
+# TaxAss-Mendota/
 ```
 
 #### Notes on these batch files:  

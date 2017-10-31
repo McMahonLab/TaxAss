@@ -42,7 +42,7 @@ blast.plots.folder <- paste(plots.folder.path, "step_4_check_BLAST_settings", se
 # ####
 
 # The package reshape is needed, must specify cran mirror and library path with Rscript
-library.path <- cat(.libPaths()) # this is the default installation path
+library.path <- .libPaths() # this is the default installation path
 get.necessary.packages <- function(){
   if (library(package = "reshape", logical.return = TRUE, lib.loc = library.path) == FALSE){
     install.packages("reshape", repos = mirror.location)

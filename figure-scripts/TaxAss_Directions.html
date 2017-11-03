@@ -229,242 +229,430 @@ pre code, pre, code {
   word-wrap: initial !important;
 }
 </style>
-<div id="example" class="section level1 tabset">
-<h1><span style="color:SteelBlue">Example</span></h1>
-<p>RRR 12-5-15</p>
 <p>This workflow assigns taxonomy to a fasta file of otu sequences using both a small, custom taxonomy database and a large general database.</p>
-</div>
 <div id="list-of-steps" class="section level1">
 <h1><span style="color:SteelBlue">List of Steps</span></h1>
 <p>This is a list of all the steps and possible commands. There are details for each step in separate sections.</p>
-<div id="background-on-why-we-chose-this-workflow" class="section level5">
-<h5>-1. background on why we chose this workflow</h5>
-</div>
-<div id="format-files-textwrangler-or-bash" class="section level5">
-<h5>0. format files (textwrangler or bash)</h5>
-<p>(depends on your starting file formats)<br />
-for Green Genes database as general.taxonomy:<br />
-<code>sed 's/ //g' &lt;general.taxonomy &gt;NoSpaces</code><br />
-<code>sed 's/$/;/' &lt;NoSpaces &gt;EndLineSemicolons</code><br />
-<code>mv EndLineSemicolons general.taxonomy</code><br />
-<code>rm NoSpaces</code><br />
-for aligned fasta files:<br />
-<code>sed 's/-//g' &lt;aligned.fasta &gt;otus.fasta</code><br />
-for mothur .count_table as OTU table:<br />
-<code>Rscript reformat_mothur_OTU_tables.R StupidLongMothurName.count_table count_table otus.abund</code></p>
-</div>
-<div id="make-blast-database-file-blast" class="section level5">
-<h5>1. make BLAST database file (blast)</h5>
-<p><code>makeblastdb -dbtype nucl -in custom.fasta -input_type fasta -parse_seqids -out custom.db</code></p>
-</div>
-<div id="run-blast-blast" class="section level5">
-<h5>2. run BLAST (blast)</h5>
-<p><code>blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 5</code></p>
-</div>
-<div id="reformat-blast-results-blast" class="section level5">
-<h5>3. reformat blast results (blast)</h5>
-<p><code>blast_formatter -archive otus.custom.blast -outfmt &quot;6 qseqid pident length qlen qstart qend&quot; -out otus.custom.blast.table</code></p>
-</div>
-<div id="correct-blast-pident-r" class="section level5">
-<h5>4. correct BLAST pident (R)</h5>
-<p><code>Rscript calc_full_length_pident.R otus.custom.blast.table otus.custom.blast.table.modified</code></p>
-</div>
-<div id="filter-blast-results-r" class="section level5">
-<h5>5. filter BLAST results (R)</h5>
-<p><code>Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.above.98 98 TRUE</code> <code>Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.below.98 98 FALSE</code></p>
-</div>
-<div id="check-that-blast-settings-are-appropriate-r" class="section level5">
-<h5>6. check that BLAST settings are appropriate (R)</h5>
-<p><code>Rscript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots</code></p>
-</div>
-<div id="recover-sequence-ids-left-out-of-blast-python-bash" class="section level5">
-<h5>7. recover sequence IDs left out of blast (python, bash)</h5>
-<p><code>python find_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table.modified ids.missing</code> <code>cat ids.below.98 ids.missing &gt; ids.below.98.all</code></p>
-</div>
-<div id="create-fasta-files-of-desired-sequence-ids-python" class="section level5">
-<h5>8. create fasta files of desired sequence IDs (python)</h5>
-<p><code>python create_fastas_given_seqIDs.py ids.above.98 otus.fasta otus.above.98.fasta</code> <code>python create_fastas_given_seqIDs.py ids.below.98.all otus.fasta otus.below.98.fasta</code></p>
-</div>
-<div id="assign-taxonomy-mothur" class="section level5">
-<h5>9. assign taxonomy (mothur)</h5>
-<p><code>mothur &quot;#classify.seqs(fasta=otus.above.98.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2, cutoff=0)&quot;</code> <code>mothur &quot;#classify.seqs(fasta=otus.below.98.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)&quot;</code></p>
-</div>
-<div id="combine-taxonomy-files-bash" class="section level5">
-<h5>10. combine taxonomy files (bash)</h5>
-<p><code>cat otus.above.98.custom.wang.taxonomy otus.below.98.general.wang.taxonomy &gt; otus.98.taxonomy</code></p>
-</div>
-<div id="assign-taxonomy-with-general-database-only-mothur-bash" class="section level5">
-<h5>11. assign taxonomy with general database only (mothur, bash)</h5>
-<p><code>mothur &quot;#classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)&quot;</code> <code>cat otus.general.wang.taxonomy &gt; otus.general.taxonomy</code></p>
-</div>
-<div id="optional--feeds-into-database_improvement_workflow-assign-taxonomy-to-custom-database-with-general-database-mothur-bash-mothur-classify.seqsfastacustom.fasta-templategeneral.fasta-taxonomygeneral.taxonomy-methodwang-probst-processors2-cutoff0-cat-custom.general.wang.taxonomy-custom.general.taxonomy" class="section level5">
-<h5><span style="color:grey">11.5 OPTIONAL- feeds into Database_Improvement_Workflow<br />
-assign taxonomy to custom database with general database (mothur, bash) <code>mothur &quot;#classify.seqs(fasta=custom.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)&quot;</code> <code>cat custom.general.wang.taxonomy custom.general.taxonomy</code></span></h5>
-</div>
-<div id="reformat-taxonomy-files-bash" class="section level5">
-<h5>12. reformat taxonomy files (bash)</h5>
-<p><code>sed 's/[[:blank:]]/\;/' &lt;otus.98.taxonomy &gt;otus.98.taxonomy.reformatted</code> <code>mv otus.98.taxonomy.reformatted otus.98.taxonomy</code> <code>sed 's/[[:blank:]]/\;/' &lt;otus.general.taxonomy &gt;otus.general.taxonomy.reformatted</code> <code>mv otus.general.taxonomy.reformatted otus.general.taxonomy</code></p>
-</div>
-<div id="compare-taxonomy-files-r" class="section level5">
-<h5>13. compare taxonomy files (R)</h5>
-<p><code>mkdir conflicts_98</code> <code>Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70</code></p>
-</div>
-<div id="optional-choose-appropriate-pident-cutoff-r" class="section level5">
-<h5>14. OPTIONAL: choose appropriate pident cutoff (R)</h5>
-<p>note: you have to repeat steps 5, 7-10, &amp; 12-13 with multiple pident cutoffs to do this step <code>Rscript plot_classification_disagreements.R otus.abund plots regular NA NA conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98</code></p>
-</div>
-<div id="generate-final-taxonomy-file-r" class="section level5">
-<h5>15. generate final taxonomy file (R)</h5>
-<p><code>Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 final</code> If skipping optional steps 11-14 or 15.5.a.: <code>Rscript find_classification_disagreements.R otus.98.taxonomy quickie ids.above.98 conflicts_98 98 85 70 final</code></p>
-</div>
-<div id="optional-plot-benefits-of-using-this-workflow-r-mothur-bash" class="section level5">
-<h5>15.5 OPTIONAL: plot benefits of using this workflow (R, mothur, bash)</h5>
-</div>
-<div id="a.-improvement-over-general-database-only" class="section level5">
-<h5>a. Improvement over general database only:</h5>
-<p><code>Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID.csv plots final.taxonomy.names final.general.names</code> ##### b. Improvement over custom database only:<br />
-<code>mothur &quot;#classify.seqs(fasta=otus.fasta, template=custom.fasta, taxonomy=custom.taxonomy, method=wang, probs=T, processors=2, cutoff=0)&quot;</code> <code>cat otus.custom.wang.taxonomy &gt; otus.custom.taxonomy</code> <code>sed 's/[[:blank:]]/\;/' &lt;otus.custom.taxonomy &gt;otus.custom.taxonomy.reformatted</code> <code>mv otus.custom.taxonomy.reformatted otus.custom.taxonomy</code> <code>mkdir conflicts_forcing</code> <code>Rscript find_classification_disagreements.R otus.custom.taxonomy otus.98.85.70.taxonomy ids.above.98 conflicts_forcing NA 85 70 forcing</code> <code>Rscript plot_classification_disagreements.R otus.abund plots conflicts_forcing otus.custom.85.taxonomy otus.98.85.70.taxonomy</code></p>
-</div>
-<div id="tidy-up-bash" class="section level5">
-<h5>16. tidy up (bash)</h5>
-<p><code>rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otus.custom.taxonomy otus.custom.[0-9]* custom.general* *pvalues total* final*names</code><br />
-<code>mkdir scripts ; mv *.py *.R *.sh *.md scripts</code> <code>mkdir analysis ; mv conflicts* plots analysis</code> <code>mkdir data ; mv otus* data</code> <code>mkdir databases ; mv *.taxonomy *.fasta databases</code></p>
-</div>
-<div id="note-run-steps-as-a-block-using-these-batch-scripts" class="section level4">
-<h4>NOTE: Run steps as a block using these batch scripts:</h4>
-<p>to source type in the terminal: ./LazyRun.sh</p>
+<pre><code>
+0. format files (textwrangler or bash)
+    depends on your starting file formats
+    for Green Genes database as general.taxonomy:
+        sed 's/ //g' &lt;general.taxonomy &gt;NoSpaces
+        sed 's/$/;/' &lt;NoSpaces &gt;EndLineSemicolons
+        mv EndLineSemicolons general.taxonomy
+        rm NoSpaces
+    for aligned fasta files:
+        sed 's/-//g' &lt;aligned.fasta &gt;otus.fasta
+    for mothur .count_table as OTU table:
+        Rscript reformat_mothur_OTU_tables.R StupidLongMothurName.count_table count_table otus.abund
+
+
+        
+1. make BLAST database file (blast)
+    makeblastdb -dbtype nucl -in custom.fasta -input_type fasta -parse_seqids -out custom.db
+
+2. run BLAST (blast)
+    blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 5
+
+3. reformat blast results (blast)
+    blast_formatter -archive otus.custom.blast -outfmt &quot;6 qseqid pident length qlen qstart qend&quot; -out otus.custom.blast.table
+
+4. correct BLAST pident (R)
+    Rscript calc_full_length_pident.R otus.custom.blast.table otus.custom.blast.table.modified
+
+5. filter BLAST results (R)
+    Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.above.98 98 TRUE 
+    Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.below.98 98 FALSE
+
+6. check that BLAST settings are appropriate (R)
+    Rscript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
+
+7. recover sequence IDs left out of blast (python, bash)
+    python find_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table.modified ids.missing
+    cat ids.below.98 ids.missing &gt; ids.below.98.all
+    
+8. create fasta files of desired sequence IDs (python)
+    python create_fastas_given_seqIDs.py ids.above.98 otus.fasta otus.above.98.fasta
+    python create_fastas_given_seqIDs.py ids.below.98.all otus.fasta otus.below.98.fasta
+
+9. assign taxonomy (mothur)
+    mothur &quot;#classify.seqs(fasta=otus.above.98.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2, cutoff=0)&quot;
+    mothur &quot;#classify.seqs(fasta=otus.below.98.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)&quot;
+
+10. combine taxonomy files (bash)
+    cat otus.above.98.custom.wang.taxonomy otus.below.98.general.wang.taxonomy &gt; otus.98.taxonomy
+
+11. assign taxonomy with general database only (mothur, bash)
+    mothur &quot;#classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)&quot;
+    cat otus.general.wang.taxonomy &gt; otus.general.taxonomy
+
+11.5 OPTIONAL- feeds into Database_Improvement_Workflow
+    assign taxonomy to custom database with general database (mothur, bash)
+    mothur &quot;#classify.seqs(fasta=custom.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)&quot;
+    cat custom.general.wang.taxonomy custom.general.taxonomy
+
+12. reformat taxonomy files (bash)
+    sed 's/[[:blank:]]/\;/' &lt;otus.98.taxonomy &gt;otus.98.taxonomy.reformatted
+    mv otus.98.taxonomy.reformatted otus.98.taxonomy
+    sed 's/[[:blank:]]/\;/' &lt;otus.general.taxonomy &gt;otus.general.taxonomy.reformatted
+    mv otus.general.taxonomy.reformatted otus.general.taxonomy
+    
+13. compare taxonomy files (R)
+    mkdir conflicts_98
+    Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70
+    
+14. OPTIONAL: choose appropriate pident cutoff (R)
+    note: you have to repeat steps 5, 7-10, &amp; 12-13 with multiple pident cutoffs to do this step
+    Rscript plot_classification_disagreements.R otus.abund plots regular NA NA conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98
+
+15. generate final taxonomy file (R)
+    Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 final
+        If skipping optional steps 11-14 or 15.5.a.:
+        Rscript find_classification_disagreements.R otus.98.taxonomy quickie ids.above.98 conflicts_98 98 85 70 final
+    
+15.5 OPTIONAL: plot benefits of using this workflow (R, mothur, bash)
+    a. Improvement over general database only:
+        Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID.csv plots final.taxonomy.names final.general.names
+    b. Improvement over custom database only:
+        mothur &quot;#classify.seqs(fasta=otus.fasta, template=custom.fasta, taxonomy=custom.taxonomy, method=wang, probs=T, processors=2, cutoff=0)&quot;
+        cat otus.custom.wang.taxonomy &gt; otus.custom.taxonomy
+        sed 's/[[:blank:]]/\;/' &lt;otus.custom.taxonomy &gt;otus.custom.taxonomy.reformatted
+        mv otus.custom.taxonomy.reformatted otus.custom.taxonomy
+        mkdir conflicts_forcing
+        Rscript find_classification_disagreements.R otus.custom.taxonomy otus.98.85.70.taxonomy ids.above.98 conflicts_forcing NA 85 70 forcing
+        Rscript plot_classification_disagreements.R otus.abund plots conflicts_forcing otus.custom.85.taxonomy otus.98.85.70.taxonomy
+
+16. tidy up (bash)
+    rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otus.custom.taxonomy otus.custom.[0-9]* custom.general* *pvalues total* final*names
+    mkdir scripts ; mv *.py *.R *.sh *.md scripts
+    mkdir analysis ; mv conflicts* plots analysis
+    mkdir data ; mv otus* data
+    mkdir databases ; mv *.taxonomy *.fasta databases</code></pre>
+<p><br> <br> <strong>OR: Run steps as a block using these batch scripts:</strong><br />
+(you have to open the batch script and enter your chosen pident and confidence values at the beginning)</p>
+<pre><code>Full TaxAss:
+  a. Run a bunch of pidents
+    ./RunSteps_1-14.sh
+  b. create final taxonomy at chosen pident 
+    ./RunStep_15.sh
+  c. clean up after everything worked
+    ./RunStep_16.sh
+
+As few steps as possible (choose pident at start):
+  ./RunSteps_quickie.sh
+  </code></pre>
 <p>Detailed explanations of commands and inputs are below:</p>
 <hr />
-<p>-1. background on why we chose this workflow</p>
-<p>Our original taxonomy assignment workflow was straightforward and more simple: everything was classified to 70% using our FW database all classifications that weren’t “unclassified” at the lineage level were kept everything else was re-classified using green genes to 60%</p>
-<p>However this workflow was flawed due to a misunderstanding of the classification p values: -The 70% bootstrap value refers to the repeatability of the taxonomy assignment, NOT to it’s accuracy. -A classification that is given at 70% confidence means that 70% of the time when you feed that sequence into that database it goes into that group. -The classifier sill puts anything you feed into it a classification, even it the true classification is not included in the database. -The GG database is huge, if you put something into it that the database doesn’t have, it will likely put it in random different clusters each time and it will be “unclassified” -Our database is small. If you put something into it that it doesn’t have, it fill find whatever it’s closest to and consistently call it that because there are not as many dissimilar options to spread it between. consistently. meaning a high bootstrap value. -simple example: if you give our FW database an archaea sequence, 100% of the time it will say it is a bacteria- because the database only has bacteria in it.</p>
-<p>Consequences of the flaw: -we were forcing sequences that do not match well to be called our favorite FW taxa -we may have missed other taxa that may be important -we may have muddied the relationships of our key taxa by adding in unrelated ones</p>
-<p>Possible solutions and why they don’t work: -Classify in GG first -then reclassify the “freshwater” phylums. -this is basically what Jason did to solve the problem -but phyla are too broad in GG, can’t assume everything in phylum is in our database -Classify in GG first -then reclassify the “freshwater” orders (or some lower level) -but GG lacks the resolution to identify those orders, we’d miss many sequences b/c GG would call them unclassified -Combine the two taxonomy databases and classify all at once -if something is present in both databases, it will be split during classification, 50% going into one, the other 50% into the other, and remain unclassified -Classify our sequences with green genes, remove those green genes sequences, and then combine the databases and classify all at once -the taxonomy databases are highly curated, adding something new in is not that simple. -the structure of the two databases may differ at higher taxonomic resolution -the green genes classification might not actually be a good match if the freshwater sequence just doesn’t exist in green genes, so then we’d be removing an unrelated sequence that we shouldn’t. -how can you differentiate if the fw sequence does not exist in gg or if the fw sequence exists in gg but is only named to class level. -Classify the sequences in the freshwater database with a different method, like BLAST, since it’s a small database anyway. -the taxonomy assignment algorithm takes into consideration phylogeny, which is a better classification that by just using sequence similarity.</p>
-<p>Our solution/this workflow (that we think works): -Classify in FW first, but with a cutoff not based on clustering bootstrap values -use a BLAST cutoff to identify highly similar sequences to those in our freshwater sequence database -classify those hightly similar sequences with a classification algorithm and our db -classify the remaining sequences with a large database</p>
+</div>
+<div id="format-files-textwrangler-or-bash" class="section level1">
+<h1><span style="color:SteelBlue">0. format files (textwrangler or bash)</span></h1>
+<pre><code>These are the files you supply as input into the workflow:
+    custom.fasta        fasta sequences in your small, ecosystem-specific taxonomy database
+    custom.taxonomy     taxonomy names in your small, ecosystem-specific taxonomy database
+    general.fasta       fasta sequences in your large, general comrpehensive taxonomy database
+    general.taxonomy    taxonomy names in your large, general comprehensive taxonomy database
+    otus.fasta          fasta sequences for each of your OTUs (OTUs can be clustered or unique sequences)
+    otus.abund          relative abundance of each OTU (i.e. the OTU table)
+
+I recommend you move all of these files into a new folder that also contains the workflow scripts, 
+and rename them to match the above names so that you can copy and paste commands from this workflow.
+Also put the script files in this workflow into that same folder.
+Then make that folder your working directory for the entirety of this workflow.
+
+_____________________________________________
+
+I. General notes on the seqIDs in all files:
+
+OTU seqID's:
+            -cannot contain any whitespace
+                BLAST will call some parts the seqID and some parts comments if they're separated.
+                Having BLAST seqIDs that don't match the full &gt;comment line of the fasta file will 
+                throw off the python script that creates fasta files for the chosen seqIDs in step 8.
+                Having any spaces will also throw off the R script that checks blast hit numbers.
+             -must match between the otus.fasta file and the otus.abund file,
+                though consistent ordering is not necessary.
+             -cannot contain semicolons
+                The taxonomy file format produced by mothur is semicolon delimited, so semicolons in
+                file names will throw off all R scripts by adding an extra column.
+             -cannot contain dashes
+                If there are dashes it makes it difficult to switch between aligned and unaligned
+                fasta files because you can't simply remove all dashes without changing the seqID names
+
+
+_____________________________________________
+
+II. Taxonomy Database Files:
+
+______________________
+
+1. .taxonomy files: 
+
+Must be compatible with mothur, example format:
+        
+seqID   kingdom;phylum;class;order;family;genus;species;
+        
+    -no whitespace except for the tab between seqID and taxonomy
+    -taxonomy level names separated by semicolons
+    -must have a semicolon at the end of each line, too!
+
+___________     
+
+The Greengenes taxonomy database can be reformatted this way: 
+
+Full 4 Commands (type in terminal) when general.taxonomy is the Greengenes taxonomy file:
+
+sed 's/ //g' &lt;general.taxonomy &gt;NoSpaces
+sed 's/$/;/' &lt;NoSpaces &gt;EndLineSemicolons
+mv EndLineSemicolons general.taxonomy
+rm NoSpaces
+
+Syntax of commands and what each argument does:
+    sed 's/find/replace/ &lt;input &gt;output
+        sed     is a &quot;stream editor,&quot; a function for editing streams of text in the terminal
+        s       tells it you are doing a substitution
+                in the first sed command that was simply a typed space
+                in the second sed command the $ means 'end of line'
+        replace this is what you are replacing with
+                in the first sed command it was left blank, to simply remove spaces
+                in the second sed command it is a semicolon
+        g       this means &quot;global&quot; find/replace all occurances, not just the first per line
+        input   this is the file sed searches through, here it is general.taxonomy (if that is green genes!)
+        output  this is the file sed creates (note it must have a different name than input)
+    
+    mv filename1 filename2
+        mv      this is a function to move (aka rename) a file from name1 to name2
+                simply keeping the edited file the same name  
+    rm filename
+        rm      this removes (aka deletes) the file named filename
+
+***** add to just use the shell script reformat_greengenes.sh instead. ****     
+___________
+
+The Silva database... 
+
+***** made shell script reformat_silva.sh but it doesn't work b/c silva is stupid. 
+there's no way to make a compatible file without opening it in ARB and exporting in a different format yourself.
+mothur and qiime did it for you, but they're also out of date. wtf SILVA? literally noone could use that format for anything.
+(see analysis notes 12-5-16 for this saga) *****
+
+______________________
+
+2. .fasta files:
+
+These should be in fasta format (note the carrot before the seqID, a new line separating 
+seqID from sequence, sequence can be one line or multiple lines.) example format:
+        
+&gt;seqID
+TACGTAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAG
+&gt;seqID
+TACGTAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAG
+        
+Note that they should not be aligned. The dashes in aligned sequences don't work with BLAST.
+
+An Aligned file would look something like this:
+&gt;SRR1531609.6
+GAG-G-A-A--TA-TT--GG-T-C----AA-T-G-G--GC-----GC-A--A---G-C-C-T-G-A-A-C-C-A---GC-C--A--T-GCC-G-A-G-T------G-C-A--G--GA-----------------------------T-G--A--C--G-G-TC----C---TA-TG-----G-A-T-----T-G-T-A---AA-C-T-GC--------------------TT-TT-G-T--A-CAG----G--A-A--G---AA-ACAC-T---C-C-C--T---------------------C----------------------------GT---------------------------G------------------------A-GGG-A-GC-T-T-G-A-C-G-----G-T---A-C-TG--------T-A-A-G----
+
+You can remove hyphens using this terminal command:
+
+Full Command (Type in Terminal):
+
+sed 's/-//g' &lt;aligned.fasta &gt;otus.fasta
+
+What the commands are:
+    sed             a stream editor, built-in bash function
+    s               tells it to do a substitution
+    g               tells it to do a global substitution (ie. every instance not just first on the line)
+    /-//            is format /find/replace/
+    aligned.fasta   the name of your aligned fasta file
+    otus.fasta      the name of the reformatted file you're creating
+
+NOTE: this removes hyphens from everywhere, so if you had hyphens in your seqID names you have to also remove
+hyphens from the names in your abund file. SeqIDs must match exactly btwn the two files (tho order doesn't matter)
+
+So may also want to do:
+
+sed 's/-//g' &lt;names-with-dashed.count_table &gt;otus.count_table
+
+_____________________________________________
+
+II. Your OTU files:
+    - QC of your OTU sequences should be performed before you start this workflow.
+
+______________________
+
+1. .fasta file:
+
+Same format as the taxonomy database fasta files, above.
+
+______________________
+
+2. .abund file:
+
+This is the table of relative abundances for each OTU in each sample, aka your OTU table. 
+
+    - It needs to be in relative abundance not raw counts.
+     That means you could either have subsampled during QC, or have divided all abundances
+     in a given sample by the total reads in that samples.  In other words, it must be 
+     relativized by sample so that each sample has the same total reads. This is important 
+     for the plot in step 14 that helps you choose an appropriate pident cutoff.
+     
+    - Format is tab delimited, seqIDs in 1st column, abundances in rest of columns, with headers (aka colnames):
+
+colname colname     colname     colname     colname
+seqID   Abundance   Abundance   Abundance   Abundance
+seqID   Abundance   Abundance   Abundance   Abundance
+seqID   Abundance   Abundance   Abundance   Abundance
+        
+___________
+        
+If mothur was used for QC, reformat file using the R script reformat_mothur_OTU_tables.R:
+        
+Full Command (type in terminal):
+        
+Rscript reformat_mothur_OTU_tables.R StupidLongMothurName.count_table count_table otus.abund
+        
+What each argument is:
+    Rscript                             Signal you're sourcing an R script with arguments
+    reformat_mothur_OTU_tables.R        Name of R script to run
+    StupidLongMothurName.count_table    name of the mothur file you're starting with
+    count_table                         type of mothur file, as specified by it's extension
+                                        options: count_table or shared
+    otus.abund                          name of the OTU table you feed into this workflow
+        
+More notes on the mothur file types:
+    .count_table        use if you are not clustering sequences, just cleaning sequencing errors
+    .shared             use if you clustered sequences
+    In other words, whatever your last OTU-esque table is prior to assigning taxonomy.
+    Note that the .abund file is a non-table-y space-saving format that you can't use here.
+            
+___________
+
+If qiime, this file is called:
+        ****check on this***
+        </code></pre>
 <hr />
-<ol start="0" style="list-style-type: decimal">
-<li>format files (textwrangler or bash)</li>
-</ol>
-<p>These are the files you supply as input into the workflow: custom.fasta fasta sequences in your small, ecosystem-specific taxonomy database custom.taxonomy taxonomy names in your small, ecosystem-specific taxonomy database general.fasta fasta sequences in your large, general comrpehensive taxonomy database general.taxonomy taxonomy names in your large, general comprehensive taxonomy database otus.fasta fasta sequences for each of your OTUs (OTUs can be clustered or unique sequences) otus.abund relative abundance of each OTU (i.e. the OTU table)</p>
-<p>I recommend you move all of these files into a new folder that also contains the workflow scripts, and rename them to match the above names so that you can copy and paste commands from this workflow. Also put the script files in this workflow into that same folder. Then make that folder your working directory for the entirety of this workflow.</p>
+</div>
+<div id="make-blast-database-file-blast" class="section level1">
+<h1><span style="color:SteelBlue">1. make BLAST database file (blast)</span></h1>
+<pre><code>Use the command makeblastdb to create a blast database out of the FW taxonomy fasta files.
+Need to create a database because:
+    1. BLAST will run faster
+    2. Having a database is necessary for some of the output formats
+
+Full Command (type in terminal):
+
+makeblastdb -dbtype nucl -in custom.fasta -input_type fasta -parse_seqids -out custom.db
+
+What each argument is:
+    -dbtype nucl        a required argument, says the database input file is nucleic acids (nucl)
+    -in custom.fasta    specify path of the input file that it makes the database out of.
+                        this is the path to the small custom taxonomy file you want to use 
+                        (i.e. the freshwater taxonomy database fasta file)
+                        note: if the file path has spaces in it, it needs to be ' &quot;/path/double quoted&quot; '
+    -input_type fasta   specifies the input file is a fasta file (that's the default value too)
+    -parse_seqids       this tells it to include information in the database that will later
+                        allow you to pull sequences back out of it.  
+                        This is necessary for using blast_formatter later.
+    -out custom.db      specify path of the database files this command creats. BLAST makes 6 files 
+                        with different extensions, but they all start with this.  BLAST Default is your 
+                        -in file name with those extensions, but it's less confusing to add .db so you 
+                        can easily identify what each file is.  
+
+These 6 files are created:
+    custom.db.nhr
+    custom.db.nog
+    custom.db.nsd
+    custom.db.nsi
+    custom.db.nsq
+(but later when you tell BLAST which database file to use you just say custom.db and it figures the rest out)</code></pre>
 <hr />
-<p>I. General notes on the seqIDs in all files:</p>
-<p>OTU seqID’s: -cannot contain any whitespace BLAST will call some parts the seqID and some parts comments if they’re separated. Having BLAST seqIDs that don’t match the full &gt;comment line of the fasta file will throw off the python script that creates fasta files for the chosen seqIDs in step 8. Having any spaces will also throw off the R script that checks blast hit numbers. -must match between the otus.fasta file and the otus.abund file, though consistent ordering is not necessary. -cannot contain semicolons The taxonomy file format produced by mothur is semicolon delimited, so semicolons in file names will throw off all R scripts by adding an extra column. -cannot contain dashes If there are dashes it makes it difficult to switch between aligned and unaligned fasta files because you can’t simply remove all dashes without changing the seqID names</p>
+</div>
+<div id="run-blast-blast" class="section level1">
+<h1><span style="color:SteelBlue">2. run BLAST (blast)</span></h1>
+<pre><code>Use the command blastn to run a megablast that returns the best hit in the taxonomy database (subject)
+for each of your OTU sequences (queries). Megablast is optimized for finding very similar matches with
+sequences longer than 30 bp.  This workflow was made for ~100 bp sequences and may need to be re-optimized
+for sequences of different lengths.  You check if settings are appropriate in step 6.
+
+Full Command (type in terminal):
+
+blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 5
+
+What each argument is:                      
+    -query otus.fasta       specify path of query file, otus.fasta.  This is the fasta file of your OTU 
+                            sequences you want classified that you reformatted in step 0.
+    -task megablast         this is already optimized by smart BLAST people for high similarity hits.
+                            It is also the blastn default task. for more info see 
+                            http://www.ncbi.nlm.nih.gov/Class/MLACourse/Modules/BLAST/nucleotide_blast.html
+    -db custom.db           the name of the blast database created in step 1(without the additional file extensions)
+                            This database is made from your subject sequences, the small, custom taxonomy database
+    -out otus.custom.blast  specify path of the blast output file (this is the file you're creating). Its format 
+                            is unreadable by you, but it's the detailed BLAST format that blast_formatter accepts.
+                            The filename here describes query.subject.blast
+    -outfmt 11              need this format in order to use blast_formatter command
+    -max_target_seqs 5      only keep the best 5 hits for each query sequence
+                            you will compare how good these are to check if BLAST settings are appropriate in step 6
+                            you can choose more or less target seqs if you want to, it doesn't have a huge impact on speed.</code></pre>
 <hr />
-<ol start="2" style="list-style-type: upper-roman">
-<li>Taxonomy Database Files:</li>
-</ol>
+</div>
+<div id="reformat-blast-results-blast" class="section level1">
+<h1><span style="color:SteelBlue">3. reformat BLAST results (blast)</span></h1>
+<pre><code>The blast_formatter function in blast takes the outformat 11 file and reformats it to any other
+possible format.  Here we reformat to a custom table format to feed into the R script that pulls out
+matching and nonmatching sequence IDs.
+However, using blast_formatter you can look at your blast results from the previous step any way you'd like!
+Just keep in mind, things like &quot;length&quot; have different definitions in different output formats (yeah. really.), 
+so pay careful attention if you try to re-do calculations on your own.
+
+Full Command (type in terminal):
+
+blast_formatter -archive otus.custom.blast -outfmt &quot;6 qseqid pident length qlen qstart qend&quot; -out otus.custom.blast.table
+
+What each argument is:      
+    -archive otus.custom.blast      Specify path to the blast result file you are reformatting.
+                                    This was generated in step 2, it is in the ASN.1 blast file format.
+    -outfmt &quot;6 qseqid pident length qlen qstart qend&quot;   
+                                    6 is a tabular format without headers or other info btwn rows of data, 
+                                    the rest specifies what goes in each tab-delimited column:
+                                        1 qseqid: query (OTU) sequence ID
+                                        2 pident: percent identity (# of matches / # &quot;columns&quot; in the HSP)
+                                        3 length: length of alignment
+                                        4 qlen: full length of query sequence
+                                        5 qstart: index of beginning of alignment on query sequence
+                                        6 qend: index of end of alignment on query sequence
+    -out otus.custom.blast.table    Specify path to the output file with above formatting.</code></pre>
 <hr />
-<ol style="list-style-type: decimal">
-<li>.taxonomy files:</li>
-</ol>
-<p>Must be compatible with mothur, example format:</p>
-<p>seqID kingdom;phylum;class;order;family;genus;species;</p>
-<pre><code>-no whitespace except for the tab between seqID and taxonomy
--taxonomy level names separated by semicolons
--must have a semicolon at the end of each line, too!</code></pre>
-<hr />
-<p>The Greengenes taxonomy database can be reformatted this way:</p>
-<p>Full 4 Commands (type in terminal) when general.taxonomy is the Greengenes taxonomy file:</p>
-<p>sed ‘s/ //g’ &lt;general.taxonomy &gt;NoSpaces sed ‘s/$/;/’ <NoSpaces>EndLineSemicolons mv EndLineSemicolons general.taxonomy rm NoSpaces</p>
-<p>Syntax of commands and what each argument does: sed ‘s/find/replace/ <input>output sed is a “stream editor,” a function for editing streams of text in the terminal s tells it you are doing a substitution in the first sed command that was simply a typed space in the second sed command the $ means ’end of line’ replace this is what you are replacing with in the first sed command it was left blank, to simply remove spaces in the second sed command it is a semicolon g this means “global” find/replace all occurances, not just the first per line input this is the file sed searches through, here it is general.taxonomy (if that is green genes!) output this is the file sed creates (note it must have a different name than input)</p>
-<pre><code>mv filename1 filename2
-    mv      this is a function to move (aka rename) a file from name1 to name2
-            simply keeping the edited file the same name  
-rm filename
-    rm      this removes (aka deletes) the file named filename</code></pre>
-<p>***** add to just use the shell script reformat_greengenes.sh instead. ****<br />
-___________</p>
-<p>The Silva database…</p>
-<p>***** made shell script reformat_silva.sh but it doesn’t work b/c silva is stupid. there’s no way to make a compatible file without opening it in ARB and exporting in a different format yourself. mothur and qiime did it for you, but they’re also out of date. wtf SILVA? literally noone could use that format for anything. (see analysis notes 12-5-16 for this saga) *****</p>
-<hr />
-<ol start="2" style="list-style-type: decimal">
-<li>.fasta files:</li>
-</ol>
-<p>These should be in fasta format (note the carrot before the seqID, a new line separating seqID from sequence, sequence can be one line or multiple lines.) example format:</p>
-<blockquote>
-<p>seqID TACGTAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAG seqID TACGTAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAG</p>
-</blockquote>
-<p>Note that they should not be aligned. The dashes in aligned sequences don’t work with BLAST.</p>
-<p>An Aligned file would look something like this: &gt;SRR1531609.6 GAG-G-A-A–TA-TT–GG-T-C—-AA-T-G-G–GC—–GC-A–A—G-C-C-T-G-A-A-C-C-A—GC-C–A–T-GCC-G-A-G-T——G-C-A–G–GA—————————–T-G–A–C–G-G-TC—-C—TA-TG—–G-A-T—–T-G-T-A—AA-C-T-GC——————–TT-TT-G-T–A-CAG—-G–A-A–G—AA-ACAC-T—C-C-C–T———————C—————————-GT—————————G————————A-GGG-A-GC-T-T-G-A-C-G—–G-T—A-C-TG——–T-A-A-G—-</p>
-<p>You can remove hyphens using this terminal command:</p>
-<p>Full Command (Type in Terminal):</p>
-<p>sed ‘s/-//g’ &lt;aligned.fasta &gt;otus.fasta</p>
-<p>What the commands are: sed a stream editor, built-in bash function s tells it to do a substitution g tells it to do a global substitution (ie. every instance not just first on the line) /-// is format /find/replace/ aligned.fasta the name of your aligned fasta file otus.fasta the name of the reformatted file you’re creating</p>
-<p>NOTE: this removes hyphens from everywhere, so if you had hyphens in your seqID names you have to also remove hyphens from the names in your abund file. SeqIDs must match exactly btwn the two files (tho order doesn’t matter)</p>
-<p>So may also want to do:</p>
-<p>sed ‘s/-//g’ &lt;names-with-dashed.count_table &gt;otus.count_table</p>
-<hr />
-<ol start="2" style="list-style-type: upper-roman">
-<li>Your OTU files:
-<ul>
-<li>QC of your OTU sequences should be performed before you start this workflow.</li>
-</ul></li>
-</ol>
-<hr />
-<ol style="list-style-type: decimal">
-<li>.fasta file:</li>
-</ol>
-<p>Same format as the taxonomy database fasta files, above.</p>
-<hr />
-<ol start="2" style="list-style-type: decimal">
-<li>.abund file:</li>
-</ol>
-<p>This is the table of relative abundances for each OTU in each sample, aka your OTU table.</p>
-<pre><code>- It needs to be in relative abundance not raw counts.
- That means you could either have subsampled during QC, or have divided all abundances
- in a given sample by the total reads in that samples.  In other words, it must be 
- relativized by sample so that each sample has the same total reads. This is important 
- for the plot in step 14 that helps you choose an appropriate pident cutoff.
- 
-- Format is tab delimited, seqIDs in 1st column, abundances in rest of columns, with headers (aka colnames):</code></pre>
-<p>colname colname colname colname colname seqID Abundance Abundance Abundance Abundance seqID Abundance Abundance Abundance Abundance seqID Abundance Abundance Abundance Abundance</p>
-<hr />
-<p>If mothur was used for QC, reformat file using the R script reformat_mothur_OTU_tables.R:</p>
-<p>Full Command (type in terminal):</p>
-<p>Rscript reformat_mothur_OTU_tables.R StupidLongMothurName.count_table count_table otus.abund</p>
-<p>What each argument is: Rscript Signal you’re sourcing an R script with arguments reformat_mothur_OTU_tables.R Name of R script to run StupidLongMothurName.count_table name of the mothur file you’re starting with count_table type of mothur file, as specified by it’s extension options: count_table or shared otus.abund name of the OTU table you feed into this workflow</p>
-<p>More notes on the mothur file types: .count_table use if you are not clustering sequences, just cleaning sequencing errors .shared use if you clustered sequences In other words, whatever your last OTU-esque table is prior to assigning taxonomy. Note that the .abund file is a non-table-y space-saving format that you can’t use here.</p>
-<hr />
-<p>If qiime, this file is called: ****check on this***</p>
-<hr />
-<ol style="list-style-type: decimal">
-<li>make BLAST database file (blast)</li>
-</ol>
-<p>Use the command makeblastdb to create a blast database out of the FW taxonomy fasta files. Need to create a database because: 1. BLAST will run faster 2. Having a database is necessary for some of the output formats</p>
-<p>Full Command (type in terminal):</p>
-<p>makeblastdb -dbtype nucl -in custom.fasta -input_type fasta -parse_seqids -out custom.db</p>
-<p>What each argument is: -dbtype nucl a required argument, says the database input file is nucleic acids (nucl) -in custom.fasta specify path of the input file that it makes the database out of. this is the path to the small custom taxonomy file you want to use (i.e. the freshwater taxonomy database fasta file) note: if the file path has spaces in it, it needs to be ‘“/path/double quoted”’ -input_type fasta specifies the input file is a fasta file (that’s the default value too) -parse_seqids this tells it to include information in the database that will later allow you to pull sequences back out of it.<br />
-This is necessary for using blast_formatter later. -out custom.db specify path of the database files this command creats. BLAST makes 6 files with different extensions, but they all start with this. BLAST Default is your -in file name with those extensions, but it’s less confusing to add .db so you can easily identify what each file is.</p>
-<p>These 6 files are created: custom.db.nhr custom.db.nog custom.db.nsd custom.db.nsi custom.db.nsq (but later when you tell BLAST which database file to use you just say custom.db and it figures the rest out)</p>
-<hr />
-<ol start="2" style="list-style-type: decimal">
-<li>run BLAST (blast)</li>
-</ol>
-<p>Use the command blastn to run a megablast that returns the best hit in the taxonomy database (subject) for each of your OTU sequences (queries). Megablast is optimized for finding very similar matches with sequences longer than 30 bp. This workflow was made for ~100 bp sequences and may need to be re-optimized for sequences of different lengths. You check if settings are appropriate in step 6.</p>
-<p>Full Command (type in terminal):</p>
-<p>blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 5</p>
-<p>What each argument is:<br />
--query otus.fasta specify path of query file, otus.fasta. This is the fasta file of your OTU sequences you want classified that you reformatted in step 0. -task megablast this is already optimized by smart BLAST people for high similarity hits. It is also the blastn default task. for more info see <a href="http://www.ncbi.nlm.nih.gov/Class/MLACourse/Modules/BLAST/nucleotide_blast.html" class="uri">http://www.ncbi.nlm.nih.gov/Class/MLACourse/Modules/BLAST/nucleotide_blast.html</a> -db custom.db the name of the blast database created in step 1(without the additional file extensions) This database is made from your subject sequences, the small, custom taxonomy database -out otus.custom.blast specify path of the blast output file (this is the file you’re creating). Its format is unreadable by you, but it’s the detailed BLAST format that blast_formatter accepts. The filename here describes query.subject.blast -outfmt 11 need this format in order to use blast_formatter command -max_target_seqs 5 only keep the best 5 hits for each query sequence you will compare how good these are to check if BLAST settings are appropriate in step 6 you can choose more or less target seqs if you want to, it doesn’t have a huge impact on speed.</p>
-<hr />
-<ol start="3" style="list-style-type: decimal">
-<li>reformat BLAST results (blast)</li>
-</ol>
-<p>The blast_formatter function in blast takes the outformat 11 file and reformats it to any other possible format. Here we reformat to a custom table format to feed into the R script that pulls out matching and nonmatching sequence IDs. However, using blast_formatter you can look at your blast results from the previous step any way you’d like! Just keep in mind, things like “length” have different definitions in different output formats (yeah. really.), so pay careful attention if you try to re-do calculations on your own.</p>
-<p>Full Command (type in terminal):</p>
-<p>blast_formatter -archive otus.custom.blast -outfmt “6 qseqid pident length qlen qstart qend” -out otus.custom.blast.table</p>
-<p>What each argument is:<br />
--archive otus.custom.blast Specify path to the blast result file you are reformatting. This was generated in step 2, it is in the ASN.1 blast file format. -outfmt “6 qseqid pident length qlen qstart qend”<br />
-6 is a tabular format without headers or other info btwn rows of data, the rest specifies what goes in each tab-delimited column: 1 qseqid: query (OTU) sequence ID 2 pident: percent identity (# of matches / # “columns” in the HSP) 3 length: length of alignment 4 qlen: full length of query sequence 5 qstart: index of beginning of alignment on query sequence 6 qend: index of end of alignment on query sequence -out otus.custom.blast.table Specify path to the output file with above formatting.</p>
-<hr />
-<ol start="4" style="list-style-type: decimal">
-<li>correct BLAST pident (R)</li>
-</ol>
-<p>The calc_full_length_pident.R script takes the formatted blast file and calculates a “full length” pident value that corrects the pident value for the entire length of the query. BLAST returns the “highest scoring pair”, which is weighted by both similarity and length. However we are trying to compare the entire OTU sequence, not just a section of it that matches really well. I could not find any command that forces blast use the entire query sequence, so this is the workaround. This “full length” pident is a conservative, worst case scenario that assumes any edge gaps are mismatches. Calculation: “full length pident” = pident * length / (length - (qend - qstart) + qlen) This script performs those calculations, and then checks which of the top 5 reported BLAST hits had the best corrected, full length pident. It returns a similar, tab delimited output file that includes the corrected full length pident and which BLAST hit number had the best corrected pident.</p>
-<p>Full Command (type in terminal):</p>
-<p>Rscript calc_full_length_pident.R otus.custom.blast.table otus.custom.blast.table.modified</p>
-<p>Separate all arguments with a space.</p>
-<p>What each argument is: Rscript sources the R script using the arguments supplied after it in the terminal. calc_full_length_pident.R the R script. otus.custom.blast.table the formatted blast output from step 3 otus.custom.blast.table.modified the output file containing the modified BLAST hit table, used in step 5. It contains tab delimited columns without column names. They are: qseqid, pident, length, qlen, q.align, true.pids, hit.num.best.ids</p>
+</div>
+<div id="correct-blast-pident-r" class="section level1">
+<h1><span style="color:SteelBlue">4. correct BLAST pident (R)</span></h1>
+<pre><code>The calc_full_length_pident.R script takes the formatted blast file and calculates a 
+&quot;full length&quot; pident value that corrects the pident value for the entire length of the query.
+BLAST returns the &quot;highest scoring pair&quot;, which is weighted by both similarity and length.
+However we are trying to compare the entire OTU sequence, not just a section of it that 
+matches really well.  I could not find any command that forces blast use the entire query 
+sequence, so this is the workaround. This &quot;full length&quot; pident is a conservative, worst case 
+scenario that assumes any edge gaps are mismatches.
+Calculation:
+    &quot;full length pident&quot; = pident * length / (length - (qend - qstart) + qlen)
+This script performs those calculations, and then checks which of the top 5 reported BLAST hits had
+the best corrected, full length pident.  It returns a similar, tab delimited output file that 
+includes the corrected full length pident and which BLAST hit number had the best corrected pident.
+
+Full Command (type in terminal):
+
+Rscript calc_full_length_pident.R otus.custom.blast.table otus.custom.blast.table.modified
+
+
+Separate all arguments with a space.
+
+What each argument is:
+    Rscript                             sources the R script using the arguments supplied after it in the terminal.
+    calc_full_length_pident.R           the R script.
+    otus.custom.blast.table             the formatted blast output from step 3
+    otus.custom.blast.table.modified    the output file containing the modified BLAST hit table, used in step 5.
+                                        It contains tab delimited columns without column names. They are:
+                                        qseqid, pident, length, qlen, q.align, true.pids, hit.num.best.ids</code></pre>
 <hr />
 <ol start="5" style="list-style-type: decimal">
 <li>filter BLAST results (R)</li>
@@ -656,7 +844,6 @@ lists of seqIDs from steps 5 and 7: ex: ids.above.98 ids.below.98 ids.below.98.a
 <p>Saving these versions of the databases will let you can reproduce your data. Alternatively you could make note of the versions you used and how you downloaded them in a README file. These can be relatively large files.</p>
 <p>If you don’t care at all about being reproducible, all you really need to save is the stuff in the data/ folder. That’s your actual data. __________________________________________________________________________________________</p>
 <p>~The end~ __________________________________________________________________________________________</p>
-</div>
 </div>
 
 

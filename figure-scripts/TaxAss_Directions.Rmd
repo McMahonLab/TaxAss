@@ -29,6 +29,12 @@ small, custom taxonomy database and a large general database.
 This is a list of all the steps and possible commands. There are details for each step in separate sections.  
 
 ````
+-1. Download/Install 
+  BLAST+
+  R
+  mothur
+  (your computer already has python)
+  taxonomy databases
 
 0. format files (textwrangler or bash)
 	depends on your starting file formats
@@ -53,14 +59,14 @@ This is a list of all the steps and possible commands. There are details for eac
 3. reformat blast results (blast)
 	blast_formatter -archive otus.custom.blast -outfmt "6 qseqid pident length qlen qstart qend" -out otus.custom.blast.table
 
-4. correct BLAST pident (R)
+4. recalculate pident (R)
 	Rscript calc_full_length_pident.R otus.custom.blast.table otus.custom.blast.table.modified
 
 5. filter BLAST results (R)
 	Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.above.98 98 TRUE 
 	Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.below.98 98 FALSE
 
-6. check that BLAST settings are appropriate (R)
+6. check BLAST settings (R)
 	Rscript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
 
 7. recover sequence IDs left out of blast (python, bash)
@@ -95,7 +101,7 @@ This is a list of all the steps and possible commands. There are details for eac
 	
 13. compare taxonomy files (R)
 	mkdir conflicts_98
-	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70
+	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 80 80
 	
 14. OPTIONAL: choose appropriate pident cutoff (R)
 	note: you have to repeat steps 5, 7-10, & 12-13 with multiple pident cutoffs to do this step
@@ -149,355 +155,393 @@ Detailed explanations of commands and inputs are below:
 
 __________________________________________________________________________________________
 
-# <span style="color:SteelBlue">0. format files (textwrangler or bash)</span>
+# <span style="color:SteelBlue">-1. download/install</span>
 
+### Programs Needed:  
+
+Program       | Version             | Source                  | Specific Link
+--------------|---------------------|-------------------------|------------------------------------------  
+mothur        | v.1.39.5            | www.mothur.org          | https://github.com/mothur/mothur/releases/tag/v1.39.5  
+BLAST         | 2.2.31+             | ncbi.nlm.nih.gov        | https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download  
+TaxAss        | master branch       | `tax-scripts` folder    | https://github.com/McMahonLab/TaxAss <br> You don't need your own github account; you can click the green download button on the top right of the main page (do have to download all folders unfortunately)  
+python        | 2.7.11              | your computer already has this | don't need anything extra
+
+You want mothur and BLAST on your "path" (that means if you type them, your computer recognizes it as a program and runs it).
+BLAST does that automatically when you install it I think, but mothur does not. 
+First make sure mothur is downloaded to your home directory- should open if you type `~/mothur/mothur`.   
+
+**To add mothur to your path:**   
 ```
-These are the files you supply as input into the workflow:
-	custom.fasta		fasta sequences in your small, ecosystem-specific taxonomy database
-	custom.taxonomy		taxonomy names in your small, ecosystem-specific taxonomy database
-	general.fasta		fasta sequences in your large, general comrpehensive taxonomy database
-	general.taxonomy	taxonomy names in your large, general comprehensive taxonomy database
-	otus.fasta			fasta sequences for each of your OTUs (OTUs can be clustered or unique sequences)
-	otus.abund			relative abundance of each OTU (i.e. the OTU table)
+# open terminal window
+~ $ open .bash_profile
 
-I recommend you move all of these files into a new folder that also contains the workflow scripts, 
-and rename them to match the above names so that you can copy and paste commands from this workflow.
-Also put the script files in this workflow into that same folder.
-Then make that folder your working directory for the entirety of this workflow.
+# or if this file doesn't exist already:
+~ $ touch .bash_profile
+~ $ open .bash_profile
+
+# add this line to the .bash_profile doc
+export PATH=~/mothur:$PATH
+```
+Now you can open the mothur program just by typing `mothur` from any location. (after restarting terminal)
+
+### Database options:
+
+Database      | Version | File Name          | Download From
+--------------|---------|--------------------|-------------------------  
+FreshTrain    | 18Aug2016 | FreshTrain18Aug2016.zip | https://github.com/McMahonLab/TaxAss/FreshTrain-files<br>(You can download the single zip file by clicking on it)
+Greengenes    | May 2013  | gg_13_5.fasta <br> gg_13_5_taxonomy.txt| greengenes.secondgenome.com/downloads
+
+Unfortunately you can't download a useable (consistent delimiters/column names) version of SILVA diectly from their database. You'd have to import it into ARB and create that yourself. Another option is to use the version created by mothur or qiime, which you can find on their websites but which aren't necessarily the most up to date version. Feel free to share how you used SILVA in a github issue or email (robin.rohwer@gmail.com) and I'll add it to the instructions here.
+
+__________________________________________________________________________________________
+
+# <span style="color:SteelBlue">0. format files</span> {.tabset}
+
+## Files Needed
+
+#### <span style="color:SteelBlue">(Use this section's tabs for details on formatting each file type.)</span>
+
+These are the files you supply as input into the workflow:  
+
+File                | Description
+--------------------|------------------------------------------------------------------
+	custom.fasta		  | fasta sequences in your small, ecosystem-specific taxonomy database
+	custom.taxonomy		| taxonomy names in your small, ecosystem-specific taxonomy database
+	general.fasta		  | fasta sequences in your large, general comrpehensive taxonomy database
+	general.taxonomy	| taxonomy names in your large, general comprehensive taxonomy database
+	otus.fasta			  | fasta sequences for each of your OTUs (OTUs can be clustered or unique sequences)
+	otus.abund			  | relative abundance of each OTU (i.e. the OTU table)  
+
+**Move everything into the same folder, and make that your working directory.**  
+In other words, create a folder that all the tax-scripts and database and data files are inside of, 
+and then use that as your present working directory (`pwd`) to source all the scripts from.  
+<br>
+It might also help to rename your files to match the above names so that you can copy and paste commands from this workflow.
 
 _____________________________________________
 
-I. General notes on the seqIDs in all files:
+## seqID formats  
 
-OTU seqID's:
-			-cannot contain any whitespace
+General notes on the seqIDs in all files:
+
+OTU seqID's:  
+
+- **cannot contain any whitespace**  
 			 	BLAST will call some parts the seqID and some parts comments if they're separated.
-			 	Having BLAST seqIDs that don't match the full >comment line of the fasta file will 
+			 	Having BLAST seqIDs that don't match the full `>comment` line of the fasta file will 
 		 	 	throw off the python script that creates fasta files for the chosen seqIDs in step 8.
 		 	 	Having any spaces will also throw off the R script that checks blast hit numbers.
-		 	 -must match between the otus.fasta file and the otus.abund file,
-			 	though consistent ordering is not necessary.
-			 -cannot contain semicolons
+- **cannot contain semicolons**   
 			 	The taxonomy file format produced by mothur is semicolon delimited, so semicolons in
 			 	file names will throw off all R scripts by adding an extra column.
-			 -cannot contain dashes
+- **cannot contain dashes**  
 			 	If there are dashes it makes it difficult to switch between aligned and unaligned
 			 	fasta files because you can't simply remove all dashes without changing the seqID names
-
+- **must match between the otus.fasta file and the otus.abund file**  
+			 	(though consistent ordering is not necessary.)
 
 _____________________________________________
 
-II. Taxonomy Database Files:
+## .taxonomy files
 
-______________________
+### `.taxonomy` file format  
 
-1. .taxonomy files: 
+Must be compatible with mothur, example format:  
 
-Must be compatible with mothur, example format:
-		
+- no whitespace except for the tab between seqID and taxonomy
+- taxonomy level names separated by semicolons
+- must have a semicolon at the end of each line, too!
+
+```		
 seqID	kingdom;phylum;class;order;family;genus;species;
-		
-	-no whitespace except for the tab between seqID and taxonomy
-	-taxonomy level names separated by semicolons
-	-must have a semicolon at the end of each line, too!
+```
 
 ___________		
 
-The Greengenes taxonomy database can be reformatted this way: 
+#### Format the Greengenes Taxonomy Database  
 
-Full 4 Commands (type in terminal) when general.taxonomy is the Greengenes taxonomy file:
+Full 4 Commands (type in terminal):
 
-sed 's/ //g' <general.taxonomy >NoSpaces
-sed 's/$/;/' <NoSpaces >EndLineSemicolons
-mv EndLineSemicolons general.taxonomy
-rm NoSpaces
+```
+reformat_greengenes.sh general.taxonomy
+```
 
-Syntax of commands and what each argument does:
-	sed 's/find/replace/ <input >output
-		sed		is a "stream editor," a function for editing streams of text in the terminal
-		s		tells it you are doing a substitution
-				in the first sed command that was simply a typed space
-				in the second sed command the $ means 'end of line'
-		replace	this is what you are replacing with
-				in the first sed command it was left blank, to simply remove spaces
-				in the second sed command it is a semicolon
-		g		this means "global" find/replace all occurances, not just the first per line
-		input	this is the file sed searches through, here it is general.taxonomy (if that is green genes!)
-		output	this is the file sed creates (note it must have a different name than input)
-	
-	mv filename1 filename2
-		mv		this is a function to move (aka rename) a file from name1 to name2
-				simply keeping the edited file the same name  
-	rm filename
-		rm		this removes (aka deletes) the file named filename
+command argument   | description
+-------------------|----------------------------------------------
+`general.taxonomy` | the downloaded greengenes file: `gg_13_5_taxonomy.txt`
 
-***** add to just use the shell script reformat_greengenes.sh instead. ****		
+Output is a file called `general.taxonomy` that is formatted correctly.
+
 ___________
 
-The Silva database... 
+#### Format the Silva database... 
 
-***** made shell script reformat_silva.sh but it doesn't work b/c silva is stupid. 
+<span style="color:grey">made shell script reformat_silva.sh but it doesn't work b/c silva is stupid and uses inconsistent delimiters w/ inconsistent column numbers. 
 there's no way to make a compatible file without opening it in ARB and exporting in a different format yourself.
 mothur and qiime did it for you, but they're also out of date. wtf SILVA? literally noone could use that format for anything.
-(see analysis notes 12-5-16 for this saga) *****
+(see analysis notes 12-5-16 for this saga)</span>
+
+Best bet is to pull it from the mothur website. Note that SILVA only includes names to genus, although it does contain more references.
 
 ______________________
 
-2. .fasta files:
+## .fasta files:
 
-These should be in fasta format (note the carrot before the seqID, a new line separating 
-seqID from sequence, sequence can be one line or multiple lines.) example format:
-		
+### `.fasta` file format 
+
+These should be in fasta format: 
+
+- carrot before the seqID (formatted according to seqID formats tab)
+- a new line separating seqID from sequence
+- sequence can be one line or multiple lines 
+- sequences should not be aligned
+
+example correct format:
+```
 >seqID
 TACGTAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAG
 >seqID
 TACGTAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAG
-		
-Note that they should not be aligned. The dashes in aligned sequences don't work with BLAST.
+```
 
-An Aligned file would look something like this:
+#### How to un-align:
+
+The dashes in aligned sequences don't work with BLAST.
+An Aligned file would look something like this:  
+```
 >SRR1531609.6
 GAG-G-A-A--TA-TT--GG-T-C----AA-T-G-G--GC-----GC-A--A---G-C-C-T-G-A-A-C-C-A---GC-C--A--T-GCC-G-A-G-T------G-C-A--G--GA-----------------------------T-G--A--C--G-G-TC----C---TA-TG-----G-A-T-----T-G-T-A---AA-C-T-GC--------------------TT-TT-G-T--A-CAG----G--A-A--G---AA-ACAC-T---C-C-C--T---------------------C----------------------------GT---------------------------G------------------------A-GGG-A-GC-T-T-G-A-C-G-----G-T---A-C-TG--------T-A-A-G----
+```
 
 You can remove hyphens using this terminal command:
 
 Full Command (Type in Terminal):
-
+```
 sed 's/-//g' <aligned.fasta >otus.fasta
+```  
 
-What the commands are:
-	sed				a stream editor, built-in bash function
-	s				tells it to do a substitution
-	g				tells it to do a global substitution (ie. every instance not just first on the line)
-	/-//			is format /find/replace/
-	aligned.fasta	the name of your aligned fasta file
-	otus.fasta		the name of the reformatted file you're creating
+command   | description
+----------|----------------------------------------------
+`sed`     | a "stream editor" for streams of text, built-in bash function  
+`s` 		  | tells it to do a substitution 
+`/-//`		|	is format `/find/replace/`, so find `-`, replace with nothing
+`g` 		  | tells it to do a global substitution (ie. every instance not just first on the line)
+`aligned.fasta` | the name of your aligned fasta file 
+`otus.fasta`	  | the name of the reformatted file you're creating (note it must have a different name than input)
 
 NOTE: this removes hyphens from everywhere, so if you had hyphens in your seqID names you have to also remove
 hyphens from the names in your abund file. SeqIDs must match exactly btwn the two files (tho order doesn't matter)
 
 So may also want to do:
-
+```
 sed 's/-//g' <names-with-dashed.count_table >otus.count_table
+```
 
 _____________________________________________
 
-II. Your OTU files:
-	- QC of your OTU sequences should be performed before you start this workflow.
+## .abund file
 
-______________________
+### `.abund` file format 
 
-1. .fasta file:
+NOTE: you don't need this file if you are taking the "quickie" route and not running the validation steps. 
+_i.e._ you're choosing a pident from the start, and just making the taxonomy table with no other checks.
 
-Same format as the taxonomy database fasta files, above.
+**This is the table of relative abundances for each OTU in each sample, aka your OTU table:** 
 
-______________________
-
-2. .abund file:
-
-This is the table of relative abundances for each OTU in each sample, aka your OTU table. 
-
-	- It needs to be in relative abundance not raw counts.
+- **relative abundance not raw counts**  
 	 That means you could either have subsampled during QC, or have divided all abundances
 	 in a given sample by the total reads in that samples.  In other words, it must be 
 	 relativized by sample so that each sample has the same total reads. This is important 
 	 for the plot in step 14 that helps you choose an appropriate pident cutoff.
-	 
-	- Format is tab delimited, seqIDs in 1st column, abundances in rest of columns, with headers (aka colnames):
+- **tab delimited**  
+- **seqIDs in 1st column, abundances in rest of columns** 
+- **with headers (column names), but no row names**  
+- **no "totals" row/column**  
+   (as might have been added by mother)
+- **numbers only for all abundance values**
 
+```
 colname	colname		colname		colname		colname
 seqID	Abundance	Abundance	Abundance	Abundance
 seqID	Abundance	Abundance	Abundance	Abundance
 seqID	Abundance	Abundance	Abundance	Abundance
-		
+```
 ___________
 		
-If mothur was used for QC, reformat file using the R script reformat_mothur_OTU_tables.R:
+### Format a mothur `.count_table` file  
+
+If you used mothur for QC and are proceeding with unique sequences, as in the TaxAss paper, you can reformat the outs.count_table file this way:  
 		
 Full Command (type in terminal):
-		
+```
 Rscript reformat_mothur_OTU_tables.R StupidLongMothurName.count_table count_table otus.abund
-		
-What each argument is:
-	Rscript								Signal you're sourcing an R script with arguments
-	reformat_mothur_OTU_tables.R		Name of R script to run
-	StupidLongMothurName.count_table	name of the mothur file you're starting with
-	count_table							type of mothur file, as specified by it's extension
-										options: count_table or shared
-	otus.abund							name of the OTU table you feed into this workflow
-		
-More notes on the mothur file types:
-	.count_table		use if you are not clustering sequences, just cleaning sequencing errors
-	.shared				use if you clustered sequences
-	In other words, whatever your last OTU-esque table is prior to assigning taxonomy.
-	Note that the .abund file is a non-table-y space-saving format that you can't use here.
-			
-___________
+```
 
-If qiime, this file is called:
-		****check on this***
+command argument                   | description
+-----------------------------------|----------------------------------------------
+`Rscript`					                 | way to source an R script with arguments  
+`reformat_mothur_OTU_tables.R`     | Name of R script to run
+`StupidLongMothurName.count_table` | name of the mothur file you're starting with
+`count_table`                      | type of mothur file, as specified by it's extension. <br> ideally this will include shared or the qiime version at some point...
+`otus.abund`							         | name of the OTU table you feed into this workflow
 		
-```		
+More notes on the mothur file types:  
+
+* `.count_table` : use if you are not clustering sequences, just cleaning sequencing errors
+* `.shared` : use if you clustered sequences  
+  In other words, whatever your last OTU-esque table is prior to assigning taxonomy.
+	Note that the .abund mothur file is a non-table-y space-saving format that you can't use here.
+	Sorry for the confusing file extension choice.
+
+	
 __________________________________________________________________________________________
 
-# <span style="color:SteelBlue">1. make BLAST database file (blast)</span>
+# <span style="color:SteelBlue">1. make BLAST database</span>
 
-```
-Use the command makeblastdb to create a blast database out of the FW taxonomy fasta files.
-Need to create a database because:
-	1. BLAST will run faster
-	2. Having a database is necessary for some of the output formats
+Use the command `makeblastdb` to create a blast database out of the FW taxonomy fasta files.  
+Need to create a database because:  
+
+1. BLAST will run faster
+2. Having a database is necessary for some of the output formats
 
 Full Command (type in terminal):
-
+```
 makeblastdb -dbtype nucl -in custom.fasta -input_type fasta -parse_seqids -out custom.db
-
-What each argument is:
-	-dbtype nucl		a required argument, says the database input file is nucleic acids (nucl)
-	-in custom.fasta	specify path of the input file that it makes the database out of.
-						this is the path to the small custom taxonomy file you want to use 
-						(i.e. the freshwater taxonomy database fasta file)
-						note: if the file path has spaces in it, it needs to be ' "/path/double quoted" '
-	-input_type fasta	specifies the input file is a fasta file (that's the default value too)
-	-parse_seqids		this tells it to include information in the database that will later
-						allow you to pull sequences back out of it.  
-						This is necessary for using blast_formatter later.
-	-out custom.db		specify path of the database files this command creats. BLAST makes 6 files 
-						with different extensions, but they all start with this.  BLAST Default is your 
-						-in file name with those extensions, but it's less confusing to add .db so you 
-						can easily identify what each file is.  
-
-These 6 files are created:
-	custom.db.nhr
-	custom.db.nog
-	custom.db.nsd
-	custom.db.nsi
-	custom.db.nsq
-(but later when you tell BLAST which database file to use you just say custom.db and it figures the rest out)
 ```
+
+command argument     | description
+---------------------|----------------------------------------------
+`-dbtype nucl`    	 | a required argument, says the database input file is nucleic acids (nucl)
+`-in custom.fasta`	 | specify path of the input file that it makes the database out of. <br>this is the path to the small custom taxonomy file you want to use<br>(i.e. the freshwater taxonomy database fasta file)<br>note: if the file path has spaces in it, it needs to be `' "/path/double quoted" '`  
+`-input_type fasta`	 | specifies the input file is a fasta file (that's the default value too)  
+`-parse_seqids`		   | this tells it to include information in the database that will later allow you to pull sequences back out of it. This is necessary for using blast_formatter later.
+`-out custom.db`		 | specify path of the database files this command creats. BLAST makes 6 files with different extensions, but they all start with this.  the default is your `-in` file name with those extensions, but it's less confusing to add `.db` so you can easily identify what each file is.  
+
+These 5 files are created:  
+`custom.db.nhr`  
+`custom.db.nog`  
+`custom.db.nsd`  
+`custom.db.nsi`  
+`custom.db.nsq`  
+(but later when you tell BLAST which database file to use you just say `custom.db` and it figures the rest out)
+
 __________________________________________________________________________________________
 
-# <span style="color:SteelBlue">2. run BLAST (blast)</span>
+# <span style="color:SteelBlue">2. run BLAST</span>
 
-```
-Use the command blastn to run a megablast that returns the best hit in the taxonomy database (subject)
+Use the command `blastn` to run a megablast that returns the best hit in the taxonomy database (subject)
 for each of your OTU sequences (queries). Megablast is optimized for finding very similar matches with
-sequences longer than 30 bp.  This workflow was made for ~100 bp sequences and may need to be re-optimized
-for sequences of different lengths.  You check if settings are appropriate in step 6.
+sequences longer than 30 bp.  This workflow created with ~100-400 bp sequences and may need to be re-optimized
+for sequences of different lengths.  You check if settings are appropriate in step 6.  
 
 Full Command (type in terminal):
-
+```
 blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 5
-
-What each argument is:						
-	-query otus.fasta 		specify path of query file, otus.fasta.  This is the fasta file of your OTU 
-							sequences you want classified that you reformatted in step 0.
-	-task megablast 		this is already optimized by smart BLAST people for high similarity hits.
-							It is also the blastn default task. for more info see 
-							http://www.ncbi.nlm.nih.gov/Class/MLACourse/Modules/BLAST/nucleotide_blast.html
-	-db custom.db 			the name of the blast database created in step 1(without the additional file extensions)
-							This database is made from your subject sequences, the small, custom taxonomy database
-	-out otus.custom.blast	specify path of the blast output file (this is the file you're creating). Its format 
-							is unreadable by you, but it's the detailed BLAST format that blast_formatter accepts.
-							The filename here describes query.subject.blast
-	-outfmt 11 				need this format in order to use blast_formatter command
-	-max_target_seqs 5		only keep the best 5 hits for each query sequence
-							you will compare how good these are to check if BLAST settings are appropriate in step 6
-							you can choose more or less target seqs if you want to, it doesn't have a huge impact on speed.
 ```
+
+command argument         | description
+-------------------------|----------------------------------------------
+`-query otus.fasta`      | specify path of query file: `otus.fasta`.<br>This is the fasta file of your OTU sequences you want classified that you reformatted in step 0.
+`-task megablast` 	     | this is already optimized by smart BLAST people for high similarity hits.<br>It is also the blastn default task. for more info see: http://www.ncbi.nlm.nih.gov/Class/MLACourse/Modules/BLAST/nucleotide_blast.html
+`-db custom.db` 		     | the name of the blast database created in step 1 (without the additional file extensions)<br>This database is made from your subject sequences: the small, custom taxonomy database
+`-out otus.custom.blast` | specify path of the blast output file (this is the file you're creating). Its format is unreadable by you, but it's the detailed BLAST format that blast_formatter accepts.<br>The filename here describes `query.subject.blast`  
+`-outfmt 11` 				     | need this format in order to use blast_formatter command
+`-max_target_seqs 5`		 | only keep the best 5 hits for each query sequence.<br>you will compare how good these are to check if BLAST settings are appropriate in step 6. you can choose more or less target seqs if you want to, it doesn't have a huge impact on speed.  
+
 __________________________________________________________________________________________
 
-# <span style="color:SteelBlue">3. reformat BLAST results (blast)</span>
+# <span style="color:SteelBlue">3. reformat BLAST results</span>
 
-```
-The blast_formatter function in blast takes the outformat 11 file and reformats it to any other
+The `blast_formatter` function in blast takes the outformat 11 file and reformats it to any other
 possible format.  Here we reformat to a custom table format to feed into the R script that pulls out
-matching and nonmatching sequence IDs.
-However, using blast_formatter you can look at your blast results from the previous step any way you'd like!
+matching and nonmatching sequence IDs.  
+
+If you're curious, using blast_formatter you can look at your blast results from the previous step any way you'd like!
 Just keep in mind, things like "length" have different definitions in different output formats (yeah. really.), 
-so pay careful attention if you try to re-do calculations on your own.
+so pay careful attention if you try to re-do calculations in the next step on your own. There's a really clear description of this in the TaxAss paper's supplemental document 1.  
 
 Full Command (type in terminal):
-
+```
 blast_formatter -archive otus.custom.blast -outfmt "6 qseqid pident length qlen qstart qend" -out otus.custom.blast.table
+```
 
-What each argument is:		
-	-archive otus.custom.blast 		Specify path to the blast result file you are reformatting.
-									This was generated in step 2, it is in the ASN.1 blast file format.
-	-outfmt "6 qseqid pident length qlen qstart qend"	
-									6 is a tabular format without headers or other info btwn rows of data, 
-									the rest specifies what goes in each tab-delimited column:
-										1 qseqid: query (OTU) sequence ID
-										2 pident: percent identity (# of matches / # "columns" in the HSP)
-										3 length: length of alignment
-										4 qlen: full length of query sequence
-										5 qstart: index of beginning of alignment on query sequence
-										6 qend: index of end of alignment on query sequence
-	-out otus.custom.blast.table	Specify path to the output file with above formatting.
-```				
+command argument                                      | description
+------------------------------------------------------|----------------------------------------------
+`-archive otus.custom.blast` 	                        | Specify path to the blast result file you are reformatting. This was generated in step 2, it is in the ASN.1 blast file format.
+`-outfmt "6 qseqid pident length qlen qstart qend"`	  | 6 is a tabular format without headers or other info btwn rows of data, the rest specifies what goes in each tab-delimited column:<br>**1** `qseqid`: query (OTU) sequence ID<br>**2** `pident`: percent identity (# of matches / # "columns" in the HSP)<br>**3** `length`: length of alignment<br>**4** `qlen`: full length of query sequence<br>**5** `qstart`: index of beginning of alignment on query sequence<br>**6** `qend`: index of end of alignment on query sequence  
+`-out otus.custom.blast.table`  	                    | Specify path to the output file with above formatting.
 __________________________________________________________________________________________
 
-# <span style="color:SteelBlue">4. correct BLAST pident (R)</span>
+# <span style="color:SteelBlue">4. recalculate pident</span>
 
-```
-The calc_full_length_pident.R script takes the formatted blast file and calculates a 
+The `calc_full_length_pident.R` script takes the formatted blast file and calculates a 
 "full length" pident value that corrects the pident value for the entire length of the query.
 BLAST returns the "highest scoring pair", which is weighted by both similarity and length.
 However we are trying to compare the entire OTU sequence, not just a section of it that 
 matches really well.  I could not find any command that forces blast use the entire query 
 sequence, so this is the workaround. This "full length" pident is a conservative, worst case 
-scenario that assumes any edge gaps are mismatches.
-Calculation:
-	"full length pident" = pident * length / (length - (qend - qstart) + qlen)
+scenario that assumes any edge gaps are mismatches.  
+
+Calculation:  
+	"full length pident" = pident * length / (length - (qend - qstart) + qlen)  
+
 This script performs those calculations, and then checks which of the top 5 reported BLAST hits had
 the best corrected, full length pident.  It returns a similar, tab delimited output file that 
-includes the corrected full length pident and which BLAST hit number had the best corrected pident.
+includes the corrected full length pident and which BLAST hit number had the best corrected pident.  
+
+NOTE: If you are curious about this equation/calculation, there's a REALLY DETAILED explanation in the TaxAss paper's
+Supplemental Document 2. It lists what each BLAST term refers to, derives the equation using those terms, and then 
+provides an example alignment to show examples of all the calculations. And it's color coded.  
 
 Full Command (type in terminal):
-
-Rscript calc_full_length_pident.R otus.custom.blast.table otus.custom.blast.table.modified
-
-
-Separate all arguments with a space.
-
-What each argument is:
-	Rscript								sources the R script using the arguments supplied after it in the terminal.
-	calc_full_length_pident.R			the R script.
-	otus.custom.blast.table				the formatted blast output from step 3
-	otus.custom.blast.table.modified	the output file containing the modified BLAST hit table, used in step 5.
-										It contains tab delimited columns without column names. They are:
-										qseqid, pident, length, qlen, q.align, true.pids, hit.num.best.ids
 ```
+Rscript calc_full_length_pident.R otus.custom.blast.table otus.custom.blast.table.modified
+```
+
+command argument                   | description
+-----------------------------------|----------------------------------------------
+`Rscript`								           | sources the R script using the arguments supplied after it in the terminal.
+`calc_full_length_pident.R`        | the R script.
+`otus.custom.blast.table`          | the formatted blast output from step 3
+`otus.custom.blast.table.modified` | the output file containing the modified BLAST hit table, used in step 5. It contains tab delimited columns without column names. They are:<br>qseqid, pident, length, qlen, q.align, true.pids, hit.num.best.ids
+
 __________________________________________________________________________________________
 
-5. filter BLAST results (R)
+# <span style="color:SteelBlue">5. filter BLAST results</span>
 
-This R script, filter_seqIDs_by_pident.R, is run twice. First to generate the sequence ID's 
+This R script, `filter_seqIDs_by_pident.R`, is run twice. First to generate the sequence ID's 
 above/equal to the user specified "full length pident" cutoff.  Those sequence IDs are 
 destined for taxonomy assignment in the small custom database.  Second it is run to generate 
 the sequence ID's below the "full length pident" cutoff, which are destined for taxonomy 
-assignment in the large general database.
+assignment in the large general database.  
 
 Full Two Commands (type in terminal):
-
+```
 Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.above.98 98 TRUE 
 Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.below.98 98 FALSE
+```
 
-What each argument is:
-	Rscript								Sources the R script using the arguments supplied after it in the terminal.
-	filter_seqIDs_by_pident.R			The R script.  
-	otus.custom.blast.table.modified	the BLAST table with corrected, full length pident values created in step 4.
-	ids.above.98 						the output file containing seqIDs at or above your cutoff value, used in step 7
-	ids.below.98						the output file containing seqIDs below your cutoff value, used in step 7
-										the format of these seqID output files are \n delimited seqIDs, no header.
-	98									the full length pident cutoff you are using to decide which sequences belong
-										in which taxonomy database classification
-	TRUE								return seqID's >= cutoff
-	FALSE								return seqID's < cutoff
-	
+command argument                   | description
+-----------------------------------|----------------------------------------------
+`Rscript`								           | Sources the R script using the arguments supplied after it in the terminal.
+`filter_seqIDs_by_pident.R`			   | The R script.  
+`otus.custom.blast.table.modified` | the BLAST table with recalculated, full length pident values created in step 4.
+`ids.above.98` 						         | the output file containing seqIDs at or above your cutoff value, used in step 8.
+`ids.below.98`						         | the output file containing seqIDs below your cutoff value, used in step 7 & 8.
+`98`									             | the full length pident cutoff you are using to decide which sequences belong in which taxonomy database classification
+`TRUE`								             | return seqID's >= cutoff
+`FALSE`								             | return seqID's < cutoff
+
+Format of the output files `ids.*.98` are \n delimited seqIDs, no header:
+```
+seqID01
+seqID03
+seqID04
+```
 __________________________________________________________________________________________
 
-6. check that BLAST settings are appropriate (R)
+# <span style="color:SteelBlue">6. check BLAST settings</span>
+
 
 There is no way to force BLAST to return only full-length hits, it will always return the 
 best "High Scoring Pair (HSP)" it finds, based on it's scoring that weights both the quality
@@ -515,33 +559,31 @@ using 16S sequences is pretty high, so while it's likely that some of the short 
 may have longer HSPs with better full-length pidents, it's less likely that any of those better, 
 "true" pidents would be good enough to meet your pident criteria. 
 
-The likelihood of incorrect results because of BLAST choosing HSPs that are not full length increases
+The likelihood of incorrect results because of BLAST choosing HSPs that are not full length probably increases
 as the length of your OTU sequences increases.  This step tries to check if this might
-be a problem.  Generate some plots with the R script plot_blast_hit_stats.R.
+be a problem. Look at it visually with the R script `plot_blast_hit_stats.R`. (I never saw it being a problem so far, just a check for different data types) 
 
 Full Command (type in the terminal)
-
+```
 Rscript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
+```
 
-What each argument in the R script is:
-	RScript								sources an R script and allows it to accept arguments from the command line
-	plot_blast_hit_stats.R				the script you are sourcing
-	otus.custom.blast.table.modified	the modified blast table produced in step 4.
-	98									the pident cutoff you chose to filter your sequences by
-	plots								the folder your generated plots will be saved in
-										this folder is created if it doesn't exist already
-	https://cran.mtu.edu				this is an OPTIONAL argument for those who
-										1. don't have the "reshape" R package installed already
-										2. live far away from the midwestern USA
-										It's the web address to the cran mirror you use, choosing
-										one close to you could make it slightly faster but
-										this honestly doesn't matter much.  The script will automatically
-										install the reshape package temporarily if you don't have it already   
+command argument                   | description
+-----------------------------------|----------------------------------------------
+`RScript`							             | sources an R script and allows it to accept arguments from the command line
+`plot_blast_hit_stats.R`				   | the script you are sourcing
+`otus.custom.blast.table.modified` | the modified blast table produced in step 4.
+`98`								               | the pident cutoff you chose to filter your sequences by
+`plots`							               | the folder your generated plots will be saved in (this folder is created if it doesn't exist already)
+`https://cran.mtu.edu`             | OPTIONAL argument (this is the default otherwise)
 
-What each generated file is:
-	plots/BLAST_hits_used_for_pidents_0-100.png
-	plots/BLAST_hits_used_for_pidents_0-100_only_incorrect_hits.png
-	plots/BLAST_hits_used_for_pidents_0-100.csv
+Note: This script will automatically install the reshape package temporarily if you don't have it already. If you get a bug, maybe this is the problem. Try opening R and typing `install.packages("reshape")` (and submit an issue for me even if that fixed it!).  
+  
+generated files:  
+
+* `plots/BLAST_hits_used_for_pidents_0-100.png`
+* `plots/BLAST_hits_used_for_pidents_0-100_only_incorrect_hits.png`
+* `plots/BLAST_hits_used_for_pidents_0-100.csv`  
 
 These plots show the percent of times that each BLAST hit was the recalculated best hit.
 The .csv file is the data table used to make the plots.
@@ -549,189 +591,200 @@ Use these to check that returning the top 5 BLAST hits is enough, i.e. you are n
 alignments that would have been better when re-calculated to full-length percent identity.
 This is shown by the re-calculated percent identity cutoff, with the idea being that if you 
 are missing "better" hits but the "better" ones are still total crap, then it doesn't matter
-if you missed them.
+if you missed them.  
+
 Basically: look at the plot.  If it isn't almost zero for hit #5 then go back to step 2 and 
-make BLAST report more than 5 hits, for example say "-max_target_seqs 10" instead of 
-"-max_target_seqs 5". Then repeat the other steps up to here and plot again, and check that
-it's almost 0% at hit 10.  If it's still not we have a serious problem, please tell me!!
+make BLAST report more than 5 hits, for example say `-max_target_seqs 10` instead of 
+`-max_target_seqs 5`. Then repeat the other steps up to here and plot again, and check that
+it's almost 0% at hit 10.  If it's still not we have a serious problem, please tell me!!  
 
 note: if there is a tie where two hits are equally good at 5th place, I think BLAST will report both
 and label one of them hit # 6.  So if you have an extra hit number, it doesn't mean there's a problem.
 
 __________________________________________________________________________________________
 
-7. recover sequence IDs left out of blast (python, bash)
+# <span style="color:SteelBlue">7. recover missing seqIDs</span>
 
 Blast has a built in reporting cutoff based on evalue.  The blast expect value depends on
 the length of the hit and the size of the database, and it reflects how frequently you 
 would see a hit of that quality by chance. The default evalue cutoff is 10, which means 
 blast does not report a match that you'd see 10 or more times by chance.  For more about
-the evalue statistics, see: http://www.ncbi.nlm.nih.gov/BLAST/tutorial/Altschul-1.html
+the evalue statistics, see: http://www.ncbi.nlm.nih.gov/BLAST/tutorial/Altschul-1.html  
 
-The python script find_seqIDs_blast_removed.py is used to find all of the 
+The python script `find_seqIDs_blast_removed.py` is used to find all of the 
 sequence IDs in the original fasta file that do not appear in the blast output.  The python 
 script then creates a new file in the same format as step 5's R script output file that
-is a newline-delimited list of the missing sequence IDs.
+is a newline-delimited list of the missing sequence IDs.  
 
 The bash command cat concatenates these missing ids with the ids below the chosen cutoff
 pident.  That is because the ids blast didn't report hits for had even worse pidents than 
 the ones that didn't make the R script cutoff, so they belong in the set that will be 
-classified by the general database.
+classified by the general database.  
 
 Full Two Commands (type in terminal):
-
+```
 python find_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table.modified ids.missing
 cat ids.below.98 ids.missing > ids.below.98.all
-						
-What each argument is in python script:
-	python							opens the python program to source the script
-	find_seqIDs_blast_removed.py	python script you're sourcing
-	otus.fasta						original fasta file of your sequences from step 0,
-									this contains all the seqIDs
-	otus.FW.blast.table.modified	reformatted blast results from step 4,
-									this contains all the seqIDs reported by BLAST
-	ids.missing						the output file of seqIDs that were left out of BLAST
-									results.  Its format is new line delimited seqIDs, no header
+```						
+
+command argument                   | description
+-----------------------------------|----------------------------------------------
+`python`							             | opens the python program to source the script
+`find_seqIDs_blast_removed.py`	   | python script you're sourcing
+`otus.fasta`						           | original fasta file of your sequences from step 0 (this contains all the seqIDs)
+`otus.FW.blast.table.modified`	   | reformatted blast results from step 4 (this contains all the seqIDs reported by BLAST)
+`ids.missing`						           | the output file of seqIDs that were left out of BLAST results.  Its format is new line delimited seqIDs, no header
 	
-What each argument in the bash script is:
-	cat								function that concatenates two files
-	ids.below.98					seqIDs below your cutoff from R script in step 5.
-	ids.missing						seqIDs not returned by BLAST, from this step, above.
-	> ids.below.98.all				combine those two files into this new one.
-									this now contains all the seqIDs you will classify in
-									the general taxonomy database, in \n delimited format.
+command argument                   | description
+-----------------------------------|----------------------------------------------
+`cat`								               | bash function that concatenates two files
+`ids.below.98`					           | seqIDs below your cutoff from R script in step 5.
+`ids.missing`						           | seqIDs not returned by BLAST, from this step, above.
+`> ids.below.98.all`				       | combine those two files into this new one. <br> this file name now contains all the seqIDs you will classify in the general taxonomy database
 									
 __________________________________________________________________________________________
 
-8. create fasta files of desired sequence IDs (python)
+# <span style="color:SteelBlue">8. create fasta of seqIDs</span>
 
 The create_fastas_given_seqIDs.py takes the sequence IDs selected using the blast output 
 and finds them in the original query fasta file.  
-It then creates a new fasta file containing just the desired sequences.
+It then creates a new fasta file containing just the desired sequences.  
+
 The script is run twice, first to create the fasta file for seqIDs above the pident cutoff,
-second to create the fasta file for seqIDs below the pident cutoff.  The fasta files will 
+second to create the fasta file for seqIDs below the pident cutoff.  These fasta files will 
 be classified with the custom and general databases, respectively.
 
 Full Two Commands (type in terminal):
-
+```
 python create_fastas_given_seqIDs.py ids.above.98 otus.fasta otus.above.98.fasta
 python create_fastas_given_seqIDs.py ids.below.98.all otus.fasta otus.below.98.fasta
+```
 
-What each argument is:
-	python							opens the python program to souce the script
-	create_fastas_given_seqIDs.py	the python script you're sourcing 
-	ids.above.98					the file of seqIDs at or above your cutoff from step 5
-	ids.below.98.all				the file of all seqIDs below your cutoff from step 7
-	otus.fasta						the original fasta file of all your OTU sequences from step 0
-	otus.above.98.fasta				the output file with fasta sequences at or above your cutoff
-	otus.below.98.fasta				the output file with fasta sequences below your cutoff
-									NOTE: if this output file already exist the script will 
-									delete it before starting.
+command argument                   | description
+-----------------------------------|----------------------------------------------
+`python`              						 |	opens the python program to souce the script
+`create_fastas_given_seqIDs.py`    |	the python script you're sourcing 
+`ids.above.98`            				 |	the file of seqIDs at or above your cutoff from step 5
+`ids.below.98.all`          			 |	the file of all seqIDs below your cutoff from step 7
+`otus.fasta`            					 |	the original fasta file of all your OTU sequences from step 0
+`otus.above.98.fasta`       			 |	the output file with fasta sequences at or above your cutoff
+`otus.below.98.fasta`       			 |	the output file with fasta sequences below your cutoff<br>NOTE: if this output file already exist the script will delete it before starting.
 	
 __________________________________________________________________________________________
 
-9. assign taxonomy (mothur)
+# <span style="color:SteelBlue">9. assign taxonomy</span>
 
-The classify.seqs() command in mothur classifies sequences using a specified algorithm 
+The `classify.seqs()` command in mothur classifies sequences using a specified algorithm 
 and a provided taxonomy database.  I use the default algorithm (wang with kmer size 8), 
 and ask it to show bootstrap values. The output file is a list of sequence ID's next to
 their assigned taxonomy.
 
 Full Two Commands (type in terminal):
-
+```
 mothur "#classify.seqs(fasta=otus.above.98.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
 mothur "#classify.seqs(fasta=otus.below.98.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
+```
 
-What the first and last commands do:
-	~/mothur/mothur		this is the path to the mothur program installed on your computer.
-						~/mothur/mothur is the default place to instal it.
-						You must open mothur to use the mothur command classify.seqs().
-						When in the mothur program " mothur > " appears instead of $
-	quit()				exits the mothur program and returns you back to bash in the terminal.
+input file names        | description
+------------------------|----------------------------------------------
+`otus.above.98.fasta` 	|	this is the fasta file containing only seqIDs >= your cutoff, from step 8
+`otus.below.98.fasta` 	|	this is the fasta file containing only seqIDs < your cutoff, from step 8
+`custom.fasta`      		|	this is the fasta file for your small custom taxonomy database (ie freshwater) 
+`general.fasta`     		|	this is the fasta file for your large general taxonomy database (ie green genes) 
+`custom.taxonomy`   		|	this is the .taxonomy file for your small custom taxonomy database (ie freshwater)
+`general.taxonomy`    	|	this is the .taxonomy file for your large general taxonomy database (ie freshwater)
 
-What the filenames are:
-	otus.above.98.fasta		this is the fasta file containing only seqIDs >= your cutoff, from step 8
-	otus.below.98.fasta		this is the fasta file containing only seqIDs < your cutoff, from step 8
-	custom.fasta			this is the fasta file for your small custom taxonomy database (ie freshwater) 
-	general.fasta			this is the fasta file for your large general taxonomy database (ie green genes) 
-	custom.taxonomy			this is the .taxonomy file for your small custom taxonomy database (ie freshwater)
-	general.taxonomy		this is the .taxonomy file for your large general taxonomy database (ie freshwater)
+mothur flag     | description
+----------------|----------------------------------------------
+`fasta=`		    | path to the .fasta file you want classified
+`template=`	    | path to the .fasta file of the taxonomy database
+`taxonomy=`	    | path to the taxonomy file of the taxonomy database
+`method=`		    | algorithm for assigning taxonomy. default is wang.
+`probs=`		    | T or F, show the bootstrap probabilities or not?
+`cutoff=`	    	| minimum bootstrap value for getting a name instead of unclassified<br>The default (v38) is `=80`, but you should say `=0`.<br>This workflow let's you apply a bootstrap cutoff after the fact so you can see everything 1st, and you have the option to use a different cutoff for the two databases.  
+`processors=`   | the number of processors on your computer to run it on<br>note: mothur has a bug where this only works on windows and unix, mac only uses 1. 
 
-What each flag does:	
-	fasta=		path to the .fasta file you want classified
-	template=	path to the .fasta file of the taxonomy database
-	taxonomy=	path to the taxonomy file of the taxonomy database
-	method=		algorithm for assigning taxonomy. default is wang.
-	probs=		T or F, show the bootstrap probabilities or not?
-	cutoff=		minimum bootstrap value for getting a name instead of unclassified
-				The default (v38) is =80, but you should say =0.  This workflow
-				let's you apply a bootstrap cutoff after the fact so you can see everything
-				1st, and you have the option to use a different cutoff for the two databases.
-	processors=	the number of processors on your computer to run it on
-				note: mothur has a bug where this only works on windows, mac only uses 1. 
+output file names                         | description
+------------------------------------------|----------------------------------------------
+`otus.above.98.custom.wang.taxonomy`			| This is the custom taxonomy file that you keep!
+`otus.above.98.custom.wang.tax.summary`		| you don't need it
+`otus.below.98.general.wang.taxonomy`			| This is the general taxonomy file that you keep!
+`otus.below.98.general.wang.tax.summary`	| you don't need it
 
-What the output files are (note you have no control over the name extensions added):
-	otus.above.98.custom.wang.taxonomy			This is the custom taxonomy file that you keep!
-	otus.above.98.custom.wang.tax.summary		crap
-	otus.below.98.general.wang.taxonomy			This is the general taxonomy file that you keep!
-	otus.below.98.general.wang.tax.summary		crap
+(note you have no control over the name extensions added)
 
-What the silently generated output files are (these are the databases mothur creates):
-	general.8mer
-	general.general.8mer.numNonZero
-	general.general.8mer.prob
-	general.tree.sum
-	general.tree.train
-	custom.8mer
-	custom.custom.8mer.numNonZero
-	custom.custom.8mer.prob
-	custom.tree.sum
-	custom.tree.train
+What the silently generated output files are (these are the databases mothur creates):  
+<style>
+.nobullet li {
+  list-style-type: none;
+}
+</style>
+
+<div class="nobullet">
+* general.8mer  
+*	general.general.8mer.numNonZero  
+*	general.general.8mer.prob  
+*	general.tree.sum  
+*	general.tree.train  
+*	custom.8mer  
+*	custom.custom.8mer.numNonZero  
+*	custom.custom.8mer.prob  
+*	custom.tree.sum  
+*	custom.tree.train  
+</div>
+	
 Note: these database files take a long time to generate and are based only on the taxonomy database,
 not on your OTU file. That means that you can re-use them and (for the general one at least) save
 20 minutes the next time you use classify.seqs with the general database. This is also why if you
 are trying multiple percent identity cutoffs you should run through one all the way first and then
-do the next ones in paralelle (as done in RunSteps_1-14.sh)
+do the next ones in paralelle (as done in RunSteps_1-14.sh).  The next steps will use the existing 
+8-mer files and save 20min generating them. FYI they are bigger files though, so make sure you delete at the end.  
 	
 NOTE: these bootstrap percent confidence values are NOT the confidence that the taxonomy 
 assignment is *correct*, just that it is *repeatable* in that database.  This is another 
-paremeter that we could explore changing more in the future.  It likely should be different
+paremeter that we could explore changing more in the future.  It's possible it should be different
 in the different databases also because of the different database sizes.  I left cutoff out
-in this command so that you can explore the different results of it later, in steps 13-14.
+in this command so that you can explore the different results of it later, in steps 13-14. 
+You can choose a different cutoff for the different databases if you want.
 
 __________________________________________________________________________________________
 
-10. combine taxonomy files (terminal)
+# <span style="color:SteelBlue">10. combine taxonomy files</span>
+
 
 Concatenate the two taxonomy files to create one complete one.  You can very simply just 
 combine them because there are no duplicate sequences between them.  The cat command in bash
 concatenates two files into one.  You also choose your final file name here.
 
 Full Command (type in terminal):
-
+```
 cat otus.above.98.custom.wang.taxonomy otus.below.98.general.wang.taxonomy > otus.98.taxonomy
+```
 
-Command syntax:
-	cat file1 file2 > file3		means "combine file1 and file2 into file 3"
+Command syntax             | Description
+---------------------------|-------------------------------------------
+`cat file1 file2 > file3`	 | "combine file1 and file2 into file 3"
 								
-What the filenames are:
-	otus.above.98.custom.wang.taxonomy		the taxonomy file for sequences classified with custom database
-	otus.below.98.general.wang.taxonomy		the taxonomy file for sequences classified with general database
-	otus.taxonomy							the name you choose for the output complete taxonomy file for all
-											your sequences.
+file names                              | description
+----------------------------------------|----------------------------------------------
+`otus.above.98.custom.wang.taxonomy`		| the taxonomy file for sequences classified with custom database
+`otus.below.98.general.wang.taxonomy`		| the taxonomy file for sequences classified with general database
+`otus.taxonomy`							            | the name you choose for the output complete taxonomy file for all your sequences.<br>I'm going with `otus.pidentcutoff.taxonomy`
 
 
 __________________________________________________________________________________________
 
-Steps 11-14 are an optional check.
+# <span style="color:SteelBlue">11. general-only taxonomy</span>
+
 __________________________________________________________________________________________
 
-11. assign taxonomy with general database only (mothur, bash)
+<span style="color:SteelBlue">Steps 11-14 are optional, used to decide the percent identity cutoff.</span>
+__________________________________________________________________________________________
 
-Get a large, general database classification of your otus.fasta file to compare too.  
-Green Genes, our general database choice, is a huge database (1,262,986 sequences), so the 
+Get a large, general database-only classification of your otus.fasta file to compare too.  
+Greengenes, our general database choice, is a huge database (1,262,986 sequences), so the 
 taxonomy assignment clustering algorithm is likely to only settle on a given taxonomic 
-assignment if it is unambiguously correct.  Therefore, we trust the upper level Green Genes
+assignment if it is unambiguously correct.  Therefore, we trust the upper level Greengenes
 assignments more than our custom database, even though we trust the lower level taxonomic
 assignments using our custom database more.
 
@@ -739,115 +792,120 @@ So in this step you assign taxonomy with the general database using mothur, and 
 rename the output file something easy to work with using bash.
 
 Full Two Commands (type in terminal):
-
+```
 mothur "#classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
 cat otus.general.wang.taxonomy > otus.general.taxonomy
+```
 
-What the commands do:
-	See step 9 for a detailed explanation of these two commands and their arguments.
+(See step 9 for a detailed explanation of these two commands and their arguments.)  
 
-What the filenames are:
-	otus.fasta					the original fasta file of your OTU sequences
-	general.fasta				the fasta file of the large, general database
-	general.taxonomy			the taxonomy file of the large, general database
-	otus.general.wang.taxonomy	the taxonomy of your OTUs assigned by the general database
-								this is the default name created by mothur
-	otus.general.taxonomy		the otus.general.wang.taxonomy file renamed
+file names                   | description
+-----------------------------|----------------------------------------------
+`otus.fasta`					       | the original fasta file of your OTU sequences
+`general.fasta`				       | the fasta file of the large, general database
+`general.taxonomy`			     | the taxonomy file of the large, general database
+`otus.general.wang.taxonomy` | the taxonomy of your OTUs assigned by the general database<br>this is the default name created by mothur
+`otus.general.taxonomy		   | the otus.general.wang.taxonomy file renamed
 
 
 __________________________________________________________________________________________
 
-11.5 assign taxonomy to custom database with general database (mothur, bash)
+# <span style="color:SteelBlue">11.5 (don't do this step)</span>
 
-This is used in the Database_Improvement_Workflow.txt in the arb-scripts folder. 
+#####  <span style="color:SteelBlue">11.5 assign taxonomy to custom database with general database (mothur, bash)</span>
+
+This is used in the `Database_Improvement_Workflow.txt` in the `arb-scripts` folder. 
 It's basically pointless to do if you're not working on the quality of the custom database,
 but if you want to you can read more about that in a note at the end of step 14.
 
-By classifying the custom database with the general database you can:
-	- Compare your two databases to get an idea of the baseline level of disagreement you 
+By classifying the custom database with the general database you can:  
+
+- Compare your two databases to get an idea of the baseline level of disagreement you 
 	  can expect from their taxonomy classifications.  This was not super helpful so you can't
 	  do it from the command line anymore, you have to open up step 14's 
 	  plot_classification_disagreements.R and uncomment out that part to do it manually.
-	- Generate a list of database disagreements that you can use to update your custom
+- Generate a list of database disagreements that you can use to update your custom
 	  database classifications to better match your general database using the .csv files
 	  generated in step 12. 
 
 Full Two Commands (Type in Terminal):
-
+```
 mothur "#classify.seqs(fasta=custom.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
 cat custom.general.wang.taxonomy custom.general.taxonomy
+```
 
-What the commands do:
-	See step 9 for a detailed explanation of these two commands and their arguments.
+(See step 9 for a detailed explanation of these two commands and their arguments.)  
 
-What the filenames are:
-	custom.fasta					the fasta file of the small, custom database
-	general.fasta					the fasta file of the large, general database
-	custom.general.wang.taxonomy	the taxonomy of your custom database assigned by the general database
-									this is the default name created by mothur
-	custom.general.taxonomy			the custom.general.wang.taxonomy file renamed
+file names                      | description
+--------------------------------|----------------------------------------------
+`custom.fasta`					        | the fasta file of the small, custom database
+`general.fasta`					        | the fasta file of the large, general database
+`custom.general.wang.taxonomy`  | the taxonomy of your custom database assigned by the general database<br>this is the default name created by mothur
+`custom.general.taxonomy`			  | the custom.general.wang.taxonomy file renamed
 	
 	
 __________________________________________________________________________________________
 
-12. reformat taxonomy files (bash)
+# <span style="color:SteelBlue">12. reformat taxonomy files</span>
+
+__________________________________________________________________________________________
+
+<span style="color:SteelBlue">**HALF OF THIS STEP IS NOT OPTIONAL**</span>
+__________________________________________________________________________________________
+
 
 The R script in step 13 requires semicolon delimited taxonomy files.  The mothur output
 .taxonomy files are delimited with both tabs and semicolons.
 
-Reformat both files you will compare:
-	the otus.taxonomy file created in step 10
-	the otus.general.taxonomy file created in step 11
+Reformat both files you will compare:  
 
-Find: tab
-Replace: semicolon
+*	the otus.taxonomy file created in step 10
+*	the otus.general.taxonomy file created in step 11  
 
-Full Four Commands (Type in Terminal):
+Find: tab  
+Replace: semicolon  
 
+Full Four Commands (Type in Terminal):  
+```
 sed 's/[[:blank:]]/\;/' <otus.98.taxonomy >otus.98.taxonomy.reformatted
 mv otus.98.taxonomy.reformatted otus.98.taxonomy
+
+# (optional- only do if did step 11):
 sed 's/[[:blank:]]/\;/' <otus.general.taxonomy >otus.general.taxonomy.reformatted
 mv otus.general.taxonomy.reformatted otus.general.taxonomy
+```
 
-
-Syntax of commands and what each argument does:
-	sed 's/find/replace/ <input >output
-		sed		is a "stream editor," a function for editing streams of text in the terminal
-		's		tells it you are doing a substitution
-		find	this is the character string you are finding
-		replace	this is what you are replacing it with
-		input	this is the file sed searches through, here it is
-				otus.taxonomy
-				otus.general.taxonomy
-		output	this is the file sed creates (note it must have a different name than input)
-	
-	mv filename1 filename2
-		mv		this is a function to move (aka rename) a file from name1 to name2
-				simply keeping the edited file the same name  
-		
+Command syntax: `sed 's/find/replace/ <input >output`  
+had to use blank because it doesn't recognize `\t` as tab for some reason, need a shell script you source with an actual tab in it. Or blank is convenient, since there is no other white space anyway.
 
 __________________________________________________________________________________________
 
-13. compare taxonomy files (bash, R)
+# <span style="color:SteelBlue">13. compare taxonomy files</span>
+
+__________________________________________________________________________________________
+
+<span style="color:SteelBlue">Steps 11-14 are optional, used to decide the percent identity cutoff.</span>
+__________________________________________________________________________________________
+
 
 The R script find_classification_disagreements.R  creates a folder containing a file for 
 each upper taxonomic level (kingdom, phylum, class, order, lineage) that lists all of the 
 classification disagreements at that taxonomic level between the custom + general taxonomy
-database workflow and the general only taxonomy database workflow. Note that this only 
+database workflow and the general-only taxonomy database workflow. Note that this only 
 compares classifications made in the custom database, it ignores differences between 
 classifications that were both made by the general database (which can happen because 
-the classification algorithm is stochastic.)
+the classification algorithm is stochastic.)  
 
 This script also allows the user to choose a bootstrap %confidence cutoff under which all
 the lower assignments are unclassified.  The script does not include unclassified names in 
-its reporting of disagreements.  This allows you ignore taxonomy assignment conflicts when
+its reporting of disagreements.  This allows you to ignore taxonomy assignment conflicts when
 you don't trust the assignment anyway, and you can decide what you trust (60% is generally
 considered the minimum cutoff you should use, 80% is the default in the mothur MiSeq SOP.)
 
 Additionally, this script generates a final version of your taxonomy file with the applied 
 bootstrap cutoff implemented.  The version made in step 10 contains all the taxonomy assignments,
 even ones with very low bootstrap p-values.  This generates a .taxonomy file with the cutoff
-applied, so that everything under that cutoff is named "unclassified."  Note that you can 
+applied, so that everything under that cutoff is named "unclassified"  Note that you can 
 apply this cutoff in step 9 using the "cutoff = #" flag with the mothur command classify.seqs().
 I didn't do it there though to make these analysis steps more flexible. The format of this file
 is comma delimited, which is slightly different than the mothur output files that are 
@@ -859,33 +917,25 @@ Note: you must create a new folder to save these results in before running the s
 	(Suggested folder name and creation is below.)
 
 Full Two Commands (type in terminal):
-
+```
 mkdir conflicts_98
-Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70
-
+Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 80 80
+```
 Note: you must enter all the arguments in this order.
 
-What the arguments are the first time you source the script:
-1.	Rscript									this opens R to accept arguments from the command line
-2.	find_classification_disagreements.R		this is the R script you're sourcing
-3.	otus.98.taxonomy						this is the path to your otu taxonomy file 
-											created using both databases in step 10
-4.	otus.general.taxonomy					this is the path to your otu taxonomy file
-											created using only the general database in step 11
-5.	ids.above.98							this is the path to the file created in step 4 that
-											contains all of the sequence IDs above or equal to 
-											your pident cutoff
-6.	conflicts_98							this is the path to the folder you want the R script
-											to save the .csv results files in. You create this
-											folder in this step with the mkdir command.
-7.	98										this is the pident you're using.
-8.	85										this is the p-value cutoff for the custom database
-											assigned sequences. This determines if a classification
-											is good enough to be named or should be "unclassified." 
-9.	70										this is the p-value cutoff for the general database
-											assigned sequences. This determines if a classification
-											is good enough to be named or should be "unclassified." 
-	
+command argument                      | description
+--------------------------------------|----------------------------------------------
+`Rscript`									            | this opens R to accept arguments from the command line
+`find_classification_disagreements.R` | this is the R script you're sourcing
+`otus.98.taxonomy`					          | this is the path to your otu taxonomy file created using both databases in step 10
+`otus.general.taxonomy`					      | this is the path to your otu taxonomy file created using only the general database in step 11
+`ids.above.98`							          | this is the path to the file created in step 4 that contains all of the sequence IDs above or equal to your pident cutoff
+`conflicts_98`							          | this is the path to the folder you want to save the .csv results files in. You create this folder in this step with the mkdir command.
+`98`										              | this is the pident cutoff you're using.
+`80`									                | this is the bootstrap p-value cutoff for the custom database assigned sequences. This determines if a classification is good enough to be named or should be "unclassified." 
+`80`										              | this is the bootstrap p-value cutoff for the general database assigned sequences. This determines if a classification is good enough to be named or should be "unclassified." 
+
+```
 What the arguments are the second time you source the script:
 1.	Rscript									this opens R to accept arguments from the command line
 2.	find_classification_disagreements.R		this is the R script you're sourcing
@@ -905,60 +955,66 @@ What the arguments are the second time you source the script:
 											named or should be "unclassified." 	
 10.	database								This flag tells the script you are comparing two
 											databases instead of OTU classifications.
+```
 
-What the generated files in your conflicts folders are:
-	kingdom_conflicts.csv
-	phylum_conflicts.csv
-	class_conflicts.csv
-	order_conflicts.csv
-	lineage_conflicts.csv
-	conflicts_summary.csv
+Generated files in your conflicts folders:  
+
+*	kingdom_conflicts.csv
+*	phylum_conflicts.csv
+*	class_conflicts.csv
+*	order_conflicts.csv
+*	lineage_conflicts.csv
+*	conflicts_summary.csv
 
 
 __________________________________________________________________________________________
 
-14. OPTIONAL: choose appropriate pident cutoff (R)
+# <span style="color:SteelBlue">14. choose pident cutoff</span>
+
+__________________________________________________________________________________________
+
+<span style="color:SteelBlue">Steps 11-14 are optional, used to decide the percent identity cutoff.</span>
+__________________________________________________________________________________________
+
+
+**You have to repeat steps 5, 7-10, & 12-13 with multiple pident cutoffs to do this step.**
 
 This step generates some plots that you can use to double check that your chosen cutoff is 
 appropriate.  The plots are saved into the "plots" folder that you created in step 6.  In
 order to examine the cutoff sensitivity, you have to run steps 5, 7-10, & 12-13 multiple times
 with different pident cutoffs.  Fortunately the ~20 min of generating 8-mer databases in 
-classify.seqs() in mothur will be faster because the mothur database files are not re-made.
+classify.seqs() in mothur will be faster because the mothur database files are not re-made.  
 
 If you are working with clustered OTUs, you might want to skip this step to save time and just
 use your clustering percent similarity as your pident cutoff. You've basically already made
 the decision this step is agonizing over when you chose that, and the plot will not mean much 
 if the sequences in it were already clustered. We recommend, if you're skipping this step,
-to just choose a pident cutoff in the range of 97-99.
+to just choose a pident cutoff in the range of 97-99.  
 
+Definitely consider using the `RunSteps` shell scripts if you are running these comparisons.
+You could go through first with only 1 sample to make sure it works, then just set up the full run overnight or on a server.  
+
+Full Command (type in terminal):
+```
 Rscript plot_classification_disagreements.R otus.abund plots regular NA NA conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98
+```
 
-What the arguments are:
-1.		Rscript									Calls program R in a way that accepts command line arguments
-2.		plot_classification_disagreements.R		name of the script you are calling
-3.		otus.abund								OTU relative abundance table
-												This script will generate the total.reads.per.seqID.csv
-												file from that.  It needs it to compare by % reads.
-4.		plots									path to folder you are saving the plots into.
-												note: this folder must already exist. you made it in step 6.
-5.		regular									placeholder, this is only used in the step where you plot forcing
-												Note: this one must say exactly "regular"
-6.		NA										also placeholder for forcing, could say anything
-7.		NA										also placeholder for forcing, could say anything
-8.		conflicts_94							path to folder containing taxonomy disagreements between
-												this cutom+general workflow and the general database alone.
-												You made this folder in step 13.
-9.		ids.above.94							path to the file that lists all the seqIDs meeting your
-												pident cutoff that were therefore classified with your
-												custom databse. You made this file in step 4.
-10.		94										pident cutoff used in the previous two arguments
-11.		conflicts_96							folder of taxonomy disagreements
-12.		ids.above.96							file of custom-classified seqIDs	
-13.		96										pident cutoff for previous two arguments
-n.		...										additional arguments
-												you can have as many pident cutoffs compared as you
-												want.  Just keep listing them in this format:
-												folder_path ids.file pident folder_path ids.file pident ...
+command argument                      | description
+--------------------------------------|----------------------------------------------
+`Rscript`									            | Calls program R in a way that accepts command line arguments
+`plot_classification_disagreements.R` | name of the script you are calling
+`otus.abund`								          | OTU relative abundance table<br>This script will generate the total.reads.per.seqID.csv file from that.  It needs it to compare by % reads.
+`plots`									              | path to folder you are saving the plots into.<br>note: this folder must already exist. you made it in step 6.
+`regular`									            | placeholder, this is only used in the step where you plot forcing<br>Note: this one must say exactly "regular"
+`NA`										              | also placeholder for forcing, could say anything
+`NA`										              | also placeholder for forcing, could say anything
+`conflicts_94`							          | path to folder containing taxonomy disagreements between this cutom+general workflow and the general database alone. You made this folder in step 13.
+`ids.above.94`							          | path to the file that lists all the seqIDs meeting your pident cutoff that were therefore classified with your custom databse. You made this file in step 4.
+`94`										              | pident cutoff used in the previous two arguments
+`conflicts_96`							          | folder of taxonomy disagreements
+`ids.above.96`							          | file of custom-classified seqIDs	
+`96`										              | pident cutoff for previous two arguments
+`...`										              | additional arguments <br>you can have as many pident cutoffs compared as you want.  Just keep listing them in this format:<br>folder_path<br>ids.file<br>pident folder_path<br>ids.file<br>pident<br>...
 
 Note: You can also add the database conflicts to the plot if you ran optional step 11.5.  
 The idea was that they could be a "baseline" for how much disagreement or forcing to expect 
@@ -970,100 +1026,95 @@ uncomment out the file path at the beginning and add the path to your database_c
 from optional step 11.5.  Then go to the very bottom section of the code, the "Use Functions" 
 section, and uncomment out the plots you want to see.  The functions they call will still be defined.
 
-What the generated plots are:
-	***choose which ones to export***
-
 __________________________________________________________________________________________
 
-15. generate final taxonomy file (R)
+# <span style="color:SteelBlue">15. make final taxonomy file</span>
 
 Based on your results from step 14, choose which pident cutoff to use.  Use the same script 
 from step 13, except this time specify "final."  This final taxonomy file is different from 
-files created in step 9 because it applies your clustering bootstrap pvalue cutoff, calling
+files created in step 9-10 because it applies your clustering bootstrap pvalue cutoff, calling
 everything below that cutoff "unclassified."  
 
 Recall that choosing that cutoff was left out of the mothur command to allow flexibility in
 analyzing results.  The "final" argument to this script is left out in step 13 because it takes
 longer when it is included.  This is because in finding the classification disagreements, the
-script only compares classifications assigned by the custom database, which is a small subset 
+script only compares classifications assigned by the custom database, which is a subset 
 of all of the classifications.
 
-Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 final
+Full Command options (Type in Terminal):    
+**yes** = ran or will run that step(s)  
+**no** = skipped or will skip that step(s)  
+  
+**yes 11-14, yes 15.5.a:**
+```
+Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 80 80 final
+```  
+  
+**yes 11-14, no 15.5.a:**
+```
+Rscript find_classification_disagreements.R otus.98.taxonomy quickie ids.above.98 conflicts_98 98 80 80 final
+```
 
-note: if you are skipping step 15.5.a or if you skipped steps 11-14 (optional checks), source this way:
+**no 11-14, no 15.5.a:**  
+```
+Rscript plot_classification_disagreements.R otus.abund MakeSeqIDReadsOnly
+Rscript find_classification_disagreements.R otus.98.taxonomy quickie ids.above.98 conflicts_98 98 80 80 final
+```
 
-Rscript find_classification_disagreements.R otus.98.taxonomy quickie ids.above.98 conflicts_98 98 85 70 final
+command argument                      | description
+--------------------------------------|----------------------------------------------
+`Rscript`									            | this opens R to accept arguments from the command line
+`find_classification_disagreements.R` | this is the R script you're sourcing
+`otus.98.taxonomy`        						| this is the path to your otu taxonomy file created using both databases in step 10
+`otus.general.taxonomy`<br><br>OR<br><br>`quickie` | `otus.general.taxonomy` is the path to your otu taxonomy file created using only the general database in step 11. It's not used for the final file generation, but it is used in this step to generate a file for step 15.5.a, so that's why you still need to specify the path. <br><br> use the `quickie` option if you skipped optional checks 11-14, and also if you did those steps but are going to skip optional step 15.5.a.  
+`ids.above.98`							          | this is the path to the file created in step 4 that contains all of the sequence IDs above or equal to your pident cutoff
+`conflicts_98`							          | this is the path to the folder you want to save the .csv results files in. You create this folder in this step with the mkdir command.
+`98`										              | this is the pident cutoff you're using.
+`80`									                | this is the bootstrap p-value cutoff for the custom database assigned sequences. This determines if a classification is good enough to be named or should be "unclassified." 
+`80`										              | this is the bootstrap p-value cutoff for the general database assigned sequences. This determines if a classification is good enough to be named or should be "unclassified." 
+`final`									              | this flag lets the script know you want a final file generated. Therefore it applies the bootstrap p-value cutoff to the entire script instead of just the custom-classified seqIDs. That's why it will take longer this time you run the script.
 
-What the arguments are this (3rd) time you source the script:
-1.	Rscript									this opens R to accept arguments from the command line
-2.	find_classification_disagreements.R		this is the R script you're sourcing
-3.	otus.98.taxonomy						this is the path to your otu taxonomy file 
-											created using both databases in step 10
-4.	otus.general.taxonomy					this is the path to your otu taxonomy file
-											created using only the general database in step 11
-											It's not used for the final file generation, but it 
-											is used in this step to generate a file for step 16,
-											so that's why you still need to specify the path.
-4.  quickie									use this option if you skipped optional checks 11-14, 
-											or if you're skipping optional step 15.5.a
-5.	ids.above.98							this is the path to the file created in step 4 that
-											contains all of the sequence IDs above or equal to 
-											your pident cutoff
-6.	conflicts_98							this is the path to the folder you want the R script
-											to save the .csv results files in. You create this
-											folder in this step with the mkdir command.
-7.	98										this is the pident you're using.
-8.	85										this is the p-value cutoff for the custom database
-											assigned sequences. This determines if a classification
-											is good enough to be named or should be "unclassified." 
-9.	70										this is the p-value cutoff for the general database
-											assigned sequences. This determines if a classification
-											is good enough to be named or should be "unclassified." 
-10.	final									this flag lets the script know you want a final file generated.
-											therefore it applies the bootstrap p-value cutoff to the
-											entire script instead of just the custom-classified seqIDs.
-											That's why it will take longer this time you run the script.
+command argument                      | description
+--------------------------------------|----------------------------------------------
+`Rscript`									            | Calls program R in a way that accepts command line arguments
+`plot_classification_disagreements.R` | name of the script you are calling
+`otus.abund`								          | OTU relative abundance table<br>This script will generate the total.reads.per.seqID.csv file from that.  It needs it to compare by % reads.
+`MakeSeqIDReadsOnly`                  | Only make the seqID.reads table. Would use this option if you skip steps 11-14 where you compare different pidents, but still want to do step 15.5.a where you pat yourself on the back and compare the general-only classifications.
 
 
 __________________________________________________________________________________________
 
-15.5 OPTIONAL: plot benefits of using this workflow (R)
+# <span style="color:SteelBlue">15.5 plot TaxAss benefits</span>
 
-15.5.a. Plot improvement over using general database alone
+### <span style="color:SteelBlue">15.5 OPTIONAL: plot benefits of using this workflow (R)</span>
+
+_____________________________________
+
+### 15.5.a. Plot improvement over using general database alone
 
 In this step two plots are generated that show you the benefit of using the custom workflow.
 The plots show the number of known taxonomic assignments by either % of total OTUs or % of 
 total reads.  Basically, the script sums up everything that is not called "unclassified"
-in the final workflow taxonomy file and the general database taxonomy file with the bootstrap
-p-value cutoffs applied.  These files are both generated in step 15.
+in the final TaxAss taxonomy file and the general database taxonomy file with the bootstrap
+p-value cutoffs applied.  These files are both generated in step 15.  
 
-Full Command (Type into terminal):
-
+Full Command Options (Type into terminal):  
+```
 Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID.csv plots final.taxonomy.names final.general.names
+```
 
-What the arguments are:
-	final.taxonomy.pvalues			a file of p-values corresponding to the final taxonomy file you
-									generated in step 15.  This file, with this name, was automatically
-									generated in step 15 so it is already in your working directory.
-	final.general.pvalues 			a file of p-values corresponding to the general-classified taxonomy
-									after the classification p-value cutoff has been applied. This file,
-									with this name, was automatically generated in step 15 so it is already
-									in your working directory.
-	total.reads.per.seqID			a file that lists each seqID and the total number of reads for that
-									seqID.  This file, with this name, was automatically generated in
-									step 14, using your otus.abund table, so it is already in your 
-									working directory.
-	plots							the name of the folder that plots are saved into.  you created this
-									folder in step 6.
-	final.taxonomy.names			**add description!
-	final.general.names				**add description!
+command argument                      | description
+--------------------------------------|----------------------------------------------
+`final.taxonomy.pvalues`			        | a file of p-values corresponding to the final taxonomy file you generated in step 15.  This file, with this name, was automatically generated in step 15 so it is already in your working directory.  
+`final.general.pvalues` 			        | a file of p-values corresponding to the general-classified taxonomy after the classification p-value cutoff has been applied. This file, with this name, was automatically generated in step 15 so it is already in your working directory.  
+`total.reads.per.seqID`		      	    | a file that lists each seqID and the total number of reads for that seqID.  This file, with this name, was automatically generated in step 14, using your otus.abund table, so it is already in your working directory.
+`plots`						  	                | the name of the folder that plots are saved into.  you created this folder in step 6.
+`final.taxonomy.names`			          | the names-only of the final taxonomy file. It's generated automatically, and deleted as an intermediate file during clean-up.
+`final.general.names`				          | the names-only of the general-only taxonomy file. It's generated automatically, and deleted as an intermediate file during clean-up.
 
-**Include the files that are generated! listed in the script too.
+_____________________________________
 
-*** if you skipped step 14 you can do this****  this is not well documented yet*****
-Rscript plot_classification_disagreements.R otus.abund MakeSeqIDReadsOnly
-
-15.5.b. Plot folly of using custom database alone
+### 15.5.b. Plot improvement over using custom database alone
 
 In this step the classifications you get using the custom database alone are compared to the final workflow
 taxonomy file generated in step 15.  The plots created show the "forcing" that would occur from using only
@@ -1072,10 +1123,11 @@ them with the most similar sequence *in your database*.  If there are no similar
 large, then the sequence will be put somewhere different each time, end up with a low p-value, and be called
 unclassified.  However in a smaller database, it's possible that a dissimilar sequence might be put reliably
 in the same classification because it is most similar to that, even though the sequence itself is very dissimilar.
-This is what I call forcing.  These plots take longer to generate because first you must classify your OTUs 
-with the custom database alone, and then you must group the classifications by taxonomic level (all other
-steps in this workflow are on an OTU-level.) However, the plots are very beautiful :)
+This is what I call forcing.  These plots take longer to generate because you have to do an additional classification 
+of your OTUs with the custom database alone.
 
+Full Commands (Type into terminal):  
+```
 mothur "#classify.seqs(fasta=otus.fasta, template=custom.fasta, taxonomy=custom.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
 cat otus.custom.wang.taxonomy > otus.custom.taxonomy
 
@@ -1083,42 +1135,69 @@ sed 's/[[:blank:]]/\;/' <otus.custom.taxonomy >otus.custom.taxonomy.reformatted
 mv otus.custom.taxonomy.reformatted otus.custom.taxonomy
 
 mkdir conflicts_forcing
-Rscript find_classification_disagreements.R otus.custom.taxonomy otus.98.85.70.taxonomy ids.above.98 conflicts_forcing NA 85 70 forcing
+Rscript find_classification_disagreements.R otus.custom.taxonomy otus.98.80.80.taxonomy ids.above.98 conflicts_forcing NA 80 80 forcing
 
-Rscript plot_classification_disagreements.R otus.abund plots conflicts_forcing otus.custom.85.taxonomy otus.98.85.70.taxonomy
+Rscript plot_classification_disagreements.R otus.abund plots conflicts_forcing otus.custom.80.taxonomy otus.98.80.80.taxonomy
+```
 
-What the arguments are (this second time you source the script):
-1.		Rscript									same
-2.		plot_classification_disagreements.R		same
-3.		NA										can leave as NA if you ran step 14, which generated the 
-												total.reads.per.seqID.csv file. Otherwise this should be
-												otus.abund to generate that file for the first time.
-4.		plots									same
-5.		conflicts_forcing						folder of taxonomy disagreements generated in 15.5.b in
-												find.classification.disagreements.R
-6.		otus.custom.85.taxonomy					the classifications using only the custom database,
-												generated in 15.5.b by find_classification_disagreements.R
-7.		otus.98.85.70.taxonomy					the final workflow taxonomy generated in step 15
+command argument                      | description
+--------------------------------------|----------------------------------------------
+`Rscript`									            | Calls program R in a way that accepts command line arguments
+`plot_classification_disagreements.R` | name of the script you are calling
+`NA`										              | can leave as `NA` if you ran step 14, which generated the `total.reads.per.seqID.csv` file. Otherwise this should be `otus.abund` to generate that file for the first time.
+`plots`									              | path to folder you are saving the plots into.<br>note: this folder must already exist. you made it in step 6.
+`conflicts_forcing`									  | folder of taxonomy disagreements generated in 15.5.b in `find.classification.disagreements.R`  
+`otus.custom.80.taxonomy`             | the classifications using only the custom database, generated in 15.5.b by `find_classification_disagreements.R`
+`otus.98.85.70.taxonomy`						  | the final workflow taxonomy generated in step 15
 
 
-						
 __________________________________________________________________________________________
 
-16. tidy up (bash)
+# <span style="color:SteelBlue">16. tidy up</span> {.tabset}
+
+## Easiest way
 
 This step tidies up your working directory folder by removing intermediate files you don't 
-need anymore and moving remaining files into orgainized folders.
-Note: these bash commands only work if you've been using the same names as the workflow.
-Note: go through these commands in order.
+need anymore and moving remaining files into orgainized folders.  
+Note: these bash commands only work if you've been using the same names as the workflow.  
+Note: go through these commands in order, <span style="color:SteelBlue">following the tabs from left to right.</span>  
+
+Easiest way is to do:
+```
+./RunStep_16.sh
+```  
+
+You end up with these folders:  
+
+* **data**  
+  has your starting datafiles and the final taxonomy file
+* **analysis**  
+  has the stuff like plots that you used to make processing decisions  
+* **scripts**  
+  all the scripts you used, to save to be reproducible  
+* **databases**  
+  all the databases you used, to save to be reproducible  
+  (you might want to delete this to save space though)
 
 
-16.1 delete intermediate files
+<br><br>
+__________________________________________________________________________________________
+
+<span style="color:SteelBlue">~The end~</span>  
+__________________________________________________________________________________________
+
+
+## 16.1 delete
+
+**16.1 delete intermediate files you don't need anymore**
 
 Full Command (Type in Terminal):
-
+```
 rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otus.custom.taxonomy otus.custom.[0-9]* custom.general* *pvalues total* final*names
+```
 
-What each of these intermediate files is (and why you might want to keep them):
+What each of these intermediate files is (and why you might want to keep them):  
+```
 custom.db.*		
 				The blast database files from step 1:	custom.db.nhr
 														custom.db.nin
@@ -1188,64 +1267,83 @@ otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otu
 																		final.general.names
 																		final.taxonomy.names
 				This file is generated in optional step 14 or 15:	total.reads.per.seqID.csv
-
+```
 Note: if for some reason you want to keep these files, you can either skip this step
 or instead of rm use the `mv filenames foldername` command to move them to a folder instead.
 Some of these intermediate files are quite large though, so keep that in mind if your computer's filling up.
 
 
-16.2 move scripts into scripts folder
+## 16.2 scripts
+
+**16.2 save scripts used in a scripts folder**
 
 Full 2 commands (Type in Terminal):
-
+```
 mkdir scripts
 mv *.py *.R *.sh *.md scripts/
+```
 
 By saving all the script versions you used to create your data you can reproduce it.
 Alternatively for reproducible data note the github SHA number you retreived them from in a README.
 Find this on github, click commits tab, click clipboard icon on most recent commit to copy the SHA identifier.
 
 
-16.3 save files used in analyzing your results in analysis folder
+## 16.3 analysis
+
+**16.3 save files used in analyzing your results in analysis folder**
+
+These are technically also "intermediate" files, but they're the ones you used to make analysis decisions so might be nice to refer back to.
 
 Full 2 commands (Type in Terminal):
-
+```
 mkdir analysis/
 mv conflicts* plots/ analysis/
+```
 
-The are the most useful files (beyond the "intermediate" ones you deleted in 16.1 for taking a
-closer look at your data after the fact. You can delete this instead if just want to get on with
-your life already. Instead of the two commands, type:
+You can delete this instead if just want to get on with
+your life already. Instead of the two commands, type:  
+```
 rm -r conflicts* plots/
+```
 
+## 16.4 data
 
-16.4 save your actual data files in a folder called data
+**16.4 save your actual data files in a folder called data**
 
 Full Two commands (Type in Terminal):
-
+``
 mkdir data
 mv otus* data/
+``
+Yeyy!  This is what you're gonna use to actually do stuff now!!  
+It includes:	 
 
-Yeyy!  This is what you're gonna use to actually do stuff now!!
-It includes:	otus.98.70.70.taxonomy		your final taxonomy file
-				otus.abund					the relative abundance OTU table you started with
-				otus.fasta					the OTU fasta file you started with
+file                    | description
+------------------------|------------------------------------------
+otus.98.70.70.taxonomy	|	your final taxonomy file
+				otus.abund			|		the relative abundance OTU table you started with
+				otus.fasta			|		the OTU fasta file you started with
 
 
-16.5 save the version of the taxonomy databases you used in a databases folder
+## 16.5 databases
+
+**16.5 save the version of the taxonomy databases you used in a databases folder**
 
 Full Two Commands (type in terminal):
-
+```
 mkdir databases
 mv *.taxonomy *.fasta databases
+```
 
-Saving these versions of the databases will let you can reproduce your data. Alternatively
+Saving these versions of the databases will let you reproduce your data. Alternatively
 you could make note of the versions you used and how you downloaded them in a README file.
-These can be relatively large files.
-
+These can be relatively large files.  
+  
 If you don't care at all about being reproducible, all you really need to save is the stuff
-in the data/ folder.  That's your actual data.
+in the data/ folder.  That's your actual data.  
+
+<br><br>
 __________________________________________________________________________________________
 
-~The end~
+<span style="color:SteelBlue">~The end~</span>  
 __________________________________________________________________________________________

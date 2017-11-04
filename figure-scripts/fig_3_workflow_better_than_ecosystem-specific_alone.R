@@ -1,235 +1,369 @@
-# RRR 8-15-16 ----
+# RRR ----
 
 # fig 3 demonstrates that the workflow is better than using only an 
 # ecosystem-specific database by showing the extent of forcing.
 
-# fig 3a shows how forcing can mess up your fine-level taxa analysis
-# fig 3b shows how forcing can skew coarse-level taxa analyses
+# fig 3a shows how increased unclassifieds decrease alpha diversity
+# fig 3b shows how forcing disproportionally affects your fine-level taxa analysis
+# The two panels are the same plot at different taxa levels.
 
-# How am I defining forcing?
-# 1. classify everything with custom database
-# 2. look at the freshwater classifications of everything that the workflow put in greengenes
-# 3. ignore everything that's unclassified in freshwater classifications
-# 4. find all the classifications that are different from the workflow classifications-
-#    these are the ones I call "forced" into the wrong classification.
+# How I define forcing in fig 3: baseline is TaxAss (ie "correct") rank abundance
+# 1. classify dataset with TaxAss
+# 2. classify dataset with only FreshTrain
+# 3. classifications that disagree were "forced" when using FreshTrain alone
+#     - loss of diversity of forced into "unclassified"
+#     - added inaccuracy if forced into confident classification
 
-# for fig 3a: baseline is freshwater rank abundance
-# 1. make a rank abundance plot of the top lineages as defined by the custom-only taxonomy
-#    (this leaves out "unclassified" from the taxa names)
-# 2.color the bars red for the OTUs that were not classified that way by the workflow
-
-# for fig 3b: baseline is workflow rank abundance
-# 1. make a rank abund of the top phyla in freshwater-only classifications
-# 2. make a rank abund of the top phyla in workflow classifications
-# 3. compare how different freshwater only is from workflow
-
+# TaxAss generates the data fed into this plot in optional step 15.5.b.
+# It has already been filtered to only include bars with a max height (grey + blue + red) > .5 % abund
+# The paper figure further caps the total # bars to 20 (32 > .5% at lineage)
 
 # ---- file paths ----
 
-mendota.unclust.forced <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster_mend_unclust/plots/ForcedTaxonomyGroups/"
-mendota.unclust.final <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster_mend_unclust/plots/FinalTaxonomyGroups/"
+# note: the exported csv's are already filtered to be only the top taxa. cutoff = .5 % rel abundance (max bar any color) I think.
 
-bogs.epi.forced <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster_bogs_epi/plots/ForcedTaxonomyGroups/"
-bogs.epi.final <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster_bogs_epi/plots/FinalTaxonomyGroups/"
+mendota.forcing.folder <- "~/Desktop/TaxAss-BatchFiles-go/Mendota/TaxAss-Mendota/analysis/plots/step_15_5b_Improvement_over_custom-only/"
 
-bogs.hypo.forced <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster_bogs_hypo/plots/ForcedTaxonomyGroups/"
-bogs.hypo.final <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster_bogs_hypo/plots/FinalTaxonomyGroups/"
+danube.forcing.folder <- "~/Desktop/TaxAss-BatchFiles-go/Danube/TaxAss-Danube/analysis/plots/step_15_5b_Improvement_over_custom-only/"
 
-michigan.hiseq.forced <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster_michigan_hiseq/plots/ForcedTaxonomyGroups/"
-michigan.hiseq.final <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster_michigan_hiseq/plots/FinalTaxonomyGroups/"
+mouse.forcing.folder <- "~/Desktop/TaxAss-BatchFiles-go/MouseGut/TaxAss-MouseGut/analysis/plots/step_15_5b_Improvement_over_custom-only/"
 
-danube.10.forced <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster_danube_10/plots/ForcedTaxonomyGroups/"
-danube.10.final <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster_danube_10/plots/FinalTaxonomyGroups/"
+michigan.forcing.folder <- "~/Desktop/TaxAss-BatchFiles-go/Michigan/TaxAss-Michigan/analysis/plots/step_15_5b_Improvement_over_custom-only/"
+
+bog.epi.forcing.folder <- "~/Desktop/TaxAss-BatchFiles-go/TroutBogEpi/TaxAss-TroutBogEpi/analysis/plots/step_15_5b_Improvement_over_custom-only/"
+
+bog.hypo.forcing.folder <- "~/Desktop/TaxAss-BatchFiles-go/TroutBogHypo/TaxAss-TroutBogHypo/analysis/plots/step_15_5b_Improvement_over_custom-only/"
 
 # choose one:
-file.path.forced <- danube.10.forced
-file.path.final <- danube.10.final
-#
+forcing.folder <- mendota.forcing.folder
+
+
 
 
 # ---- define functions ----
 
-import.grouped.folder <- function(FolderPath){
-  grouped <- list(kingdom=NULL, phylum=NULL, class=NULL, order=NULL, lineage=NULL, clade=NULL, tribe=NULL)
-  files <- list.files(FolderPath)
-  for (t in 1:7){
-    grouped[[t]] <- read.csv(file = paste(FolderPath, files[t], sep = ""), colClasses = "character")
-    grouped[[t]][ ,t+1] <- as.numeric(grouped[[t]][ ,t+1])
-  }
-  return(grouped)
+get.csv.filenames <- function(Folder){
+  csv.files <- list.files(path = Folder)
+  index <- grep(pattern = "*.csv", x = csv.files)
+  forcing.files <- paste(Folder, csv.files[index], sep = "")
+  forcing.files <- forcing.files[1:7] # don't include additional summary files
+  return(forcing.files)
 }
 
-# these are copied from the plot_classification_disagreements.R script
-
-# Find the most abundant taxa at each taxonomy level - and decide if you want to include unclassifieds in your rank abund calcs
-find.top.taxa.by.total.reads <- function(TaxonomyList, NumberTopTaxa = "all", RemoveUnclass){
-  grouped.taxa <- TaxonomyList
-  
-  # trim or don't trim the total number of results
-  num.taxa <- NULL
-  if (NumberTopTaxa == "all"){
-    for (t in 1:length(grouped.taxa)){
-      num.taxa[t] <- nrow(grouped.taxa[[t]])
-    }
-  }else{
-    num.taxa <- rep.int(x = NumberTopTaxa, times = length(grouped.taxa))
+import.forcing.files <- function(FilePaths){
+  forcing <- list(NULL)
+  for(t in 1:length(FilePaths)){
+    forcing[[t]] <- read.csv(file = FilePaths[t], header = TRUE, colClasses = "character")
+    forcing[[t]][ ,-(1:t)] <- apply(X = as.matrix(forcing[[t]][ ,-(1:t)]), MARGIN = 2, FUN = as.numeric)
   }
-  
-  # arrange highest to lowest total reads
-  grouped.taxa.ord <- list("kingdom"=NULL,"phylum"=NULL, "class"=NULL, "order"=NULL, "lineage"=NULL, "clade"=NULL, "tribe"=NULL)
-  for (t in 1:7){
-    index <- order(grouped.taxa[[t]][ ,(t + 1)], decreasing = TRUE)
-    grouped.taxa.ord[[t]] <- grouped.taxa[[t]][index, ]
-  }
-  
-  if (RemoveUnclass == TRUE){
-    # remove unclassified taxa b/c those really can't be compared on the same taxa level, and likely wouldn't be included in a "top taxa" analysis anyway.
-    not.unclassifieds <- list("kingdom"=NULL, "phylum"=NULL, "class"=NULL, "order"=NULL, "lineage"=NULL, "clade"=NULL, "tribe"=NULL)
-    for (t in 1:7){
-      index <- grep(x = grouped.taxa.ord[[t]][ ,t], pattern =  "unclassified.*", value = FALSE )
-      # this is necessary because you can not use -0 as an index
-      if (length(index) != 0){
-        not.unclassifieds[[t]] <- grouped.taxa.ord[[t]][-index, ]
-      }else{
-        not.unclassifieds[[t]] <- grouped.taxa.ord[[t]]
-      }
-    }
-  }else{
-    # name is misleading now but this is easier than chaning all the names:
-    not.unclassifieds <- grouped.taxa.ord
-  }
-  
-  # look just at the top 20 levels
-  grouped.taxa.top <- list("kingdom"=NULL,"phylum"=NULL, "class"=NULL, "order"=NULL, "lineage"=NULL, "clade"=NULL, "tribe"=NULL)
-  for (t in 1:7){
-    if (nrow(not.unclassifieds[[t]]) < num.taxa[t]){
-      grouped.taxa.top[[t]] <- not.unclassifieds[[t]]
-    }else{
-      grouped.taxa.top[[t]] <- not.unclassifieds[[t]][1:num.taxa[t], ]
-    }
-  }
-  return(grouped.taxa.top)
+  names(forcing) <- c("kingdom", "phylum", "class", "order", "lineage", "clade", "tribe")
+  return(forcing)
 }
 
-remove.parentheses <- function(x){
-  fixed.name <- sub(pattern = '\\(.*\\)' , replacement = '', x = x)
-  return(fixed.name)
-}
+# modified very slightly from plot_classification_disagreement's plot.forcing.diffs:
+# diffs are: split into three funcitons, not exporting the plot automatically
 
-find.forcing.diffs <- function(TopFinalList, AllForcedList){
-  top.final <- TopFinalList
-  all.forced <- AllForcedList
-  
-  for (t in 1:length(top.final)){
-    fw.reads <- NULL
-    difference <- NULL
-    for (n in 1:nrow(top.final[[t]])){
-      index <- which(all.forced[[t]][ ,t] == top.final[[t]][n,t])
-      if (length(index) > 0){
-        temp.reads <- all.forced[[t]][index,(t+1)]
-      }else{
-        temp.reads <- 0
-      }
-      fw.reads <- c(fw.reads, temp.reads)
-      difference <- c(difference, temp.reads - top.final[[t]][n,(t+1)])
-    }
-    top.final[[t]] <- cbind(top.final[[t]], fw.reads, difference)
-  }
-  
-  for (t in 1:length(top.final)){
-    x <- top.final[[t]]
-    grey.bars <- x$reads
-    red.bars <- x$difference
-    blue.bars <- abs(x$difference)
-    
-    for (r in 1:nrow(x)){
-      if (x$difference[r] > 0){
-        blue.bars[r] <- 0
-      }else if (x$difference[r] < 0){
-        red.bars[r] <- 0
-        grey.bars[r] <- grey.bars[r] - blue.bars[r]
-      }
-    }
-    
-    top.final[[t]] <- cbind(top.final[[t]], grey.bars, red.bars, blue.bars)
-  }
-  return(top.final)
-}
-
-# this removes taxa that are low abundance based on their max of red, grey, and blue heights. (so narrows in on interesting bars while maintaining origional ranks)
-filter.out.low.abund <- function(TaxaList, CutoffVector){
-  for (t in 1:7){
-    max.heights <- NULL
-    for (r in 1:nrow(TaxaList[[t]])){
-      max.heights[r] <- max(TaxaList[[t]][r,(t + 4):(t + 6)])
-    }
-    index <- which(max.heights < CutoffVector[t])
-    if (length(index) > 0){
-      TaxaList[[t]] <- TaxaList[[t]][-index, ]
-    }
-  }
-  return(TaxaList)
-}
-
-plot.forcing.diffs <- function(TopTaxaList, NumBars, PlottingLevels = 1:length(TopTaxaList)){
+extract.plot.data <- function(TopTaxaList, NumBars = 800, PlottingLevels = 1:length(TopTaxaList)){
   top.taxa <- TopTaxaList
-  
-  # pull out and format just the data for the plot
   stacked.data <- list(NULL) 
+  
+  # plot specified number of bars or fewer if that many don't exist
   for (t in PlottingLevels){
     num.bars <- NumBars
     if (nrow(top.taxa[[t]]) < num.bars){
       num.bars <- nrow(top.taxa[[t]])
     }
+    
+    # Pull out only red/blue/grey bar heights and the lowest-level taxa name
     stacked.data[[t]] <- top.taxa[[t]][1:num.bars, c(t + 4, t + 5, t + 6)]
-    row.names(stacked.data[[t]]) <- top.taxa[[t]][1:num.bars ,t]
+    row.names(stacked.data[[t]]) <- top.taxa[[t]][1:num.bars,t]
     stacked.data[[t]] <- as.matrix(stacked.data[[t]])
     stacked.data[[t]] <- t(stacked.data[[t]])
     names(stacked.data)[t] <- names(top.taxa)[t]
   }
-  
-  # export plots and data!
+  return(stacked.data)
+}
+
+shorten.taxa.names <- function(PlotData, PlottingLevels = 1:length(PlotData), MaxLettersBarLabels = 80){
+  stacked.data <- PlotData
+
   for (t in PlottingLevels){
+    # remove p__ from beginning of taxa names
+    taxa.names <- sub(pattern = ".*__", replacement = "", x = colnames(stacked.data[[t]]))
     
-    # # long names go off the plot
-    # taxa.names <- sub(pattern = ".*__", replacement = "", x = colnames(stacked.data[[t]]))
-    # taxa.names <- substr(x = taxa.names, start = 1, stop = 20)
-    # 
-    # # make the y axis not have crazy big numbers on it, put them in rounded percents
-    # max.bar <- max(stacked.data[[t]][1, ] + stacked.data[[t]][2, ])
+    # shorten names to a max number of characters- looks inconsistent b/c not monospaced font
+    max.length <- MaxLettersBarLabels
+    for (n in 1:length(taxa.names)){
+      if (nchar(taxa.names[n], type = "chars") > max.length){
+        taxa.names[n] <- substr(x = taxa.names[n], start = 1, stop = max.length - 1)
+        taxa.names[n] <- paste(taxa.names[n], "-", sep = "")
+      }
+    }
+    
+    # replace old names in plotting data
+    colnames(stacked.data[[t]]) <- taxa.names
+  }
+  return(stacked.data)
+}
+
+plot.forcing.diffs <- function(PlotData, FolderPath = NULL, PlottingLevels = 1:length(PlotData)){  
+  stacked.data <- PlotData
+  for (t in PlottingLevels){
+    # # adjust y-axis to go to the max value
+    # max.bar <- max(stacked.data[[t]][1, ] + stacked.data[[t]][2, ]) # grey bar + red bar
     # y.axis.ticks <- c(0, max.bar * (1/4), max.bar * (1/2), max.bar * (3/4), max.bar)
-    # y.axis.labels <- round(x = y.axis.ticks / tot.reads * 100, digits = 0)
+    # y.axis.labels <- round(x = y.axis.ticks, digits = 0)
     
+    # export plot if folder specified
+    if (!is.null(FolderPath)){
+      plot.name <- paste("fig_3__", t, "_", names(stacked.data)[t], "_forcing.png", sep = "")
+      plot.name <- paste(FolderPath, "/", plot.name, sep = "")
+      png(filename = plot.name, width = 7, height = 5, units = "in", res = 100)
+    }
+    
+    # the plot
     par(mar = c(10,5,5,2))
     barplot(height = stacked.data[[t]], beside = FALSE, col = c("grey","red","blue"), main = names(stacked.data)[t], las = 2, ylab = "Relative Abundance (% reads)", border = NA)
-    legend(x = "topright", legend = c("Gained from forcing", "Lost from forcing"), fill = c("red", "blue"), border = FALSE, bty = "n", inset = .05)
+    legend(x = "topright", legend = c("Prevented Inaccuracy", "Maintained Diversity"), fill = c("red", "blue"), border = FALSE, bty = "n", inset = .05)
     
-    
+    # finish exporting plot if folder specified
+    if (!is.null(FolderPath)){
+      unnecessary.message <- dev.off()
+      cat("made plot: ", plot.name, "\n")
+    }
   }
 }
 
 
+# ---- use functions for quick look at all taxa levels ----
 
-# ---- use functions ----
+forcing.files <- get.csv.filenames(Folder = forcing.folder)
 
-grouped.forced.taxa <- import.grouped.folder(FolderPath = file.path.forced)
+forcing.data <- import.forcing.files(FilePaths = forcing.files)
 
-grouped.final.taxa <- import.grouped.folder(FolderPath = file.path.final)
+forcing.data <- extract.plot.data(TopTaxaList = forcing.data)
 
-top.final.taxa <- find.top.taxa.by.total.reads(TaxonomyList = grouped.final.taxa, NumberTopTaxa = "all", RemoveUnclass = FALSE) # all here to export all data, numbars (workflow rank abund) is determined in plot function.
+forcing.data <- shorten.taxa.names(PlotData = forcing.data, MaxLettersBarLabels = 30)
 
-top.final.taxa <- find.forcing.diffs(TopFinalList = top.final.taxa, AllForcedList = grouped.forced.taxa)
+plot.forcing.diffs(PlotData = forcing.data)
 
-top.final.taxa <- filter.out.low.abund(TaxaList = top.final.taxa, CutoffVector = c(0, .5, .5, .5, .5, .5, .5))
+# ---- PAPER ----
 
-plot.forcing.diffs(TopTaxaList = top.final.taxa, NumBars = 800, PlottingLevels = c(2,5))
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Figure_3.pdf"
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
+layout(mat = matrix(c(1,2,2), nrow = 1))
+par(mai = c(.55, .2, .24, 0), omi = c(0, .27, .05, .27)) # bottom, left, top, right
+
+# ---- 3a ----
+panel.data <- forcing.data$phylum
+plot.title <- "Phylum Rank Abundance"
+max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
+max.bar # choose axis max based on this
+y.axis.ticks <- c(0,5,10,15,20,25,30,35,40)
+y.tick.labels <- c(0,"", 10, "", 20,"",30,"",40)
+y.axis.label <- "Relative Abundance (% reads)"
+y.max <- 40
+
+# stays same for both panels ----
+bar.labels <- colnames(panel.data)
+empty.labels <- rep("", length(bar.labels))
+bar.colors <- c("grey", "red", "blue")
+loc.labels <- barplot(height = panel.data, beside = F, col = bar.colors, las = 2, border = NA, names.arg = empty.labels, axes = F, ylim = c(0,y.max))
+
+# X axis----
+text(x = loc.labels - .1, y = -1, labels = bar.labels, srt = -30, xpd = NA, cex = .95, adj = 0)
+# Y axis
+axis(side = 2, at = y.axis.ticks, labels = F, line = -.2, xpd = T, tck = -.02)
+mtext(text = y.tick.labels, side = 2, at = y.axis.ticks, line = .2, las = 1, cex = .7)
+# Title
+mtext(text = plot.title, side = 3, line = .8, cex = 1, at = .5, adj = 0)
+# Y label
+mtext(text = y.axis.label, side = 2, line = 2.1, cex = 1)
+# 
+# box(which = "plot", col=adjustcolor("purple", alpha.f = .5), lwd = 3)
+# box(which = "figure", col=adjustcolor("orange", alpha.f = .5), lwd = 3)
+
+# ---- 3b ----
+panel.data <- forcing.data$lineage
+panel.data <- panel.data[ ,1:20]
+plot.title <- "Family/Lineage Rank Abundance"
+max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
+max.bar # choose axis max based on this
+y.axis.ticks <- c(0,5,10,15,20,25,30)
+y.tick.labels <- c(0,"",10,"",20,"",30)
+
+# stays same for both panels ----
+bar.labels <- colnames(panel.data)
+empty.labels <- rep("", length(bar.labels))
+bar.colors <- c("grey", "red", "blue")
+loc.labels <- barplot(height = panel.data, beside = F, col = bar.colors, las = 2, border = NA, names.arg = empty.labels, axes = F)
+
+# X axis----
+lab.y <- c(-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1) # put lowercase ones higher
+text(x = loc.labels - .1, y = -.9, labels = bar.labels, srt = -30, xpd = NA, cex = .9, adj = 0)
+# Y axis
+axis(side = 2, at = y.axis.ticks, labels = F, line = -.75, xpd = T, tck = -.02)
+mtext(text = y.tick.labels, side = 2, at = y.axis.ticks, line = -.35, las = 1, cex = .7)
+# Title
+mtext(text = plot.title, side = 3, line = .8, cex = 1, at = 3, adj = 0)
+# ----
+legend.text <- c("Prevented Inaccuracy", "Maintained Richness")
+text(x = 17, y = c(20.8,17.8), labels = legend.text, adj = 0, xpd = NA, cex = 1.1)
+rect(xleft = 15.5, xright = 16.5, ybottom = 20, ytop = 22, col = bar.colors[2], border = F, xpd = NA)
+rect(xleft = 15.5, xright = 16.5, ybottom = 17, ytop = 19, col = bar.colors[3], border = F, xpd = NA)
+
+# box(which = "inner", col=adjustcolor("red", alpha.f = .5), lwd = 3)
+# box(which = "outer", col=adjustcolor("blue", alpha.f = .5), lwd = 3)
+# box(which = "plot", col=adjustcolor("purple", alpha.f = .5), lwd = 3)
+# box(which = "figure", col=adjustcolor("orange", alpha.f = .5), lwd = 3)
+#----
+dev.off()
 
 
+# ---- Paper Supplemental Figures ----
 
+# Michigan ----
+forcing.folder <- michigan.forcing.folder
+# Run "quick look" section to load data
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_3_Michigan.pdf"
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
+layout(mat = matrix(c(1,2,2), nrow = 1))
+par(mai = c(.55, .2, .24, 0), omi = c(0, .27, .05, .4)) # bottom, left, top, right
+panel.data <- forcing.data$phylum
+plot.title <- "Phylum Rank Abundance"
+max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
+max.bar # choose axis max based on this
+y.axis.ticks <- c(0,5,10,15,20,25,30)
+y.tick.labels <- c(0,"", 10, "", 20,"",30)
+y.axis.label <- "Relative Abundance (% reads)"
+y.max <- 30
+# Run paper figure line 167 to 186
+panel.data <- forcing.data$lineage
+panel.data <- panel.data[ ,1:20]
+plot.title <- "Family/Lineage Rank Abundance"
+max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
+max.bar # choose axis max based on this
+y.axis.ticks <- c(0,5,10,15,20,25,30,35)
+y.tick.labels <- c(0,"",10,"",20,"",30,"")
+# Run paper figure lines 195 to 219
+mtext(text = expression(bold("Lake Michigan")), side = 3, line = -5, at = 18, cex = 2)
+dev.off()
 
+# Danube ----
+forcing.folder <- danube.forcing.folder
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_3_Danube.pdf"
+# Run "quick look" section to load data
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
+layout(mat = matrix(c(1,2,2), nrow = 1))
+par(mai = c(.55, .2, .24, 0), omi = c(0, .27, .05, .2)) # bottom, left, top, right
+panel.data <- forcing.data$phylum
+plot.title <- "Phylum Rank Abundance"
+max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
+max.bar # choose axis max based on this
+y.axis.ticks <- c(0,5,10,15,20,25,30)
+y.tick.labels <- c(0,"", 10, "", 20,"",30)
+y.axis.label <- "Relative Abundance (% reads)"
+y.max <- 30
+# Run paper figure line 167 to 186
+panel.data <- forcing.data$lineage
+panel.data <- panel.data[ ,1:20]
+plot.title <- "Family/Lineage Rank Abundance"
+max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
+max.bar # choose axis max based on this
+y.axis.ticks <- c(0,5,10,15,20,25,30,35,40)
+y.tick.labels <- c(0,"",10,"",20,"",30,"",40)
+# Run paper figure lines 195 to 219
+mtext(text = expression(bold("Danube River")), side = 3, line = -5, at = 18, cex = 2)
+dev.off()
 
+# Bog Epi ----
+forcing.folder <- bog.epi.forcing.folder
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_3_Bog_Epi.pdf"
+# Run "quick look" section to load data
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
+layout(mat = matrix(c(1,2,2), nrow = 1))
+par(mai = c(.55, .2, .24, 0), omi = c(0, .27, .05, .6)) # bottom, left, top, right
+panel.data <- forcing.data$phylum
+plot.title <- "Phylum Rank Abundance"
+max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
+max.bar # choose axis max based on this
+y.axis.ticks <- c(0,5,10,15,20,25,30,35,40,45,50)
+y.tick.labels <- c(0,"", 10, "", 20,"",30,"",40,"",50)
+y.axis.label <- "Relative Abundance (% reads)"
+y.max <- 50
+# Run paper figure line 167 to 186
+panel.data <- forcing.data$lineage
+panel.data <- panel.data[ ,1:20]
+plot.title <- "Family/Lineage Rank Abundance"
+max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
+max.bar # choose axis max based on this
+y.axis.ticks <- c(0,5,10,15,20,25,30,35,40,45)
+y.tick.labels <- c(0,"",10,"",20,"",30,"",40,"")
+# Run paper figure lines 195 to 219
+mtext(text = expression(bold("Bog Epilimnion")), side = 3, line = -5, at = 18, cex = 2)
+dev.off()
+
+# Bog Hypo ----
+forcing.folder <- bog.epi.forcing.folder
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_3_Bog_Hypo.pdf"
+# Run "quick look" section to load data
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
+layout(mat = matrix(c(1,2,2), nrow = 1))
+par(mai = c(.55, .2, .24, 0), omi = c(0, .27, .05, .6)) # bottom, left, top, right
+panel.data <- forcing.data$phylum
+plot.title <- "Phylum Rank Abundance"
+max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
+max.bar # choose axis max based on this
+y.axis.ticks <- c(0,5,10,15,20,25,30,35,40,45,50)
+y.tick.labels <- c(0,"", 10, "", 20,"",30,"",40,"",50)
+y.axis.label <- "Relative Abundance (% reads)"
+y.max <- 50
+# Run paper figure line 167 to 186
+panel.data <- forcing.data$lineage
+panel.data <- panel.data[ ,1:20]
+plot.title <- "Family/Lineage Rank Abundance"
+max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
+max.bar # choose axis max based on this
+y.axis.ticks <- c(0,5,10,15,20,25,30,35,40,45)
+y.tick.labels <- c(0,"",10,"",20,"",30,"",40,"")
+# Run paper figure lines 195 to 219
+mtext(text = expression(bold("Bog Hypolimnion")), side = 3, line = -5, at = 18, cex = 2)
+dev.off()
+
+# Mouse Gut ----
+forcing.folder <- mouse.forcing.folder
+save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_3_Mouse_Gut.pdf"
+# Run "quick look" section to load data
+pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
+layout(mat = matrix(c(1,2,2), nrow = 1))
+par(mai = c(.55, .2, .24, 0), omi = c(0, .27, .05, .6)) # bottom, left, top, right
+panel.data <- forcing.data$phylum
+plot.title <- "Phylum Rank Abundance"
+max.bar <- max(panel.data[1, ] + panel.data[3, ]) # grey bar + BLUE bar
+max.bar # choose axis max based on this
+y.axis.ticks <- c(0,10,20,30,40,50,60,70)
+y.tick.labels <- c(0,"",20,"",40,"",60,"")
+y.axis.label <- "Relative Abundance (% reads)"
+y.max <- 70
+# Run paper figure line 167 to 186
+panel.data <- forcing.data$lineage
+plot.title <- "Family/Lineage Rank Abundance"
+max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
+max.bar # choose axis max based on this
+y.axis.ticks <- c(0,10,20,30,40,50,60,70,80,90,100)
+y.tick.labels <- c(0,"",20,"",40,"",60,"",80,"",100)
+# Run paper figure lines 195 to 202
+text(x = loc.labels - .1, y = -1.1, labels = bar.labels, srt = -30, xpd = NA, cex = .9, adj = 0)
+# Run paper figure lines 204 to 219
+# just paste the stupid legend on later.
+mtext(text = expression(bold("Mouse Gut")), side = 3, line = -5, at = 9, cex = 2)
+dev.off()
+
+#
 # ---- POSTER ----
-# choose mendota
+# note: ran scripts from plot_classification_disagreements.R to re-generate data to plot,
+# but now plot_classification_disagreements.R is updated to export a nice csv of the data
+# so I deleted those no-longer-used scripts from this plotting script.
 
 mendota.unclust.forced <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster_mend_unclust/plots/ForcedTaxonomyGroups/"
 mendota.unclust.final <- "~/Desktop/TaxonomyTrainingSets/BLASTing/poster_mend_unclust/plots/FinalTaxonomyGroups/"

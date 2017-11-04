@@ -18,7 +18,7 @@ I. Pre-workflow scripts (in this folder, copy into a separate working directory 
 	sed 's/[[:blank:]]/\;/' <otus.98.taxonomy >otus.98.taxonomy.reformatted
 
 3. replace blanks with "unclassified" (R)
-	replace_blanks_with_unclassified.R (no terminal call yet)
+	Rscript replace_blanks_with_unclassified.R semicolon-delim-input-file output-file
 
 4. return to first column being tab delimited for mothur (bash)
 	./replace_first_semicolon_with_tab.sh

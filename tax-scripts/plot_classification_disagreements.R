@@ -21,48 +21,58 @@
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 
-# # FOR PLOTTING FORCING  **don't forget to change the seqID.reads file path below!!
+# FOR PLOTTING FORCING  **don't forget to change the seqID.reads file path below!!
 # cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!\n")
 # userprefs <- c(NA, # if seqid.reads exists (i.e. you ran step 14) this is NA, otherwise it's otus.abund file path)
-#                "../../take_mendota_clust/plots",
-#                "../../take_mendota_clust/conflicts_forcing",
-#                "../../take_mendota_clust/otus.custom.80.taxonomy",
-#                "../../take_mendota_clust/otus.98.80.80.taxonomy")
-# 
-# # # FOR CHOOSING CUTOFF:
+#                "../../ME_plot_test/plots",
+#                "../../ME_plot_test/conflicts_forcing",
+#                "../../ME_plot_test/otus.custom.85.taxonomy",
+#                "../../ME_plot_test/otus.98.85.70.taxonomy")
+
+# # FOR CHOOSING CUTOFF:
 # cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
-# userprefs <- c("../../take18playwith/otus.abund",
-#                "../../take18playwith/plots",
+# userprefs <- c("../../poster_mend-check/otus.abund",
+#                "../../poster_mend-check/plots",
 #                "regular",
-#                "regular",
-#                "regular",
-#                "../../take18playwith/conflicts_95",
-#                "../../take18playwith/ids.above.95",
+#                NA,
+#                NA,
+#                "../../poster_mend-check/conflicts_90",
+#                "../../poster_mend-check/ids.above.90",
+#                90,
+#                "../../poster_mend-check/conflicts_91",
+#                "../../poster_mend-check/ids.above.91",
+#                91,
+#                "../../poster_mend-check/conflicts_92",
+#                "../../poster_mend-check/ids.above.92",
+#                92,
+#                "../../poster_mend-check/conflicts_93",
+#                "../../poster_mend-check/ids.above.93",
+#                93,
+#                "../../poster_mend-check/conflicts_94",
+#                "../../poster_mend-check/ids.above.94",
+#                94,
+#                "../../poster_mend-check/conflicts_95",
+#                "../../poster_mend-check/ids.above.95",
 #                95,
-#                "../../take18playwith/conflicts_96",
-#                "../../take18playwith/ids.above.96",
+#                "../../poster_mend-check/conflicts_96",
+#                "../../poster_mend-check/ids.above.96",
 #                96,
-#                "../../take18playwith/conflicts_97",
-#                "../../take18playwith/ids.above.97",
+#                "../../poster_mend-check/conflicts_97",
+#                "../../poster_mend-check/ids.above.97",
 #                97,
-#                "../../take18playwith/conflicts_98",
-#                "../../take18playwith/ids.above.98",
+#                "../../poster_mend-check/conflicts_98",
+#                "../../poster_mend-check/ids.above.98",
 #                98,
-#                "../../take18playwith/conflicts_99",
-#                "../../take18playwith/ids.above.99",
+#                "../../poster_mend-check/conflicts_99",
+#                "../../poster_mend-check/ids.above.99",
 #                99,
-#                "../../take18playwith/conflicts_100",
-#                "../../take18playwith/ids.above.100",
+#                "../../poster_mend-check/conflicts_100",
+#                "../../poster_mend-check/ids.above.100",
 #                100)
-# 
 # # JUST MAKE SEQID.READS FILE, SKIPPING STEP 14 BUT DOING 15.5.A
 # cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
 # userprefs <- c("../../take18playwith/otus.abund", 
 #                "MakeSeqIDReadsOnly")
-
-# cat("fuck you forgot to comment out the seqid.reads file path in plot_classification_disagreements!\n")
-# seqID.reads.file.path <- "../../take_mendota_clust/total.reads.per.seqID.csv"
-# present.working.directory <- "../../take_mendota_clust/"
 
 # in case you want to add the db baseline conflict back to the plots, need to specify this path below
 # and un-comment the plotting calls that use it at the end of the script.
@@ -84,12 +94,24 @@ if (length(rest.of.arguments) > 0){
 seqID.reads.file.path <- "total.reads.per.seqID.csv"
 present.working.directory <- "."
 
+# cat("fuck you forgot to comment out the seqid.reads file path in plot_classification_disagreements!\n")
+# seqID.reads.file.path <- "../../ME_plot_test/total.reads.per.seqID.csv"
+# present.working.directory <- "../../ME_plot_test/"
+
+
 # ---------------------------------------------------------------------------------------------------------------------
 # Define functions to import and process the data
 # ---------------------------------------------------------------------------------------------------------------------
 
-# import all the conflict summary files from each folder and compile them into a matrix
+make.plot.directory <- function(FolderPath){
+  if (!dir.exists(FolderPath)){
+    dir.create(FolderPath)
+    cat("made folder: ", FolderPath, "\n")
+  }
+}
+
 import.all.conflict.summaries <- function(ConflictFolders, PidentsUsed){
+  # import all the conflict summary files from each folder and compile them into a matrix
   pident.folders <- ConflictFolders
   pident.values <- PidentsUsed
   
@@ -113,16 +135,16 @@ import.all.conflict.summaries <- function(ConflictFolders, PidentsUsed){
   return(mismatches.matrix)
 }
 
-# import the database conflicts summary file
 import.database.conflicts <- function(DatabaseFolder){
+  # import the database conflicts summary file
   db.conflicts.folder.path <- DatabaseFolder
   db.conflicts <- read.csv(file = paste(db.conflicts.folder.path, "/conflicts_summary.csv", sep =""), stringsAsFactors = FALSE)
   # the sequences totals are not needed here
   return(db.conflicts[1:5, ])
 }
 
-# import the optional plotting step's forcing conflicts summary file
 import.forcing.conflicts <- function(ForcingFolder){
+  # import the optional plotting step's forcing conflicts summary file
   forcing.folder.path <- ForcingFolder
   forcing.conflicts <- read.csv(file = paste(forcing.folder.path, "/conflicts_summary.csv", sep = ""), stringsAsFactors = FALSE)
   forcing.conflicts.matrix <- as.matrix(forcing.conflicts[ ,2, drop = FALSE])
@@ -132,8 +154,8 @@ import.forcing.conflicts <- function(ForcingFolder){
   return(forcing.conflicts.matrix)
 }
 
-# import seqID.reads variable for the forcing plot (it's generated w/ the regular plotting)
 import.seqID.reads <- function(FilePath){
+  # import seqID.reads variable for the forcing plot (it's generated w/ the regular plotting)
   seqID.reads.file.path <- FilePath
   
   seqID.reads <- read.csv(file = seqID.reads.file.path, colClasses = "character")
@@ -146,8 +168,8 @@ import.seqID.reads <- function(FilePath){
   return(seqID.reads)
 }
 
-# import the OTU table and then pull out just the total reads for each seqID
 import.and.reformat.otu.table <- function(OTUtable){
+  # import the OTU table and then pull out just the total reads for each seqID
   otu.table.path <- OTUtable
   
   otus <- read.table(file = otu.table.path, sep = "\t", header = TRUE, colClasses = "character")
@@ -162,16 +184,16 @@ import.and.reformat.otu.table <- function(OTUtable){
   return(seqID.reads)
 }
 
-# check if you have seqid.reads already or need to make it
 check.for.seqID.reads <- function(PWDpath){
+  # check if you have seqid.reads already or need to make it
   x <- list.files(path = PWDpath)
   check <- any(x == "total.reads.per.seqID.csv")
   return(check)
 }
 
-# import the ids.above. files that list seqIDs above the pident cutoff
-# This is used inside the add.totals.to.read.summaries() function
 import.ids.above <- function(FilePaths, PidentsUsed){
+  # import the ids.above. files that list seqIDs above the pident cutoff
+  # This is used inside the add.totals.to.read.summaries() function
   ids.file.paths <- FilePaths
   pident.values <- PidentsUsed
   
@@ -188,20 +210,16 @@ import.ids.above <- function(FilePaths, PidentsUsed){
   return(fw.ids)
 }
 
-# import files comparing conflicts at each level, record the seqIDs into a list of lists
-# structure: outer list- each pident, inner lists- seqIDs at each taxa level
-get.conflict.seqIDs <- function(ConflictsFolders, PidentsUsed){
+get.conflict.seqIDs <- function(ConflictsFolders, PidentsUsed, TaxaLevels){
+  # import files comparing conflicts at each level, record the seqIDs into a list of lists
+  # structure: outer list- each pident, inner lists- seqIDs at each taxa level
   pident.folders <- ConflictsFolders
   pident.values <- PidentsUsed
+  num.taxa.levels <- TaxaLevels
   
-  # forcing plots go to tribe level
-  if (pident.values[1] == "forcing"){
-    num.taxa.levels <- 7
-    conflict.ids.start <- list(Kingdom = NULL, Phylum = NULL, Class = NULL, Order = NULL, Lineage = NULL, Clade = NULL, Tribe = NULL)
-  }else{
-    num.taxa.levels <- 5
-    conflict.ids.start <- list(Kingdom = NULL, Phylum = NULL, Class = NULL, Order = NULL, Lineage = NULL)
-  }
+  # forcing plots go to tribe (7) level, conflicts plots go to lineage (5) level
+  conflict.ids.start <- list(Kingdom = NULL, Phylum = NULL, Class = NULL, Order = NULL, Lineage = NULL, Clade = NULL, Tribe = NULL)
+  conflict.ids.start <- conflict.ids.start[1:num.taxa.levels]
   
   all.pidents <- list(NULL)
   # for each pident folder
@@ -222,34 +240,33 @@ get.conflict.seqIDs <- function(ConflictsFolders, PidentsUsed){
   return(all.pidents)
 }
 
-# create a list of total reads that matches the structure of the list of conflicting seqIDs
 find.reads.per.seqID <- function(ReadsTable, ConflictsList, Forcing = FALSE){
+  # create a list of total reads that matches the structure of the list of conflicting seqIDs
   otu.reads <- ReadsTable
   conflict.ids <- ConflictsList
   
-  # forcing plots go to tribe level
-  if (Forcing == TRUE){
-    num.taxa.levels <- 7
-    taxa.list.start <- list(Kingdom = NULL, Phylum = NULL, Class = NULL, Order = NULL, Lineage = NULL, Clade = NULL, Tribe = NULL)
-  }else{
-    num.taxa.levels <- 5
-    taxa.list.start <- list(Kingdom = NULL, Phylum = NULL, Class = NULL, Order = NULL, Lineage = NULL)
-  }
+  taxa.list.start <- list(Kingdom = NULL, Phylum = NULL, Class = NULL, Order = NULL, Lineage = NULL, Clade = NULL, Tribe = NULL)
+  num.taxa.levels <- length(conflict.ids[[1]])
+  taxa.list.start <- taxa.list.start[1:num.taxa.levels]
   
   # for each upper list level (pident folder)
   pidents.list <- list(NULL)
   for (p in 1:length(conflict.ids)){
-  
+
     # for each inner list level (taxonomy level)
     taxa.list <- taxa.list.start
     for (t in 1:num.taxa.levels){
-      # for each seqID
+      # find the total reads corresponding to each of the conflict seqIDs
       if (length(conflict.ids[[p]][[t]]) > 0){
-        for (s in 1:length(conflict.ids[[p]][[t]])){
-          index <- which(otu.reads$seqID == conflict.ids[[p]][[t]][s])
-          taxa.list[[t]] <- c(taxa.list[[t]], otu.reads[index,2])
-        }
-      }else taxa.list[[t]] <- 0
+        conf.ids <- conflict.ids[[p]][[t]]
+        reads.ids <- otu.reads$seqID
+        combined.ids <- c(conf.ids, reads.ids)
+        index <- duplicated(combined.ids)
+        index <- index[-c(1:length(conf.ids))]
+        taxa.list[[t]] <- otu.reads[index,2]
+      }else{
+        taxa.list[[t]] <- 0
+      }
     }
     # assign element p of the outer list the inner list it contains
     pidents.list[[p]] <- taxa.list
@@ -258,25 +275,19 @@ find.reads.per.seqID <- function(ReadsTable, ConflictsList, Forcing = FALSE){
   return(pidents.list)
 }
 
-# collapse the list of total reads per seqID into a table of total reads: taxa level x pident
 generate.summary.table.of.reads <- function(ReadsList, Forcing = FALSE){
+  # collapse the list of total reads per seqID into a table of total reads: taxa level x pident
   reads.list <- ReadsList
-  
-  # forcing plots go to tribe level
-  if (Forcing == TRUE){
-    num.taxa.levels <- 7
-  }else{
-    num.taxa.levels <- 5
-  }
-  
+ 
   # Set up empty matrix to fill
-  reads.summary <- matrix(0, nrow = num.taxa.levels, ncol = length(reads.list))
+  num.taxa.levels <- length(reads.list[[1]])
+  num.pidents <- length(reads.list)
+  reads.summary <- matrix(0, nrow = num.taxa.levels, ncol = num.pidents)
   row.names(reads.summary) <- names(reads.list[[1]])
   colnames(reads.summary) <- names(reads.list)
   
   #For each outer list's list (pident)
   for (p in 1:length(reads.list)){
-    
     # For each inner list's vector (taxa level)
     taxa.sum <- NULL
     for (t in 1:num.taxa.levels){
@@ -287,9 +298,9 @@ generate.summary.table.of.reads <- function(ReadsList, Forcing = FALSE){
   return(reads.summary)
 }
 
-# add to the read.summaries table the overall totals to match the otu.summaries structure
-# this involves importing the fw_classified_taxonomies.csv file to get the list of fw seqIDs
 add.totals.to.read.summaries <- function(ReadSummaryTable, AbundanceTable, PidentsUsed, CustomSeqIDs){
+  # add to the read.summaries table the overall totals to match the otu.summaries structure
+  # this involves importing the fw_classified_taxonomies.csv file to get the list of fw seqIDs
   seqID.reads <- AbundanceTable
   reads.summary <- ReadSummaryTable
   pident.values <- PidentsUsed
@@ -302,10 +313,11 @@ add.totals.to.read.summaries <- function(ReadSummaryTable, AbundanceTable, Piden
     # for each seqID classified with FW
     fw.reads[p] <- 0
     if (length(fw.ids[[p]]) > 0){
-      for (s in 1:length(fw.ids[[p]])){
-        index <- which(seqID.reads[,1] == fw.ids[[p]][s])
-        fw.reads[p] <- fw.reads[p] + seqID.reads[index,2]
-      } 
+      ids.subset <- fw.ids[[p]]
+      reads.ids <- seqID.reads[ ,1]
+      index <- duplicated(c(ids.subset, reads.ids))
+      index <- index[-c(1:length(ids.subset))]
+      fw.reads[p] <- sum(seqID.reads[index,2])
     }
     names(fw.reads)[p] <- paste("pident", pident.values[p], sep = "")
   }
@@ -320,8 +332,8 @@ add.totals.to.read.summaries <- function(ReadSummaryTable, AbundanceTable, Piden
   return(reads.summary)
 }
 
-# import bootstrap p-values to compare
 import.bootstrap.pvalues <- function(ConflictFolders, PidentsUsed, FW = TRUE){
+  # import bootstrap p-values to compare
   pident.folders <- ConflictFolders
   pident.values <- PidentsUsed
   
@@ -355,8 +367,8 @@ import.bootstrap.pvalues <- function(ConflictFolders, PidentsUsed, FW = TRUE){
   return(bootstraps.taxa)
 }
 
-# import the custom-only classified taxonomy for the "forcing" plots (function borrowed from find_classification_disagreements.R)
 import.taxonomy.file <- function(FilePath, Final = FALSE){
+  # import the custom-only classified taxonomy for the "forcing" plots (function borrowed from find_classification_disagreements.R)
   taxonomy.file.path <- FilePath
   if (Final == FALSE){
     delimitor <- ";"
@@ -385,97 +397,93 @@ import.taxonomy.file <- function(FilePath, Final = FALSE){
   return(tax)
 }
 
-# Group seqIDs at each taxa level for forcing plots - decide how to treat unclassifieds: group, or make unique ? (can remove later, not this step)
-group.seqIDs.into.taxa <- function(TaxonomyTable, ReadsPerSeqID, UniqueUnclass){
-  forced.taxonomy <- TaxonomyTable
-  seqID.reads <- ReadsPerSeqID
-
-  # first put them im the same order (they should be both character seqIDs already, and taxonomy was ordered inside it's import function)
-  index <- order(seqID.reads[ ,1])
-  seqID.reads.ord <- seqID.reads[index, ]
-  if (all.equal(seqID.reads.ord[ ,1], forced.taxonomy[ ,1]) != TRUE){
-    cat("Crap something's messed up with the indexing, seqID.reads and forced.taxonomy need to have the same order of seqIDs")
+make.empty.list.structure <- function(ListNames){
+  # the list contains zero under each name, not NULL.  NULL is truly empty, but can't have a name
+  # this is used in group.taxa()
+  empty.list <- list(NULL)
+  for (e in 1:length(ListNames)){
+    empty.list[[e]] <- 0
+    names(empty.list)[e] <- ListNames[e]
   }
-  
-  # add total reads to taxonomy table
-  tax.reads <- cbind(forced.taxonomy, seqID.reads.ord[ ,2])
-  colnames(tax.reads)[9] <- "reads"
-  
-  # name change is a relic, also makes easier to troubleshoot
-  otus.taxa <- tax.reads  
-  
-  # Order taxonomy names so that phyla are alphabetical, classes within a phylum are alphabetical, etc
-  index <- order(otus.taxa[ ,2], otus.taxa[ ,3], otus.taxa[ ,4], otus.taxa[ ,5], otus.taxa[ ,6], otus.taxa[ ,7], otus.taxa[ ,8])
-  otus.taxa.ord <- otus.taxa[index, ]
-  
-  if (UniqueUnclass == TRUE){
-    # Make unique taxonomy table (so that there aren't duplicate names at each level as occurs with "unclassified")
-    for (t in 2:8){
-      unique.taxa <- unique(otus.taxa.ord[ ,2:t, drop = FALSE])          
-      unique.names <- make.unique(unique.taxa[,(t-1)])       
-      for (u in 1:nrow(unique.taxa)){                     
-        for (r in 1:nrow(otus.taxa.ord)){
-          if (all(otus.taxa.ord[r,2:t] == unique.taxa[u,1:(t-1)])){
-            otus.taxa.ord[r,t] <- unique.names[u]
-          }
-        }
-      }
-    }
-  }
-  
-  # change to being a dataframe so that read numbers can be numeric
-  otus.taxa.ord <- as.data.frame(otus.taxa.ord, stringsAsFactors = F)
-  otus.taxa.ord[ ,9] <- as.numeric(otus.taxa.ord[ ,9])
-  
-  # Create a blank list to fill with data
-  grouped.taxa <- list("kingdom"=NULL,"phylum"=NULL, "class"=NULL, "order"=NULL, "lineage"=NULL, "clade"=NULL, "tribe"=NULL)
-  
-  # Populate list with the unique taxa names at each level and a numeric column for total reads
-  for (t in 1:7){
-    grouped.taxa[[t]] <- as.data.frame( cbind( unique(otus.taxa.ord[ ,(2:(t+1))]), 
-                                               rep( x = 0, times = nrow(unique(otus.taxa.ord[ ,(2:(t+1)), drop=F])) ) ), 
-                                        stringsAsFactors = FALSE)
-    grouped.taxa[[t]][ ,(t+1)] <- as.numeric(grouped.taxa[[t]][ ,(t+1)])
-    colnames(grouped.taxa[[t]]) <- c( colnames(otus.taxa.ord)[(2:(t+1))], "reads")
-    rownames(grouped.taxa[[t]])<- NULL
-  }
-  
-  # Fill in the reads columns in each element of the grouped.taxa list
-  for (t in 1:7){                                   
-    uniquename <- 1
-    for (r in 1:nrow(otus.taxa.ord)){
-      if ( all( otus.taxa.ord[r, 2:(t + 1)] == grouped.taxa[[t]][uniquename, 1:t]) ){
-        grouped.taxa[[t]][uniquename, (t + 1)] <- grouped.taxa[[t]][uniquename, (t + 1)] + otus.taxa.ord[r,9]
-      }else{
-        uniquename <- uniquename + 1
-        grouped.taxa[[t]][uniquename, (t + 1)] <- grouped.taxa[[t]][uniquename, (t + 1)] + otus.taxa.ord[r,9]
-      }
-    }
-    cat("Now you're on taxa level:",t,'\n')
-  }
-  
-  if (UniqueUnclass == FALSE){
-    # combine unclassifieds at each level so that they form just one bar regardless of differing upper levels
-    for (t in 1:7){
-      index <- which(grouped.taxa[[t]][ ,t] == "unclassified")
-      if (length(index) > 0){
-        unclass.reads <- sum(grouped.taxa[[t]][index, (t + 1)])
-        unclass.names <- c(rep.int(x = "CombinedTaxa", times = t - 1), "unclassified")
-        unclass.row <- c(unclass.names, unclass.reads)
-        grouped.taxa[[t]] <- grouped.taxa[[t]][-index, ]
-        grouped.taxa[[t]] <- rbind(grouped.taxa[[t]], unclass.row)
-        grouped.taxa[[t]][ ,(t + 1)] <- as.numeric(grouped.taxa[[t]][ ,(t + 1)])
-        ord.index <- order(grouped.taxa[[t]][ ,(t + 1)], decreasing = TRUE)
-        grouped.taxa[[t]] <- grouped.taxa[[t]][ord.index, ]
-      }
-    }
-  }
-  
-  return(grouped.taxa)
+  return(empty.list)
 }
 
-# Find the most abundant taxa at each taxonomy level - and decide if you want to include unclassifieds in your rank abund calcs
+make.unclassifieds.unique <- function(Taxonomy){
+  # Taxonomy is a matrix containing only the names, no abundances or OTU numbers
+  # this function maintains row order, so those columns can be re-combined after this
+  # this is used in group.taxa()
+  taxa.levels <- 2:ncol(Taxonomy)
+  
+  # first add the level-above name to each "unclassified"
+  for (t in taxa.levels){
+    index <- which(Taxonomy[ ,t] == "unclassified")
+    Taxonomy[index,t] <- paste(Taxonomy[index,t], Taxonomy[index,t - 1], sep = ".")
+  }
+  
+  # then remove extra unclassifieds to get only unclassified.last_known_name
+  remove.extra.u <- function(x){
+    x <- gsub(pattern = ".unclassified", replacement = "", x = x)
+    return(x)
+  }
+  Taxonomy <- apply(X = Taxonomy, MARGIN = 2, FUN = remove.extra.u)
+  
+  return(Taxonomy)
+}
+
+group.taxa <- function(Taxonomy, Abunds, ListNames = c("kingdom","phylum","class","order","lineage","clade","tribe"), UniqueUnclass){
+  # Taxonomy is a matrix (or vector) containing only the names, no abundances or OTU numbers
+  # Abunds is a matrix (or vector) containing the relative abundances in each sample
+  # ListNames is a vector describing grouping level (phylum, class, order, etc- length should match # Tax columns)
+  # This function groups the abundances by summing them for each Taxonomy Level
+  # It produces a large list, where each element contains an abundance table grouped to that level
+  
+  # Optionally differentiate the "unclassified" names by their last known name:
+  if (UniqueUnclass == TRUE){
+    Taxonomy <- make.unclassifieds.unique(Taxonomy = Taxonomy)
+  }
+  
+  # First create the lists of variable categories the function aggregate() requires:
+  aggregation.list <- make.empty.list.structure(ListNames = ListNames)
+  for(t in 1:length(aggregation.list)){
+    aggregation.list[[t]] <- Taxonomy[ ,t]
+  }
+  
+  # Next create the grouped-by-taxa-level list:
+  taxa.list <- make.empty.list.structure(ListNames = ListNames)
+  for (t in 1:length(taxa.list)){
+    taxa.list[[t]] <- aggregate(x = Abunds, by = aggregation.list[1:t], FUN = "sum")
+  }
+  
+  # If don't want "unclassifieds to be differentiated, group them together:
+  # note: all unclassifieds at current level t get grouped. so their upper taxa levels are combined too,
+  # resulting in a category of "CombinedTaxa" since many diverse things are grouped together potentially.
+  if (UniqueUnclass == FALSE){
+    for (t in 1:length(taxa.list)){
+      index <- which(taxa.list[[t]][ ,t] == "unclassified")
+      if (length(index) > 0){
+        unclass.abund <- sum(taxa.list[[t]][index, (t + 1)])
+        unclass.name <- c(rep.int(x = "CombinedTaxa", times = t - 1), "unclassified")
+        unclass.row <- c(unclass.name, unclass.abund)
+        taxa.list[[t]] <- taxa.list[[t]][-index, ]
+        taxa.list[[t]] <- rbind(taxa.list[[t]], unclass.row)
+        taxa.list[[t]][ ,(t + 1)] <- as.numeric(taxa.list[[t]][ ,(t + 1)])
+      }
+    }
+  }
+  
+  # Change order to by abundance instead of alphabetical:
+  for (t in 1:length(taxa.list)){
+    index <- order(taxa.list[[t]][ ,(t + 1)], decreasing = TRUE)
+    taxa.list[[t]] <- taxa.list[[t]][index, ]
+    colnames(taxa.list[[t]])[(t + 1)] <- "abund"
+    row.names(taxa.list[[t]]) <- NULL
+  }
+  
+  return(taxa.list)
+}
+
 find.top.taxa.by.total.reads <- function(TaxonomyList, NumberTopTaxa = "all", RemoveUnclass){
+  # Find the most abundant taxa at each taxonomy level - and decide if you want to include unclassifieds in your rank abund calcs
   grouped.taxa <- TaxonomyList
   
   # trim or don't trim the total number of results
@@ -512,7 +520,7 @@ find.top.taxa.by.total.reads <- function(TaxonomyList, NumberTopTaxa = "all", Re
     not.unclassifieds <- grouped.taxa.ord
   }
   
-  # look just at the top 20 levels
+  # look just at the top levels
   grouped.taxa.top <- list("kingdom"=NULL,"phylum"=NULL, "class"=NULL, "order"=NULL, "lineage"=NULL, "clade"=NULL, "tribe"=NULL)
   for (t in 1:7){
     if (nrow(not.unclassifieds[[t]]) < num.taxa[t]){
@@ -524,17 +532,19 @@ find.top.taxa.by.total.reads <- function(TaxonomyList, NumberTopTaxa = "all", Re
   return(grouped.taxa.top)
 }
 
-# Remove parentheses and % confidence- script from find_classification_disagreements.R
 remove.parentheses <- function(x){
+  # Remove parentheses and % confidence- script from find_classification_disagreements.R
+  # use with apply()
   fixed.name <- sub(pattern = '\\(.*\\)' , replacement = '', x = x)
   return(fixed.name)
 }
 
-# find the differences btwn the workflow and the custom-only classifications
 find.forcing.diffs <- function(TopFinalList, AllForcedList){
+  # find the differences btwn the workflow and the custom-only classifications
   top.final <- TopFinalList
   all.forced <- AllForcedList
   
+  # add a fw.reads column and a difference column to the top final taxa list
   for (t in 1:length(top.final)){
     fw.reads <- NULL
     difference <- NULL
@@ -551,9 +561,10 @@ find.forcing.diffs <- function(TopFinalList, AllForcedList){
     top.final[[t]] <- cbind(top.final[[t]], fw.reads, difference)
   }
   
+  # add columns for values used to make the stacked grey, red, and blue barplot
   for (t in 1:length(top.final)){
     x <- top.final[[t]]
-    grey.bars <- x$reads
+    grey.bars <- x$abund
     red.bars <- x$difference
     blue.bars <- abs(x$difference)
     
@@ -571,8 +582,8 @@ find.forcing.diffs <- function(TopFinalList, AllForcedList){
   return(top.final)
 }
 
-# this removes taxa that are low abundance based on their max of red, grey, and blue heights. (so narrows in on interesting bars while maintaining origional ranks)
 filter.out.low.abund <- function(TaxaList, CutoffVector){
+  # this removes taxa that are low abundance based on their max of red, grey, and blue heights. (so narrows in on interesting bars while maintaining origional ranks)
   for (t in 1:7){
     max.heights <- NULL
     for (r in 1:nrow(TaxaList[[t]])){
@@ -586,7 +597,115 @@ filter.out.low.abund <- function(TaxaList, CutoffVector){
   return(TaxaList)
 }
 
+import.pvalues.above.bootstrap.cutoff <- function(FolderPaths, Pidents){
+  pident.folders <- FolderPaths
+  pident.values <- Pidents
+  
+  tax.nums.list <- list(NULL)
+  for (p in 1:length(pident.values)){
+    file.name <- paste(pident.folders[p],"bootstrap_pvalues.csv", sep = "/")
+    tax.nums.list[[p]] <- read.csv(file = file.name, header = T, colClasses = "character")
+    names(tax.nums.list)[p] <- paste("pident", pident.values[p], sep = "_")
+  }
+  return(tax.nums.list)
+}
 
+convert.to.yes.no.classified <- function(PvaluesList){
+  tax.nums <- PvaluesList
+  for(p in 1:length(tax.nums)){
+    t.n <- apply(X = tax.nums[[p]][ ,-1], MARGIN = 2, FUN = as.numeric)
+    t.n <- t.n != 0
+    t.n <- apply(X = t.n, MARGIN = 2, FUN = as.numeric)
+    tax.nums[[p]][ ,-1] <- t.n
+  }
+  return(tax.nums)
+}
+
+combine.tax.nums.with.seqid.reads <- function(PvaluesList, TotReadsTable){
+  seqID.reads <- TotReadsTable
+  tax.TF <- PvaluesList
+  
+  # put seqIDs in same order in all tables
+  index.reads <- order(seqID.reads[ ,1])
+  seqID.reads <- seqID.reads[index.reads, ]
+  
+  index.pvals <- NULL
+  check.order <- NULL
+  for (p in 1:length(tax.TF)){
+    index.pvals <- order(tax.TF[[p]][ ,1])
+    tax.TF[[p]] <- tax.TF[[p]][index.pvals, ]
+    check.order[p] <- all.equal(tax.TF[[p]][ ,1], seqID.reads[ ,1])
+  }
+  if (all(check.order != TRUE)){
+    cat("Fuck there's something messed up w/ the tax.nums indexing in function combine.tax.nums.with.seqid.reads()")
+  }
+  
+  # add read counts to the tax.nums tables
+  for (p in 1:length(tax.TF)){
+    tax.TF[[p]] <- cbind(seqID.reads, tax.TF[[p]][ ,-1])
+  }
+  return(tax.TF)
+}
+
+calc.reads.per.name <- function(TaxReadsList){
+  tax.reads <- TaxReadsList
+  for (p in 1:length(tax.reads)){
+    tax <- tax.reads[[p]][ ,-c(1:2)]
+    tax <- as.matrix(tax)
+    reads <- tax.reads[[p]][ ,2]
+    t.r <- tax * reads
+    tax.reads[[p]] <- data.frame(tax.reads[[p]][ ,1], t.r, stringsAsFactors = FALSE)
+  }
+  return(tax.reads)
+}
+
+create.summary.matrix <- function(TaxList){
+  tax.sum <- matrix(0, nrow = length(TaxList), ncol = ncol(TaxList[[1]]) - 1)
+  row.names(tax.sum) <- names(TaxList)
+  colnames(tax.sum) <- colnames(TaxList[[1]][ ,-1])
+  for (p in 1:length(TaxList)){
+    tax <- TaxList[[p]][ ,-1]
+    tax.sum[p, ] <- colSums(tax)
+  }
+  return(tax.sum)
+}
+
+convert.to.percent <- function(TaxSum, Total){
+  TaxSum <- TaxSum / Total * 100
+  return(TaxSum)
+}
+
+find.alpha.diversity <- function(Taxonomy){
+  alpha.div <-NULL
+  for (t in 1:ncol(Taxonomy)){
+    alpha.div[t] <- length(unique(Taxonomy[ ,t]))
+  }
+  names(alpha.div) <- colnames(Taxonomy)
+  return(alpha.div)
+}
+
+find.percent.classified <- function(GroupedTaxaList){
+  # note: unclassifieds can't have been made unique
+  perc.class <- NULL
+  for (t in 1:length(GroupedTaxaList)){
+    index <- which(GroupedTaxaList[[t]][ ,t] == "unclassified")
+    if (length(index) > 0){
+      perc.class[t] <- sum(GroupedTaxaList[[t]][-index, t + 1])
+    }else{
+      perc.class[t] <- sum(GroupedTaxaList[[t]][ ,t + 1])
+    }
+  }
+  names(perc.class) <- names(GroupedTaxaList)
+  return(perc.class)
+}
+
+export.fw.stats <- function(AlphaDiv, PercClass, FolderPath){
+  file.name <- paste(FolderPath, "Custom-only_classification_stats.csv", sep = "/")
+  fw.stats <- data.frame(Percent.Reads.Classified = PercClass, Alpha.Diversity = AlphaDiv)
+  write.csv(x = fw.stats, file = file.name, quote = FALSE)
+  cat("Made Datafile: ", file.name, "\n")
+  return(fw.stats)
+}
 
 # ---------------------------------------------------------------------------------------------------------------------
 # Define functions to plot the data
@@ -915,22 +1034,29 @@ plot.forcing.diffs <- function(TopTaxaList, NumBars, FolderPath, PlottingLevels 
     plot.name <- paste(FolderPath, "/", t, "-Forcing_Diffs-", names(stacked.data)[t], ".png", sep = "")
     csv.name <- paste(FolderPath, "/", t, "-Forcing_Diffs-", names(stacked.data)[t], ".csv", sep = "")
     
-    # # long names go off the plot
-    # taxa.names <- sub(pattern = ".*__", replacement = "", x = colnames(stacked.data[[t]]))
-    # taxa.names <- substr(x = taxa.names, start = 1, stop = 20)
-    # 
-    # # make the y axis not have crazy big numbers on it, put them in rounded percents
-    # max.bar <- max(stacked.data[[t]][1, ] + stacked.data[[t]][2, ])
+    # really long names go off the plot
+    taxa.names <- sub(pattern = ".*__", replacement = "", x = colnames(stacked.data[[t]]))
+    # this ends up looking weird b/c the label are not monospaced font so some of the "short" names get cut off too.
+    # for (n in 1:length(taxa.names)){
+    #   if (nchar(taxa.names[n], type = "chars") > 20){
+    #     taxa.names[n] <- substr(x = taxa.names[n], start = 1, stop = 19)
+    #     taxa.names[n] <- paste(taxa.names[n], "-", sep = "")
+    #   }
+    # }
+    colnames(stacked.data[[t]]) <- taxa.names
+
+    # # adjust y-axis to go to the max value
+    # max.bar <- max(stacked.data[[t]][1, ] + stacked.data[[t]][2, ]) # grey bar + red bar
     # y.axis.ticks <- c(0, max.bar * (1/4), max.bar * (1/2), max.bar * (3/4), max.bar)
     # y.axis.labels <- round(x = y.axis.ticks / tot.reads * 100, digits = 0)
-    
-    # make to plots!
-    # png(filename = plot.name, width = 7, height = 5, units = "in", res = 100)
+
+    # make the plots!
+    png(filename = plot.name, width = 7, height = 5, units = "in", res = 100)
     par(mar = c(10,5,5,2))
     barplot(height = stacked.data[[t]], beside = FALSE, col = c("grey","red","blue"), main = names(stacked.data)[t], las = 2, ylab = "Relative Abundance (% reads)", border = NA)
-    legend(x = "topright", legend = c("Gained from forcing", "Lost from forcing"), fill = c("red", "blue"), border = FALSE, bty = "n", inset = .05)
-    # unnecessary.message <- dev.off()
-    # cat("made plot: ", plot.name, "\n")
+    legend(x = "topright", legend = c("Added Inaccuracy", "Lost Diversity"), fill = c("red", "blue"), border = FALSE, bty = "n", inset = .05)
+    unnecessary.message <- dev.off()
+    cat("made plot: ", plot.name, "\n")
     
     # export the data! ... do the full data not just stacked data:
     write.csv(x = top.taxa[[t]], file = csv.name, quote = FALSE, row.names = FALSE)
@@ -966,8 +1092,8 @@ export.summary.table <- function(SummaryTable, FolderPath, ByOTU = TRUE, Percent
   cat("made datafile: ", file.name, "\n")
 }
 
-# export as a table the total forcing stats (this made the green bar plots that are commented out now) (forcing option)
 export.total.forcing.stats <- function(OtuSum, ReadSum, FolderPath){
+  # export as a table the total forcing stats (this made the green bar plots that are commented out now) (forcing option)
   # the OTU summary is not in percents, the reads summary is
   otu.tot.row <- nrow(OtuSum)
   OtuSum <- OtuSum / OtuSum[otu.tot.row,1] * 100
@@ -981,8 +1107,8 @@ export.total.forcing.stats <- function(OtuSum, ReadSum, FolderPath){
   cat("Made datafile: ", file.name, "\n")
 }
 
-# exported the grouped lists so that each level is another file in a folder (forcing option).
 export.grouped.list <- function(Grouped, PlotsPath, FolderName){
+  # exported the grouped lists so that each level is another file in a folder (forcing option).
   folder.path <- paste(PlotsPath, "/", FolderName, "/", sep = "")
   dir.create(path = folder.path, showWarnings = FALSE) # the warning is if the folder already exists, but it works regardless.
   for (t in 1:length(Grouped)){
@@ -992,6 +1118,77 @@ export.grouped.list <- function(Grouped, PlotsPath, FolderName){
   cat("Made datafiles of total reads per taxon in folder: ", folder.path, "\n")
 }
 
+plot.total.classified <- function(SummaryMatrix, PidentValues, FolderPath, DataType){
+  pidents <- PidentValues
+  sum.named <- SummaryMatrix
+  
+  line.col <- rainbow(n = ncol(sum.named), v = .4)
+  x.lim <- c(min(pidents), max(pidents))
+  y.label <- paste("Percent Classified (", DataType, ")", sep = "")
+  x.label <- "Percent Identity Cutoff"
+  plot.title <- expression(bold("Choose a percent identity cutoff that maximizes classification"))
+  plot.filename <- paste(FolderPath, "/Percent_", DataType, "_Classified_by_Pident.png", sep = "")
+  taxa.levels <- sub(pattern = ".fw", replacement = "", x = colnames(sum.named))
+  
+  png(filename = plot.filename, width = 10, height = 5, units = "in", res = 100)
+  
+  par(mfrow = c(1,ncol(sum.named)), omi = c(.4,.3,.3,.1), mai = c(.2,.3,.3,0))
+  for (t in 1:ncol(sum.named)){
+    ass <- sum.named[ ,t]
+    
+    # make y axis at least 5 percentage points range so plots less misleading
+    y.max <- max(ass)
+    y.min <- min(ass)
+    y.range <- y.max - y.min
+    if (y.range < 5){
+      half.range <- y.range / 2
+      extend.by <- 2.5 - half.range
+      y.min <- y.min - extend.by
+      y.max <- y.max + extend.by
+    }
+    
+    # basic plot
+    plot(x = pidents, y = ass, col = line.col[t], type = "l", ann = F, lwd = 3, axes = F, ylim = c(y.min, y.max))
+    mtext(text = taxa.levels[t], side = 3, line = .5, outer = F, cex = 1.2, col = line.col[t])
+    
+    # vertical max line
+    index <- which(ass == max(ass))
+    max.names <- pidents[index]
+    lines(x = c(max.names, max.names), y = c(0, max(ass)), col = adjustcolor(col = line.col[t], alpha.f = .3), lwd = 3)
+    
+    # x axis labels
+    x.lab.cols <- rep("black", times = length(pidents))
+    x.lab.cols[index] <- line.col[t]
+    x.lab.cex <- rep(.7, times = length(pidents))
+    x.lab.cex[index] <- 2
+    x.lab.line <- rep(.5, times = length(pidents))
+    x.lab.line[index] <- 1.5
+    empty.x.labels <- rep("", times = length(pidents))
+    axis(side = 1, at = pidents, labels = empty.x.labels)
+    mtext(text = pidents, side = 1, line = x.lab.line, at = pidents, col = x.lab.cols, cex = x.lab.cex)
+    
+    # y axis labels
+    span <- y.max - y.min
+    y.ax <- c(y.min, y.min + (span * 1/3), y.min + (span * 2/3), y.max)
+    y.ax.lab <- round(x = y.ax, digits = 0)
+    empty.y.labels <- rep("", times = length(y.ax))
+    axis(side = 2, at = y.ax, labels = empty.y.labels)
+    mtext(text = y.ax.lab, side = 2, line = .7, at = y.ax)
+  } 
+  mtext(text = plot.title, side = 3, line = .5, outer = T, cex = 1.2)
+  mtext(text = x.label, side = 1, line = 1.5, outer = T, cex = 1.2)
+  mtext(text = y.label, side = 2, line = .5, outer = T, cex = 1.2)
+  
+  unnecessary.message <- dev.off()
+  cat("made plot: ", plot.filename, "\n")
+}
+
+export.total.classified.summary <- function(SummaryMatrix, FolderPath, DataType){
+  data.filename <- paste(FolderPath, "/Percent_", DataType, "_Classified_by_Pident.csv", sep = "")
+  colnames(SummaryMatrix) <- sub(pattern = ".fw", replacement = "", x = colnames(SummaryMatrix))
+  write.csv(x = SummaryMatrix, file = data.filename, quote = F)
+  cat("Made Datafile: ", data.filename, "\n")
+}
 
 # ---------------------------------------------------------------------------------------------------------------------
 # Use Functions
@@ -1001,15 +1198,20 @@ export.grouped.list <- function(Grouped, PlotsPath, FolderName){
 # first check if all you're doing is making the seqID.reads file
 # ---------------------------------------------------------------------------------------------------------------------
 if (userprefs[2] == "MakeSeqIDReadsOnly"){
+# ---------------------------------------------------------------------------------------------------------------------
   seqID.reads <- import.and.reformat.otu.table(OTUtable = otu.table.path) 
   write.table(x = seqID.reads, file = "total.reads.per.seqID.csv", sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
-  cat("made the datafile: ", "total.reads.per.seqID.csv")
+  cat("made the datafile: ", "total.reads.per.seqID.csv \n")
 
 # ---------------------------------------------------------------------------------------------------------------------
 # second check if this is the optional "forcing plot"
+# ---------------------------------------------------------------------------------------------------------------------
 }else if (forcing.folder.path != "regular"){
 # ---------------------------------------------------------------------------------------------------------------------
 
+  plots.folder.path <- paste(plots.folder.path, "step_15_5b_Improvement_over_custom-only", sep = "/")
+  make.plot.directory(FolderPath = plots.folder.path)
+  
   otus.forced <- import.forcing.conflicts(ForcingFolder = forcing.folder.path)
   
   if (check.for.seqID.reads(PWDpath = present.working.directory)){
@@ -1018,7 +1220,7 @@ if (userprefs[2] == "MakeSeqIDReadsOnly"){
     seqID.reads <- import.and.reformat.otu.table(OTUtable = otu.table.path) # wasn't exported if you chose pident and skipped step 14
   }
   
-  forced.seqIDs <- get.conflict.seqIDs(ConflictsFolders = forcing.folder.path, PidentsUsed = "forcing")
+  forced.seqIDs <- get.conflict.seqIDs(ConflictsFolders = forcing.folder.path, PidentsUsed = "forcing", TaxaLevels = 7)
   
   forced.seqID.reads <- find.reads.per.seqID(ReadsTable = seqID.reads, ConflictsList = forced.seqIDs, Forcing = TRUE)
   
@@ -1030,13 +1232,13 @@ if (userprefs[2] == "MakeSeqIDReadsOnly"){
   
   forced.taxonomy <- import.taxonomy.file(FilePath = forced.taxonomy.file)
   
-  grouped.forced.taxa <- group.seqIDs.into.taxa(TaxonomyTable = forced.taxonomy, ReadsPerSeqID = seqID.reads, UniqueUnclass = FALSE)
+  grouped.forced.taxa <- group.taxa(Taxonomy = forced.taxonomy[ ,-1], Abunds = seqID.reads[ ,2], UniqueUnclass = FALSE)
   
-  top.taxa <- find.top.taxa.by.total.reads(TaxonomyList = grouped.forced.taxa, NumberTopTaxa = 20, RemoveUnclass = FALSE) # only used for custom-only rank abund order (plot.most.misleading.forced.taxa)                   .                              
+  # top.taxa <- find.top.taxa.by.total.reads(TaxonomyList = grouped.forced.taxa, NumberTopTaxa = 20, RemoveUnclass = FALSE) # only used for custom-only rank abund order (plot.most.misleading.forced.taxa)                   .                              
   
   final.taxonomy <- import.taxonomy.file(FilePath = final.taxonomy.file, Final = TRUE)
 
-  grouped.final.taxa <- group.seqIDs.into.taxa(TaxonomyTable = final.taxonomy, ReadsPerSeqID = seqID.reads, UniqueUnclass = FALSE)
+  grouped.final.taxa <- group.taxa(Taxonomy = final.taxonomy[ ,-1], Abunds = seqID.reads[ ,2], UniqueUnclass = FALSE)
 
   top.final.taxa <- find.top.taxa.by.total.reads(TaxonomyList = grouped.final.taxa, NumberTopTaxa = "all", RemoveUnclass = FALSE) # all here to export all data, numbars (workflow rank abund) is determined in plot function.
 
@@ -1048,7 +1250,7 @@ if (userprefs[2] == "MakeSeqIDReadsOnly"){
   
   # plot.percent.forced(ForcingTable = reads.forced, ResultsFolder = plots.folder.path, ByReads = TRUE)
   
-  export.total.forcing.stats(OtuSum = otus.forced, ReadSum = reads.forced, FolderPath = plots.folder.path)
+  # export.total.forcing.stats(OtuSum = otus.forced, ReadSum = reads.forced, FolderPath = plots.folder.path)
   
   # plot.most.misleading.forced.otus(ReadsPerForcedSeqIDs = forced.seqID.reads, ForcedSeqIDs = forced.seqIDs, 
   #                                  ReadsPerSeqID = seqID.reads, OutputFolder = plots.folder.path, PlottingLevels = 1:7)
@@ -1059,17 +1261,27 @@ if (userprefs[2] == "MakeSeqIDReadsOnly"){
 
   plot.forcing.diffs(TopTaxaList = top.final.taxa, NumBars = 800, FolderPath = plots.folder.path)
   
-  export.grouped.list(Grouped = grouped.forced.taxa, PlotsPath = plots.folder.path, FolderName = "ForcedTaxonomyGroups")
-  export.grouped.list(Grouped = grouped.final.taxa, PlotsPath = plots.folder.path, FolderName = "FinalTaxonomyGroups")
+  # export.grouped.list(Grouped = grouped.forced.taxa, PlotsPath = plots.folder.path, FolderName = "ForcedTaxonomyGroups")
+  # export.grouped.list(Grouped = grouped.final.taxa, PlotsPath = plots.folder.path, FolderName = "FinalTaxonomyGroups")
+  
+  # Export stats on alpha diversity and percent classified using only the FW database:
+  fw.unique.unclass <- make.unclassifieds.unique(Taxonomy = forced.taxonomy[ ,-1])
+  fw.alpha <- find.alpha.diversity(Taxonomy = fw.unique.unclass)
+  
+  fw.perc.class <- find.percent.classified(GroupedTaxaList = grouped.forced.taxa)
+  
+  fw.stats <- export.fw.stats(AlphaDiv = fw.alpha, PercClass = fw.perc.class, FolderPath = plots.folder.path)
   
 # ---------------------------------------------------------------------------------------------------------------------
 # If not then do the normal comparison for choosing pident cutoff
+# ---------------------------------------------------------------------------------------------------------------------
 }else{
 # ---------------------------------------------------------------------------------------------------------------------
   
-  # ---------------------------------------------------------------------------------------------------------------------
-  # examine custom taxonomy disagreements and contribution by number OTUs
-  # ---------------------------------------------------------------------------------------------------------------------
+# examine custom taxonomy disagreements and contribution by number OTUs -----------------------------------------------
+  
+  plots.folder.path <- paste(plots.folder.path, "step_14_Choose_pident_cutoff", sep = "/")
+  make.plot.directory(FolderPath = plots.folder.path)
   
   otu.summaries <- import.all.conflict.summaries(ConflictFolders = pident.folders, PidentsUsed = pident.values)
   export.summary.table(SummaryTable = otu.summaries, FolderPath = plots.folder.path, ByOTU = TRUE, Percents = FALSE)
@@ -1083,7 +1295,8 @@ if (userprefs[2] == "MakeSeqIDReadsOnly"){
   otu.summaries <- otu.summaries[c(-5,-4), ]
   # db.summary <- db.summary[-5, ]
   
-  plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path)
+  # These plots people generally found confusing, and the message was clearer by looking at the datatables exported above anyway
+  # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path)
   # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, y.axis.limit = 10) #zooms on any phylum forcing
   # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE)
   # plot.num.forced(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE, y.axis.limit = 1)
@@ -1093,13 +1306,11 @@ if (userprefs[2] == "MakeSeqIDReadsOnly"){
   # plot.num.classified.outs(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = FALSE)
   plot.num.classified.outs(ConflictSummaryTable = otu.summaries, ResultsFolder = plots.folder.path, AsPercent = TRUE)
   
-  # ---------------------------------------------------------------------------------------------------------------------
-  # examine custom taxonomy disagreements and contribution by number reads
-  # ---------------------------------------------------------------------------------------------------------------------
+# examine custom taxonomy disagreements and contribution by number reads ----------------------------------------------
   
   seqID.reads <- import.and.reformat.otu.table(OTUtable = otu.table.path)
   
-  conflict.seqIDs <- get.conflict.seqIDs(ConflictsFolders = pident.folders, PidentsUsed = pident.values)
+  conflict.seqIDs <- get.conflict.seqIDs(ConflictsFolders = pident.folders, PidentsUsed = pident.values, TaxaLevels = 5)
   
   conflict.seqID.reads <- find.reads.per.seqID(ReadsTable = seqID.reads, ConflictsList = conflict.seqIDs)
   
@@ -1118,9 +1329,10 @@ if (userprefs[2] == "MakeSeqIDReadsOnly"){
   #leave out order because there's too many unclassifieds, makes it hard to interpret
   read.summaries <- read.summaries[c(-5,-4), ]
   
+  # These plots people generally found confusing, and the message was clearer by looking at the datatable exported above anyway
   # plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE)
   # plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, y.axis.limit = 10000)
-  plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE)
+  # plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE)
   # plot.num.forced(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = TRUE, y.axis.limit = .5)
   
   # plot.num.classified.outs(ConflictSummaryTable = read.summaries, ResultsFolder = plots.folder.path, ByReads = TRUE, AsPercent = FALSE)
@@ -1128,14 +1340,43 @@ if (userprefs[2] == "MakeSeqIDReadsOnly"){
   
   # export the reads per seqID for use in the plot_classification_improvement.R script
   write.table(x = seqID.reads, file = "total.reads.per.seqID.csv", sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
-  cat("made the datafile: ", "total.reads.per.seqID.csv")
+  cat("made the datafile: ", seqID.reads.file.path, "\n")
   
-  # ---------------------------------------------------------------------------------------------------------------------
-  # examine pident cutoff relationship to bootstrap p-values -this plot is not useful.
-  # ---------------------------------------------------------------------------------------------------------------------
+# examine total percent of dataset that is classified by read and OTU -------------------------------------------------
+  
+  tax.nums <- import.pvalues.above.bootstrap.cutoff(FolderPaths = pident.folders, Pidents = pident.values)
+  tax.TF <- convert.to.yes.no.classified(PvaluesList = tax.nums)
+  
+  tax.reads <- combine.tax.nums.with.seqid.reads(PvaluesList = tax.TF, TotReadsTable = seqID.reads)
+  tax.reads <- calc.reads.per.name(TaxReadsList = tax.reads)
+  
+  otus.named <- create.summary.matrix(TaxList = tax.TF)
+  reads.named <- create.summary.matrix(TaxList = tax.reads)
+  
+  otus.named <- convert.to.percent(TaxSum = otus.named, Total = nrow(seqID.reads))
+  reads.named <- convert.to.percent(TaxSum = reads.named, Total = sum(seqID.reads[ ,2]))
+  
+  export.total.classified.summary(SummaryMatrix = otus.named, FolderPath = plots.folder.path, DataType = "OTUs")
+  export.total.classified.summary(SummaryMatrix = reads.named, FolderPath = plots.folder.path, DataType = "Reads")
+  
+  # plot.total.classified(SummaryMatrix = reads.named, PidentValues = pident.values, FolderPath = plots.folder.path, DataType = "Reads")
+  # k and p mostly all classified, t shows forcing
+  plot.total.classified(SummaryMatrix = reads.named[ ,-1], PidentValues = pident.values, FolderPath = plots.folder.path, DataType = "Reads")
+  # trim down the total pidents (for when I did 90:100)
+  # plot.total.classified(SummaryMatrix = reads.named[-c(1:5),-c(1:2,7)], PidentValues = pident.values[-c(1:5)], FolderPath = plots.folder.path, DataType = "Reads")
+
+  # The plots by OTU are not very helpful b/c of the strong effects of forcing
+  # plot.total.classified(SummaryMatrix = otus.named, PidentValues = pident.values, FolderPath = plots.folder.path, DataType = "OTUs")
+  # only see diversity lost with lowering pident at the phylum level- that's probably the cyanos
+  plot.total.classified(SummaryMatrix = otus.named[ ,-1], PidentValues = pident.values, FolderPath = plots.folder.path, DataType = "OTUs")
+  # otherwise you actually see forcing at the OTU-level. as more OTUs are put into FW, more OTUs are classified. 
+  # these gains must be from stuff forced into a classification in FW, but unclassified in GG.
+  
+  
+# examine pident cutoff relationship to bootstrap p-values -this plot is not useful. ----------------------------------
+  
   # fw.pvalues <- import.bootstrap.pvalues(ConflictFolders = pident.folders, PidentsUsed = pident.values, FW = TRUE)
   # gg.pvalues <- import.bootstrap.pvalues(ConflictFolders = pident.folders, PidentsUsed = pident.values, FW = FALSE)
-  
   # plot.bootstrap.percents(FWpValues = fw.pvalues, GGpValues = gg.pvalues, ResultsFolder = plots.folder.path)
 }
 

@@ -28,10 +28,10 @@ path.to.mothur.file <- userprefs[1]
 mothur.extension <- userprefs[2]
 path.to.output.file <- userprefs[3]
 
-cat("fuck you forgot to comment out the file paths in reformat_mothur_OTU_tables.R!")
-path.to.mothur.file <- "~/Desktop/danube_10/fastqfolder/danube-10.count_table"
-mothur.extension <- "count_table" # because I think..... several ones will work??? clearly .shared worked for ben!
-path.to.output.file <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take_swedish_2/otus.abund"
+# cat("fuck you forgot to comment out the file paths in reformat_mothur_OTU_tables.R!")
+# path.to.mothur.file <- "~/Desktop/danube_10/fastqfolder/danube-10.count_table"
+# mothur.extension <- "count_table" # because I think..... several ones will work??? clearly .shared worked for ben!
+# path.to.output.file <- "~/Desktop/TaxonomyTrainingSets/BLASTing/take_swedish_2/otus.abund"
 
 # ---- Define Functions ----
 
@@ -65,7 +65,7 @@ reformat.for.workflow <- function(OTUs){
 
 export.workflow.table <- function(OTUs, FilePath){
   write.table(x = OTUs, file = FilePath, quote = FALSE, sep = "\t", row.names = FALSE)
-  cat("Reformatted OTU table saved as", FilePath)
+  cat("Reformatted OTU table saved as", FilePath, "\n")
 }
 
 import.and.format.shared <- function(FilePath){

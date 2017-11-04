@@ -6,9 +6,9 @@
 
 # Choose final pident.
 
-pident=("98")
-fwbootstrap=("85")
-ggbootstrap=("70")
+pident=("99")
+fwbootstrap=("80")
+ggbootstrap=("80")
 
 # 15
 Rscript find_classification_disagreements.R otus.$pident.taxonomy otus.general.taxonomy ids.above.$pident conflicts_$pident $pident $fwbootstrap $ggbootstrap final &&
@@ -19,7 +19,7 @@ mothur "#classify.seqs(fasta=otus.fasta, template=custom.fasta, taxonomy=custom.
 cat otus.custom.wang.taxonomy > otus.custom.taxonomy &&
 sed 's/[[:blank:]]/\;/' <otus.custom.taxonomy >otus.custom.taxonomy.reformatted &&
 mv otus.custom.taxonomy.reformatted otus.custom.taxonomy &&
-mkdir conflicts_forcing &&
+mkdir conflicts_forcing
 Rscript find_classification_disagreements.R otus.custom.taxonomy otus.$pident.$fwbootstrap.$ggbootstrap.taxonomy ids.above.$pident conflicts_forcing NA $fwbootstrap $ggbootstrap forcing &&
 Rscript plot_classification_disagreements.R otus.abund plots conflicts_forcing otus.custom.$fwbootstrap.taxonomy otus.$pident.$fwbootstrap.$ggbootstrap.taxonomy &&
 

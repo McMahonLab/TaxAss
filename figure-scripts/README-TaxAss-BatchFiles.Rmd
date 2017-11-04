@@ -1,0 +1,179 @@
+---
+title: "README-TaxAss-BatchFiles"
+author: "Robin Rohwer"
+date: "September 12, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "/Users/athena/Desktop/TaxAssData/TaxAss-BatchFiles")
+```
+
+## Reproduce Data Processing in TaxAss Paper  
+#### Download versions of programs and databases used in this paper:
+Program       | Version             | Download From
+--------------|---------------------|-------------------------  
+mothur        | v.1.39.5            | mothur.org  
+SraToolkit    | 2.7.0-mac64         | ncbi.nlm.nih.gov  
+BLAST         | 2.2.31+             | ncbi.nlm.nih.gov  
+vsearch       | 2.4.3-macos-x86_64  | github.com/torognes/vsearch
+TaxAss        | SHA **??????????**  | github.com/McMahonLab/TaxAss/tax-scripts <br> (And included in these batch files)
+
+Database      | Version | File Name          | Download From
+--------------|---------|--------------------|-------------------------  
+FreshTrain    | 18Aug2016 | FreshTrain18Aug2016.zip | github.com/McMahonLab/TaxAss/FreshTrain-files
+Greengenes    | May 2013  | gg_13_5.fasta <br> gg_13_5_taxonomy.txt| greengenes.secondgenome.com/downloads
+Silva Seed    | v128      | silva.seed_v128.align     | mothur.org    
+
+#### Add these programs to your path after installing:  
+
+* mothur  
+* SraToolkit  
+* BLAST (probably automatically installs to path)  
+ 
+The TaxAss tax-scripts are already in each ecosystem folder here. Otherwise you would add them to your working directory (not on the path).
+
+#### Download the reference databases into the existing folder called ReferenceDatabases:  
+
+* FreshTrain  
+* Greengenes  
+* Silva seed
+
+Unzip the files, and move them so that they are not nested within other folders after expanding. Do not change any names. This is what the contents of `ReferenceDatabases` should look like:
+
+```{bash, eval=F}
+ls ReferenceDatabases/
+
+# FreshTrain18Aug2016.fasta
+# FreshTrain18Aug2016.taxonomy
+# README.txt
+# gg_13_5.fasta
+# gg_13_5_taxonomy.txt
+# silva.seed_v128.align
+
+```
+
+#### Navegate into the main TaxAss-BatchFiles folder within the terminal.  
+These notes assume starting in that folder as the present working directory at the beginning of each of the following "Process ..." steps.  
+  
+This main direcory contains lake-specific folders for processing each dataset, in addition to the ReferenceDatabases folder you downloaded files into yourself and the `tax-scripts` folder taken from the TaxAss github repository version **SHA##########** 
+```{bash, eval= F}
+ls
+
+# Danube/
+# Mendota/
+# Michigan/
+# MouseGut/
+# ReferenceDatabases/
+# TroutBogEpi/
+# TroutBogHypo/
+# tax-scripts/
+```
+Each lake-specific folder contains separate folders for different processing steps. For example:
+```{bash, eval=F}
+ls Mendota/
+
+# QC-Mendota/
+# Quickie-TaxAss-Mendota/
+# TaxAss-Mendota/
+```
+
+#### Notes on these batch files:  
+- QC downloads raw fastq files and converts them to fasta files using standard QC settings.  
+- TaxAss runs the full TaxAss workflow, including optional steps to identify a good percent identity cutoff.  
+- Quickie TaxAss runs only one pident, skipping optional checks.  
+  
+- These batch files are "all inclusive" because they're just meant to provide reproducible results. If you're running TaxAss on your own data and want to run as a batch file, you should adjust the provided batch files within the tax-scripts folder with names `RunSteps_*.sh`.  
+  
+- Note that script annotations include more details, especially the QC scripts which are not included as part of the TaxAss workflow.  
+- Sending the terminal output to a text file allows you to check for errors later. Deleting the 1000's of lines of numbers mothur prints while processing ("mothur barf") makes the output readable.  
+
+
+
+## Process Lake Mendota!
+```{bash, eval=F}
+cd Mendota/QC-Mendota/
+./qc_mendota.sh > terminal_output.txt
+./deletemothurbarf.sh terminal_output.txt > terminal_output_qc.txt ; rm terminal_output.txt
+
+cd ../TaxAss-Mendota/
+./taxass_mendota.sh 
+
+cd ../Quickie-TaxAss-Mendota/
+./taxass_mendota_99.sh 
+```
+
+## Process Trout Bog Epilimnion!
+```{bash, eval=F}
+cd TroutBogEpi/QC-TroutBogEpi/
+./qc_bog_epi.sh > terminal_output.txt
+./deletemothurbarf.sh terminal_output.txt > terminal_output_qc.txt ; rm terminal_output.txt
+
+cd ../TaxAss-TroutBogEpi/
+./taxass_bog_epi.sh 
+
+cd ../Quickie-TaxAss-TroutBogEpi/
+./taxass_bog_epi_99.sh 
+```
+
+## Process Trout Bog Hypolimnion!
+```{bash, eval=F}
+cd TroutBogHypo/QC-TroutBogHypo/
+./qc_bog_hypo.sh > terminal_output.txt
+./deletemothurbarf.sh terminal_output.txt > terminal_output_qc.txt ; rm terminal_output.txt
+
+cd ../TaxAss-TroutBogHypo/
+./taxass_bog_hypo.sh 
+
+cd ../Quickie-TaxAss-TroutBogHypo/
+./taxass_bog_hypo_99.sh 
+```
+
+## Process Lake Michigan!  
+```{bash, eval=F}
+cd Michigan/QC-Michigan/
+./qc_michigan.sh > terminal_output.txt
+./deletemothurbarf.sh terminal_output.txt > terminal_output_qc.txt ; rm terminal_output.txt
+
+cd ../TaxAss-Michigan/
+./taxass_michigan.sh 
+
+cd ../Quickie-TaxAss-Michigan/
+./taxass_michigan_99.sh 
+```
+
+## Process Danube River!  
+```{bash, eval=F}
+cd Danube/QC-Danube/
+./qc_danube.sh > terminal_output.txt
+./deletemothurbarf.sh terminal_output.txt > terminal_output_qc.txt ; rm terminal_output.txt
+
+cd ../TaxAss-Danube/
+./taxass_danube.sh 
+
+cd ../Quickie-TaxAss-Danube/
+./taxass_danube_99.sh 
+```
+
+## Process Mouse Gut!  
+This data is the full version of the example used in mothur's MiSeq SOP (aka the "stability" study for those of you who've also memorized it). Go to the MiSeq SOP: https://www.mothur.org/wiki/MiSeq_SOP and scroll down to the "Logistics" section. Then click the "full dataset" link and it will open a download window. Download into the `TaxAss-BatchFiles/MouseGut/QC-MouseGut/` folder.  
+
+```{bash, eval = F}
+cd MouseGut/QC-MouseGut
+# download dataset from mothur's website into this folder
+tar -xvf StabilityNoMetaG.tar
+rm Mock* # delete mock community samples- not real mousegut data
+gunzip *.gz
+rm StabilityNoMetaG.tar # delete large file
+./qc_mousegut.sh > terminal_output.txt
+./deletemothurbarf.sh terminal_output.txt > terminal_output_qc.txt ; rm terminal_output.txt
+
+
+```
+
+<br>
+<br>
+
+##### Now you're all done replicating the data processing used in the TaxAss manuscript. Go use TaxAss on your own datasets!!!
+

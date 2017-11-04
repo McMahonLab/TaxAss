@@ -22,17 +22,26 @@ reads.table.path <- userprefs[3]
 path.to.plots.folder <- userprefs[4]
 taxonomy.names.path <- userprefs[5]
 gg.names.path <- userprefs[6]
+
+improvement.plots.folder <- paste(path.to.plots.folder, "step_15_5a_Improvement_over_general-only", sep = "/")
   
 # cat("fuck you forgot to comment out the file paths in find_classification_improvements.R!")
-# taxonomy.pvalues.path <- "../../take18playwith/final.taxonomy.pvalues"
-# gg.pvalues.path <- "../../take18playwith/final.general.pvalues"
-# reads.table.path <- "../../take18playwith/total.reads.per.seqID.csv"
-# path.to.plots.folder <- "../../take18playwith/plots"
-# taxonomy.names.path <- "../../take18playwith/final.taxonomy.names"
-# gg.names.path <- "../../take18playwith/final.general.names"
-
+# taxonomy.pvalues.path <- "../../ME_plot_test/final.taxonomy.pvalues"
+# gg.pvalues.path <- "../../ME_plot_test/final.general.pvalues"
+# reads.table.path <- "../../ME_plot_test/total.reads.per.seqID.csv"
+# path.to.plots.folder <- "../../ME_plot_test/plots"
+# taxonomy.names.path <- "../../ME_plot_test/final.taxonomy.names"
+# gg.names.path <- "../../ME_plot_test/final.general.names"
+# improvement.plots.folder <- paste(path.to.plots.folder, "step_15_5a_Improvement_over_general", sep = "/")
 
 # ---- Define functions to import and format data ----
+
+make.plot.directory <- function(FolderPath){
+  if (!dir.exists(FolderPath)){
+    dir.create(FolderPath)
+    cat("made folder: ", FolderPath, "\n")
+  }
+}
 
 import.pvalues <- function(FilePath){
   pvalues.path <- FilePath
@@ -61,13 +70,13 @@ import.and.order.names <- function(FilePath){
 check.orders.match <- function(Vector1, Vector2){
   # first check there are no duplicated names- can't have any ties in the order!
   if (length(Vector1) != length(unique(Vector1)) | length(Vector2) != length(unique(Vector2)) | length(Vector1) != length(Vector2)){
-    cat("uh oh major problem, the number of seqIDs is different in your two tables!")
+    cat("\n\nuh oh major problem, the number of seqIDs is different in your two tables!\n\n")
   }
   # second check that they are in the same order
-  if (all.equal(Vector1, Vector2)){
-    cat("orders match- good.")
+  if (all.equal(Vector1, Vector2) == TRUE){
+    cat("orders match- good.\n")
   }else{
-    cat("crap something's wrong, they didn't end up in the same order.  must fix.")
+    cat("\n\ncrap something's wrong, the seqIDs didn't end up in the same order, or they don't match.  must fix.\n\n")
   }
 }
 
@@ -200,9 +209,39 @@ check.numbers.add.up <- function(StackedData, BesideData){
   beside <- BesideData
   
   checker <- all.equal(colSums(stacked), beside[2, ])
-  cat("check sums of stacked match workflow bar of beside: ", checker)
+  cat("check sums of stacked match workflow bar of beside: ", checker, "\n")
 }
 
+make.unclassifieds.unique <- function(Taxonomy){
+  # Taxonomy is a matrix containing only the names, no abundances or OTU numbers
+  # this function maintains row order, so those columns can be re-combined after this
+  # this is used in group.taxa()
+  taxa.levels <- 2:ncol(Taxonomy)
+  
+  # first add the level-above name to each "unclassified"
+  for (t in taxa.levels){
+    index <- which(Taxonomy[ ,t] == "unclassified")
+    Taxonomy[index,t] <- paste(Taxonomy[index,t], Taxonomy[index,t - 1], sep = ".")
+  }
+  
+  # then remove extra unclassifieds to get only unclassified.last_known_name
+  remove.extra.u <- function(x){
+    x <- gsub(pattern = ".unclassified", replacement = "", x = x)
+    return(x)
+  }
+  Taxonomy <- apply(X = Taxonomy, MARGIN = 2, FUN = remove.extra.u)
+  
+  return(Taxonomy)
+}
+
+find.alpha.diversity <- function(Taxonomy){
+  alpha.div <-NULL
+  for (t in 1:ncol(Taxonomy)){
+    alpha.div[t] <- length(unique(Taxonomy[ ,t]))
+  }
+  names(alpha.div) <- colnames(Taxonomy)
+  return(alpha.div)
+}
 
 # Define functions to plot the data ----
 
@@ -293,8 +332,17 @@ export.summary.table <- function(Summary, FolderPath, PlotType, DataType){
   cat("made datafile: ", file.name, "\n")
 }
 
+# make a csv file that compares the total alpha diversity using TaxAss vs. GreenGenes
+export.diversity.table <- function(div.table, FolderPath){
+  file.name <- paste(FolderPath, "alpha_diversity_TaxAss_vs_General.csv", sep = "/")
+  write.csv(x = div.table, file = file.name, quote = FALSE)
+  cat("Made datafile: ", file.name, "\n")
+}
 
 # ---- Use functions! ----
+
+# make a subfolder to put this step's plots into:
+make.plot.directory(FolderPath = improvement.plots.folder)
 
 # get data to plot the overall improvement (beside) part of the barplot
 fw.pvals <- import.pvalues(FilePath = taxonomy.pvalues.path)
@@ -336,15 +384,25 @@ check.numbers.add.up(StackedData = stacked.data.reads, BesideData = beside.data.
 
 # Generate the Plot!
 excluded.taxa <- c(1)
-fancy.barplot(BesideData = beside.data.otus[ ,-excluded.taxa], StackedData = stacked.data.otus[ ,-excluded.taxa], BarSpacing = c(0,1), DataType = "OTUs", FolderPath = path.to.plots.folder)
-fancy.barplot(BesideData = beside.data.reads[ ,-excluded.taxa], StackedData = stacked.data.reads[ ,-excluded.taxa], BarSpacing = c(0,1), DataType = "Reads", FolderPath = path.to.plots.folder)
+fancy.barplot(BesideData = beside.data.otus[ ,-excluded.taxa], StackedData = stacked.data.otus[ ,-excluded.taxa], BarSpacing = c(0,1), DataType = "OTUs", FolderPath = improvement.plots.folder)
+fancy.barplot(BesideData = beside.data.reads[ ,-excluded.taxa], StackedData = stacked.data.reads[ ,-excluded.taxa], BarSpacing = c(0,1), DataType = "Reads", FolderPath = improvement.plots.folder)
 
 # Export the Data!
 
-export.summary.table(Summary = beside.data.otus, FolderPath = path.to.plots.folder, PlotType = "Beside", DataType = "OTUs")
-export.summary.table(Summary = beside.data.reads, FolderPath = path.to.plots.folder, PlotType = "Beside", DataType = "Reads")
-export.summary.table(Summary = stacked.data.otus, FolderPath = path.to.plots.folder, PlotType = "Stacked", DataType = "OTUs")
-export.summary.table(Summary = stacked.data.reads, FolderPath = path.to.plots.folder, PlotType = "Stacked", DataType = "Reads")
+export.summary.table(Summary = beside.data.otus, FolderPath = improvement.plots.folder, PlotType = "Beside", DataType = "OTUs")
+export.summary.table(Summary = beside.data.reads, FolderPath = improvement.plots.folder, PlotType = "Beside", DataType = "Reads")
+export.summary.table(Summary = stacked.data.otus, FolderPath = improvement.plots.folder, PlotType = "Stacked", DataType = "OTUs")
+export.summary.table(Summary = stacked.data.reads, FolderPath = improvement.plots.folder, PlotType = "Stacked", DataType = "Reads")
+
+# Generate and Export summary data on alpha diversity
+fw.names.unique.unclass <- make.unclassifieds.unique(Taxonomy = fw.names[ ,-1])
+gg.names.unique.unclass <- make.unclassifieds.unique(Taxonomy = gg.names[ ,-1])
+
+fw.alpha <- find.alpha.diversity(Taxonomy = fw.names.unique.unclass)
+gg.alpha <- find.alpha.diversity(Taxonomy = gg.names.unique.unclass)
+
+alpha <- data.frame(TaxAss = fw.alpha, General = gg.alpha)
+export.diversity.table(div.table = alpha, FolderPath = improvement.plots.folder)
 
 
 # Check the fancy plot by looking at the simple component plots
@@ -358,8 +416,8 @@ export.summary.table(Summary = stacked.data.reads, FolderPath = path.to.plots.fo
 
 # Legacy plot- the original simple "beside-only" barplot showing improvement.
 
-# plot.num.classified(FWTable = otus.named.gg, GGTable = otus.named.gg, Reads = FALSE, FolderPath = path.to.plots.folder)
-# plot.num.classified(FWTable = reads.named.fw, GGTable = reads.named.gg, Reads = TRUE, FolderPath = path.to.plots.folder)
+# plot.num.classified(FWTable = otus.named.gg, GGTable = otus.named.gg, Reads = FALSE, FolderPath = improvement.plots.folder)
+# plot.num.classified(FWTable = reads.named.fw, GGTable = reads.named.gg, Reads = TRUE, FolderPath = improvement.plots.folder)
 
 
 

@@ -1,7 +1,7 @@
 ---
 title: "TaxAss Workflow"
 author: "Robin Rohwer"
-date: "last updated: 11/2/2017"
+date: "last updated: 11/5/2017"
 output: 
   html_document:
     toc: true
@@ -22,8 +22,10 @@ pre code, pre, code {
 }
 ```
 
-This workflow assigns taxonomy to a fasta file of otu sequences using both a 
+TaxAss assigns taxonomy to a fasta file of otu sequences using both a 
 small, custom taxonomy database and a large general database.
+
+Download the scripts from the github repo: https://github.com/McMahonLab/TaxAss
 
 # <span style="color:SteelBlue">List of Steps</span>
 This is a list of all the steps and possible commands. There are details for each step in separate sections.  

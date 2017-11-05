@@ -29,6 +29,6 @@ Please tell me!  If you find a bug (or if you get confused) I want to fix it/hel
 
 Who made TaxAss?
 ---
-The McMahon lab studies lake microbial ecology (and some of it also studies wastewater). We are at the Univerisity of Wisconsin-Madison.
+The McMahon lab studies lake microbial ecology (and some of it also studies wastewater). We are at the Univerisity of Wisconsin-Madison.  
 Lab Website: https://mcmahonlab.wisc.edu/  
 Lab Twitter: @mcmahonlab 

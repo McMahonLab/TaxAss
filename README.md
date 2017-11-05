@@ -5,7 +5,7 @@ TaxAss is a **Taxonomy Assignment** workflow that lets you classify 16S datasets
 How do I TaxAss?
 ---
 
-Step-by-step directions: [tax-scripts/TaxAss_Directions.html](https://htmlpreview.github.io/?https://github.com/McMahonLab/TaxAss/blob/master/tax-scripts/TaxAss_Directions.html)
+**Step-by-step directions:** [tax-scripts/TaxAss_Directions.html](https://htmlpreview.github.io/?https://github.com/McMahonLab/TaxAss/blob/master/tax-scripts/TaxAss_Directions.html)
 
 TaxAss uses a series of python, R, and bash scripts in addition to using BLAST+ and mothur's classify.seqs() command.  The scripts are sourced from the terminal window (mac or linux). You'll need to download this repository (green "Clone or download" button, top right), and then just add the tax-scripts folder to your working diriectory.
 
@@ -13,7 +13,7 @@ Where's the stuff I need?
 ---
 
 **The stuff you need:**  
-1. Step by step directions are in `TaxAss_Directions.html` inside the `tax-scripts` folder (viewable without download from [here](https://htmlpreview.github.io/?https://github.com/McMahonLab/TaxAss/blob/master/tax-scripts/TaxAss_Directions.html)).  
+1. Step by step directions are in `TaxAss_Directions.html` inside the `tax-scripts` folder (view without download [here](https://htmlpreview.github.io/?https://github.com/McMahonLab/TaxAss/blob/master/tax-scripts/TaxAss_Directions.html)).  
 2. Scripts are in the `tax-scripts` folder.  
 3. The FreshTrain taxonomy files are in the `FreshTrain-files` folder.  
 

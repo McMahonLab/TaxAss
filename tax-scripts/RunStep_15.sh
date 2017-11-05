@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# This is a sourceable bash script that runs steps 15-16 of the workflow.  
+# This is a sourceable bash script that runs steps 15-15.5 of the workflow.  
 # NOTE that the pident chosen here is the final taxonomy one, you may want to change it.
 # RRR 2/11/16
 
 # Choose final pident.
 
-pident=("99")
+pident=("98")
 fwbootstrap=("80")
 ggbootstrap=("80")
 
@@ -23,7 +23,7 @@ mkdir conflicts_forcing
 Rscript find_classification_disagreements.R otus.custom.taxonomy otus.$pident.$fwbootstrap.$ggbootstrap.taxonomy ids.above.$pident conflicts_forcing NA $fwbootstrap $ggbootstrap forcing &&
 Rscript plot_classification_disagreements.R otus.abund plots conflicts_forcing otus.custom.$fwbootstrap.taxonomy otus.$pident.$fwbootstrap.$ggbootstrap.taxonomy &&
 
-printf 'Steps 15-16 have finished running.  When you are finished with all your analysis you can tidy up your working directory with step 17. \n \a'
+printf 'Steps 15, 15.5.a., and 15.5.b. have finished running.  When you are finished with all your analysis you can tidy up your working directory with step 16. \n \a'
 sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'; sleep .1; printf '\a'
 
 exit 0

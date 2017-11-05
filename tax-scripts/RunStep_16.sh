@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# This is a sourceable bash script that runs steps 15-16 of the workflow.  
-# NOTE that the pident chosen here is the final taxonomy one, you may want to change it.
+# This is a sourceable bash script that runs step 16 of the workflow.  
+# Clean-up step
 # RRR 2/11/16
 
 # Make sure you're really done before deleting stuff.

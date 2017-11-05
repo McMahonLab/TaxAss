@@ -4,10 +4,12 @@
 # That means that you do not try different percent identity cutoffs to choose the best one.
 # That might make sense for you if you have already made a similarity choice, for example by
 # choosing a cutoff to cluster OTUs. Then just have pident match that cutoff.
+# Note: this also skips the BLAST check (step 6). You could go back and just do that one.
+# Note: still run step 16 to tidy up.
 
 # Choose pident.
 
-pident=("99")
+pident=("98")
 fwbootstrap=("80")
 ggbootstrap=("80")
 

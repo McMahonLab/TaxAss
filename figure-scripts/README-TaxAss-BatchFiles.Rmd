@@ -18,7 +18,7 @@ mothur        | v.1.39.5            | mothur.org
 SraToolkit    | 2.7.0-mac64         | ncbi.nlm.nih.gov  
 BLAST         | 2.2.31+             | ncbi.nlm.nih.gov  
 vsearch       | 2.4.3-macos-x86_64  | github.com/torognes/vsearch
-TaxAss        | SHA **??????????**  | github.com/McMahonLab/TaxAss/tax-scripts <br> (And included in these batch files)
+TaxAss        | SHA 371108d803f35ed2d23afa7d1150cb303bb297e7  | github.com/McMahonLab/TaxAss/tax-scripts <br> (And included in these batch files)
 
 Database      | Version | File Name          | Download From
 --------------|---------|--------------------|-------------------------  
@@ -57,7 +57,7 @@ ls ReferenceDatabases/
 #### Navegate into the main TaxAss-BatchFiles folder within the terminal.  
 These notes assume starting in that folder as the present working directory at the beginning of each of the following "Process ..." steps.  
   
-This main direcory contains lake-specific folders for processing each dataset, in addition to the ReferenceDatabases folder you downloaded files into yourself and the `tax-scripts` folder taken from the TaxAss github repository version **SHA##########** 
+This main direcory contains lake-specific folders for processing each dataset, in addition to the ReferenceDatabases folder you downloaded files into yourself and the `tax-scripts` folder taken from the TaxAss github repository.
 ```{bash, eval= F}
 ls
 

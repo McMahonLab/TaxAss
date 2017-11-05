@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This is a sourceable bash script that runs steps 1-13 of the workflow.  
+# This is a sourceable bash script that runs steps 1-14 of the workflow.  
 # In addition to avoiding problems that happened with pasting blocks of code,
 # This lets you run multiple pidents in paralelle which makes it faster.
 # The actual commands in this script are identical to the workflow commands

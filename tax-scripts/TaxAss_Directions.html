@@ -331,10 +331,11 @@ pre code, pre, code {
 
 16. tidy up (bash)
     rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otus.custom.taxonomy otus.custom.[0-9]* custom.general* *pvalues total* final*names
-    mkdir scripts ; mv *.py *.R *.sh *.md scripts
-    mkdir analysis ; mv conflicts* plots analysis
+    mkdir scripts ; mv *.py *.R *.sh *.md *.Rmd *.html scripts
+    mkdir analysis ; mv conflicts* *.txt plots analysis
     mkdir data ; mv otus* data
-    mkdir databases ; mv *.taxonomy *.fasta databases</code></pre>
+    mkdir databases ; mv *.taxonomy *.fasta databases
+</code></pre>
 <p><br> <br> <strong>OR: Run steps as a block using these batch scripts:</strong><br />
 (you have to open the batch script and enter your chosen pident and confidence values at the beginning)</p>
 <pre><code>Full TaxAss:
@@ -1922,7 +1923,7 @@ otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otu
 <p><strong>16.2 save scripts used in a scripts folder</strong></p>
 <p>Full 2 commands (Type in Terminal):</p>
 <pre><code>mkdir scripts
-mv *.py *.R *.sh *.md scripts/</code></pre>
+mv *.py *.R *.sh *.md *.Rmd *.html scripts</code></pre>
 <p>By saving all the script versions you used to create your data you can reproduce it. Alternatively for reproducible data note the github SHA number you retreived them from in a README. Find this on github, click commits tab, click clipboard icon on most recent commit to copy the SHA identifier.</p>
 </div>
 <div id="analysis" class="section level2">

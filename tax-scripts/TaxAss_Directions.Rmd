@@ -128,10 +128,11 @@ This is a list of all the steps and possible commands. There are details for eac
 
 16. tidy up (bash)
 	rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otus.custom.taxonomy otus.custom.[0-9]* custom.general* *pvalues total* final*names
-	mkdir scripts ; mv *.py *.R *.sh *.md scripts
-	mkdir analysis ; mv conflicts* plots analysis
-	mkdir data ; mv otus* data
-	mkdir databases ; mv *.taxonomy *.fasta databases
+    mkdir scripts ; mv *.py *.R *.sh *.md *.Rmd *.html scripts
+    mkdir analysis ; mv conflicts* *.txt plots analysis
+    mkdir data ; mv otus* data
+    mkdir databases ; mv *.taxonomy *.fasta databases
+
 ````
 <br>
 <br>
@@ -1282,7 +1283,7 @@ Some of these intermediate files are quite large though, so keep that in mind if
 Full 2 commands (Type in Terminal):
 ```
 mkdir scripts
-mv *.py *.R *.sh *.md scripts/
+mv *.py *.R *.sh *.md *.Rmd *.html scripts
 ```
 
 By saving all the script versions you used to create your data you can reproduce it.

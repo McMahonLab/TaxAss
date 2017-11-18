@@ -12,6 +12,7 @@
 pident=("98")
 fwbootstrap=("80")
 ggbootstrap=("80")
+processors=("2")
 
 # Note: still gotta do the reformatting manually (step 0)
 
@@ -34,8 +35,8 @@ cat ids.below.${pident[0]} ids.missing > ids.below.${pident[0]}.all &&
 python create_fastas_given_seqIDs.py ids.above.${pident[0]} otus.fasta otus.above.${pident[0]}.fasta &&
 python create_fastas_given_seqIDs.py ids.below.${pident[0]}.all otus.fasta otus.below.${pident[0]}.fasta &&
 # 9
-mothur "#classify.seqs(fasta=otus.above.${pident[0]}.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2, cutoff=0)" &&
-mothur "#classify.seqs(fasta=otus.below.${pident[0]}.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)" &&
+mothur "#classify.seqs(fasta=otus.above.${pident[0]}.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=$processors, cutoff=0)" &&
+mothur "#classify.seqs(fasta=otus.below.${pident[0]}.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=$processors, cutoff=0)" &&
 # 10
 cat otus.above.${pident[0]}.custom.wang.taxonomy otus.below.${pident[0]}.general.wang.taxonomy > otus.${pident[0]}.taxonomy &&
 # 11 skip: general-only classification

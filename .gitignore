@@ -3,6 +3,7 @@
 .DS_Store
 .Rproj.user/
 tax-scripts/.RData
+.Rproj.user
 
 # Databases
 FreshTrain-files/gg_13_5.fasta
@@ -23,5 +24,10 @@ workflow-flowchart.pptx
 Rplot*.pdf
 mothur.*
 
+# Temporarily hide
+arb-scripts/Marathonas_test/ecoli_16S.fasta
+arb-scripts/Marathonas_test/mara.taxonomy
+arb-scripts/Marathonas_test/mara_aligned.fasta
+arb-scripts/Marathonas_test/mara_v4.fasta
+arb-scripts/Marathonas_test/v4_515F-806R.oligos
 
-.Rproj.user

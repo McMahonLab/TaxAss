@@ -9,7 +9,7 @@
 # It uses mothur and file formats match the mothur program requirements
 
 # syntax:
-# ./trim_full-length_to_primer_region.sh full-length primers.oligos
+# ./trim_full-length_to_primer_region.sh primers.oligos aligned-fasta-without-filetype name-for-trimmed.fasta
 
 # define input files:
 oligosfile="$1" # the primers

@@ -1,0 +1,30 @@
+---
+title: "README_marathonas_validation"
+author: "Robin Rohwer"
+date: "1/22/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Reproduce TaxAss validation using full-length 16S assignments
+
+This readme walks you through the data processing to reproduce "simulated 
+tag data" from full-length 16S sequences. This was used to validate TaxAss.
+
+The process:  
+
+* Start with full length 16S sequences from Marathonas reservoir in Greece.   
+    * These do not already exist in the FreshTrain database.  
+* Align the full length sequences to the FreshTrain manually using Arb.   
+    * The result of this is zipped in this folder. Likely chimeras were removed.  
+* Trim the full-length Marathonas sequences to a primer region of choice.   
+    * That's where this Readme picks up.  
+* Assign taxonomy to the short primer regions using TaxAss.  
+    * When I say "tax!", you say "ass!"  
+* Compare the TaxAss assignment results to the "true" classifications known 
+from the full length alignments.
+
+## Unzip and add TaxAss tax-scripts

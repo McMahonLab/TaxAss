@@ -9,3 +9,4 @@
 # I'll chop them into a variable region and then assign them using TaxAss
 # This should validate that TaxAss works, and address concerns about overclassifying missing references
 
+# first, use mothur to trim full length seqs.

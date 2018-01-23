@@ -103,5 +103,5 @@ outTaxonHandle.close()
 ### Clean up your files
 ################################################################################
 os.remove(fileName)
-os.remove('silva.nr_v123.align')
-os.remove('silva.nr_v123.tax')
+os.remove('silva.nr_v132.align')
+os.remove('silva.nr_v132.tax')

@@ -31,43 +31,28 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 
 # # FOR CHOOSING CUTOFF:
 # cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
-# userprefs <- c("../../poster_mend-check/otus.abund",
-#                "../../poster_mend-check/plots",
+# userprefs <- c("../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/otus.abund",
+#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/plots",
 #                "regular",
 #                NA,
 #                NA,
-#                "../../poster_mend-check/conflicts_90",
-#                "../../poster_mend-check/ids.above.90",
-#                90,
-#                "../../poster_mend-check/conflicts_91",
-#                "../../poster_mend-check/ids.above.91",
-#                91,
-#                "../../poster_mend-check/conflicts_92",
-#                "../../poster_mend-check/ids.above.92",
-#                92,
-#                "../../poster_mend-check/conflicts_93",
-#                "../../poster_mend-check/ids.above.93",
-#                93,
-#                "../../poster_mend-check/conflicts_94",
-#                "../../poster_mend-check/ids.above.94",
-#                94,
-#                "../../poster_mend-check/conflicts_95",
-#                "../../poster_mend-check/ids.above.95",
+#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/conflicts_95",
+#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/ids.above.95",
 #                95,
-#                "../../poster_mend-check/conflicts_96",
-#                "../../poster_mend-check/ids.above.96",
+#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/conflicts_96",
+#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/ids.above.96",
 #                96,
-#                "../../poster_mend-check/conflicts_97",
-#                "../../poster_mend-check/ids.above.97",
+#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/conflicts_97",
+#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/ids.above.97",
 #                97,
-#                "../../poster_mend-check/conflicts_98",
-#                "../../poster_mend-check/ids.above.98",
+#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/conflicts_98",
+#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/ids.above.98",
 #                98,
-#                "../../poster_mend-check/conflicts_99",
-#                "../../poster_mend-check/ids.above.99",
+#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/conflicts_99",
+#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/ids.above.99",
 #                99,
-#                "../../poster_mend-check/conflicts_100",
-#                "../../poster_mend-check/ids.above.100",
+#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/conflicts_100",
+#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/ids.above.100",
 #                100)
 # # JUST MAKE SEQID.READS FILE, SKIPPING STEP 14 BUT DOING 15.5.A
 # cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
@@ -95,8 +80,8 @@ seqID.reads.file.path <- "total.reads.per.seqID.csv"
 present.working.directory <- "."
 
 # cat("fuck you forgot to comment out the seqid.reads file path in plot_classification_disagreements!\n")
-# seqID.reads.file.path <- "../../ME_plot_test/total.reads.per.seqID.csv"
-# present.working.directory <- "../../ME_plot_test/"
+# seqID.reads.file.path <- "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/total.reads.per.seqID.csv"
+# present.working.directory <- "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/"
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -1151,18 +1136,22 @@ plot.total.classified <- function(SummaryMatrix, PidentValues, FolderPath, DataT
     plot(x = pidents, y = ass, col = line.col[t], type = "l", ann = F, lwd = 3, axes = F, ylim = c(y.min, y.max))
     mtext(text = taxa.levels[t], side = 3, line = .5, outer = F, cex = 1.2, col = line.col[t])
     
-    # vertical max line
+    # vertical max line if single max exists
     index <- which(ass == max(ass))
-    max.names <- pidents[index]
-    lines(x = c(max.names, max.names), y = c(0, max(ass)), col = adjustcolor(col = line.col[t], alpha.f = .3), lwd = 3)
+    if (length(index) == 1){
+      max.names <- pidents[index]
+      lines(x = c(max.names, max.names), y = c(0, max(ass)), col = adjustcolor(col = line.col[t], alpha.f = .3), lwd = 3)
+    }
     
     # x axis labels
     x.lab.cols <- rep("black", times = length(pidents))
-    x.lab.cols[index] <- line.col[t]
     x.lab.cex <- rep(.7, times = length(pidents))
-    x.lab.cex[index] <- 2
     x.lab.line <- rep(.5, times = length(pidents))
-    x.lab.line[index] <- 1.5
+    if (length(index) == 1){
+      x.lab.cols[index] <- line.col[t]
+      x.lab.cex[index] <- 2
+      x.lab.line[index] <- 1.5
+    }
     empty.x.labels <- rep("", times = length(pidents))
     axis(side = 1, at = pidents, labels = empty.x.labels)
     mtext(text = pidents, side = 1, line = x.lab.line, at = pidents, col = x.lab.cols, cex = x.lab.cex)

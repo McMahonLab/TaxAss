@@ -179,5 +179,5 @@ outFastaHandle.close()
 
 os.remove(inputFasta)
 os.remove(inputTaxon)
-os.move(outputFasta, inputFasta)
-os.move(outputTaxon, inputTaxon)
+os.rename(outputFasta, inputFasta)
+os.rename(outputTaxon, inputTaxon)

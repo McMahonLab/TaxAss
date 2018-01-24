@@ -216,7 +216,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">TaxAss Workflow</h1>
 <h4 class="author"><em>Robin Rohwer</em></h4>
-<h4 class="date"><em>last updated: 11/5/2017</em></h4>
+<h4 class="date"><em>last updated: 1/23/2018</em></h4>
 
 </div>
 
@@ -248,13 +248,14 @@ pre code, pre, code {
         sed 's/$/;/' &lt;NoSpaces &gt;EndLineSemicolons
         mv EndLineSemicolons general.taxonomy
         rm NoSpaces
+    for SILVA database as general.taxonomy
+      python getSilvaFromMothur.py
+      python convertFreshTrainToSilva.py
     for aligned fasta files:
         sed 's/-//g' &lt;aligned.fasta &gt;otus.fasta
     for mothur .count_table as OTU table:
         Rscript reformat_mothur_OTU_tables.R StupidLongMothurName.count_table count_table otus.abund
 
-
-        
 1. make BLAST database file (blast)
     makeblastdb -dbtype nucl -in custom.fasta -input_type fasta -parse_seqids -out custom.db
 
@@ -440,9 +441,16 @@ export PATH=~/mothur:$PATH</code></pre>
 <td>gg_13_5.fasta <br> gg_13_5_taxonomy.txt</td>
 <td>greengenes.secondgenome.com/downloads</td>
 </tr>
+<tr class="odd">
+<td>SILVA</td>
+<td>Release 132</td>
+<td>Silva.nr_v132.tgz</td>
+<td>Download the mothur-compatible SILVA reference files for SILVA release 132 from <a href="https://www.mothur.org/wiki/Silva_reference_files" class="uri">https://www.mothur.org/wiki/Silva_reference_files</a> by clicking on the <code>Full length sequences and taxonomy references</code> link. This should link directly to <a href="https://www.mothur.org/w/images/3/32/Silva.nr_v132.tgz" class="uri">https://www.mothur.org/w/images/3/32/Silva.nr_v132.tgz</a>.</td>
+</tr>
 </tbody>
 </table>
-<p>Unfortunately you can’t download a useable (consistent delimiters/column names) version of SILVA diectly from their database. You’d have to import it into ARB and create that yourself. Another option is to use the version created by mothur or qiime, which you can find on their websites but which aren’t necessarily the most up to date version. Feel free to share how you used SILVA in a github issue or email (<a href="mailto:robin.rohwer@gmail.com">robin.rohwer@gmail.com</a>) and I’ll add it to the instructions here.</p>
+<p>To use the SILVA database with TaxAss, you must ensure that your custom database contains the same taxonomic structure as SILVA. Differences in classification between the databases can be found by classifying your custom database using SILVA and running the <code>find_classification_disagreements.R</code> script included in this repository. Additional details can be found by reading the <code>Database_Improvement_Workflow.txt</code> in the <code>arb-scripts</code> folder included in this repository, or by contacting the authors via Github or e-mail.</p>
+<p>If you want to use the FreshTrain as your custom database, we have provided the required scripts: <code>getSilvaFromMothur.py</code> and <code>convertFreshTrainToSilva.py</code>. Both are included in this repostitory. As of 2018-01-23, these scripts have been tested only with SILVA Release 132 and Fresh Train release 18 August 2016.</p>
 <hr />
 </div>
 </div>
@@ -548,8 +556,15 @@ If there are dashes it makes it difficult to switch between aligned and unaligne
 </div>
 <div id="format-the-silva-database" class="section level4">
 <h4>Format the Silva database…</h4>
-<p><span style="color:grey">made shell script reformat_silva.sh but it doesn’t work b/c silva is stupid and uses inconsistent delimiters w/ inconsistent column numbers. there’s no way to make a compatible file without opening it in ARB and exporting in a different format yourself. mothur and qiime did it for you, but they’re also out of date. wtf SILVA? literally noone could use that format for anything. (see analysis notes 12-5-16 for this saga)</span></p>
-<p>Best bet is to pull it from the mothur website. Note that SILVA only includes names to genus, although it does contain more references.</p>
+<p>If you want to use the FreshTrain as your custom database, we have provided the required scripts: <code>getSilvaFromMothur.py</code> and <code>convertFreshTrainToSilva.py</code>. Both are included in this repostitory. As of 2018-01-23, these scripts have been tested only with SILVA Release 132 and Fresh Train release 18 August 2016.</p>
+<p>To use the SILVA database with TaxAss, you must first run two scripts: <code>getSilvaFromMothur.py</code> and <code>convertFreshTrainToSilva.py</code>. Both are included in this repostitory. As of 2018-01-23, these scripts have been tested only with SILVA Release 132 and Fresh Train release 18 August 2016.</p>
+<p>The script <code>getSilvaFromMothur.py</code> downloads the mothur-compatible SILVA reference files (Release 132) and processes the fasta and taxonomy files so they’re compatible with TaxAss.</p>
+<pre><code>python getSilvaFromMothur.py</code></pre>
+<p>Outputs: two files, <code>general.taxonomy</code> and <code>general.fasta</code> that are formatted correctly for TaxAss.</p>
+<p>The script <code>convertFreshTrainToSilva.py</code> updates the taxonomic tree structure of the FreshTrain (18 August 2016 release) to reflect the taxonomic structure used in SILVA (Release 132). For each freshwater lineage, class- and order-level taxonomic classifications are updated to reflect the placement of those sequences in SILVA, as determined using the <code>find_classification_disagreements.R</code> script in this package. (See comments contained within <code>convertFreshTrainToSilva.py</code> for details on re-assigned taxonomies, and <code>Database_Improvement_Workflow.txt</code> in the <code>arb-scripts folder</code> for the workflow.) In addition, any sequences not belonging to a freshwater-lineage were removed from the FreshTrain.</p>
+<pre><code>python convertFreshTrainToSilva.py</code></pre>
+<p>Required files: two files, <code>general.taxonomy</code> and <code>general.fasta</code> obtained from running <code>getSilvaFromMothur.py</code>. Required files: two files, <code>custom.taxonomy</code> and <code>custom.fasta</code> obtained from extracting the <code>FreshTrain18Aug2016.zip</code> file included with this repository.</p>
+<p>Outputs: two files, <code>custom.taxonomy</code> and <code>custom.fasta</code>, representing new versions of the FreshTrain database that have the same taxonomic structure as SILVA.</p>
 <hr />
 </div>
 </div>

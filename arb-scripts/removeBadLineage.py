@@ -57,8 +57,8 @@ for curLine in inTaxonHandle.readlines():
 
     # Split along a tab to separate seqID from taxonomy
     # Grab the lineage from the taxonomy information
-    seqID = curLine.split('\t')[0]
-    seqTaxon = curLine.split(';')
+    [seqID, seqTaxon] = curLine.split('\t')
+    seqTaxon = seqTaxon.split(';')
     lineage = seqTaxon[4]
     
     # If the lineage is valid, write the new taxonomy file

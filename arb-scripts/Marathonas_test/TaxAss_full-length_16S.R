@@ -163,22 +163,31 @@ find.correct.unclassifications <- function(fw.arb, fw.tag){
 
 # ---- In progress ----
 
-
+fw.arb = fw.arb.tax
+fw.tag = fw.v4.tax
 
 find.underclassifications <- function(fw.arb, fw.tag){
   # input data is already subsetted to FreshTrain-classified seqs
   
-  correct.unclass <- list("kingdom" = NULL,"phylum" = NULL,"class" = NULL,"order" = NULL,"lineage" = NULL,"clade" = NULL,"tribe" = NULL)
+  under.class <- list("kingdom" = NULL,"phylum" = NULL,"class" = NULL,"order" = NULL,"lineage" = NULL,"clade" = NULL,"tribe" = NULL)
   
-  for (t in 1:length(correct.unclass)){
-    # subset to only unclassified names
-    arb <- fw.arb[ ,t + 1]
-    index <- which(arb == "unclassified")
-    fw.arb <- fw.arb[index, ]
+  # save to re-start each loop step-down
+  fwa <- fw.arb
+  fwt <- fw.tag
+  
+  for (t in 1:length(under.class)){
+    fw.arb <- fwa
+    fw.tag <- fwt
     
+    # subset to only unclassified names in tag data
     tag <- fw.tag[ ,t + 1]
     index <- which(tag == "unclassified")
-    fw.tag <- fw.tag[index, ]
+    fw.tag <- fw.tag[index, ,drop = F]
+    
+    if (nrow(fw.tag) < 1){ # skip ahead if there are none
+      under.class[[t]] <- fw.tag
+      next
+    }
     
     # subset to only shared ID's:
     arb <- fw.arb[ ,1]
@@ -191,16 +200,21 @@ find.underclassifications <- function(fw.arb, fw.tag){
     fw.tag <- as.data.frame(fw.tag, stringsAsFactors = F)
     fw.tag <- merge(x = fw.tag, y = shared, by = 1, sort = T)
     
+    if (nrow(fw.tag) < 1){ # skip ahead if there are none
+      under.class[[t]] <- fw.tag
+      next
+    }
+    
     # subset to only matching upper-level names:
     for (u in 1:(t - 1)){
-      all.equal(fw.tag[ ,1],fw.arb[ ,1])
-      index <- which(fw.tag[ ,(t + 1)- u] == fw.arb[ ,(t + 1) - u])
+      cat(all.equal(fw.tag[ ,1],fw.arb[ ,1]))
+      index <- which(fw.tag[ ,(t + 1)- u] == fw.arb[ ,(t + 1) - u] | fw.tag[ ,(t + 1)- u] == "unclassified")
       fw.tag <- fw.tag[index, ]
       fw.arb <- fw.arb[index, ]
     }
-    correct.unclass[[t]] <- fw.tag[index, ]
+    under.class[[t]] <- fw.tag[index, ]
   }
-  return(correct.unclass)
+  return(under.class)
 }
 
 find.incorrect.classifications 

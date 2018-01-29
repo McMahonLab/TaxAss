@@ -70,9 +70,6 @@ make.unclassifieds.unique <- function(Taxonomy){
 
 # ---- Functions made/modified for this analysis specifically ----
 
-
-
-
 find.correct.classifications <- function(fw.arb, fw.tag){
   # input data is already subsetted to FreshTrain-classified seqs
   
@@ -111,22 +108,27 @@ find.correct.classifications <- function(fw.arb, fw.tag){
   return(correct.class)
 }
 
-correct.unclass.list <- find.correct.classifications(fw.arb = fw.arb.tax, fw.tag = fw.v4.tax)
-
 find.correct.unclassifications <- function(fw.arb, fw.tag){
   # input data is already subsetted to FreshTrain-classified seqs
   
   correct.unclass <- list("kingdom" = NULL,"phylum" = NULL,"class" = NULL,"order" = NULL,"lineage" = NULL,"clade" = NULL,"tribe" = NULL)
   
+  # save to re-start each loop step-down
+  fwa <- fw.arb
+  fwt <- fw.tag
+  
   for (t in 1:length(correct.unclass)){
+    fw.arb <- fwa
+    fw.tag <- fwt
+    
     # subset to only unclassified names
     arb <- fw.arb[ ,t + 1]
     index <- which(arb == "unclassified")
-    fw.arb <- fw.arb[index, ]
+    fw.arb <- fw.arb[index, ,drop = F]
     
     tag <- fw.tag[ ,t + 1]
     index <- which(tag == "unclassified")
-    fw.tag <- fw.tag[index, ]
+    fw.tag <- fw.tag[index, ,drop = F]
     
     if (nrow(fw.tag) < 1){ # skip ahead if there are none
       correct.unclass[[t]] <- fw.tag
@@ -144,17 +146,24 @@ find.correct.unclassifications <- function(fw.arb, fw.tag){
     fw.tag <- as.data.frame(fw.tag, stringsAsFactors = F)
     fw.tag <- merge(x = fw.tag, y = shared, by = 1, sort = T)
     
-    # subset to only matching upper-level names:
-    for (u in 1:(t - 1)){
-      all.equal(fw.tag[ ,1],fw.arb[ ,1])
-      index <- which(fw.tag[ ,(t + 1)- u] == fw.arb[ ,(t + 1) - u])
-      fw.tag <- fw.tag[index, ]
-      fw.arb <- fw.arb[index, ]
+    if (nrow(fw.tag) < 1){ # skip ahead if there are none
+      correct.unclass[[t]] <- fw.tag
+      next
     }
+    
+    # subset to unclassifieds with same level unclassification as arb
+    fw.tag[ ,-1] <- make.unclassifieds.unique(Taxonomy = fw.tag[ ,-1])
+    fw.arb[ ,-1] <- make.unclassifieds.unique(Taxonomy = fw.arb[ ,-1])
+    index <- which(fw.tag[ ,t + 1] == fw.arb[ ,t + 1])
     correct.unclass[[t]] <- fw.tag[index, ]
   }
   return(correct.unclass)
 }
+
+
+# ---- In progress ----
+
+
 
 find.underclassifications <- function(fw.arb, fw.tag){
   # input data is already subsetted to FreshTrain-classified seqs
@@ -266,5 +275,6 @@ fw.v4.tax <- v4.tax[index, ]
 
 correct.class.list <- find.correct.classifications(fw.arb = fw.arb.tax, fw.tag = fw.v4.tax)
 
+correct.unclass.list <- find.correct.unclassifications(fw.arb = fw.arb.tax, fw.tag = fw.v4.tax)
 
 

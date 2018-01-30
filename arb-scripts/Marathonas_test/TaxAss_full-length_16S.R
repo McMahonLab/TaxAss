@@ -73,6 +73,8 @@ make.unclassifieds.unique <- function(Taxonomy){
 find.correct.classifications <- function(fw.arb, fw.tag){
   # input data is already subsetted to FreshTrain-classified seqs
   
+  # correct classification defined as: taxa names agree and exist
+  
   correct.class <- list("kingdom" = NULL,"phylum" = NULL,"class" = NULL,"order" = NULL,"lineage" = NULL,"clade" = NULL,"tribe" = NULL)
   
   for (t in 1:length(correct.class)){
@@ -80,13 +82,13 @@ find.correct.classifications <- function(fw.arb, fw.tag){
     arb <- fw.arb[ ,t + 1]
     index <- which(arb == "unclassified")
     if(length(index) > 0){
-      fw.arb <- fw.arb[-index, ]
+      fw.arb <- fw.arb[-index, ,drop = F]
     }
     
     tag <- fw.tag[ ,t + 1]
     index <- which(tag == "unclassified")
     if(length(index) > 0){
-      fw.tag <- fw.tag[-index, ]
+      fw.tag <- fw.tag[-index, ,drop = F]
     }
     
     # subset to only shared ID's:
@@ -103,13 +105,15 @@ find.correct.classifications <- function(fw.arb, fw.tag){
     # subset to only matching names:
     all.equal(fw.tag[ ,1],fw.arb[ ,1])
     index <- which(fw.tag[ ,t + 1] == fw.arb[ ,t + 1])
-    correct.class[[t]] <- fw.tag[index, ]
+    correct.class[[t]] <- fw.tag[index, ,drop = F]
   }
   return(correct.class)
 }
 
 find.correct.unclassifications <- function(fw.arb, fw.tag){
   # input data is already subsetted to FreshTrain-classified seqs
+  
+  # correct unclassification defined as: taxa names agree at upper levels and don't exist at lower levels
   
   correct.unclass <- list("kingdom" = NULL,"phylum" = NULL,"class" = NULL,"order" = NULL,"lineage" = NULL,"clade" = NULL,"tribe" = NULL)
   
@@ -155,13 +159,16 @@ find.correct.unclassifications <- function(fw.arb, fw.tag){
     fw.tag[ ,-1] <- make.unclassifieds.unique(Taxonomy = fw.tag[ ,-1])
     fw.arb[ ,-1] <- make.unclassifieds.unique(Taxonomy = fw.arb[ ,-1])
     index <- which(fw.tag[ ,t + 1] == fw.arb[ ,t + 1])
-    correct.unclass[[t]] <- fw.tag[index, ]
+    correct.unclass[[t]] <- fw.tag[index, ,drop = F]
   }
   return(correct.unclass)
 }
 
 find.underclassifications <- function(fw.arb, fw.tag){
   # input data is already subsetted to FreshTrain-classified seqs
+  
+  # underclassification defined as: taxa name exists in arb and unclassified in tag, but all existing upper names agree
+  # only includes FreshTrain seqs because don't know "correct" class of others
   
   under.class <- list("kingdom" = NULL,"phylum" = NULL,"class" = NULL,"order" = NULL,"lineage" = NULL,"clade" = NULL,"tribe" = NULL)
   
@@ -215,60 +222,179 @@ find.underclassifications <- function(fw.arb, fw.tag){
     for (u in 1:(t - 1)){
       cat(all.equal(fw.tag[ ,1],fw.arb[ ,1]))
       index <- which(fw.tag[ ,(t + 1)- u] == fw.arb[ ,(t + 1) - u] | fw.tag[ ,(t + 1)- u] == "unclassified")
-      fw.tag <- fw.tag[index, ]
+      fw.tag <- fw.tag[index, ,drop = F]
       fw.arb <- fw.arb[index, ]
     }
-    under.class[[t]] <- fw.tag[index, ]
+    under.class[[t]] <- fw.tag
   }
   return(under.class)
 }
 
+find.over.classifications <- function(fw.arb, fw.tag){
+  # input data is subsetted to FreshTrain-classified seqs
+  
+  # over-classification defined as: tag has name while arb is unclass, all existing upper names match
+  # only includes FreshTrain arb b/c no way to know if upper-levels match for the non-FreshTrain arb classifications
+  # this is like a special type of misclassification
+  
+  over.class <- list("kingdom" = NULL,"phylum" = NULL,"class" = NULL,"order" = NULL,"lineage" = NULL,"clade" = NULL,"tribe" = NULL)
+  
+  # save to re-start each loop step-down
+  fwa <- fw.arb
+  fwt <- fw.tag
+  
+  for (t in 1:length(over.class)){
+    fw.arb <- fwa
+    fw.tag <- fwt
+    
+    # subset to only unclassified names in arb data
+    arb <- fw.arb[ ,t + 1]
+    index <- which(arb == "unclassified")
+    fw.arb <- fw.arb[index, ,drop = F]
+    
+    if (nrow(fw.arb) < 1){ # skip ahead if there are none
+      over.class[[t]] <- fw.arb
+      next
+    }
+    
+    # subset to only shared ID's:
+    arb <- fw.arb[ ,1]
+    tag <- fw.tag[ ,1]
+    shared <- intersect(x = arb, y = tag)
+    
+    fw.arb <- as.data.frame(fw.arb, stringsAsFactors = F)
+    fw.arb <- merge(x = fw.arb, y = shared, by = 1, sort = T)
+    
+    fw.tag <- as.data.frame(fw.tag, stringsAsFactors = F)
+    fw.tag <- merge(x = fw.tag, y = shared, by = 1, sort = T)
+    
+    if (nrow(fw.tag) < 1){ # skip ahead if there are none
+      over.class[[t]] <- fw.tag
+      next
+    }
+    
+    # subset to only classified names in tag data
+    cat(all.equal(fw.tag[ ,1],fw.arb[ ,1]))
+    index <- which(fw.tag[ ,t + 1] != "unclassified")
+    fw.arb <- fw.arb[index, ]
+    fw.tag <- fw.tag[index, ,drop = F]
+    
+    if (nrow(fw.tag) < 1){ # skip ahead if there are none
+      over.class[[t]] <- fw.tag
+      next
+    }
+    
+    # subset to only matching upper-level names:
+    # step up taxa levels, keeping only matching seqIDs as go
+    for (u in 1:(t - 1)){
+      cat(all.equal(fw.tag[ ,1],fw.arb[ ,1]))
+      index <- which(fw.tag[ ,(t + 1)- u] == fw.arb[ ,(t + 1) - u] | fw.arb[ ,(t + 1)- u] == "unclassified")
+      fw.tag <- fw.tag[index, ,drop = F]
+      fw.arb <- fw.arb[index, ]
+    }
+    over.class[[t]] <- fw.tag
+  }
+  return(over.class)
+}
+
+find.correct.GG.classifications <- function(all.arb, fw.arb, all.tag, fw.tag){
+  # subset to GG-classified only
+  gg.arb.ids <- setdiff(x = all.arb[ ,1], y = fw.arb[ ,1])
+  gg.tag.ids <- setdiff(x = all.tag[ ,1], fw.tag[ ,1])
+  
+  all.arb <- as.data.frame(all.arb, stringsAsFactors = F)
+  gg.arb <- merge(x = all.arb, y = gg.arb.ids, by = 1, sort = T)
+  
+  all.tag <- as.data.frame(all.tag, stringsAsFactors = F)
+  gg.tag <- merge(x = all.tag, y = gg.tag.ids, by = 1, sort = T)
+  
+  # subset to shared ID's
+  shared <- intersect(gg.arb.ids, gg.tag.ids)
+  gg.arb <- merge(x = gg.arb, y = shared, by = 1, sort = T)
+  gg.tag <- merge(x = gg.tag, y = shared, by = 1, sort = T)
+  
+  # no results list because "true" GG name unknown so all that GG handled both times are "correct"
+  return(gg.tag)
+}
 
 # ---- In progress ----
 
-fw.arb = fw.arb.tax
-fw.tag = fw.v4.tax
 
 
-find.incorrect.classifications 
 
-find.incorrect.unclassifications 
 
-find.incorrect.classifications <- function(taxass, arb, FWtable_percents, GGtable_percents, TaxaLevel, tracker, FolderPath, forcing = FALSE){
-  # Find seqs misclassified at a given phylogenetic level, t
-  fw <- FWtable
-  gg <- GGtable
-  fw.percents <- FWtable_percents
-  gg.percents <- GGtable_percents
-  t <- TaxaLevel
-  num.mismatches <- tracker
-  results.folder.path <- FolderPath
+find.mis.classifications <- function(all.arb, all.tag){
+  # input data is all classified seqs
   
-  taxa.names <- c("kingdom","phylum","class","order","lineage","clade","tribe")
+  # mis-classification defined as: 
+  # - mismatched names, 
+  # - unclass with mismatched upper names
+  # - GG name when should be FreshTrain
+  # - FreshTrain name when should be GG
+  # excludes: unclass with matching upper names (over & under classifications)
   
-  # compare names in column t+1, because first columns are seqID and t=1 is kingdom, t=7 is tribe
-  # ignore names that say unclassified, except in forcing comparison when fw giving any erroneous name counts as forcing
-  if (forcing == TRUE){
-    index <- which(gg[,t+1] != fw[,t+1] & fw[,t+1] != "unclassified")
-  }else{
-    index <- which(gg[,t+1] != fw[,t+1] & gg[,t+1] != "unclassified" & fw[,t+1] != "unclassified")
+  mis.class <- list("kingdom" = NULL,"phylum" = NULL,"class" = NULL,"order" = NULL,"lineage" = NULL,"clade" = NULL,"tribe" = NULL)
+  
+  # save to re-start each loop step-down
+  aa <- all.arb
+  at <- all.tag
+  
+  for (t in 1:length(mis.class)){
+    all.arb <- aa
+    all.tag <- at
+    
+    # subset to only unclassified names in arb data
+    arb <- all.arb[ ,t + 1]
+    index <- which(arb == "unclassified")
+    all.arb <- all.arb[index, ,drop = F]
+    
+    if (nrow(all.arb) < 1){ # skip ahead if there are none
+      mis.class[[t]] <- all.arb
+      next
+    }
+    
+    # subset to only shared ID's:
+    arb <- all.arb[ ,1]
+    tag <- all.tag[ ,1]
+    shared <- intersect(x = arb, y = tag)
+    
+    all.arb <- as.data.frame(all.arb, stringsAsFactors = F)
+    all.arb <- merge(x = all.arb, y = shared, by = 1, sort = T)
+    
+    all.tag <- as.data.frame(all.tag, stringsAsFactors = F)
+    all.tag <- merge(x = all.tag, y = shared, by = 1, sort = T)
+    
+    if (nrow(all.tag) < 1){ # skip ahead if there are none
+      mis.class[[t]] <- all.tag
+      next
+    }
+    
+    # subset to only classified names in tag data
+    cat(all.equal(all.tag[ ,1],all.arb[ ,1]))
+    index <- which(all.tag[ ,t + 1] != "unclassified")
+    all.arb <- all.arb[index, ]
+    all.tag <- all.tag[index, ,drop = F]
+    
+    if (nrow(all.tag) < 1){ # skip ahead if there are none
+      mis.class[[t]] <- all.tag
+      next
+    }
+    
+    # subset to only matching upper-level names:
+    # step up taxa levels, keeping only matching seqIDs as go
+    for (u in 1:(t - 1)){
+      cat(all.equal(all.tag[ ,1],all.arb[ ,1]))
+      index <- which(all.tag[ ,(t + 1)- u] == all.arb[ ,(t + 1) - u] | all.arb[ ,(t + 1)- u] == "unclassified")
+      all.tag <- all.tag[index, ,drop = F]
+      all.arb <- all.arb[index, ]
+    }
+    mis.class[[t]] <- all.tag
   }
+  return(mis.class)
   
-  cat("there are ", length(index), " conflicting names at ", taxa.names[t], " level\n")
-  num.mismatches[t] <- length(index)
   
-  # Compare the conflicting tables in entirety, use the original files with percents still in it
-  conflicting <- cbind(gg.percents[index,,drop=F], fw.percents[index,,drop=F])
-  
-  # Check that the files still line up correctly
-  check.files.match(FWtable = conflicting[,9:16,drop=F], GGtable = conflicting[,1:8,drop=F])
-  
-  # Export a file with the conflicting rows side by side.
-  write.csv(conflicting, file = paste(results.folder.path, "/", t, "_", taxa.names[t],"_conflicts.csv", sep=""), row.names = FALSE)
-  
-  #Track the number of mismatches at each level
-  return(num.mismatches)
 }
+
 
 # # example of logic:
 # arb <- letters[1:5]
@@ -305,3 +431,7 @@ correct.class.list <- find.correct.classifications(fw.arb = fw.arb.tax, fw.tag =
 correct.unclass.list <- find.correct.unclassifications(fw.arb = fw.arb.tax, fw.tag = fw.v4.tax)
 
 under.class.list <- find.underclassifications(fw.arb = fw.arb.tax, fw.tag = fw.v4.tax)
+
+over.class.list <- find.over.classifications(fw.arb = fw.arb.tax, fw.tag = fw.v4.tax)
+
+gg.class.table <- find.correct.GG.classifications(all.arb = arb.tax, all.tag = v4.tax, fw.arb = fw.arb.tax, fw.tag = fw.v4.tax)

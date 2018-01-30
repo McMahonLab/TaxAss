@@ -68,7 +68,7 @@ make.unclassifieds.unique <- function(Taxonomy){
   return(Taxonomy)
 }
 
-# ---- Functions made/modified for this analysis specifically ----
+# ---- Functions made for this analysis specifically ----
 
 find.correct.classifications <- function(fw.arb, fw.tag){
   # input data is already subsetted to FreshTrain-classified seqs
@@ -160,12 +160,6 @@ find.correct.unclassifications <- function(fw.arb, fw.tag){
   return(correct.unclass)
 }
 
-
-# ---- In progress ----
-
-fw.arb = fw.arb.tax
-fw.tag = fw.v4.tax
-
 find.underclassifications <- function(fw.arb, fw.tag){
   # input data is already subsetted to FreshTrain-classified seqs
   
@@ -205,7 +199,19 @@ find.underclassifications <- function(fw.arb, fw.tag){
       next
     }
     
+    # subset to only classified names in arb data
+    cat(all.equal(fw.tag[ ,1],fw.arb[ ,1]))
+    index <- which(fw.arb[ ,t + 1] != "unclassified")
+    fw.arb <- fw.arb[index, ]
+    fw.tag <- fw.tag[index, ,drop = F]
+    
+    if (nrow(fw.tag) < 1){ # skip ahead if there are none
+      under.class[[t]] <- fw.tag
+      next
+    }
+    
     # subset to only matching upper-level names:
+    # step up taxa levels, keeping only matching seqIDs as go
     for (u in 1:(t - 1)){
       cat(all.equal(fw.tag[ ,1],fw.arb[ ,1]))
       index <- which(fw.tag[ ,(t + 1)- u] == fw.arb[ ,(t + 1) - u] | fw.tag[ ,(t + 1)- u] == "unclassified")
@@ -216,6 +222,13 @@ find.underclassifications <- function(fw.arb, fw.tag){
   }
   return(under.class)
 }
+
+
+# ---- In progress ----
+
+fw.arb = fw.arb.tax
+fw.tag = fw.v4.tax
+
 
 find.incorrect.classifications 
 
@@ -291,4 +304,4 @@ correct.class.list <- find.correct.classifications(fw.arb = fw.arb.tax, fw.tag =
 
 correct.unclass.list <- find.correct.unclassifications(fw.arb = fw.arb.tax, fw.tag = fw.v4.tax)
 
-
+under.class.list <- find.underclassifications(fw.arb = fw.arb.tax, fw.tag = fw.v4.tax)

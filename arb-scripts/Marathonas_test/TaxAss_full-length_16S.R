@@ -17,11 +17,14 @@
 
 # ---- File paths ----
 
+# for import
 file.arb.tax <- "../arb-scripts/Marathonas_test/mara.taxonomy"
 
 file.v4.tax <- "../arb-scripts/Marathonas_test/mara_v4.98.80.80.taxonomy"
 file.v4.ids <- "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/ids.above.98"
 
+# for export
+folder.v4 <- "~/Desktop/Marathonas_v4_results"
 
 # ---- Functions taken from find_classification_disagreements.R ----
 
@@ -223,9 +226,10 @@ find.underclassifications <- function(fw.arb, fw.tag){
       cat(all.equal(fw.tag[ ,1],fw.arb[ ,1]))
       index <- which(fw.tag[ ,(t + 1)- u] == fw.arb[ ,(t + 1) - u] | fw.tag[ ,(t + 1)- u] == "unclassified")
       fw.tag <- fw.tag[index, ,drop = F]
-      fw.arb <- fw.arb[index, ]
+      fw.arb <- fw.arb[index, ,drop = F]
     }
-    under.class[[t]] <- fw.tag
+    under.class[[t]] <- cbind(fw.arb, fw.tag)
+    colnames(under.class[[t]]) <- paste(colnames(under.class[[t]]), c(rep.int(x = "arb", times = 8), rep.int(x = "tag", times = 8)), sep = ".")
   }
   return(under.class)
 }
@@ -290,9 +294,10 @@ find.over.classifications <- function(fw.arb, fw.tag){
       cat(all.equal(fw.tag[ ,1],fw.arb[ ,1]))
       index <- which(fw.tag[ ,(t + 1)- u] == fw.arb[ ,(t + 1) - u] | fw.arb[ ,(t + 1)- u] == "unclassified")
       fw.tag <- fw.tag[index, ,drop = F]
-      fw.arb <- fw.arb[index, ]
+      fw.arb <- fw.arb[index, ,drop = F]
     }
-    over.class[[t]] <- fw.tag
+    over.class[[t]] <- cbind(fw.arb, fw.tag)
+    colnames(over.class[[t]]) <- paste(colnames(over.class[[t]]), c(rep.int(x = "arb", times = 8), rep.int(x = "tag", times = 8)), sep = ".")
   }
   return(over.class)
 }
@@ -402,76 +407,6 @@ find.mis.classifications <- function(c.class, c.unclass, under, over, c.gen, i.g
   return(mis.class)
 }
 
-# ---- In progress ----
-#####
-# # save to re-start each loop step-down
-# fw.arb <- as.data.frame(x = fw.arb, stringsAsFactors = F)
-# fw.tag <- as.data.frame(x = fw.tag, stringsAsFactors = F)
-# fwa <- fw.arb
-# fwt <- fw.tag
-# 
-# for (t in 1:length(mis.class)){
-#   fw.arb <- fwa
-#   fw.tag <- fwt
-#   
-#   # subset to only shared ID's:
-#   arb <- fw.arb[ ,1]
-#   tag <- fw.tag[ ,1]
-#   shared <- intersect(x = arb, y = tag)
-#   fw.arb <- merge(x = fw.arb, y = shared, by = 1, sort = T)
-#   fw.tag <- merge(x = fw.tag, y = shared, by = 1, sort = T)
-#   
-#   # making unclassifieds unique means upper disagreements reflected in lower names
-#   fw.tag.unique <- fw.tag
-#   fw.arb.unique <- fw.arb
-#   fw.tag.unique[ ,-1] <- make.unclassifieds.unique(Taxonomy = fw.tag[ ,-1])
-#   fw.arb.unique[ ,-1] <- make.unclassifieds.unique(Taxonomy = fw.arb[ ,-1])
-#   
-#   # subset to only mismatched names. making unclass unique removes correct unclassifications as well
-#   all.equal(fw.arb[ ,1], fw.tag[ ,1], fw.tag.unique[ ,1], fw.arb.unique[ ,1])
-#   arb <- fw.arb.unique[ ,t + 1]
-#   tag <- fw.tag.unique[ ,t + 1]
-#   index <- which(arb == tag)
-#   fw.arb <- fw.arb[-index, ,drop = F]
-#   fw.tag <- fw.tag[-index, ,drop = F]
-#   
-#   if (nrow(fw.arb) < 1){ # skip ahead if there are none
-#     mis.class[[t]] <- fw.arb
-#     next
-#   }
-#   
-#   # subset to only mismatched upper-level names (remove under and over classifications)
-#   # step up taxa levels, keeping only mismatched seqIDs as go
-#   for (u in 2:t){
-#     cat(all.equal(fw.tag[ ,1],fw.arb[ ,1]))
-#     arb <- fw.arb[ ,u]
-#     tag <- fw.tag[ ,u]
-#     index <- which(arb != tag | arb == "unclassified" | tag == "unclassified") # have already removed matching unclassifieds
-#     fw.tag <- fw.tag[index, ,drop = F]
-#     fw.arb <- fw.arb[index, ,drop = F]
-#   }
-#   mis.class[[t]] <- cbind(fw.arb, fw.tag)
-#   colnames(mis.class[[t]]) <- paste(colnames(mis.class[[t]]), c(rep.int(x = "arb", times = 8), rep.int(x = "tag", times = 8)), sep = ".")
-# }
-#####
-
-
-
-
-
-
-
-# # example of logic:
-# arb <- letters[1:5]
-# tag <- letters[2:6]
-# index.arb <- duplicated(c(tag,arb))
-# index.arb <- index.arb[-(1:length(tag))]
-# index.tag <- duplicated(c(arb,tag))
-# index.tag <- index.tag[-(1:length(arb))]
-# arb <- arb[index.arb]
-# tag <- tag[index.tag]
-
-
 # ---- Import & Format Data ----
 
 arb.tax <- read.csv(file.arb.tax, header = T, colClasses = "character")
@@ -491,6 +426,8 @@ fw.v4.tax <- v4.tax[index, ]
 
 # ---- Analyze Data ----
 
+# v4 data
+
 correct.class.list <- find.correct.classifications(fw.arb = fw.arb.tax, fw.tag = fw.v4.tax)
 
 correct.unclass.list <- find.correct.unclassifications(fw.arb = fw.arb.tax, fw.tag = fw.v4.tax)
@@ -507,10 +444,29 @@ incorrect.ft.table <- find.incorrect.FT.classifications(all.arb = arb.tax, fw.ar
 
 mis.class.list <- find.mis.classifications(c.class = correct.class.list, c.unclass = correct.unclass.list, under = under.class.list, over = over.class.list, c.gen = correct.gg.table, i.gen = incorrect.gg.table, i.fresh = incorrect.ft.table, all.arb = arb.tax, all.tag = v4.tax)
 
-
 y <- data.frame(matrix(data = "bla", nrow = 9, ncol = 7))
 for( t in 1:7){
   x <- rbind(names(correct.class.list)[t], nrow(correct.class.list[[t]]), nrow(correct.unclass.list[[t]]), nrow(under.class.list[[t]]), nrow(over.class.list[[t]]), nrow(correct.gg.table), nrow(incorrect.gg.table), nrow(incorrect.ft.table), nrow(mis.class.list[[t]]))
   y[ ,t] <- x
 }
 y
+
+results.v4 <- data.frame(matrix(data = "bla", nrow = 9, ncol = 7))
+for( t in 1:7){
+  temp <- rbind(names(correct.class.list)[t], nrow(correct.class.list[[t]]), nrow(correct.unclass.list[[t]]), nrow(under.class.list[[t]]), 
+                nrow(over.class.list[[t]]), nrow(correct.gg.table), nrow(incorrect.gg.table), nrow(incorrect.ft.table), nrow(mis.class.list[[t]]))
+  results.v4[ ,t] <- temp
+}
+colnames(results.v4) <- results.v4[1, ]
+results.v4 <- results.v4[-1, ]
+row.names(results.v4) <- c("correct classifications", "correct unclassifications", "underclassifications", "overclassifications", "correctly in greengenes", "incorrectly in greengenes", "incorrectly in FreshTrain", "misclassifications")
+results.v4 <- results.v4[c(1,2,3,4,8,6,7,5), ]
+temp <- row.names(results.v4)
+results.v4 <- as.matrix(results.v4)
+results.v4 <- apply(X = results.v4, MARGIN = 2, FUN = as.numeric)
+row.names(results.v4) <- temp
+
+barplot(results.v4, col = c("blue", "blue", "blue", "blue", "blue", "blue","green","green"), names.arg = row.names(results.v4))
+
+barplot(results.v4[ ,7], col = c("blue", "blue", "blue", "blue", "blue", "blue","green","green"))
+str(results.v4)

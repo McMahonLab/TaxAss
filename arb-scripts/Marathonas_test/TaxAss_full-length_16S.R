@@ -313,8 +313,27 @@ find.correct.GG.classifications <- function(all.arb, fw.arb, all.tag, fw.tag){
   gg.arb <- merge(x = gg.arb, y = shared, by = 1, sort = T)
   gg.tag <- merge(x = gg.tag, y = shared, by = 1, sort = T)
   
-  # no results list because "true" GG name unknown so all that GG handled both times are "correct"
+  # no results list because "true" GG name unknown so all that GG handled both times are "correct" at every level
   return(gg.tag)
+}
+
+find.incorrect.GG.classifications <- function(fw.arb, all.tag, fw.tag){
+  # subset to GG-classified tags
+  gg.tag.ids <- setdiff(x = all.tag[ ,1], fw.tag[ ,1])
+  all.tag <- as.data.frame(all.tag, stringsAsFactors = F)
+  gg.tag <- merge(x = all.tag, y = gg.tag.ids, by = 1, sort = T)
+  
+  # subset to shared IDs with freshwater arb IDs
+  shared <- intersect(gg.tag[ ,1], fw.arb[ ,1])
+  fw.arb <- as.data.frame(fw.arb, stringsAsFactors = F)
+  gg.arb <- merge(x = fw.arb, y = shared, by = 1, sort = T)
+  gg.tag <- merge(x = gg.tag, y = shared, by = 1, sort = T)
+  
+  # combine b/c interesting to compare
+  all.equal(gg.arb[ ,1], gg.tag[ ,1])
+  incorrectly.gg <- cbind(gg.arb, gg.tag)
+  colnames(incorrectly.gg) <- paste(colnames(incorrectly.gg), c(rep.int(x = "arb", times = 8), rep.int(x = "tag", times = 8)), sep = ".")
+  return(incorrectly.gg)
 }
 
 # ---- In progress ----
@@ -323,8 +342,18 @@ find.correct.GG.classifications <- function(all.arb, fw.arb, all.tag, fw.tag){
 
 
 
-find.mis.classifications <- function(all.arb, all.tag){
-  # input data is all classified seqs
+
+
+cor.class = correct.class.list
+cor.unclass = correct.unclass.list
+under = under.class.list
+over = over.class.list
+general = gg.class.table
+all.arb = arb.tax
+all.tag = v4.tax
+
+find.mis.classifications <- function(cor.class, cor.unclass, under, over, general, all.arb, all.tag){
+  # input data is all the other summaries, b/c mis.class is all the rest
   
   # mis-classification defined as: 
   # - mismatched names, 
@@ -335,18 +364,24 @@ find.mis.classifications <- function(all.arb, all.tag){
   
   mis.class <- list("kingdom" = NULL,"phylum" = NULL,"class" = NULL,"order" = NULL,"lineage" = NULL,"clade" = NULL,"tribe" = NULL)
   
-  # save to re-start each loop step-down
-  aa <- all.arb
-  at <- all.tag
+  all.tag <- as.data.frame(all.tag, stringsAsFactors = F)
+  all.arb <- as.data.frame(all.arb, stringsAsFactors = F)
   
   for (t in 1:length(mis.class)){
-    all.arb <- aa
-    all.tag <- at
+    cc <- cor.class[[t]][ ,1]
+    cu <- cor.unclass[[t]][ ,1]
+    un <- under[[t]][ ,1]
+    ov <- over[[t]][ ,1]
+    gg <- general[ ,1]
     
-    # subset to only unclassified names in arb data
-    arb <- all.arb[ ,t + 1]
-    index <- which(arb == "unclassified")
-    all.arb <- all.arb[index, ,drop = F]
+    # Check that no duplicate names
+    length(unique(x = c(cc,cu,un,ov,gg))) == length(cc) + length(cu) + length(un) + length(ov) + length(gg)
+    
+    # subset to the not-taken seqIDs
+    not.mis <- c(cc,cu,un,ov,gg)
+    mis.ids <- setdiff(x = all.tag[ ,1], y = not.mis)
+    mis.tag <- merge(x = all.tag, y = mis.ids, by = 1, sort = T)
+    mis.arb <- merge(x = all.arb, y = mis.ids, by = 1, sort = T)
     
     if (nrow(all.arb) < 1){ # skip ahead if there are none
       mis.class[[t]] <- all.arb
@@ -434,4 +469,15 @@ under.class.list <- find.underclassifications(fw.arb = fw.arb.tax, fw.tag = fw.v
 
 over.class.list <- find.over.classifications(fw.arb = fw.arb.tax, fw.tag = fw.v4.tax)
 
-gg.class.table <- find.correct.GG.classifications(all.arb = arb.tax, all.tag = v4.tax, fw.arb = fw.arb.tax, fw.tag = fw.v4.tax)
+correct.gg.table <- find.correct.GG.classifications(all.arb = arb.tax, all.tag = v4.tax, fw.arb = fw.arb.tax, fw.tag = fw.v4.tax)
+
+incorrect.gg.table <- find.incorrect.GG.classifications(fw.arb = fw.arb.tax, all.tag = v4.tax, fw.tag = fw.v4.tax)
+
+
+
+y <- data.frame(matrix(data = "bla", nrow = 6, ncol = 7))
+for( t in 1:7){
+  x <- rbind(names(correct.class.list)[t], nrow(correct.class.list[[t]]), nrow(correct.unclass.list[[t]]), nrow(under.class.list[[t]]), nrow(over.class.list[[t]]), nrow(gg.class.table))
+  y[ ,t] <- x
+}
+y

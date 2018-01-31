@@ -298,6 +298,8 @@ find.over.classifications <- function(fw.arb, fw.tag){
 }
 
 find.correct.GG.classifications <- function(all.arb, fw.arb, all.tag, fw.tag){
+  # wasn't in FreshTrain in arb alignment, was classified by gg in TaxAss
+  
   # subset to GG-classified only
   gg.arb.ids <- setdiff(x = all.arb[ ,1], y = fw.arb[ ,1])
   gg.tag.ids <- setdiff(x = all.tag[ ,1], fw.tag[ ,1])
@@ -318,6 +320,8 @@ find.correct.GG.classifications <- function(all.arb, fw.arb, all.tag, fw.tag){
 }
 
 find.incorrect.GG.classifications <- function(fw.arb, all.tag, fw.tag){
+  # was in the FreshTrain in arb alignment, was classified by GG in TaxAss
+  
   # subset to GG-classified tags
   gg.tag.ids <- setdiff(x = all.tag[ ,1], fw.tag[ ,1])
   all.tag <- as.data.frame(all.tag, stringsAsFactors = F)
@@ -335,6 +339,28 @@ find.incorrect.GG.classifications <- function(fw.arb, all.tag, fw.tag){
   colnames(incorrectly.gg) <- paste(colnames(incorrectly.gg), c(rep.int(x = "arb", times = 8), rep.int(x = "tag", times = 8)), sep = ".")
   return(incorrectly.gg)
 }
+
+find.incorrect.FT.classifications <- function(all.arb, fw.arb, fw.tag){
+  # was not in FreshTrain in arb alignment, was classified by FreshTrain in TaxAss
+  
+  # subset to non-FreshTrain arb
+  gg.arb.ids <- setdiff(x = all.arb[ ,1], y = fw.arb[ ,1])
+  all.arb <- as.data.frame(all.arb, stringsAsFactors = F)
+  gg.arb <- merge(x = all.arb, y = gg.arb.ids, by = 1, sort = T)
+  
+  # subset to shared IDs with FreshTrain tags
+  shared <- intersect(x = gg.arb[ ,1], fw.tag[ ,1])
+  fw.tag <- as.data.frame(fw.tag, stringsAsFactors = F)
+  gg.arb <- merge(x = gg.arb, y = shared, by = 1, sort = T)
+  fw.tag <- merge(x = fw.tag, y = shared, by = 1, sort = T)
+  
+  # combine b/c interesting to compare
+  all.equal(gg.arb[ ,1], fw.tag[ ,1])
+  incorrectly.ft <- cbind(gg.arb, fw.tag)
+  colnames(incorrectly.ft) <- paste(colnames(incorrectly.ft), c(rep.int(x = "arb", times = 8), rep.int(x = "tag", times = 8)), sep = ".")
+  return(incorrectly.ft)
+}
+
 
 # ---- In progress ----
 
@@ -473,11 +499,12 @@ correct.gg.table <- find.correct.GG.classifications(all.arb = arb.tax, all.tag =
 
 incorrect.gg.table <- find.incorrect.GG.classifications(fw.arb = fw.arb.tax, all.tag = v4.tax, fw.tag = fw.v4.tax)
 
+incorrect.ft.table <- find.incorrect.FT.classifications(all.arb = arb.tax, fw.arb = fw.arb.tax, fw.tag = fw.v4.tax)
 
 
-y <- data.frame(matrix(data = "bla", nrow = 6, ncol = 7))
+y <- data.frame(matrix(data = "bla", nrow = 8, ncol = 7))
 for( t in 1:7){
-  x <- rbind(names(correct.class.list)[t], nrow(correct.class.list[[t]]), nrow(correct.unclass.list[[t]]), nrow(under.class.list[[t]]), nrow(over.class.list[[t]]), nrow(gg.class.table))
+  x <- rbind(names(correct.class.list)[t], nrow(correct.class.list[[t]]), nrow(correct.unclass.list[[t]]), nrow(under.class.list[[t]]), nrow(over.class.list[[t]]), nrow(gg.class.table), nrow(incorrect.gg.table), nrow(incorrect.ft.table))
   y[ ,t] <- x
 }
 y

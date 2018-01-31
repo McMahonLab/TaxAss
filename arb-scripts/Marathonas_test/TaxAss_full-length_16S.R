@@ -378,20 +378,63 @@ general = gg.class.table
 all.arb = arb.tax
 all.tag = v4.tax
 
+fw.arb = fw.arb.tax
+fw.tag = fw.v4.tax
+
 find.mis.classifications <- function(cor.class, cor.unclass, under, over, general, all.arb, all.tag){
-  # input data is all the other summaries, b/c mis.class is all the rest
+  # input data is fw only
   
-  # mis-classification defined as: 
-  # - mismatched names, 
-  # - unclass with mismatched upper names
-  # - GG name when should be FreshTrain
-  # - FreshTrain name when should be GG
+  # mis-classification defined as: mismatched names and unclass with mismatched upper names withing FreshTrain orgs
   # excludes: unclass with matching upper names (over & under classifications)
-  
+  # excludes: seqs classified in GG in one and FT in other & vice versa (incorrect gg and ft classifications)
+    
   mis.class <- list("kingdom" = NULL,"phylum" = NULL,"class" = NULL,"order" = NULL,"lineage" = NULL,"clade" = NULL,"tribe" = NULL)
   
-  all.tag <- as.data.frame(all.tag, stringsAsFactors = F)
-  all.arb <- as.data.frame(all.arb, stringsAsFactors = F)
+  # save to re-start each loop step-down
+  fw.arb <- as.data.frame(x = fw.arb, stringsAsFactors = F)
+  fw.tag <- as.data.frame(x = fw.tag, stringsAsFactors = F)
+  fwa <- fw.arb
+  fwt <- fw.tag
+  
+  for (t in 1:length(mis.class)){
+    fw.arb <- fwa
+    fw.tag <- fwt
+    
+    # subset to only shared ID's:
+    arb <- fw.arb[ ,1]
+    tag <- fw.tag[ ,1]
+    shared <- intersect(x = arb, y = tag)
+    fw.arb <- merge(x = fw.arb, y = shared, by = 1, sort = T)
+    fw.tag <- merge(x = fw.tag, y = shared, by = 1, sort = T)
+    
+    # subset to only mismatched names 
+    all.equal(fw.arb[ ,1], fw.tag[ ,1])
+    arb <- fw.arb[ ,t + 1]
+    tag <- fw.tag[ ,t + 1]
+    index <- which(arb != tag)
+    fw.arb <- fw.arb[index, ,drop = F]
+    fw.tag <- fw.tag[index, ,drop = F]
+    
+    #****left off here****
+    
+    if (nrow(fw.arb) < 1){ # skip ahead if there are none
+      over.class[[t]] <- fw.arb
+      next
+    }
+    
+    # subset to only mismatched upper-level names:
+    # step up taxa levels, keeping only matching seqIDs as go
+    for (u in 1:(t - 1)){
+      cat(all.equal(fw.tag[ ,1],fw.arb[ ,1]))
+      index <- which(fw.tag[ ,(t + 1)- u] == fw.arb[ ,(t + 1) - u] | fw.arb[ ,(t + 1)- u] == "unclassified")
+      fw.tag <- fw.tag[index, ,drop = F]
+      fw.arb <- fw.arb[index, ]
+    }
+    over.class[[t]] <- fw.tag
+  }
+  
+  
+  
   
   for (t in 1:length(mis.class)){
     cc <- cor.class[[t]][ ,1]

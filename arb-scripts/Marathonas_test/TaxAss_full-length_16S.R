@@ -24,7 +24,7 @@ file.v4.tax <- "../arb-scripts/Marathonas_test/mara_v4.98.80.80.taxonomy"
 file.v4.ids <- "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/ids.above.98"
 
 # for export
-folder.v4 <- "~/Desktop/Marathonas_v4_results"
+folder.v4 <- "~/Desktop/MarathonASS/"
 
 # ---- Functions taken from find_classification_disagreements.R ----
 
@@ -407,12 +407,94 @@ find.mis.classifications <- function(c.class, c.unclass, under, over, c.gen, i.g
   return(mis.class)
 }
 
+# ---- Functions to visualize results ----
+
+create.summary.table <- function(){ # lazy calls to global environment...
+  results.v4 <- data.frame(matrix(data = "bla", nrow = 9, ncol = 7))
+  for( t in 1:7){
+    temp <- rbind(names(correct.class.list)[t], # taxa level
+                  nrow(over.class.list[[t]]),      # arb is FW unclass, tag is FW name, upper-names match
+                  nrow(mis.class.list[[t]]),       # arb FW name != tag FW name
+                  nrow(incorrect.ft.table),        # arb is GG, tag is FW
+                  nrow(incorrect.gg.table),        # arb is FW, tag is GG
+                  nrow(under.class.list[[t]]),     # arb is FW name, tag is FW unclass
+                  nrow(correct.gg.table),          # arb is GG, tag is GG
+                  nrow(correct.unclass.list[[t]]), # arb is FW unclass, tag is FW unclass
+                  nrow(correct.class.list[[t]])    # arb FW name == tag FW name
+                  )
+    results.v4[ ,t] <- temp
+  }
+  colnames(results.v4) <- results.v4[1, ]
+  results.v4 <- results.v4[-1, ]
+  row.names(results.v4) <- c("overclassifications",
+                             "misclassifications", 
+                             "incorrectly in FreshTrain",
+                             "incorrectly in greengenes",
+                             "underclassifications",
+                             "correctly in greengenes",
+                             "correct unclassifications",
+                             "correct classifications")
+  results.v4 <- results.v4[8:1, ] # flip table so correct on bottom in bar plots
+  temp <- row.names(results.v4)
+  results.v4 <- as.matrix(results.v4)
+  results.v4 <- apply(X = results.v4, MARGIN = 2, FUN = as.numeric)
+  row.names(results.v4) <- temp
+  return(results.v4)
+}
+
+make.stacked.bar <- function(){ # laxy calls from global env
+  label.cex <- 1.2
+  axis.cex <- 1.3
+  title.cex <- 1.5
+  
+  col.correct <- adjustcolor(col = "darkgreen")
+  col.under <- adjustcolor(col = rainbow(n = 20, v = .8)[4])
+  col.wrong <- adjustcolor(col = "darkred")
+  
+  line.loc <- cumsum(results.v4[ ,7])
+  line.loc <- line.loc - (.5 * results.v4[ ,7])
+  label.loc <- line.loc
+  for (n in 2:(nrow(results.v4))){
+    if (n < nrow(results.v4)){
+      sep <- .5 * (label.loc[n] - label.loc[n - 1]) + .5 * (label.loc[n + 1] - label.loc[n])
+    }else{
+      sep <- (label.loc[n] - label.loc[n - 1])
+    }
+    
+    if (sep < 15){
+      label.loc[n] <- label.loc[n] + (15 - sep)
+    }
+  }
+  
+  max.val <- sum(results.v4[ ,1])
+  
+  par(mar = c(3,4,3,12))
+  bar.loc <- barplot(results.v4[ ,-(1:4)], col = c(col.correct, col.correct, col.correct, col.under, col.under, col.wrong, col.wrong, col.wrong), axisnames = F, axes = F)
+  
+  mtext(text = colnames(results.v4)[-(1:4)], side = 1, line = 1, at = bar.loc, cex = label.cex)
+  
+  axis(side = 2, at = c(0, max.val), labels = c("",max.val), cex = label.cex)
+  axis(side = 2, cex = label.cex)
+  mtext(text = "Number of Sequences", side = 2, line = 2.5, cex = axis.cex)
+  
+  text(x = rep.int(x = 3.8, times = nrow(results.v4)), y = label.loc, labels = row.names(results.v4), xpd = T, adj = 0, cex = label.cex)
+  for (n in 1:nrow(results.v4)){
+    lines(x = c(3.62,3.78), y = c(line.loc[n], label.loc[n]), xpd = T)
+  }
+  
+  mtext(text = "TaxAss Accuracy", side = 3, line = 1.7, cex = title.cex)
+  
+} 
+
+
+
+
 # ---- Import & Format Data ----
 
 arb.tax <- read.csv(file.arb.tax, header = T, colClasses = "character")
 arb.tax <- as.matrix(arb.tax)
 
-index <- which(arb.tax[ ,6] == "unclassified")
+index <- which(arb.tax[ ,6] == "unclassified") # which lineage == unclassified
 fw.arb.tax <- arb.tax[-index, ]
 
 v4.tax <- read.csv(file = file.v4.tax, header = T, colClasses = "character")
@@ -424,49 +506,42 @@ v4.ids <- read.csv(file.v4.ids, colClasses = "character", header = F)
 index <- find.fw.seqid.indeces(FullTable = v4.tax, FWids = v4.ids)
 fw.v4.tax <- v4.tax[index, ]
 
-# ---- Analyze Data ----
+# ---- Compare Classifications ----
 
-# v4 data
-
+# identify classification types ----
 correct.class.list <- find.correct.classifications(fw.arb = fw.arb.tax, fw.tag = fw.v4.tax)
-
 correct.unclass.list <- find.correct.unclassifications(fw.arb = fw.arb.tax, fw.tag = fw.v4.tax)
-
 under.class.list <- find.underclassifications(fw.arb = fw.arb.tax, fw.tag = fw.v4.tax)
-
 over.class.list <- find.over.classifications(fw.arb = fw.arb.tax, fw.tag = fw.v4.tax)
-
 correct.gg.table <- find.correct.GG.classifications(all.arb = arb.tax, all.tag = v4.tax, fw.arb = fw.arb.tax, fw.tag = fw.v4.tax)
-
 incorrect.gg.table <- find.incorrect.GG.classifications(fw.arb = fw.arb.tax, all.tag = v4.tax, fw.tag = fw.v4.tax)
-
 incorrect.ft.table <- find.incorrect.FT.classifications(all.arb = arb.tax, fw.arb = fw.arb.tax, fw.tag = fw.v4.tax)
-
 mis.class.list <- find.mis.classifications(c.class = correct.class.list, c.unclass = correct.unclass.list, under = under.class.list, over = over.class.list, c.gen = correct.gg.table, i.gen = incorrect.gg.table, i.fresh = incorrect.ft.table, all.arb = arb.tax, all.tag = v4.tax)
 
-y <- data.frame(matrix(data = "bla", nrow = 9, ncol = 7))
-for( t in 1:7){
-  x <- rbind(names(correct.class.list)[t], nrow(correct.class.list[[t]]), nrow(correct.unclass.list[[t]]), nrow(under.class.list[[t]]), nrow(over.class.list[[t]]), nrow(correct.gg.table), nrow(incorrect.gg.table), nrow(incorrect.ft.table), nrow(mis.class.list[[t]]))
-  y[ ,t] <- x
-}
-y
+# explore results ----
+results.v4 <- create.summary.table()
+write.csv(x = results.v4, file = paste(folder.v4, "summary_table.csv", sep = "/"))
 
-results.v4 <- data.frame(matrix(data = "bla", nrow = 9, ncol = 7))
-for( t in 1:7){
-  temp <- rbind(names(correct.class.list)[t], nrow(correct.class.list[[t]]), nrow(correct.unclass.list[[t]]), nrow(under.class.list[[t]]), 
-                nrow(over.class.list[[t]]), nrow(correct.gg.table), nrow(incorrect.gg.table), nrow(incorrect.ft.table), nrow(mis.class.list[[t]]))
-  results.v4[ ,t] <- temp
-}
-colnames(results.v4) <- results.v4[1, ]
-results.v4 <- results.v4[-1, ]
-row.names(results.v4) <- c("correct classifications", "correct unclassifications", "underclassifications", "overclassifications", "correctly in greengenes", "incorrectly in greengenes", "incorrectly in FreshTrain", "misclassifications")
-results.v4 <- results.v4[c(1,2,3,4,8,6,7,5), ]
-temp <- row.names(results.v4)
-results.v4 <- as.matrix(results.v4)
-results.v4 <- apply(X = results.v4, MARGIN = 2, FUN = as.numeric)
-row.names(results.v4) <- temp
+make.stacked.bar()
 
-barplot(results.v4, col = c("blue", "blue", "blue", "blue", "blue", "blue","green","green"), names.arg = row.names(results.v4))
+
+
+
+
+
+
 
 barplot(results.v4[ ,7], col = c("blue", "blue", "blue", "blue", "blue", "blue","green","green"))
 str(results.v4)
+
+
+
+
+
+
+
+
+
+
+
+

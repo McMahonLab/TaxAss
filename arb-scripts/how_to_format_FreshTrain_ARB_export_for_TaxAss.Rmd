@@ -9,22 +9,31 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## Overview of steps
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+* export all full-length 16S from ARB  
+* reformatting to make taxonomy file compatible with mothur  
+* remove references lacking FreshTrain names  
+* adjust coarse-level nomenclature (phylum/class/order) to match comprehensive database of choice
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+## ARB export  
 
-```{r cars}
-summary(cars)
-```
+The FreshTrain comes from an ARB database of 16S clone libraries from freshwater systems. 
+All of the clones were aligned in ARB alongside the Greengenes database to determine the 
+phylogeny of abundant freshwater taxa introduced in [Newton *et al.* 2011](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3063352/). 
+Currently all full-length 16S sequences are exported from ARB, and this includes some of 
+the freshwater clones that do not have "FreshTrain names," i.e. they were found in a freshwater
+sample but they are not one of the abundant freshwater taxa included in the Newton nomenclature.  
 
-## Including Plots
+## Reformatting  
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
+## Remove non-FreshTrain refs
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Before taxonomy assignment with the FreshTrain and TaxAss, these sequences need to be removed 
+because only relevant reference sequences should exist for the percent identity calculation.
+
+## Adjust coarse-level nomenclature  
+
+
+

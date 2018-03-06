@@ -9,6 +9,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
+
 ## Reproduce TaxAss validation using full-length 16S assignments
 
 This readme walks you through the data processing to reproduce "simulated 
@@ -27,22 +29,29 @@ The process:
 * Compare the TaxAss assignment results to the "true" classifications known 
 from the full length alignments.
 
+
+
+
 ## Unzip and add TaxAss tax-scripts  
 
 Start with `Marathonas_test` as your present working directory.  
 
 Add the tax-scripts and taxonomy database files to the `add-tax-scripts-and-databases` folder:  
 
-```
+```{bash, eval=F}
 cp ../tax-scripts/*  add-tax-scripts-and-databases
 cp ../FreshTrain-files/whatever 
 unzip them
 # add comprehensive database also
 ```  
 
+
+
+
 ## Trim full-length sequences to different V regions  
 
-Trim the Marathonas full-length 16S sequences to the variable regions amplified by primers in tag data. Do this for several commonly used primer sets that amplify regions of differing lengths.  
+Trim the Marathonas full-length 16S sequences to the variable regions amplified by primers in tag data. Do this for several commonly used primer sets that amplify regions of differing lengths. Put
+each V-region analysis in a different folder.
 
 This uses the shell script `trim_full-length_to_primer_region.sh` and requires the program mothur to be on your computer's path. The syntax to call the script is:  
 ```
@@ -50,16 +59,30 @@ This uses the shell script `trim_full-length_to_primer_region.sh` and requires t
 ```
 
 ### V4 region
-```  
+```{bash, eval=F}  
+mkdir v4_tags
+# add all the scripts and reference files
+cp add-tax-scripts-and-databases/* v4_mara/
+cp oligo-files/v4_515F-806R.oligos v4_mara/
+cp oligo-files/ecoli_16S.fasta v4_mara/
+cp trim_full-length_to_primer_region.sh v4_mara/
+# add all the marathonas data files
+cp mara_aligned.fasta v4_mara/
+cp mara_dummy.abund v4_mara/otus.abund
+# run the script to trim the fasta file to primer region
+cd v4_mara
 ./trim_full-length_to_primer_region.sh v4_515F-806R.oligos mara_aligned mara_v4.fasta
 ```
 
+
+
+
 ## TaxAss the simulated tag data  
 
-Run TaxAss on each simulated tag dataset. create separate folders for each of them.
+Run TaxAss on each simulated tag dataset. 
 
 ### V4 region
-```
+```{bash, eval=F}
 mkdir mara_v4
 cp mara_v4.fasta mara_v4/otus.fasta
 cp add-tax-scripts-and-databases/* mara_v4
@@ -68,6 +91,9 @@ cd mara_v4
 ./RunStep_15.sh > terminal_output_15.txt
 # don't ./RunStep_16.sh because need some intermediate files for analysis
 ```
+
+
+
 
 ## Compare TaxAss names to full-length names  
 

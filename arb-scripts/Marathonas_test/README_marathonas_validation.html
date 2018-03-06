@@ -157,27 +157,38 @@ $(document).ready(function () {
 <h2>Unzip and add TaxAss tax-scripts</h2>
 <p>Start with <code>Marathonas_test</code> as your present working directory.</p>
 <p>Add the tax-scripts and taxonomy database files to the <code>add-tax-scripts-and-databases</code> folder:</p>
-<pre><code>cp ../tax-scripts/*  add-tax-scripts-and-databases
+<pre class="bash"><code>cp ../tax-scripts/*  add-tax-scripts-and-databases
 cp ../FreshTrain-files/whatever 
 unzip them
 # add comprehensive database also</code></pre>
 </div>
 <div id="trim-full-length-sequences-to-different-v-regions" class="section level2">
 <h2>Trim full-length sequences to different V regions</h2>
-<p>Trim the Marathonas full-length 16S sequences to the variable regions amplified by primers in tag data. Do this for several commonly used primer sets that amplify regions of differing lengths.</p>
+<p>Trim the Marathonas full-length 16S sequences to the variable regions amplified by primers in tag data. Do this for several commonly used primer sets that amplify regions of differing lengths. Put each V-region analysis in a different folder.</p>
 <p>This uses the shell script <code>trim_full-length_to_primer_region.sh</code> and requires the program mothur to be on your computer’s path. The syntax to call the script is:</p>
 <pre><code>./trim_full-length_to_primer_region.sh primers.oligos aligned-fasta-without-filetype name-for-trimmed.fasta</code></pre>
 <div id="v4-region" class="section level3">
 <h3>V4 region</h3>
-<pre><code>./trim_full-length_to_primer_region.sh v4_515F-806R.oligos mara_aligned mara_v4.fasta</code></pre>
+<pre class="bash"><code>mkdir v4_tags
+# add all the scripts and reference files
+cp add-tax-scripts-and-databases/* v4_mara/
+cp oligo-files/v4_515F-806R.oligos v4_mara/
+cp oligo-files/ecoli_16S.fasta v4_mara/
+cp trim_full-length_to_primer_region.sh v4_mara/
+# add all the marathonas data files
+cp mara_aligned.fasta v4_mara/
+cp mara_dummy.abund v4_mara/otus.abund
+# run the script to trim the fasta file to primer region
+cd v4_mara
+./trim_full-length_to_primer_region.sh v4_515F-806R.oligos mara_aligned mara_v4.fasta</code></pre>
 </div>
 </div>
 <div id="taxass-the-simulated-tag-data" class="section level2">
 <h2>TaxAss the simulated tag data</h2>
-<p>Run TaxAss on each simulated tag dataset. create separate folders for each of them.</p>
+<p>Run TaxAss on each simulated tag dataset.</p>
 <div id="v4-region-1" class="section level3">
 <h3>V4 region</h3>
-<pre><code>mkdir mara_v4
+<pre class="bash"><code>mkdir mara_v4
 cp mara_v4.fasta mara_v4/otus.fasta
 cp add-tax-scripts-and-databases/* mara_v4
 cd mara_v4

@@ -7,8 +7,7 @@ The zipped files in this folder contain the McMahon Lab's custom taxonomy databa
 2. The `.fasta` file lists the nucleotide sequence for each sequence ID.  
 3. The readme file describes the changes in the current version of the database.  
   
-<br>  
-**There are several different FreshTrain versions:**  
+<br> 
   
 zipped file name        | description
 ------------------------|----------------------------------------------------------------

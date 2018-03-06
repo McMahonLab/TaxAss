@@ -25,15 +25,87 @@ Currently all full-length 16S sequences are exported from ARB, and this includes
 the freshwater clones that do not have "FreshTrain names," i.e. they were found in a freshwater
 sample but they are not one of the abundant freshwater taxa included in the Newton nomenclature.  
 
-## Reformatting  
+## Simple Reformatting  
 
-
-## Remove non-FreshTrain refs
+Replace `U` and `.` with `T` and `-` (perl)  
+```{bash, eval=F}
+cat myseqs.fa | prepareARBaligns4tree.pl > mycleanseqs.fa
+```
+<br>
+  
+Make file semicolon delimited (bash)  
+```{bash, eval=F}
+sed 's/[[:blank:]]/\;/' <otus.98.taxonomy >otus.98.taxonomy.reformatted
+```
+<br>
+  
+Replace blanks like `;;;` with unclassifieds like `unclassified;unclassified;unclassified;` (R)  
+```{bash, eval=F}
+Rscript replace_blanks_with_unclassified.R semicolon-delim-input-file output-file
+```
+<br>
+  
+Return to first column being tab delimited for mothur-compatibility (bash)  
+```{bash, eval=F}
+./replace_first_semicolon_with_tab.sh
+```
+<br>
+  
+## Remove Non-FreshTrain References
 
 Before taxonomy assignment with the FreshTrain and TaxAss, these sequences need to be removed 
 because only relevant reference sequences should exist for the percent identity calculation.
 
+Use the script `removeBadLineages.py` with this syntax:
+```{bash, eval=F}
+./removeBadLineages.py inputFasta inputTaxon outputFasta outputTaxon
+```
+This script requires four arguments, read from the command line:  
+
+`inputFasta`  = Input fasta file, from which to remove lineages: i.e., FreshTrain25Jan2018.fasta  
+`inputTaxon`  = Input taxonomy file, from which to remove lineages: i.e., FreshTrain25Jan2018.taxonomy  
+`outputFasta` = Output fasta file, i.e., custom.fasta  
+`outputTaxon` = Output taxonomy file, i.e., custom.taxonomy  
+
+From the input files, this script removes any sequences not assigned to a 
+freshwate-specific lineage, and writes the remaining sequences to the output files.  
+
+
 ## Adjust coarse-level nomenclature  
 
+The FreshTrain phylogeny isn't currently integrated into a comprehensive database, like
+Greengenes or silva, which is why TaxAss is necessary. However, it's "coarse-level" taxonomic 
+nomenclature (e.g. phylum, class, order) currently matches the nomenclature used in Greengenes. 
+Therefore, if you plan to use the FreshTrain with SILVA, you need to adjust a few of the names. 
+Otherwise when you group by class, for example, some of them might appear to be different classes 
+that are really just a difference in nomenclature between the two databases.
 
+There are scripts to convert the FreshTrain from Greengenes-compatible to Silva-compatible:  
+
+* `convertFreshTrainToSilvaV128.py`  
+* `convertFreshTrainToSilvaV132.py`  
+<br>
+
+**SILVA v132 syntax is:**
+```{bash, eval=F}
+convertFreshTrainToSilvaV132.py inputTaxon outputTaxon
+```
+This script requires two arguments, read from the command line:  
+`inputTaxon` = Input taxonomy file, to make compliant with silva v132  
+`outputTaxon` = Output fasta file, i.e., custom.taxonomy   
+
+<br>
+
+**SILVA v128 syntax is:**
+```{bash, eval=F}
+convertFreshTrainToSilvaV128.py inputTaxon outputTaxon
+```
+This script requires two arguments, read from the command line:  
+`inputTaxon` = Input taxonomy file, to make compliant with silva v128  
+`outputTaxon` = Output fasta file, i.e., custom.taxonomy  
+
+<br>
+The coarse-level names that needed to be changed were identified using the 
+optional TaxAss step 11.5, where the custom database references are classified 
+with the general database. This generates a list of conflicting names.  
 

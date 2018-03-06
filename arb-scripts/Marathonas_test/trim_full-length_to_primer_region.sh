@@ -12,10 +12,10 @@
 # ./trim_full-length_to_primer_region.sh primers.oligos aligned-fasta-without-filetype name-for-trimmed.fasta
 
 # define input files:
-oligosfile="$1" # the primers
-refalign="$2"   # the aligned sequences to-be-trimmed. file name without .fasta extension. ex. mara.fasta would be entered as argument "mara"
-# an ecoli full length 16S sequence named exactly ecoli_16S.fasta
-createdfile="$3" # a name for the trimmed reference file, like mara_v4.fasta
+oligosfile="$1"   # the primers
+refalign="$2"     # the aligned sequences to-be-trimmed. file name without .fasta extension. ex. mara.fasta would be entered as argument "mara"
+createdfile="$3"  # a name for the trimmed reference file, like mara_v4.fasta
+# ecoli_16S.fasta # an ecoli full length 16S sequence named exactly ecoli_16S.fasta
 
 mothur "#pcr.seqs(fasta=ecoli_16S.fasta, oligos=$oligosfile, keepprimer=F, keepdots=T)" &&
 
@@ -32,7 +32,7 @@ echo $startnum $correctstart $endnum
 # note this is using the corrected start num for mother 1.39.5
 mothur "#pcr.seqs(fasta=$refalign.fasta, start=$correctstart, end=$endnum, keepdots=F, nomatch=reject, pdiffs=0, rdiffs=0)" &&
 
-# note: double check that there are still 289 fasta sequences, since non-matching ones are tossed
+# note: double check that there are still 285 fasta sequences, since non-matching ones are tossed
 
 rm mothur.*.logfile
 rm *.8mer

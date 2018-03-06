@@ -69,9 +69,10 @@ cp trim_full-length_to_primer_region.sh v4_mara/
 # add all the marathonas data files
 cp mara_aligned.fasta v4_mara/
 cp mara_dummy.abund v4_mara/otus.abund
-# run the script to trim the fasta file to primer region
+# trim the fasta file to primer region
 cd v4_mara
-./trim_full-length_to_primer_region.sh v4_515F-806R.oligos mara_aligned mara_v4.fasta
+./trim_full-length_to_primer_region.sh v4_515F-806R.oligos mara_aligned otus.fasta
+cd ../
 ```
 
 
@@ -83,13 +84,10 @@ Run TaxAss on each simulated tag dataset.
 
 ### V4 region
 ```{bash, eval=F}
-mkdir mara_v4
-cp mara_v4.fasta mara_v4/otus.fasta
-cp add-tax-scripts-and-databases/* mara_v4
-cd mara_v4
+cd v4_mara
 ./RunSteps_1-14.sh > terminal_output_1-14.txt
 ./RunStep_15.sh > terminal_output_15.txt
-# don't ./RunStep_16.sh because need some intermediate files for analysis
+# don't ./RunStep_16.sh, need some intermediate files for analysis
 ```
 
 

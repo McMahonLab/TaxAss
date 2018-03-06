@@ -37,6 +37,7 @@ mothur "#pcr.seqs(fasta=$refalign.fasta, start=$correctstart, end=$endnum, keepd
 rm mothur.*.logfile
 rm *.8mer
 rm ecoli_16S.pcr.align ecoli_16S.pcr.align.report ecoli_16S.pcr.fasta ecoli_16S.pcr.summary
+rm mara_aligned.fasta
 
 sed 's/-//g' <$refalign.pcr.fasta >$createdfile
 rm $refalign.pcr.fasta

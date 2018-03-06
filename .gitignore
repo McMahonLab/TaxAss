@@ -15,7 +15,6 @@ FreshTrain-files/FreshTrain11Feb2016
 processedData
 rawData
 plots
-arb-scripts/Marathonas_test/add-tax-scripts-and-databases
 
 # Other files
 Taxonomy_Assignment_Scripts.Rproj
@@ -24,11 +23,11 @@ workflow-flowchart.pptx
 Rplot*.pdf
 mothur.*
 
-# Temporarily hide
-arb-scripts/Marathonas_test/ecoli_16S.fasta
-arb-scripts/Marathonas_test/mara.taxonomy
-arb-scripts/Marathonas_test/mara_aligned.fasta
-arb-scripts/Marathonas_test/mara_v4.fasta
-arb-scripts/Marathonas_test/v4_515F-806R.oligos
-arb-scripts/Marathonas_test/mara_dummy.abund
-arb-scripts/Marathonas_test/mara_v4.98.80.80.taxonomy
+# Marathonas Analysis Folders
+arb-scripts/Marathonas_test/v4_mara/
+arb-scripts/Marathonas_test/v4v5_mara/
+arb-scripts/Marathonas_test/v3v4_mara/
+arb-scripts/Marathonas_test/v6_mara/
+
+# temp hide
+arb-scripts/Marathonas_test/add-tax-scripts-and-databases

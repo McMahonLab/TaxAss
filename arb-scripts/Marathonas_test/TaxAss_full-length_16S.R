@@ -20,11 +20,11 @@
 # for import
 file.arb.tax <- "../arb-scripts/Marathonas_test/mara.taxonomy"
 
-file.v4.tax <- "../arb-scripts/Marathonas_test/mara_v4.98.80.80.taxonomy"
-file.v4.ids <- "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/ids.above.98"
+file.v4.tax <- "../arb-scripts/Marathonas_test/v4_mara/otus.98.80.80.taxonomy"
+file.v4.ids <- "../arb-scripts/Marathonas_test/v4_mara/ids.above.98"
 
 # for export
-folder.v4 <- "~/Desktop/MarathonASS/"
+folder.v4 <- "~/Desktop/MarathonASS/v4_results/"
 
 # ---- Functions taken from find_classification_disagreements.R ----
 
@@ -468,21 +468,21 @@ make.stacked.bar <- function(){ # laxy calls from global env
   
   max.val <- sum(results.v4[ ,1])
   
-  par(mar = c(3,4,3,12))
+  par(mar = c(2,4,3,12))
   bar.loc <- barplot(results.v4[ ,-(1:4)], col = c(col.correct, col.correct, col.correct, col.under, col.under, col.wrong, col.wrong, col.wrong), axisnames = F, axes = F)
   
-  mtext(text = colnames(results.v4)[-(1:4)], side = 1, line = 1, at = bar.loc, cex = label.cex)
+  mtext(text = colnames(results.v4)[-(1:4)], side = 1, line = .5, at = bar.loc, cex = label.cex)
   
   axis(side = 2, at = c(0, max.val), labels = c("",max.val), cex = label.cex)
   axis(side = 2, cex = label.cex)
-  mtext(text = "Number of Sequences", side = 2, line = 2.5, cex = axis.cex)
+  mtext(text = "Number of Sequences", side = 2, line = 2.3, cex = axis.cex)
   
   text(x = rep.int(x = 3.8, times = nrow(results.v4)), y = label.loc, labels = row.names(results.v4), xpd = T, adj = 0, cex = label.cex)
   for (n in 1:nrow(results.v4)){
     lines(x = c(3.62,3.78), y = c(line.loc[n], label.loc[n]), xpd = T)
   }
   
-  mtext(text = "TaxAss Accuracy", side = 3, line = 1.7, cex = title.cex)
+  mtext(text = "TaxAss Accuracy", side = 3, line = 1.3, cex = title.cex)
   
 } 
 
@@ -522,17 +522,22 @@ mis.class.list <- find.mis.classifications(c.class = correct.class.list, c.uncla
 results.v4 <- create.summary.table()
 write.csv(x = results.v4, file = paste(folder.v4, "summary_table.csv", sep = "/"))
 
+pdf(file = paste(folder.v4, "stacked_bar.pdf", sep = "/"), width = 6.875, height = 3, family = "Helvetica", title = "Marathonas Validation", colormodel = "srgb")
+layout(mat = matrix(data = c(1,1,1,2,2), nrow = 1, ncol = 5))
 make.stacked.bar()
+dev.off()
 
+x <- incorrect.gg.table[ ,c(1,6:8,14:16)]
+# how many that went to GG are unclassified at clade/tribe
+y <- x[ ,-1] == "unclassified"
+y <- colSums(y) / nrow(y) * 100
+barplot(y, main = "Percent Unclassified")
+# which ones are classified in each?
+index <- which(x[ ,3] != "unclassified" & x[ ,6] != "unclassified") # clade
+x[index, ]
+index <- which(x[ ,2] != "unclassified" & x[ ,5] != "unclassified") # lineage
+x[index, ]
 
-
-
-
-
-
-
-barplot(results.v4[ ,7], col = c("blue", "blue", "blue", "blue", "blue", "blue","green","green"))
-str(results.v4)
 
 
 

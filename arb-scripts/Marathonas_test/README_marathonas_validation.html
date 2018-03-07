@@ -157,18 +157,19 @@ $(document).ready(function () {
 <h2>Unzip and add TaxAss tax-scripts</h2>
 <p>Start with <code>Marathonas_test</code> as your present working directory.</p>
 <p>Add the tax-scripts and taxonomy database files to the <code>add-tax-scripts-and-databases</code> folder:</p>
-<pre class="bash"><code>cp ../tax-scripts/*  add-tax-scripts-and-databases
-cp ../FreshTrain-files/whatever 
-unzip them
-# add comprehensive database also</code></pre>
+<pre class="bash"><code>cp ../../tax-scripts/*  add-tax-scripts-and-databases
+# unzip your FreshTrain reference (using GG-compatible for example:)
+cp ../../FreshTrain-files/FreshTrain25Jan2018NoBadLineage/FreshTrain25Jan2018NoBadLineage.fasta add-tax-scripts-and-databases/custom.fasta
+cp ../../FreshTrain-files/FreshTrain25Jan2018NoBadLineage/FreshTrain25Jan2018NoBadLineage.taxonomy  add-tax-scripts-and-databases/custom.taxonomy
+# add your comprehensive database (formatted according to TaxAss step 0, named general.fasta and general.taxonomy)</code></pre>
 </div>
 <div id="trim-full-length-sequences-to-different-v-regions" class="section level2">
 <h2>Trim full-length sequences to different V regions</h2>
 <p>Trim the Marathonas full-length 16S sequences to the variable regions amplified by primers in tag data. Do this for several commonly used primer sets that amplify regions of differing lengths. Put each V-region analysis in a different folder.</p>
 <p>This uses the shell script <code>trim_full-length_to_primer_region.sh</code> and requires the program mothur to be on your computer’s path. The syntax to call the script is:</p>
 <pre><code>./trim_full-length_to_primer_region.sh primers.oligos aligned-fasta-without-filetype name-for-trimmed.fasta</code></pre>
-<div id="v4-region" class="section level3">
-<h3>V4 region</h3>
+<div id="v4-region" class="section level4">
+<h4>V4 region</h4>
 <pre class="bash"><code>mkdir v4_tags
 # add all the scripts and reference files
 cp add-tax-scripts-and-databases/* v4_mara/
@@ -183,15 +184,96 @@ cd v4_mara
 ./trim_full-length_to_primer_region.sh v4_515F-806R.oligos mara_aligned otus.fasta
 cd ../</code></pre>
 </div>
+<div id="v4-v5-region" class="section level4">
+<h4>V4-V5 region</h4>
+<pre class="bash"><code>mkdir v4v5_mara
+# add all the scripts and reference files
+cp add-tax-scripts-and-databases/* v4v5_mara/
+cp oligo-files/v4v5_515FB-926R.oligos v4v5_mara/
+cp oligo-files/ecoli_16S.fasta v4v5_mara/
+cp trim_full-length_to_primer_region.sh v4v5_mara/
+# add all the marathonas data files
+cp mara_aligned.fasta v4v5_mara/
+cp mara_dummy.abund v4v5_mara/otus.abund
+# trim the fasta file to primer region
+cd v4v5_mara
+./trim_full-length_to_primer_region.sh v4v5_515FB-926R.oligos mara_aligned otus.fasta
+cd ../</code></pre>
+</div>
+<div id="v3-v4-region" class="section level4">
+<h4>V3-V4 region</h4>
+<pre class="bash"><code>mkdir v3v4_mara
+# add all the scripts and reference files
+cp add-tax-scripts-and-databases/* v3v4_mara/
+cp oligo-files/v3v4_341F-805R.oligos v3v4_mara/
+cp oligo-files/ecoli_16S.fasta v3v4_mara/
+cp trim_full-length_to_primer_region.sh v3v4_mara/
+# add all the marathonas data files
+cp mara_aligned.fasta v3v4_mara/
+cp mara_dummy.abund v3v4_mara/otus.abund
+# trim the fasta file to primer region
+cd v3v4_mara
+./trim_full-length_to_primer_region.sh v3v4_341F-805R.oligos mara_aligned otus.fasta
+cd ../</code></pre>
+</div>
+<div id="v6-region" class="section level4">
+<h4>V6 region</h4>
+<pre class="bash"><code>mkdir v6_mara
+# add all the scripts and reference files
+cp add-tax-scripts-and-databases/* v6_mara/
+cp oligo-files/v6.oligos v6_mara/
+cp oligo-files/ecoli_16S.fasta v6_mara/
+cp trim_full-length_to_primer_region.sh v6_mara/
+# add all the marathonas data files
+cp mara_aligned.fasta v6_mara/
+cp mara_dummy.abund v6_mara/otus.abund
+# trim the fasta file to primer region
+cd v6_mara
+./trim_full-length_to_primer_region.sh v6.oligos mara_aligned otus.fasta
+cd ../</code></pre>
+</div>
 </div>
 <div id="taxass-the-simulated-tag-data" class="section level2">
 <h2>TaxAss the simulated tag data</h2>
 <p>Run TaxAss on each simulated tag dataset.</p>
-<div id="v4-region-1" class="section level3">
-<h3>V4 region</h3>
+<div id="v4-region-1" class="section level4">
+<h4>V4 region</h4>
 <pre class="bash"><code>cd v4_mara
-./RunSteps_1-14.sh &gt; terminal_output_1-14.txt
-./RunStep_15.sh &gt; terminal_output_15.txt
+./RunSteps_1-14.sh &gt; termout.txt
+./deletemothurbarf.sh termout.txt &gt; terminal_output_1-14.txt
+./RunStep_15.sh &gt; termout.txt
+./deletemothurbarf.sh termout.txt &gt; terminal_output_15.txt
+rm termout.txt
+# don't ./RunStep_16.sh, need some intermediate files for analysis</code></pre>
+</div>
+<div id="v4-v5-region-1" class="section level4">
+<h4>V4-V5 region</h4>
+<pre class="bash"><code>cd v4v5_mara
+./RunSteps_1-14.sh &gt; termout.txt
+./deletemothurbarf.sh termout.txt &gt; terminal_output_1-14.txt
+./RunStep_15.sh &gt; termout.txt
+./deletemothurbarf.sh termout.txt &gt; terminal_output_15.txt
+rm termout.txt
+# don't ./RunStep_16.sh, need some intermediate files for analysis</code></pre>
+</div>
+<div id="v3-v4-region-1" class="section level4">
+<h4>V3-V4 region</h4>
+<pre class="bash"><code>cd v3v4_mara
+./RunSteps_1-14.sh &gt; termout.txt
+./deletemothurbarf.sh termout.txt &gt; terminal_output_1-14.txt
+./RunStep_15.sh &gt; termout.txt
+./deletemothurbarf.sh termout.txt &gt; terminal_output_15.txt
+rm termout.txt
+# don't ./RunStep_16.sh, need some intermediate files for analysis</code></pre>
+</div>
+<div id="v6-region-1" class="section level4">
+<h4>V6 region</h4>
+<pre class="bash"><code>cd v6_mara
+./RunSteps_1-14.sh &gt; termout.txt
+./deletemothurbarf.sh termout.txt &gt; terminal_output_1-14.txt
+./RunStep_15.sh &gt; termout.txt
+./deletemothurbarf.sh termout.txt &gt; terminal_output_15.txt
+rm termout.txt
 # don't ./RunStep_16.sh, need some intermediate files for analysis</code></pre>
 </div>
 </div>

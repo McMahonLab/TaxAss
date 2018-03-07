@@ -39,10 +39,11 @@ Start with `Marathonas_test` as your present working directory.
 Add the tax-scripts and taxonomy database files to the `add-tax-scripts-and-databases` folder:  
 
 ```{bash, eval=F}
-cp ../tax-scripts/*  add-tax-scripts-and-databases
-cp ../FreshTrain-files/whatever 
-unzip them
-# add comprehensive database also
+cp ../../tax-scripts/*  add-tax-scripts-and-databases
+# unzip your FreshTrain reference (using GG-compatible for example:)
+cp ../../FreshTrain-files/FreshTrain25Jan2018NoBadLineage/FreshTrain25Jan2018NoBadLineage.fasta add-tax-scripts-and-databases/custom.fasta
+cp ../../FreshTrain-files/FreshTrain25Jan2018NoBadLineage/FreshTrain25Jan2018NoBadLineage.taxonomy  add-tax-scripts-and-databases/custom.taxonomy
+# add your comprehensive database (formatted according to TaxAss step 0, named general.fasta and general.taxonomy)
 ```  
 
 
@@ -58,7 +59,7 @@ This uses the shell script `trim_full-length_to_primer_region.sh` and requires t
 ./trim_full-length_to_primer_region.sh primers.oligos aligned-fasta-without-filetype name-for-trimmed.fasta
 ```
 
-### V4 region
+#### V4 region
 ```{bash, eval=F}  
 mkdir v4_tags
 # add all the scripts and reference files
@@ -75,6 +76,57 @@ cd v4_mara
 cd ../
 ```
 
+#### V4-V5 region
+```{bash, eval=F}  
+mkdir v4v5_mara
+# add all the scripts and reference files
+cp add-tax-scripts-and-databases/* v4v5_mara/
+cp oligo-files/v4v5_515FB-926R.oligos v4v5_mara/
+cp oligo-files/ecoli_16S.fasta v4v5_mara/
+cp trim_full-length_to_primer_region.sh v4v5_mara/
+# add all the marathonas data files
+cp mara_aligned.fasta v4v5_mara/
+cp mara_dummy.abund v4v5_mara/otus.abund
+# trim the fasta file to primer region
+cd v4v5_mara
+./trim_full-length_to_primer_region.sh v4v5_515FB-926R.oligos mara_aligned otus.fasta
+cd ../
+```
+
+#### V3-V4 region
+```{bash, eval=F}  
+mkdir v3v4_mara
+# add all the scripts and reference files
+cp add-tax-scripts-and-databases/* v3v4_mara/
+cp oligo-files/v3v4_341F-805R.oligos v3v4_mara/
+cp oligo-files/ecoli_16S.fasta v3v4_mara/
+cp trim_full-length_to_primer_region.sh v3v4_mara/
+# add all the marathonas data files
+cp mara_aligned.fasta v3v4_mara/
+cp mara_dummy.abund v3v4_mara/otus.abund
+# trim the fasta file to primer region
+cd v3v4_mara
+./trim_full-length_to_primer_region.sh v3v4_341F-805R.oligos mara_aligned otus.fasta
+cd ../
+```
+
+#### V6 region
+```{bash, eval=F}  
+mkdir v6_mara
+# add all the scripts and reference files
+cp add-tax-scripts-and-databases/* v6_mara/
+cp oligo-files/v6.oligos v6_mara/
+cp oligo-files/ecoli_16S.fasta v6_mara/
+cp trim_full-length_to_primer_region.sh v6_mara/
+# add all the marathonas data files
+cp mara_aligned.fasta v6_mara/
+cp mara_dummy.abund v6_mara/otus.abund
+# trim the fasta file to primer region
+cd v6_mara
+./trim_full-length_to_primer_region.sh v6.oligos mara_aligned otus.fasta
+cd ../
+```
+
 
 
 
@@ -82,11 +134,47 @@ cd ../
 
 Run TaxAss on each simulated tag dataset. 
 
-### V4 region
+#### V4 region
 ```{bash, eval=F}
 cd v4_mara
-./RunSteps_1-14.sh > terminal_output_1-14.txt
-./RunStep_15.sh > terminal_output_15.txt
+./RunSteps_1-14.sh > termout.txt
+./deletemothurbarf.sh termout.txt > terminal_output_1-14.txt
+./RunStep_15.sh > termout.txt
+./deletemothurbarf.sh termout.txt > terminal_output_15.txt
+rm termout.txt
+# don't ./RunStep_16.sh, need some intermediate files for analysis
+```
+
+#### V4-V5 region
+```{bash, eval=F}
+cd v4v5_mara
+./RunSteps_1-14.sh > termout.txt
+./deletemothurbarf.sh termout.txt > terminal_output_1-14.txt
+./RunStep_15.sh > termout.txt
+./deletemothurbarf.sh termout.txt > terminal_output_15.txt
+rm termout.txt
+# don't ./RunStep_16.sh, need some intermediate files for analysis
+```
+
+#### V3-V4 region
+```{bash, eval=F}
+cd v3v4_mara
+./RunSteps_1-14.sh > termout.txt
+./deletemothurbarf.sh termout.txt > terminal_output_1-14.txt
+./RunStep_15.sh > termout.txt
+./deletemothurbarf.sh termout.txt > terminal_output_15.txt
+rm termout.txt
+# don't ./RunStep_16.sh, need some intermediate files for analysis
+```
+
+#### V6 region
+```{bash, eval=F}
+cd v6_mara
+./RunSteps_1-14.sh > termout.txt
+./deletemothurbarf.sh termout.txt > terminal_output_1-14.txt
+./RunStep_15.sh > termout.txt
+./deletemothurbarf.sh termout.txt > terminal_output_15.txt
+rm termout.txt
 # don't ./RunStep_16.sh, need some intermediate files for analysis
 ```
 

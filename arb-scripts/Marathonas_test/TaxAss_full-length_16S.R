@@ -17,14 +17,28 @@
 
 # ---- File paths ----
 
+userprefs <- commandArgs(trailingOnly = TRUE)
+
+# for import
+file.arb.tax <- userprefs[1]
+
+file.v4.tax <- userprefs[2]
+file.v4.ids <- userprefs[3]
+
+# for export
+folder.v4 <- userprefs[4]
+
+# troubleshoot: ----
+cat("COMMENT OUT FILE PATHS!!!")
 # for import
 file.arb.tax <- "../arb-scripts/Marathonas_test/mara.taxonomy"
 
-file.v4.tax <- "../arb-scripts/Marathonas_test/v4_mara/otus.98.80.80.taxonomy"
-file.v4.ids <- "../arb-scripts/Marathonas_test/v4_mara/ids.above.98"
+file.v4.tax <- "../arb-scripts/Marathonas_test/v3v4_mara/otus.98.80.80.taxonomy"
+file.v4.ids <- "../arb-scripts/Marathonas_test/v3v4_mara/ids.above.98"
 
 # for export
-folder.v4 <- "~/Desktop/MarathonASS/v4_results/"
+folder.v4 <- "~/Desktop/MarathonASS/v3v4_results/"
+# end troubleshoot ----
 
 # ---- Functions taken from find_classification_disagreements.R ----
 
@@ -409,6 +423,15 @@ find.mis.classifications <- function(c.class, c.unclass, under, over, c.gen, i.g
 
 # ---- Functions to visualize results ----
 
+list.to.csv <- function(the.folder, the.list){
+  dir.create(path = the.folder)
+  for (n in 1:length(the.list)){
+    file.name <- paste(the.folder, "/", n, "-", names(the.list)[n], ".csv", sep = "")
+    write.csv(x = the.list[[n]], file = file.name)
+    cat("made file:", file.name, "\n")
+  }
+}
+
 create.summary.table <- function(){ # lazy calls to global environment...
   results.v4 <- data.frame(matrix(data = "bla", nrow = 9, ncol = 7))
   for( t in 1:7){
@@ -518,25 +541,53 @@ incorrect.gg.table <- find.incorrect.GG.classifications(fw.arb = fw.arb.tax, all
 incorrect.ft.table <- find.incorrect.FT.classifications(all.arb = arb.tax, fw.arb = fw.arb.tax, fw.tag = fw.v4.tax)
 mis.class.list <- find.mis.classifications(c.class = correct.class.list, c.unclass = correct.unclass.list, under = under.class.list, over = over.class.list, c.gen = correct.gg.table, i.gen = incorrect.gg.table, i.fresh = incorrect.ft.table, all.arb = arb.tax, all.tag = v4.tax)
 
+# save tables ----
+the.folder <- paste(folder.v4, "correct_class", sep = "/")
+list.to.csv(the.folder = the.folder, the.list = correct.class.list)
+
+the.folder <- paste(folder.v4, "correct_unclass", sep = "/")
+list.to.csv(the.folder = the.folder, the.list = correct.unclass.list)
+
+the.folder <- paste(folder.v4, "under_class", sep = "/")
+list.to.csv(the.folder = the.folder, the.list = under.class.list)
+
+the.folder <- paste(folder.v4, "over_class", sep = "/")
+list.to.csv(the.folder = the.folder, the.list = over.class.list)
+
+the.file <- paste(folder.v4, "correct_gg.csv", sep = "/")
+write.csv(x = correct.gg.table, file = the.file)
+
+the.file <- paste(folder.v4, "incorrect_gg.csv", sep = "/")
+write.csv(x = incorrect.gg.table, file = the.file)
+
+the.file <- paste(folder.v4, "incorrect_ft.csv", sep = "/")
+write.csv(x = incorrect.ft.table, file = the.file)
+
+the.folder <- paste(folder.v4, "mis_class", sep = "/")
+list.to.csv(the.folder = the.folder, the.list = mis.class.list)
+
+
 # explore results ----
 results.v4 <- create.summary.table()
-write.csv(x = results.v4, file = paste(folder.v4, "summary_table.csv", sep = "/"))
+write.csv(x = results.v4, file = paste(folder.v4, "summary_table.csv", sep = "/"), quote = F)
 
 pdf(file = paste(folder.v4, "stacked_bar.pdf", sep = "/"), width = 6.875, height = 3, family = "Helvetica", title = "Marathonas Validation", colormodel = "srgb")
 layout(mat = matrix(data = c(1,1,1,2,2), nrow = 1, ncol = 5))
 make.stacked.bar()
 dev.off()
 
-x <- incorrect.gg.table[ ,c(1,6:8,14:16)]
-# how many that went to GG are unclassified at clade/tribe
-y <- x[ ,-1] == "unclassified"
-y <- colSums(y) / nrow(y) * 100
-barplot(y, main = "Percent Unclassified")
-# which ones are classified in each?
-index <- which(x[ ,3] != "unclassified" & x[ ,6] != "unclassified") # clade
-x[index, ]
-index <- which(x[ ,2] != "unclassified" & x[ ,5] != "unclassified") # lineage
-x[index, ]
+
+
+# x <- incorrect.gg.table[ ,c(1,6:8,14:16)]
+# # how many that went to GG are unclassified at clade/tribe
+# y <- x[ ,-1] == "unclassified"
+# y <- colSums(y) / nrow(y) * 100
+# barplot(y, main = "Percent Unclassified")
+# # which ones are classified in each?
+# index <- which(x[ ,3] != "unclassified" & x[ ,6] != "unclassified") # clade
+# x[index, ]
+# index <- which(x[ ,2] != "unclassified" & x[ ,5] != "unclassified") # lineage
+# x[index, ]
 
 
 

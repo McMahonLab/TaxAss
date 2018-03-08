@@ -143,6 +143,7 @@ cd v4_mara
 ./deletemothurbarf.sh termout.txt > terminal_output_15.txt
 rm termout.txt
 # don't ./RunStep_16.sh, need some intermediate files for analysis
+cd ../
 ```
 
 #### V4-V5 region
@@ -154,6 +155,7 @@ cd v4v5_mara
 ./deletemothurbarf.sh termout.txt > terminal_output_15.txt
 rm termout.txt
 # don't ./RunStep_16.sh, need some intermediate files for analysis
+cd ../
 ```
 
 #### V3-V4 region
@@ -165,6 +167,7 @@ cd v3v4_mara
 ./deletemothurbarf.sh termout.txt > terminal_output_15.txt
 rm termout.txt
 # don't ./RunStep_16.sh, need some intermediate files for analysis
+cd ../
 ```
 
 #### V6 region
@@ -176,15 +179,38 @@ cd v6_mara
 ./deletemothurbarf.sh termout.txt > terminal_output_15.txt
 rm termout.txt
 # don't ./RunStep_16.sh, need some intermediate files for analysis
+cd ../
 ```
 
 
 
 
-## Compare TaxAss names to full-length names  
+## Compare TaxAss names to full-length "true" names  
 
-Using script `TaxAss_full-length_16S.R`  
+Use script `compare_full-length_to_taxass_results.R` which can be called from the 
+terminal with this syntax:  
+```
+Rscript compare_full-length_to_taxass_results.R file.arb.tax file.v4.tax file.v4.ids folder.v4
+```
+
+argument       | description
+---------------|-----------------------------------------------------------------
+file.arb.tax   | `mara.taxonomy`, the "true" taxonomy determined by aligning the full-length sequence  
+file.v4.tax    | `otus.taxonomy`, the taxonomy assignmed to simulated tags by TaxAss
+file.v4.ids    | `ids.above.98`, an intermediate file made by TaxAss that lists the seqIDs above the percent identity cutoff.<br>Note: this is the one that gets deleted if you `RunStep_16.sh`  
+folder.v4      | a (pre-existing) folder that you want to save the results in  
 
 
-and this doesn't have command line entry yet.  
+
+
+#### V4 region
+```{bash, eval=F}
+cd v4_mara
+mkdir v4_results
+Rscript ../compare_full-length_to_taxass_results.R ../mara.taxonomy otus.98.80.80.taxonomy ids.above.98 v4_results
+cd ../
+```
+
+
+
 

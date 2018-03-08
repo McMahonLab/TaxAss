@@ -244,7 +244,8 @@ cd ../</code></pre>
 ./RunStep_15.sh &gt; termout.txt
 ./deletemothurbarf.sh termout.txt &gt; terminal_output_15.txt
 rm termout.txt
-# don't ./RunStep_16.sh, need some intermediate files for analysis</code></pre>
+# don't ./RunStep_16.sh, need some intermediate files for analysis
+cd ../</code></pre>
 </div>
 <div id="v4-v5-region-1" class="section level4">
 <h4>V4-V5 region</h4>
@@ -254,7 +255,8 @@ rm termout.txt
 ./RunStep_15.sh &gt; termout.txt
 ./deletemothurbarf.sh termout.txt &gt; terminal_output_15.txt
 rm termout.txt
-# don't ./RunStep_16.sh, need some intermediate files for analysis</code></pre>
+# don't ./RunStep_16.sh, need some intermediate files for analysis
+cd ../</code></pre>
 </div>
 <div id="v3-v4-region-1" class="section level4">
 <h4>V3-V4 region</h4>
@@ -264,7 +266,8 @@ rm termout.txt
 ./RunStep_15.sh &gt; termout.txt
 ./deletemothurbarf.sh termout.txt &gt; terminal_output_15.txt
 rm termout.txt
-# don't ./RunStep_16.sh, need some intermediate files for analysis</code></pre>
+# don't ./RunStep_16.sh, need some intermediate files for analysis
+cd ../</code></pre>
 </div>
 <div id="v6-region-1" class="section level4">
 <h4>V6 region</h4>
@@ -274,13 +277,51 @@ rm termout.txt
 ./RunStep_15.sh &gt; termout.txt
 ./deletemothurbarf.sh termout.txt &gt; terminal_output_15.txt
 rm termout.txt
-# don't ./RunStep_16.sh, need some intermediate files for analysis</code></pre>
+# don't ./RunStep_16.sh, need some intermediate files for analysis
+cd ../</code></pre>
 </div>
 </div>
-<div id="compare-taxass-names-to-full-length-names" class="section level2">
-<h2>Compare TaxAss names to full-length names</h2>
-<p>Using script <code>TaxAss_full-length_16S.R</code></p>
-<p>and this doesn’t have command line entry yet.</p>
+<div id="compare-taxass-names-to-full-length-true-names" class="section level2">
+<h2>Compare TaxAss names to full-length “true” names</h2>
+<p>Use script <code>compare_full-length_to_taxass_results.R</code> which can be called from the terminal with this syntax:</p>
+<pre><code>Rscript compare_full-length_to_taxass_results.R file.arb.tax file.v4.tax file.v4.ids folder.v4</code></pre>
+<table>
+<colgroup>
+<col width="19%"></col>
+<col width="80%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>argument</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>file.arb.tax</td>
+<td><code>mara.taxonomy</code>, the “true” taxonomy determined by aligning the full-length sequence</td>
+</tr>
+<tr class="even">
+<td>file.v4.tax</td>
+<td><code>otus.taxonomy</code>, the taxonomy assignmed to simulated tags by TaxAss</td>
+</tr>
+<tr class="odd">
+<td>file.v4.ids</td>
+<td><code>ids.above.98</code>, an intermediate file made by TaxAss that lists the seqIDs above the percent identity cutoff.<br>Note: this is the one that gets deleted if you <code>RunStep_16.sh</code></td>
+</tr>
+<tr class="even">
+<td>folder.v4</td>
+<td>a (pre-existing) folder that you want to save the results in</td>
+</tr>
+</tbody>
+</table>
+<div id="v4-region-2" class="section level4">
+<h4>V4 region</h4>
+<pre class="bash"><code>cd v4_mara
+mkdir v4_results
+Rscript ../compare_full-length_to_taxass_results.R ../mara.taxonomy otus.98.80.80.taxonomy ids.above.98 v4_results
+cd ../</code></pre>
+</div>
 </div>
 
 

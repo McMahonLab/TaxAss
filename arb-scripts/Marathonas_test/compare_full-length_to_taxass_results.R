@@ -28,17 +28,17 @@ file.v4.ids <- userprefs[3]
 # for export
 folder.v4 <- userprefs[4]
 
-# troubleshoot: ----
-cat("COMMENT OUT FILE PATHS!!!")
-# for import
-file.arb.tax <- "../arb-scripts/Marathonas_test/mara.taxonomy"
-
-file.v4.tax <- "../arb-scripts/Marathonas_test/v3v4_mara/otus.98.80.80.taxonomy"
-file.v4.ids <- "../arb-scripts/Marathonas_test/v3v4_mara/ids.above.98"
-
-# for export
-folder.v4 <- "~/Desktop/MarathonASS/v3v4_results/"
-# end troubleshoot ----
+# # troubleshoot: ----
+# cat("CRAP COMMENT OUT FILE PATHS!!!")
+# # for import
+# file.arb.tax <- "../arb-scripts/Marathonas_test/mara.taxonomy"
+# 
+# file.v4.tax <- "../arb-scripts/Marathonas_test/v3v4_mara/otus.98.80.80.taxonomy"
+# file.v4.ids <- "../arb-scripts/Marathonas_test/v3v4_mara/ids.above.98"
+# 
+# # for export
+# folder.v4 <- "~/Desktop/MarathonASS/v3v4_results/"
+# # end troubleshoot ----
 
 # ---- Functions taken from find_classification_disagreements.R ----
 

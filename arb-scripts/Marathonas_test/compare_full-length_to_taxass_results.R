@@ -33,11 +33,11 @@ folder.v4 <- userprefs[4]
 # # for import
 # file.arb.tax <- "../arb-scripts/Marathonas_test/mara.taxonomy"
 # 
-# file.v4.tax <- "../arb-scripts/Marathonas_test/v3v4_mara/otus.98.80.80.taxonomy"
-# file.v4.ids <- "../arb-scripts/Marathonas_test/v3v4_mara/ids.above.98"
+# file.v4.tax <- "../arb-scripts/Marathonas_test/v4_mara/otus.100.80.80.taxonomy"
+# file.v4.ids <- "../arb-scripts/Marathonas_test/v4_mara/ids.above.100"
 # 
 # # for export
-# folder.v4 <- "~/Desktop/MarathonASS/v3v4_results/"
+# folder.v4 <- "../arb-scripts/Marathonas_test/v4_mara/v4_results_100/"
 # # end troubleshoot ----
 
 # ---- Functions taken from find_classification_disagreements.R ----

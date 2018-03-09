@@ -191,11 +191,11 @@ Now you can open the mothur program just by typing `mothur` from any location. (
 
 Database      | Version | File Name          | Download From
 --------------|---------|--------------------|-------------------------  
-FreshTrain    | 18Aug2016 | FreshTrain18Aug2016.zip | https://github.com/McMahonLab/TaxAss/FreshTrain-files<br>(You can download the single zip file by clicking on it)
-Greengenes    | May 2013  | gg_13_5.fasta <br> gg_13_5_taxonomy.txt| greengenes.secondgenome.com/downloads
+FreshTrain    | 18Aug2016 | FreshTrain18Aug2016.zip | https://github.com/McMahonLab/TaxAss/FreshTrain-files<br>(You can download the single zip file without the whole TaxAss repository by clicking on it)
+Greengenes    | Aug 2013  | "greengenes reference taxonomy" <br> "greengenes reference alignment" | https://www.mothur.org/wiki/Greengenes-formatted_databases
+Silva         | v.132 <br> v.128 | "Full length sequences and taxonomy references" | https://www.mothur.org/wiki/Silva_reference_files
 
-Unfortunately you can't download a useable (consistent delimiters/column names) version of SILVA diectly from their database. You'd have to import it into ARB and create that yourself. Another option is to use the version created by mothur or qiime, which you can find on their websites but which aren't necessarily the most up to date version. Feel free to share how you used SILVA in a github issue or email (robin.rohwer@gmail.com) and I'll add it to the instructions here.
-
+(Note that if you're a non-academic or commercial user you have to pay to use silva.)
 __________________________________________________________________________________________
 
 # <span style="color:SteelBlue">0. format files</span> {.tabset}

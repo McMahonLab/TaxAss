@@ -139,7 +139,7 @@ make.database.split.bar <- function(){
   
   par(mfrow = c(1,2), mar = c(2,1,2.4,1), oma = c(0,3,0,0))
   
-  bar.loc <- barplot(sum.split, col = c(col.gg, col.fw), axisnames = F, axes = F)
+  bar.loc <- barplot(sum.split, col = c(col.fw, col.gg), axisnames = F, axes = F)
   
   mtext(text = colnames(sum.split), side = 1, line = .5, at = bar.loc, cex = label.cex, las = 1)
   

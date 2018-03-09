@@ -20,7 +20,7 @@ file.100 <- "../arb-scripts/Marathonas_test/v4_mara/v4_results_100/summary_table
 
 output.folder <- "../arb-scripts/Marathonas_test/v4_mara/v4_pident_impact/"
 
-# ---- Functions ----
+# ---- Just go in order ----
 
 import.summary.table <- function(file.name, pident){
   sum.tab <- read.csv(file = file.name)
@@ -95,6 +95,8 @@ make.stacked.bar <- function(lev){ # laxy calls from global env
   
 } 
 
+# ----
+
 pdf(file = paste(output.folder, "1_tribe_detailed.pdf", sep = "/"), width = 6.875, height = 3, family = "Helvetica", title = "Marathonas Validation", colormodel = "srgb")
 # layout(mat = matrix(data = c(1,1,1,2,2), nrow = 1, ncol = 5))
 make.stacked.bar(lev = tri)
@@ -120,7 +122,49 @@ ft.split <- 285 - gg.split
 sum.split <- cbind(arb, rbind(gg.split,ft.split))
 sum.split <- as.matrix(sum.split)
 
-barplot(sum.split, col = c("blue","green"))
-
 sum.errors <- cbind("96" = sum(tri[c(6,7,8), 1]), "97" = sum(tri[c(6,7,8), 2]),"98" = sum(tri[c(6,7,8), 3]) ,"99" = sum(tri[c(6,7,8), 4]),"100" = sum(tri[c(6,7,8), 5]) )
-barplot(sum.errors, col = "red")
+
+# ----
+
+make.database.split.bar <- function(){
+  label.cex <- 1.1
+  axis.cex <- 1.2
+  title.cex <- 1.4
+  
+  col.fw <- adjustcolor(col = "darkgreen", alpha.f = 1)
+  col.gg <- adjustcolor(col = "darkblue", alpha.f = 1)
+  col.error <- adjustcolor(col = "darkred", alpha.f = 1)
+  
+  max.val <- sum(sum.split[ ,1])
+  
+  par(mfrow = c(1,2), mar = c(2,1,2.4,1), oma = c(0,3,0,0))
+  
+  bar.loc <- barplot(sum.split, col = c(col.gg, col.fw), axisnames = F, axes = F)
+  
+  mtext(text = colnames(sum.split), side = 1, line = .5, at = bar.loc, cex = label.cex, las = 1)
+  
+  axis(side = 2, at = c(0, max.val), labels = c("",max.val), cex = label.cex)
+  axis(side = 2, cex = label.cex)
+  mtext(text = "Number of Sequences", side = 2, line = 2.3, cex = axis.cex)
+  
+  
+  barplot(sum.errors, col = "red")
+  
+  
+  
+  mtext(text = "TaxAss Accuracy", side = 3, line = -1.3, cex = title.cex, outer = T)
+  
+  
+  
+  
+  
+  
+  
+  
+  
+}
+
+
+
+
+

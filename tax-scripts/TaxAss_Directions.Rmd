@@ -277,27 +277,22 @@ Output is a file called `general.taxonomy` that is formatted correctly.
 
 ___________
 
-#### Format the Silva database... 
+#### Format the Silva database: 
 
-<span style="color:grey">made shell script reformat_silva.sh but it doesn't work b/c silva is stupid and uses inconsistent delimiters w/ inconsistent column numbers. 
-there's no way to make a compatible file without opening it in ARB and exporting in a different format yourself.
-mothur and qiime did it for you, but they're also out of date. wtf SILVA? literally noone could use that format for anything.
-(see analysis notes 12-5-16 for this saga)</span>
-
-Best bet is to pull it from the mothur website. Note that SILVA only includes names to genus, although it does contain more references.
+If you downloaded it from mothur, it's ready-to-go. Optionally you can unalign the fasta to make the file size smaller (directions under fasta tab).
 
 ______________________
 
 ## .fasta files:
 
-### `.fasta` file format 
+### `.fasta` file format  
 
 These should be in fasta format: 
 
 - carrot before the seqID (formatted according to seqID formats tab)
 - a new line separating seqID from sequence
 - sequence can be one line or multiple lines 
-- sequences should not be aligned
+- OTU sequences should not be aligned (taxonomy reference can be aligned)
 
 example correct format:
 ```
@@ -332,13 +327,35 @@ command   | description
 `aligned.fasta` | the name of your aligned fasta file 
 `otus.fasta`	  | the name of the reformatted file you're creating (note it must have a different name than input)
 
-NOTE: this removes hyphens from everywhere, so if you had hyphens in your seqID names you have to also remove
+**NOTE: this removes hyphens from everywhere!** If you had hyphens in your seqID names you have to also remove
 hyphens from the names in your abund file. SeqIDs must match exactly btwn the two files (tho order doesn't matter)
 
 So may also want to do:
 ```
 sed 's/-//g' <names-with-dashed.count_table >otus.count_table
 ```
+
+<br>
+
+#### Optionally you can un-align the silva taxonomy reference to make it smaller:  
+
+The silva reference downloaded from mothur is aligned. Using this file directly for taxonomy assignment works just fine. BUT, if you want to save 10GB of space you don't need it aligned for taxonomy assignment so you can un-align it using the shell script `un-align_silva.sh`. This reduces the file size (for v132) from **10.68 GB to 318 MB.** _dang!_ It takes about 7 minutes to run this script to remove hyphens and semicolons, and it saves about 7 minutes later on during taxonomy assignment. None of the intermediate files change sizes, the processing time breaks even, so this is optional, just saves you 10GB of space if you're keeping the reference around. 
+
+Example syntax:
+```
+./un-align_silva.sh silva.nr_v132.align general.fasta silva.nr_v132.tax general.taxonomy
+```
+
+command   | description
+----------|----------------------------------------------
+`un-align_silva.sh` | script located in tax-scripts folder  
+`silva.nr_v132.align` | the silva database fasta file downloaded from mothur  
+`general.fasta` | a new name for the output unaligned database.  
+`silva.nr_v132.tax` | the silva database taxonomy file downloaded from mothur <br> Removing the `.`'s to un-align the fasta also removes dots from the sequence ID name. So need to remove the same dots from the sequence IDs in the taxonomy file.  
+`general.taxonomy` | a new name for the output unaligned database.  
+
+<br>
+(It is possible I made up the word "un-align")
 
 _____________________________________________
 

@@ -555,9 +555,8 @@ If there are dashes it makes it difficult to switch between aligned and unaligne
 <hr />
 </div>
 <div id="format-the-silva-database" class="section level4">
-<h4>Format the Silva database…</h4>
-<p><span style="color:grey">made shell script reformat_silva.sh but it doesn’t work b/c silva is stupid and uses inconsistent delimiters w/ inconsistent column numbers. there’s no way to make a compatible file without opening it in ARB and exporting in a different format yourself. mothur and qiime did it for you, but they’re also out of date. wtf SILVA? literally noone could use that format for anything. (see analysis notes 12-5-16 for this saga)</span></p>
-<p>Best bet is to pull it from the mothur website. Note that SILVA only includes names to genus, although it does contain more references.</p>
+<h4>Format the Silva database:</h4>
+<p>If you downloaded it from mothur, it’s ready-to-go. Optionally you can unalign the fasta to make the file size smaller (directions under fasta tab).</p>
 <hr />
 </div>
 </div>
@@ -571,7 +570,7 @@ If there are dashes it makes it difficult to switch between aligned and unaligne
 <li>carrot before the seqID (formatted according to seqID formats tab)</li>
 <li>a new line separating seqID from sequence</li>
 <li>sequence can be one line or multiple lines</li>
-<li>sequences should not be aligned</li>
+<li>OTU sequences should not be aligned (taxonomy reference can be aligned)</li>
 </ul>
 <p>example correct format:</p>
 <pre><code>&gt;seqID
@@ -624,9 +623,51 @@ GAG-G-A-A--TA-TT--GG-T-C----AA-T-G-G--GC-----GC-A--A---G-C-C-T-G-A-A-C-C-A---GC-
 </tr>
 </tbody>
 </table>
-<p>NOTE: this removes hyphens from everywhere, so if you had hyphens in your seqID names you have to also remove hyphens from the names in your abund file. SeqIDs must match exactly btwn the two files (tho order doesn’t matter)</p>
+<p><strong>NOTE: this removes hyphens from everywhere!</strong> If you had hyphens in your seqID names you have to also remove hyphens from the names in your abund file. SeqIDs must match exactly btwn the two files (tho order doesn’t matter)</p>
 <p>So may also want to do:</p>
 <pre><code>sed 's/-//g' &lt;names-with-dashed.count_table &gt;otus.count_table</code></pre>
+<p><br></p>
+</div>
+<div id="optionally-you-can-un-align-the-silva-taxonomy-reference-to-make-it-smaller" class="section level4">
+<h4>Optionally you can un-align the silva taxonomy reference to make it smaller:</h4>
+<p>The silva reference downloaded from mothur is aligned. Using this file directly for taxonomy assignment works just fine. BUT, if you want to save 10GB of space you don’t need it aligned for taxonomy assignment so you can un-align it using the shell script <code>un-align_silva.sh</code>. This reduces the file size (for v132) from <strong>10.68 GB to 318 MB.</strong> <em>dang!</em> It takes about 7 minutes to run this script to remove hyphens and semicolons, and it saves about 7 minutes later on during taxonomy assignment. None of the intermediate files change sizes, the processing time breaks even, so this is optional, just saves you 10GB of space if you’re keeping the reference around.</p>
+<p>Example syntax:</p>
+<pre><code>./un-align_silva.sh silva.nr_v132.align general.fasta silva.nr_v132.tax general.taxonomy</code></pre>
+<table style="width:81%;">
+<colgroup>
+<col width="15%"></col>
+<col width="65%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>command</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>un-align_silva.sh</code></td>
+<td>script located in tax-scripts folder</td>
+</tr>
+<tr class="even">
+<td><code>silva.nr_v132.align</code></td>
+<td>the silva database fasta file downloaded from mothur</td>
+</tr>
+<tr class="odd">
+<td><code>general.fasta</code></td>
+<td>a new name for the output unaligned database.</td>
+</tr>
+<tr class="even">
+<td><code>silva.nr_v132.tax</code></td>
+<td>the silva database taxonomy file downloaded from mothur <br> Removing the <code>.</code>’s to un-align the fasta also removes dots from the sequence ID name. So need to remove the same dots from the sequence IDs in the taxonomy file.</td>
+</tr>
+<tr class="odd">
+<td><code>general.taxonomy</code></td>
+<td>a new name for the output unaligned database.</td>
+</tr>
+</tbody>
+</table>
+<p><br> (It is possible I made up the word “un-align”)</p>
 <hr />
 </div>
 </div>

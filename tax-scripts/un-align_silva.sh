@@ -23,14 +23,14 @@ smallsilva="$2"
 tax="$3"
 periodlesstax="$4"
 
-# sed 's/\.//g' <$silva >nodots
-# printf "removed dots \n"
-# sed 's/-//g' <nodots >nodashes
-# rm nodots
-# printf "removed dashes \n"
-# sed 's/	.*$//g' <nodashes >$smallsilva
-# rm nodashes
-# printf "removed taxonomies after seqIDs \n \a fasta done \n"
+sed 's/\.//g' <$silva >nodots
+printf "removed dots \n"
+sed 's/-//g' <nodots >nodashes
+rm nodots
+printf "removed dashes \n"
+sed 's/	.*$//g' <nodashes >$smallsilva
+rm nodashes
+printf "removed taxonomies after seqIDs \n \a fasta done \n"
 
 sed 's/\.//' <$tax >$periodlesstax
 printf "removed dots from seqID names in taxonomy file too \n \a now actually done \n"

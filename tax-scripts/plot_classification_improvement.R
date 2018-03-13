@@ -23,16 +23,17 @@ path.to.plots.folder <- userprefs[4]
 taxonomy.names.path <- userprefs[5]
 gg.names.path <- userprefs[6]
 
-improvement.plots.folder <- paste(path.to.plots.folder, "step_15_5a_Improvement_over_general-only", sep = "/")
   
-# cat("fuck you forgot to comment out the file paths in find_classification_improvements.R!")
-# taxonomy.pvalues.path <- "../../ME_plot_test/final.taxonomy.pvalues"
-# gg.pvalues.path <- "../../ME_plot_test/final.general.pvalues"
-# reads.table.path <- "../../ME_plot_test/total.reads.per.seqID.csv"
-# path.to.plots.folder <- "../../ME_plot_test/plots"
-# taxonomy.names.path <- "../../ME_plot_test/final.taxonomy.names"
-# gg.names.path <- "../../ME_plot_test/final.general.names"
-# improvement.plots.folder <- paste(path.to.plots.folder, "step_15_5a_Improvement_over_general", sep = "/")
+cat("fuck you forgot to comment out the file paths in find_classification_improvements.R!")
+taxonomy.pvalues.path <- "../../test2_smallsilva/final.taxonomy.pvalues"
+gg.pvalues.path <- "../../test2_smallsilva/final.general.pvalues"
+reads.table.path <- "../../test2_smallsilva/total.reads.per.seqID.csv"
+path.to.plots.folder <- "../../test2_smallsilva/plots"
+taxonomy.names.path <- "../../test2_smallsilva/final.taxonomy.names"
+gg.names.path <- "../../test2_smallsilva/final.general.names"
+
+
+improvement.plots.folder <- paste(path.to.plots.folder, "step_15_5a_Improvement_over_general-only", sep = "/")
 
 # ---- Define functions to import and format data ----
 
@@ -128,8 +129,7 @@ convert.to.unchanged.true.false <- function(FWnames, GGnames, TrueFalseTable){
   unchanged <- otus.named.fw[ ,1:2]
   # create a T/F table- T if the names match, F if they don't
   unchanged <- cbind(unchanged, fw.names[ ,-1] == gg.names[ ,-1])
-  # adjust T/F table so also F if it was unclassified
-  unchanged[ ,-(1:2)] <- unchanged[ ,-(1:2)] * otus.named.fw[ ,-(1:2)]
+  # note: names match if the names are the same or if BOTH are unclassified
   
   return(unchanged)
 }
@@ -165,6 +165,23 @@ convert.to.newly.named.true.false <- function(FWnames, GGnames, FW_TrueTalseTabl
   newnamed <- cbind(newnamed, otus.named.fw[ ,-(1:2)] * otus.NOT.named.gg[ ,-(1:2)])
   
   return(newnamed)
+}
+
+convert.to.newly.unclassified.true.false <- function(){
+  fw.names <- FWnames
+  gg.names <- GGnames
+  otus.named.fw <- FW_TrueTalseTable
+  otus.named.gg <- GG_TrueFalseTable
+  
+  # create table of those NOT named by TaxAss- T if unclassified by FW
+  otus.NOT.named.fw <- otus.named.fw[ ,1:2]
+  otus.NOT.named.fw <- cbind(otus.NOT.named.fw, otus.named.fw[ ,-(1:2)] == FALSE)
+  # create a table of all given name by general-only- T if classified by GG
+  lostname <- otus.named.gg[ ,1:2]
+  # now adjust so T if BEFORE named by GG but now NOT named by FW
+  lostname <- cbind(lostname, otus.named.gg[ ,-(1:2)] * otus.NOT.named.fw[ ,-(1:2)])
+  
+  return(lostname)
 }
 
 get.beside.data <- function(GGTable, FWTable, Reads = TRUE){
@@ -375,6 +392,10 @@ reads.reclassified <- convert.to.reads.presence.absence(TrueFalseTable = otus.re
 
 otus.newly.named <- convert.to.newly.named.true.false(FWnames = fw.names, GGnames = gg.names, FW_TrueTalseTable = otus.named.fw, GG_TrueFalseTable = otus.named.gg)
 reads.newly.named <- convert.to.reads.presence.absence(TrueFalseTable = otus.newly.named)
+
+otus.newly.unclass <- convert.to.newly.unclassified.true.false()
+
+
 
 stacked.data.otus <- get.stacked.data(Same = otus.unchanged, Better = otus.reclassified, New = otus.newly.named, Reads = FALSE)
 stacked.data.reads <- get.stacked.data(Same = reads.unchanged, Better = reads.reclassified, New = reads.newly.named, Reads = TRUE)

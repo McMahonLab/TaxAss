@@ -2,7 +2,7 @@
 
 # syntax for command line:
 
-# $ Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID plots
+# Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID.csv plots final.taxonomy.names final.general.names ids.above.98
 
 # This script generates the following files, all within the specified folder. names are hard-coded:
 #   WorkflowImprovement-OTUsClassified.png
@@ -22,6 +22,7 @@ reads.table.path <- userprefs[3]
 path.to.plots.folder <- userprefs[4]
 taxonomy.names.path <- userprefs[5]
 gg.names.path <- userprefs[6]
+ids.above.path <- userprefs[7]
 
   
 cat("fuck you forgot to comment out the file paths in find_classification_improvements.R!")
@@ -31,6 +32,7 @@ reads.table.path <- "../../test2_smallsilva/total.reads.per.seqID.csv"
 path.to.plots.folder <- "../../test2_smallsilva/plots"
 taxonomy.names.path <- "../../test2_smallsilva/final.taxonomy.names"
 gg.names.path <- "../../test2_smallsilva/final.general.names"
+ids.above.path <- "../../test2_smallsilva/ids.above.98"
 
 
 improvement.plots.folder <- paste(path.to.plots.folder, "step_15_5a_Improvement_over_general-only", sep = "/")
@@ -98,7 +100,6 @@ order.by.seqID.and.combine.tables <- function(ReadsTable, PvaluesTable){
   return(pvals.with.reads)
 }
 
-
 # ---- Define functions to manipulate the data ----
 
 convert.to.name.presence.absence <- function(PvaluesTable){
@@ -119,7 +120,7 @@ convert.to.reads.presence.absence <- function(TrueFalseTable){
   return(pvals)
 }
 
-convert.to.unchanged.true.false <- function(FWnames, GGnames, TrueFalseTable){
+# convert.to.unchanged.true.false <- function(FWnames, GGnames, TrueFalseTable){
   fw.names <- FWnames
   gg.names <- GGnames
   otus.named.fw <- TrueFalseTable
@@ -167,7 +168,23 @@ convert.to.newly.named.true.false <- function(FWnames, GGnames, FW_TrueTalseTabl
   return(newnamed)
 }
 
-convert.to.newly.unclassified.true.false <- function(){
+convert.to.percent <- function(X, seqid.reads, Reads){
+  if (Reads == TRUE){
+    normalizer <- sum(seqid.reads[ ,2])
+  }else{
+    normalizer <- nrow(seqid.reads)
+  }
+  
+  perc <- colSums(X[ ,-(1:2)]) / normalizer * 100
+  return(perc)
+}
+
+find.remaining.unchanged <- function(perc.classified, perc.reclassified, perc.newly.classified, Reads){
+  perc.unchanged <- perc.classified[2, ] - perc.reclassified - perc.newly.classified
+  return(perc.unchanged)
+}
+
+convert.to.newly.unclassified.true.false <- function(FWnames, GGnames, FW_TrueTalseTable, GG_TrueFalseTable){
   fw.names <- FWnames
   gg.names <- GGnames
   otus.named.fw <- FW_TrueTalseTable
@@ -202,7 +219,7 @@ get.beside.data <- function(GGTable, FWTable, Reads = TRUE){
   return(class.table)
 }
 
-get.stacked.data <- function(Same, Better, New, Reads = TRUE){
+# get.stacked.data <- function(Same, Better, New, Reads = TRUE){
   unchanged <- Same
   renamed <- Better
   newly.named <- New
@@ -361,7 +378,7 @@ export.diversity.table <- function(div.table, FolderPath){
 # make a subfolder to put this step's plots into:
 make.plot.directory(FolderPath = improvement.plots.folder)
 
-# get data to plot the overall improvement (beside) part of the barplot
+# get data to plot the overall improvement (beside) part of the barplot ----
 fw.pvals <- import.pvalues(FilePath = taxonomy.pvalues.path)
 gg.pvals <- import.pvalues(FilePath = gg.pvalues.path)
 
@@ -379,26 +396,67 @@ reads.named.gg <- convert.to.reads.presence.absence(TrueFalseTable = otus.named.
 beside.data.otus <- get.beside.data(FWTable = otus.named.fw, GGTable = otus.named.gg, Reads = FALSE)
 beside.data.reads <- get.beside.data(FWTable = reads.named.fw, GGTable = reads.named.gg, Reads = TRUE)
 
-# get data to plot the type of improvement (stacked) part of the barplot
+# get data to plot the type of improvement (stacked) part of the barplot and alpha diversity table ----
 fw.names <- import.and.order.names(FilePath = taxonomy.names.path)
 gg.names <- import.and.order.names(FilePath = gg.names.path)
 check.orders.match(Vector1 = fw.names$seqID, Vector2 = gg.names$seqID)
 
-otus.unchanged <- convert.to.unchanged.true.false(FWnames = fw.names, GGnames = gg.names, TrueFalseTable = otus.named.fw)
-reads.unchanged <- convert.to.reads.presence.absence(TrueFalseTable = otus.unchanged)
+# Generate and Export summary data on alpha diversity before subsetting
+fw.names.unique.unclass <- make.unclassifieds.unique(Taxonomy = fw.names[ ,-1])
+gg.names.unique.unclass <- make.unclassifieds.unique(Taxonomy = gg.names[ ,-1])
 
+fw.alpha <- find.alpha.diversity(Taxonomy = fw.names.unique.unclass)
+gg.alpha <- find.alpha.diversity(Taxonomy = gg.names.unique.unclass)
+
+alpha <- data.frame(TaxAss = fw.alpha, General = gg.alpha)
+export.diversity.table(div.table = alpha, FolderPath = improvement.plots.folder)
+
+# to get stacked data, subset to only the OTUs classified by FW in TaxAss (all GG OTUs called unchanged) ----
+fw.ids <- read.csv(ids.above.path, colClasses = "character", header = F)
+colnames(fw.ids) <- "seqID"
+
+fw.pvals <- merge(x = fw.pvals, y = fw.ids, by = "seqID")
+gg.pvals <- merge(x = gg.pvals, y = fw.ids, by = "seqID")
+otus.named.fw <- merge(x = otus.named.fw, y = fw.ids, by = "seqID")
+otus.named.gg <- merge(x = otus.named.gg, y = fw.ids, by = "seqID")
+reads.named.fw <- merge(x = reads.named.fw, y = fw.ids, by = "seqID")
+reads.named.gg <- merge(x = reads.named.gg, y = fw.ids, by = "seqID")
+fw.names <- merge(x = fw.names, y = fw.ids, by = "seqID")
+gg.names <- merge(x = gg.names, y = fw.ids, by = "seqID")
+
+# categorize types of improvement
 otus.reclassified <- convert.to.renamed.true.false(FWnames = fw.names, GGnames = gg.names, FW_TrueTalseTable = otus.named.fw, GG_TrueFalseTable = otus.named.gg)
 reads.reclassified <- convert.to.reads.presence.absence(TrueFalseTable = otus.reclassified)
 
 otus.newly.named <- convert.to.newly.named.true.false(FWnames = fw.names, GGnames = gg.names, FW_TrueTalseTable = otus.named.fw, GG_TrueFalseTable = otus.named.gg)
 reads.newly.named <- convert.to.reads.presence.absence(TrueFalseTable = otus.newly.named)
 
-otus.newly.unclass <- convert.to.newly.unclassified.true.false()
+perc.otus.reclassified <- convert.to.percent(X = otus.reclassified, seqid.reads = reads, Reads = FALSE)
+perc.reads.reclassified <- convert.to.percent(X = reads.reclassified, seqid.reads = reads, Reads = TRUE)
 
+perc.otus.newly.named <- convert.to.percent(X = otus.newly.named, seqid.reads = reads, Reads = FALSE)
+perc.reads.newly.named <- convert.to.percent(X = reads.newly.named, seqid.reads = reads, Reads = TRUE)
 
+perc.otus.unchanged <- find.remaining.unchanged(perc.classified = beside.data.otus, perc.reclassified = perc.otus.reclassified, perc.newly.classified = perc.otus.newly.named, Reads = FALSE)
+perc.reads.unchanged <- find.remaining.unchanged(perc.classified = beside.data.reads, perc.reclassified = perc.reads.reclassified, perc.newly.classified = perc.reads.newly.named, Reads = TRUE)
 
-stacked.data.otus <- get.stacked.data(Same = otus.unchanged, Better = otus.reclassified, New = otus.newly.named, Reads = FALSE)
-stacked.data.reads <- get.stacked.data(Same = reads.unchanged, Better = reads.reclassified, New = reads.newly.named, Reads = TRUE)
+# # Just out of curiousity- which ones loose classification in FW?
+# otus.newly.unclass <- convert.to.newly.unclassified.true.false(FWnames = fw.names, GGnames = gg.names, FW_TrueTalseTable = otus.named.fw, GG_TrueFalseTable = otus.named.gg)
+# reads.newly.unclass <- convert.to.reads.presence.absence(TrueFalseTable = otus.newly.unclass)
+# 
+# perc.otus.newly.unclass <- convert.to.percent(X = otus.newly.unclass, seqid.reads = reads, Reads = FALSE)
+# perc.reads.newly.unclass <- convert.to.percent(X = reads.newly.unclass, seqid.reads = reads, Reads = TRUE)
+# 
+# index <- which(otus.newly.unclass[ ,6] > 0) # 6 = order
+# check.orders.match(Vector1 = otus.newly.unclass[ ,1], fw.names[ ,1])
+# check.orders.match(Vector1 = fw.names[ ,1], Vector2 = gg.names[ ,1])
+# lost.names <- cbind(otus.newly.unclass[index,1:2], gg.names[index,-1], fw.names[index,-1])
+# colnames(lost.names)[3:9] <- paste(colnames(lost.names)[3:9], "GG", sep = ".")
+# colnames(lost.names)[10:16] <- paste(colnames(lost.names)[10:16], "FW", sep = ".")
+# # don't raise any red flags. just a few. maybe could look at these more when trying to improve the FreshTrain.
+
+stacked.data.otus <- rbind(perc.otus.unchanged, perc.otus.reclassified, perc.otus.newly.named)
+stacked.data.reads <- rbind(perc.reads.unchanged, perc.reads.reclassified, perc.reads.newly.named)
 
 check.numbers.add.up(StackedData = stacked.data.otus, BesideData = beside.data.otus)
 check.numbers.add.up(StackedData = stacked.data.reads, BesideData = beside.data.reads)
@@ -415,15 +473,15 @@ export.summary.table(Summary = beside.data.reads, FolderPath = improvement.plots
 export.summary.table(Summary = stacked.data.otus, FolderPath = improvement.plots.folder, PlotType = "Stacked", DataType = "OTUs")
 export.summary.table(Summary = stacked.data.reads, FolderPath = improvement.plots.folder, PlotType = "Stacked", DataType = "Reads")
 
-# Generate and Export summary data on alpha diversity
-fw.names.unique.unclass <- make.unclassifieds.unique(Taxonomy = fw.names[ ,-1])
-gg.names.unique.unclass <- make.unclassifieds.unique(Taxonomy = gg.names[ ,-1])
-
-fw.alpha <- find.alpha.diversity(Taxonomy = fw.names.unique.unclass)
-gg.alpha <- find.alpha.diversity(Taxonomy = gg.names.unique.unclass)
-
-alpha <- data.frame(TaxAss = fw.alpha, General = gg.alpha)
-export.diversity.table(div.table = alpha, FolderPath = improvement.plots.folder)
+# # Out of curiosity, what is getting improved at order level??
+# index <- which(otus.newly.named[ ,6] > 0) # 6 = order
+# check.orders.match(Vector1 = otus.newly.named[ ,1], fw.names[ ,1])
+# check.orders.match(Vector1 = fw.names[ ,1], Vector2 = gg.names[ ,1])
+# newly.named.orders <- cbind(otus.newly.named[index,1:2], gg.names[index,-1], fw.names[index,-1])
+# colnames(newly.named.orders)[3:9] <- paste(colnames(newly.named.orders)[3:9], "GG", sep = ".")
+# colnames(newly.named.orders)[10:16] <- paste(colnames(newly.named.orders)[10:16], "FW", sep = ".")
+# write.csv(x = newly.named.orders, file = "~/Desktop/newly_named_orders.csv")
+# # not sure, maybe they were near cutoff in silva. not sure how to interpret. includes acI's so not just poorly flushed out clades...
 
 
 # Check the fancy plot by looking at the simple component plots

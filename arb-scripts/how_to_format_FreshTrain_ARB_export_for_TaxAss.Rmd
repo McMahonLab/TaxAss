@@ -109,3 +109,23 @@ The coarse-level names that needed to be changed were identified using the
 optional TaxAss step 11.5, where the custom database references are classified 
 with the general database. This generates a list of conflicting names.  
 
+## Remove or Add p\_\_, c\_\_, o\_\_, etc. prefixes:
+
+Whether the prefixes are there or not needs to match between SILVA and the FreshTrain. Greengenes has them, SILVA doesn't. Therefore The FreshTrain as exported from ARB has the prefixes.  
+  
+2 options:  
+
+1. add prefixes to everything in SILVA with Josh's script `processSilvaFromMothur.py`  
+
+2. remove the prefixes from the FreshTrain. This seems easier and faster to me, but who am I?
+simply find and replace with nothing:
+k__  
+p__  
+c__  
+o__  
+f__  
+g__  
+s__  
+
+**we need to come back and edit this to reflect what we do. Obviously we should do #2, because then people don't have to process the silva database they download before using it and both FreshTrain and SILVA will be grab 'n go**
+and the un-aligning can be done with a suuuper simple bash script using sed which is really efficient and in the tax-scripts folder. 

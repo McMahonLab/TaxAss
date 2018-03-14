@@ -191,6 +191,22 @@ $(document).ready(function () {
 <code>outputTaxon</code> = Output fasta file, i.e., custom.taxonomy</p>
 <p><br> The coarse-level names that needed to be changed were identified using the optional TaxAss step 11.5, where the custom database references are classified with the general database. This generates a list of conflicting names.</p>
 </div>
+<div id="remove-or-add-p__-c__-o__-etc.-prefixes" class="section level2">
+<h2>Remove or Add p__, c__, o__, etc. prefixes:</h2>
+<p>Whether the prefixes are there or not needs to match between SILVA and the FreshTrain. Greengenes has them, SILVA doesn’t. Therefore The FreshTrain as exported from ARB has the prefixes.</p>
+<p>2 options:</p>
+<ol style="list-style-type: decimal">
+<li><p>add prefixes to everything in SILVA with Josh’s script <code>processSilvaFromMothur.py</code></p></li>
+<li><p>remove the prefixes from the FreshTrain. This seems easier and faster to me, but who am I? simply find and replace with nothing: k__<br />
+p__<br />
+c__<br />
+o__<br />
+f__<br />
+g__<br />
+s__</p></li>
+</ol>
+<p><strong>we need to come back and edit this to reflect what we do. Obviously we should do #2, because then people don’t have to process the silva database they download before using it and both FreshTrain and SILVA will be grab ’n go</strong> and the un-aligning can be done with a suuuper simple bash script using sed which is really efficient and in the tax-scripts folder.</p>
+</div>
 
 
 

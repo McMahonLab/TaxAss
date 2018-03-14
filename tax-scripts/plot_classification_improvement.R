@@ -295,7 +295,7 @@ fancy.barplot <- function(BesideData, StackedData, BarSpacing, DataType, FolderP
   col.y <- "grey"
   col.z <- c("grey", "orange", "red")
   y.axis.label <- paste(DataType, "Classified (%)")
-  beside.legend <- c("Left Bars- Greegenes", "Right Bars- Workflow")
+  beside.legend <- c("Left Bars- General-Only", "Right Bars- TaxAss")
   stacked.legend <- c("Unchanged", "Re-Classified","Newly-Classified")
   title.label <- "Classification Improvement"
   file.name <- paste(FolderPath, "/WorkflowImprovement-", DataType, "Classified.png", sep = "")

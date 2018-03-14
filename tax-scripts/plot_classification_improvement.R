@@ -25,14 +25,14 @@ gg.names.path <- userprefs[6]
 ids.above.path <- userprefs[7]
 
   
-cat("fuck you forgot to comment out the file paths in find_classification_improvements.R!")
-taxonomy.pvalues.path <- "../../test2_smallsilva/final.taxonomy.pvalues"
-gg.pvalues.path <- "../../test2_smallsilva/final.general.pvalues"
-reads.table.path <- "../../test2_smallsilva/total.reads.per.seqID.csv"
-path.to.plots.folder <- "../../test2_smallsilva/plots"
-taxonomy.names.path <- "../../test2_smallsilva/final.taxonomy.names"
-gg.names.path <- "../../test2_smallsilva/final.general.names"
-ids.above.path <- "../../test2_smallsilva/ids.above.98"
+# cat("fuck you forgot to comment out the file paths in find_classification_improvements.R!")
+# taxonomy.pvalues.path <- "../../test2_smallsilva/final.taxonomy.pvalues"
+# gg.pvalues.path <- "../../test2_smallsilva/final.general.pvalues"
+# reads.table.path <- "../../test2_smallsilva/total.reads.per.seqID.csv"
+# path.to.plots.folder <- "../../test2_smallsilva/plots"
+# taxonomy.names.path <- "../../test2_smallsilva/final.taxonomy.names"
+# gg.names.path <- "../../test2_smallsilva/final.general.names"
+# ids.above.path <- "../../test2_smallsilva/ids.above.98"
 
 
 improvement.plots.folder <- paste(path.to.plots.folder, "step_15_5a_Improvement_over_general-only", sep = "/")
@@ -120,21 +120,6 @@ convert.to.reads.presence.absence <- function(TrueFalseTable){
   return(pvals)
 }
 
-# convert.to.unchanged.true.false <- function(FWnames, GGnames, TrueFalseTable){
-  fw.names <- FWnames
-  gg.names <- GGnames
-  otus.named.fw <- TrueFalseTable
-  check.orders.match(Vector1 = fw.names$seqID, Vector2 = gg.names$seqID)
-  check.orders.match(Vector1 = fw.names$seqID, Vector2 = otus.named.fw$seqID)
-  
-  unchanged <- otus.named.fw[ ,1:2]
-  # create a T/F table- T if the names match, F if they don't
-  unchanged <- cbind(unchanged, fw.names[ ,-1] == gg.names[ ,-1])
-  # note: names match if the names are the same or if BOTH are unclassified
-  
-  return(unchanged)
-}
-
 convert.to.renamed.true.false <- function(FWnames, GGnames, FW_TrueTalseTable, GG_TrueFalseTable){
   fw.names <- FWnames
   gg.names <- GGnames
@@ -184,7 +169,7 @@ find.remaining.unchanged <- function(perc.classified, perc.reclassified, perc.ne
   return(perc.unchanged)
 }
 
-convert.to.newly.unclassified.true.false <- function(FWnames, GGnames, FW_TrueTalseTable, GG_TrueFalseTable){
+# convert.to.newly.unclassified.true.false <- function(FWnames, GGnames, FW_TrueTalseTable, GG_TrueFalseTable){
   fw.names <- FWnames
   gg.names <- GGnames
   otus.named.fw <- FW_TrueTalseTable
@@ -216,25 +201,6 @@ get.beside.data <- function(GGTable, FWTable, Reads = TRUE){
   
   class.table <- rbind(gg.classified,fw.classified)
   
-  return(class.table)
-}
-
-# get.stacked.data <- function(Same, Better, New, Reads = TRUE){
-  unchanged <- Same
-  renamed <- Better
-  newly.named <- New
-  
-  if (Reads == TRUE){
-    normalizer <- sum(unchanged[ ,2]) # could be any of the 3 here
-  }else{
-    normalizer <- nrow(unchanged)
-  }
-  
-  tot.unchanged <- colSums(unchanged[ ,-(1:2)]) / normalizer * 100
-  tot.renamed <- colSums(renamed[ ,-(1:2)]) / normalizer * 100
-  tot.newly.named <- colSums(newly.named[ ,-(1:2)]) / normalizer * 100
-  
-  class.table <- rbind(tot.unchanged, tot.renamed, tot.newly.named)
   return(class.table)
 }
 
@@ -440,21 +406,6 @@ perc.reads.newly.named <- convert.to.percent(X = reads.newly.named, seqid.reads 
 perc.otus.unchanged <- find.remaining.unchanged(perc.classified = beside.data.otus, perc.reclassified = perc.otus.reclassified, perc.newly.classified = perc.otus.newly.named, Reads = FALSE)
 perc.reads.unchanged <- find.remaining.unchanged(perc.classified = beside.data.reads, perc.reclassified = perc.reads.reclassified, perc.newly.classified = perc.reads.newly.named, Reads = TRUE)
 
-# # Just out of curiousity- which ones loose classification in FW?
-# otus.newly.unclass <- convert.to.newly.unclassified.true.false(FWnames = fw.names, GGnames = gg.names, FW_TrueTalseTable = otus.named.fw, GG_TrueFalseTable = otus.named.gg)
-# reads.newly.unclass <- convert.to.reads.presence.absence(TrueFalseTable = otus.newly.unclass)
-# 
-# perc.otus.newly.unclass <- convert.to.percent(X = otus.newly.unclass, seqid.reads = reads, Reads = FALSE)
-# perc.reads.newly.unclass <- convert.to.percent(X = reads.newly.unclass, seqid.reads = reads, Reads = TRUE)
-# 
-# index <- which(otus.newly.unclass[ ,6] > 0) # 6 = order
-# check.orders.match(Vector1 = otus.newly.unclass[ ,1], fw.names[ ,1])
-# check.orders.match(Vector1 = fw.names[ ,1], Vector2 = gg.names[ ,1])
-# lost.names <- cbind(otus.newly.unclass[index,1:2], gg.names[index,-1], fw.names[index,-1])
-# colnames(lost.names)[3:9] <- paste(colnames(lost.names)[3:9], "GG", sep = ".")
-# colnames(lost.names)[10:16] <- paste(colnames(lost.names)[10:16], "FW", sep = ".")
-# # don't raise any red flags. just a few. maybe could look at these more when trying to improve the FreshTrain.
-
 stacked.data.otus <- rbind(perc.otus.unchanged, perc.otus.reclassified, perc.otus.newly.named)
 stacked.data.reads <- rbind(perc.reads.unchanged, perc.reads.reclassified, perc.reads.newly.named)
 
@@ -472,6 +423,23 @@ export.summary.table(Summary = beside.data.otus, FolderPath = improvement.plots.
 export.summary.table(Summary = beside.data.reads, FolderPath = improvement.plots.folder, PlotType = "Beside", DataType = "Reads")
 export.summary.table(Summary = stacked.data.otus, FolderPath = improvement.plots.folder, PlotType = "Stacked", DataType = "OTUs")
 export.summary.table(Summary = stacked.data.reads, FolderPath = improvement.plots.folder, PlotType = "Stacked", DataType = "Reads")
+
+# ---- some sanity checks ----
+
+# # Just out of curiousity- which ones loose classification in FW?
+# otus.newly.unclass <- convert.to.newly.unclassified.true.false(FWnames = fw.names, GGnames = gg.names, FW_TrueTalseTable = otus.named.fw, GG_TrueFalseTable = otus.named.gg)
+# reads.newly.unclass <- convert.to.reads.presence.absence(TrueFalseTable = otus.newly.unclass)
+# 
+# perc.otus.newly.unclass <- convert.to.percent(X = otus.newly.unclass, seqid.reads = reads, Reads = FALSE)
+# perc.reads.newly.unclass <- convert.to.percent(X = reads.newly.unclass, seqid.reads = reads, Reads = TRUE)
+# 
+# index <- which(otus.newly.unclass[ ,6] > 0) # 6 = order
+# check.orders.match(Vector1 = otus.newly.unclass[ ,1], fw.names[ ,1])
+# check.orders.match(Vector1 = fw.names[ ,1], Vector2 = gg.names[ ,1])
+# lost.names <- cbind(otus.newly.unclass[index,1:2], gg.names[index,-1], fw.names[index,-1])
+# colnames(lost.names)[3:9] <- paste(colnames(lost.names)[3:9], "GG", sep = ".")
+# colnames(lost.names)[10:16] <- paste(colnames(lost.names)[10:16], "FW", sep = ".")
+# # don't raise any red flags. just a few. maybe could look at these more when trying to improve the FreshTrain.
 
 # # Out of curiosity, what is getting improved at order level??
 # index <- which(otus.newly.named[ ,6] > 0) # 6 = order

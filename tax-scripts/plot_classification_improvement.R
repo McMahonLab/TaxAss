@@ -169,12 +169,13 @@ find.remaining.unchanged <- function(perc.classified, perc.reclassified, perc.ne
   return(perc.unchanged)
 }
 
-# convert.to.newly.unclassified.true.false <- function(FWnames, GGnames, FW_TrueTalseTable, GG_TrueFalseTable){
+convert.to.newly.unclassified.true.false <- function(FWnames, GGnames, FW_TrueTalseTable, GG_TrueFalseTable){
+  # this is only used in the "sanity checks" part
   fw.names <- FWnames
   gg.names <- GGnames
   otus.named.fw <- FW_TrueTalseTable
   otus.named.gg <- GG_TrueFalseTable
-  
+
   # create table of those NOT named by TaxAss- T if unclassified by FW
   otus.NOT.named.fw <- otus.named.fw[ ,1:2]
   otus.NOT.named.fw <- cbind(otus.NOT.named.fw, otus.named.fw[ ,-(1:2)] == FALSE)
@@ -182,7 +183,7 @@ find.remaining.unchanged <- function(perc.classified, perc.reclassified, perc.ne
   lostname <- otus.named.gg[ ,1:2]
   # now adjust so T if BEFORE named by GG but now NOT named by FW
   lostname <- cbind(lostname, otus.named.gg[ ,-(1:2)] * otus.NOT.named.fw[ ,-(1:2)])
-  
+
   return(lostname)
 }
 

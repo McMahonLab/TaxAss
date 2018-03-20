@@ -31,28 +31,28 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 
 # # FOR CHOOSING CUTOFF:
 # cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
-# userprefs <- c("../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/otus.abund",
-#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/plots",
+# userprefs <- c("../../test2_smallsilva/otus.abund",
+#                "../../test2_smallsilva/plots",
 #                "regular",
 #                NA,
 #                NA,
-#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/conflicts_95",
-#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/ids.above.95",
+#                "../../test2_smallsilva/conflicts_95",
+#                "../../test2_smallsilva/ids.above.95",
 #                95,
-#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/conflicts_96",
-#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/ids.above.96",
+#                "../../test2_smallsilva/conflicts_96",
+#                "../../test2_smallsilva/ids.above.96",
 #                96,
-#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/conflicts_97",
-#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/ids.above.97",
+#                "../../test2_smallsilva/conflicts_97",
+#                "../../test2_smallsilva/ids.above.97",
 #                97,
-#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/conflicts_98",
-#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/ids.above.98",
+#                "../../test2_smallsilva/conflicts_98",
+#                "../../test2_smallsilva/ids.above.98",
 #                98,
-#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/conflicts_99",
-#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/ids.above.99",
+#                "../../test2_smallsilva/conflicts_99",
+#                "../../test2_smallsilva/ids.above.99",
 #                99,
-#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/conflicts_100",
-#                "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/ids.above.100",
+#                "../../test2_smallsilva/conflicts_100",
+#                "../../test2_smallsilva/ids.above.100",
 #                100)
 # # JUST MAKE SEQID.READS FILE, SKIPPING STEP 14 BUT DOING 15.5.A
 # cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
@@ -80,8 +80,8 @@ seqID.reads.file.path <- "total.reads.per.seqID.csv"
 present.working.directory <- "."
 
 # cat("fuck you forgot to comment out the seqid.reads file path in plot_classification_disagreements!\n")
-# seqID.reads.file.path <- "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/total.reads.per.seqID.csv"
-# present.working.directory <- "../arb-scripts/Marathonas_test/add-tax-scripts-and-databases/"
+# seqID.reads.file.path <- "../../test2_smallsilva/total.reads.per.seqID.csv"
+# present.working.directory <- "../../test2_smallsilva/"
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -1130,6 +1130,11 @@ plot.total.classified <- function(SummaryMatrix, PidentValues, FolderPath, DataT
       extend.by <- 2.5 - half.range
       y.min <- y.min - extend.by
       y.max <- y.max + extend.by
+      y.min <- ceiling(y.min)
+      y.max <- ceiling(y.max)
+    }else{
+      y.min <- floor(y.min)
+      y.max <- ceiling(y.max)
     }
     
     # basic plot
@@ -1157,9 +1162,10 @@ plot.total.classified <- function(SummaryMatrix, PidentValues, FolderPath, DataT
     mtext(text = pidents, side = 1, line = x.lab.line, at = pidents, col = x.lab.cols, cex = x.lab.cex)
     
     # y axis labels
-    span <- y.max - y.min
-    y.ax <- c(y.min, y.min + (span * 1/3), y.min + (span * 2/3), y.max)
-    y.ax.lab <- round(x = y.ax, digits = 0)
+    # span <- y.max - y.min
+    # y.ax <- c(y.min, y.min + (span * 1/3), y.min + (span * 2/3), y.max)
+    y.ax <- pretty(x = c(y.min, y.max), eps.correct = 2)
+    y.ax.lab <- y.ax
     empty.y.labels <- rep("", times = length(y.ax))
     axis(side = 2, at = y.ax, labels = empty.y.labels)
     mtext(text = y.ax.lab, side = 2, line = .7, at = y.ax)

@@ -53,11 +53,11 @@ import sys
 ### User-defined files and other declarations
 ################################################################################
 
-#inputTaxon = sys.argv[1]
-#outputTaxon = sys.argv[2]
+inputTaxon = sys.argv[1]
+outputTaxon = sys.argv[2]
 
-inputTaxon = '/Users/joshamilton/Documents/Research/2015-TagTaxonomyWorkflow/2018-01-18-SILVA-FreshTrain/FreshTrain-files/FreshTrain25Jan2018NoBadLineage/FreshTrain25Jan2018NoBadLineage.taxonomy'
-outputTaxon = 'custom.taxonomy'
+# inputTaxon = '/Users/joshamilton/Documents/Research/2015-TagTaxonomyWorkflow/2018-01-18-SILVA-FreshTrain/FreshTrain-files/FreshTrain25Jan2018NoBadLineage/FreshTrain25Jan2018NoBadLineage.taxonomy'
+# outputTaxon = 'custom.taxonomy'
 
 # Dictionary of class-level disagreements. For each lineage, will update the
 # class with the appropriate SILVA class-level taxonomic assignment

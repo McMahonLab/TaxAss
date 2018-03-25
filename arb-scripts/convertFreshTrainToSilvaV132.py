@@ -40,7 +40,7 @@
 
 # This script requires two arguments, read from the command line:
 # inputTaxon = Input taxonomy file, to make compliant with FreshTrain
-# outputTaxon = Output fasta file, i.e., custom.txonomy
+# outputTaxon = Output taxonomy file, i.e., custom.taxonomy
 ################################################################################
 
 #%%#############################################################################

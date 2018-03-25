@@ -6,6 +6,10 @@
 # URL: http://http://mcmahonlab.wisc.edu/
 # All rights reserved.
 ################################################################################
+
+# ********* Josh you copy-pasted this and it's the wrong silva version!! **************
+# also, this is not copyrighted, that's a legal thing you have to file and pay for, pls adjust language there too?
+
 # Update the taxonomic strucutre of the FreshTrain reference database to be 
 # compatabile with the mothur-compatible SILVA V132 reference files.
 #
@@ -40,7 +44,7 @@
 
 # This script requires two arguments, read from the command line:
 # inputTaxon = Input taxonomy file, to make compliant with FreshTrain
-# outputTaxon = Output fasta file, i.e., custom.txonomy
+# outputTaxon = Output taxonomy file, i.e., custom.txonomy
 ################################################################################
 
 #%%#############################################################################

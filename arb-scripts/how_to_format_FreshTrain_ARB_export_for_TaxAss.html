@@ -120,7 +120,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">How to format the ARB-exported FreshTrain for use with TaxAss</h1>
 <h4 class="author"><em>Robin Rohwer</em></h4>
-<h4 class="date"><em>last updated Feb 1, 2018</em></h4>
+<h4 class="date"><em>last updated Mar 25, 2018</em></h4>
 
 </div>
 
@@ -136,10 +136,12 @@ $(document).ready(function () {
 </li>
 <li>adjust coarse-level nomenclature (phylum/class/order) to match comprehensive database of choice</li>
 </ul>
+<p><br></p>
 </div>
 <div id="arb-export" class="section level2">
 <h2>ARB export</h2>
 <p>The FreshTrain comes from an ARB database of 16S clone libraries from freshwater systems. All of the clones were aligned in ARB alongside the Greengenes database to determine the phylogeny of abundant freshwater taxa introduced in <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3063352/">Newton <em>et al.</em> 2011</a>. Currently all full-length 16S sequences are exported from ARB, and this includes some of the freshwater clones that do not have “FreshTrain names,” i.e. they were found in a freshwater sample but they are not one of the abundant freshwater taxa included in the Newton nomenclature.</p>
+<p><br></p>
 </div>
 <div id="simple-reformatting" class="section level2">
 <h2>Simple Reformatting</h2>
@@ -162,11 +164,12 @@ $(document).ready(function () {
 <p>Use the script <code>removeBadLineages.py</code> with this syntax:</p>
 <pre class="bash"><code>./removeBadLineages.py inputFasta inputTaxon outputFasta outputTaxon</code></pre>
 <p>This script requires four arguments, read from the command line:</p>
-<p><code>inputFasta</code> = Input fasta file, from which to remove lineages: i.e., FreshTrain25Jan2018.fasta<br />
-<code>inputTaxon</code> = Input taxonomy file, from which to remove lineages: i.e., FreshTrain25Jan2018.taxonomy<br />
-<code>outputFasta</code> = Output fasta file, i.e., custom.fasta<br />
-<code>outputTaxon</code> = Output taxonomy file, i.e., custom.taxonomy</p>
+<p><code>inputFasta</code> = Input fasta file, from which to remove lineages: i.e., FreshTrain18Aug2016.fasta<br />
+<code>inputTaxon</code> = Input taxonomy file, from which to remove lineages: i.e., FreshTrain18Aug2016.taxonomy<br />
+<code>outputFasta</code> = Output fasta file, i.e., FreshTrain25Jan2018.fasta<br />
+<code>outputTaxon</code> = Output taxonomy file, i.e., FreshTrain25Jan2018.taxonomy</p>
 <p>From the input files, this script removes any sequences not assigned to a freshwate-specific lineage, and writes the remaining sequences to the output files.</p>
+<p><br></p>
 </div>
 <div id="adjust-coarse-level-nomenclature" class="section level2">
 <h2>Adjust coarse-level nomenclature</h2>
@@ -181,31 +184,26 @@ $(document).ready(function () {
 <p><strong>SILVA v132 syntax is:</strong></p>
 <pre class="bash"><code>convertFreshTrainToSilvaV132.py inputTaxon outputTaxon</code></pre>
 <p>This script requires two arguments, read from the command line:<br />
-<code>inputTaxon</code> = Input taxonomy file, to make compliant with silva v132<br />
-<code>outputTaxon</code> = Output fasta file, i.e., custom.taxonomy</p>
+<code>inputTaxon</code> = Input taxonomy file to make compliant with silva v132. For example, FreshTrain25Jan2018Greengenes13_5.taxonomy <code>outputTaxon</code> = Output taxonomy file. For example, FreshTrain25Jan2018SILVAv128.taxonomy</p>
 <p><br></p>
 <p><strong>SILVA v128 syntax is:</strong></p>
 <pre class="bash"><code>convertFreshTrainToSilvaV128.py inputTaxon outputTaxon</code></pre>
 <p>This script requires two arguments, read from the command line:<br />
-<code>inputTaxon</code> = Input taxonomy file, to make compliant with silva v128<br />
-<code>outputTaxon</code> = Output fasta file, i.e., custom.taxonomy</p>
+<code>inputTaxon</code> = Input taxonomy file to make compliant with silva v128<br />
+<code>outputTaxon</code> = Output taxonomy file</p>
 <p><br> The coarse-level names that needed to be changed were identified using the optional TaxAss step 11.5, where the custom database references are classified with the general database. This generates a list of conflicting names.</p>
+<p><br></p>
 </div>
-<div id="remove-or-add-p__-c__-o__-etc.-prefixes" class="section level2">
-<h2>Remove or Add p__, c__, o__, etc. prefixes:</h2>
+<div id="remove-k__-p__-c__-o__-prefixes" class="section level2">
+<h2>Remove k__, p__, c__, o__ prefixes:</h2>
 <p>Whether the prefixes are there or not needs to match between SILVA and the FreshTrain. Greengenes has them, SILVA doesn’t. Therefore The FreshTrain as exported from ARB has the prefixes.</p>
-<p>2 options:</p>
-<ol style="list-style-type: decimal">
-<li><p>add prefixes to everything in SILVA with Josh’s script <code>processSilvaFromMothur.py</code></p></li>
-<li><p>remove the prefixes from the FreshTrain. This seems easier and faster to me, but who am I? simply find and replace with nothing: k__<br />
-p__<br />
-c__<br />
-o__<br />
-f__<br />
-g__<br />
-s__</p></li>
-</ol>
-<p><strong>we need to come back and edit this to reflect what we do. Obviously we should do #2, because then people don’t have to process the silva database they download before using it and both FreshTrain and SILVA will be grab ’n go</strong> and the un-aligning can be done with a suuuper simple bash script using sed which is really efficient and in the tax-scripts folder.</p>
+<p>Remove the prefixes from the FreshTrain with <code>remove_gg_taxa_level_prefixes.sh</code></p>
+<p>syntax:</p>
+<pre class="bash"><code>./remove_gg_taxa_level_prefixes.sh input.taxonomy output.taxonomy</code></pre>
+<p>where <code>input.taxonomy</code> is for example <code>FreshTrain25Jan2018SILVAv132_temp.taxonomy</code><br />
+and <code>output.taxonomy</code> is for example <code>FreshTrain25Jan2018SILVAv132.taxonomy</code></p>
+<p><br></p>
+<p><strong>note:</strong> Josh’s script <code>processSilvaFromMothur.py</code> adds the prefixes to all of silva at the same time as un-aligning it. But unaligning is not necessary, and the FreshTrain is smaller so makes more sense to change it, and the prefixes are annoying. So instead I’m recommending to create ready-to-use FreshTrain files that don’t have the prefixes, with an optional step to un-align silva included in the TaxAss directions as a shell script.</p>
 </div>
 
 

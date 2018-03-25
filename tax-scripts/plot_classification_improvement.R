@@ -34,7 +34,6 @@ ids.above.path <- userprefs[7]
 # gg.names.path <- "../../test2_smallsilva/final.general.names"
 # ids.above.path <- "../../test2_smallsilva/ids.above.98"
 
-
 improvement.plots.folder <- paste(path.to.plots.folder, "step_15_5a_Improvement_over_general-only", sep = "/")
 
 # ---- Define functions to import and format data ----

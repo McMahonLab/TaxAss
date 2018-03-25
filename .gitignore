@@ -5,15 +5,16 @@
 tax-scripts/.RData
 .Rproj.user
 
-# Databases
+# Other Databases
 FreshTrain-files/gg_13_5.fasta
 FreshTrain-files/gg_13_5.taxonomy
-FreshTrain-files/FreshTrain18Aug2016
-FreshTrain-files/FreshTrain11Feb2016
-FreshTrain-files/FreshTrain25Jan2018/
-FreshTrain-files/FreshTrain25Jan2018NoBadLineage/
-FreshTrain-files/FreshTrain25Jan2018NoBadLineageSILVAv128/
-FreshTrain-files/FreshTrain25Jan2018NoBadLineageSILVAv132/
+
+# Expanded FreshTrain Folders
+FreshTrain-files/FreshTrain18Aug2016/
+FreshTrain-files/FreshTrain11Feb2016/
+FreshTrain-files/FreshTrain25Jan2018Greengenes13_5/
+FreshTrain-files/FreshTrain25Mar2018SILVAv128/
+FreshTrain-files/FreshTrain25Mar2018SILVAv132/
 
 # Data Directories
 processedData

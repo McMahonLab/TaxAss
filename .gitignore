@@ -32,6 +32,7 @@ arb-scripts/Marathonas_test/v4_mara/
 arb-scripts/Marathonas_test/v4v5_mara/
 arb-scripts/Marathonas_test/v3v4_mara/
 arb-scripts/Marathonas_test/v6_mara/
+arb-scripts/Marathonas_test/with_greengenes/
 
 # temp hide
 arb-scripts/Marathonas_test/add-tax-scripts-and-databases

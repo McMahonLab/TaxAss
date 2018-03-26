@@ -130,12 +130,12 @@ $(document).ready(function () {
 <p>This readme walks you through the data processing to reproduce “simulated tag data” from full-length 16S sequences. This was used to validate TaxAss.</p>
 <p>The process:</p>
 <ul>
-<li>Start with full length 16S sequences from Marathonas reservoir in Greece.
+<li>Start with full-length 16S sequences from Marathonas reservoir in Greece.
 <ul>
 <li>These do not already exist in the FreshTrain database.<br />
 </li>
 </ul></li>
-<li>Align the full length sequences to the FreshTrain manually using Arb.
+<li>Align the full-length sequences to the FreshTrain manually using Arb.
 <ul>
 <li>The result of this is zipped in this folder. Likely chimeras were removed.<br />
 </li>
@@ -150,7 +150,7 @@ $(document).ready(function () {
 <li>When I say “tax!”, you say “ass!”<br />
 </li>
 </ul></li>
-<li>Compare the TaxAss assignment results to the “true” classifications known from the full length alignments.</li>
+<li>Compare the TaxAss assignment results to the “true” classifications known from the full-length alignments.</li>
 </ul>
 </div>
 <div id="unzip-and-add-taxass-tax-scripts" class="section level2">
@@ -158,9 +158,9 @@ $(document).ready(function () {
 <p>Start with <code>Marathonas_test</code> as your present working directory.</p>
 <p>Add the tax-scripts and taxonomy database files to the <code>add-tax-scripts-and-databases</code> folder:</p>
 <pre class="bash"><code>cp ../../tax-scripts/*  add-tax-scripts-and-databases
-# unzip your FreshTrain reference (using GG-compatible for example:)
-cp ../../FreshTrain-files/FreshTrain25Jan2018NoBadLineage/FreshTrain25Jan2018NoBadLineage.fasta add-tax-scripts-and-databases/custom.fasta
-cp ../../FreshTrain-files/FreshTrain25Jan2018NoBadLineage/FreshTrain25Jan2018NoBadLineage.taxonomy  add-tax-scripts-and-databases/custom.taxonomy
+# unzip your FreshTrain reference (using SILVA v132 for example:)
+cp ../../FreshTrain-files/FreshTrain25Mar2018SILVAv132/FreshTrain25Jan2018SILVAv132.fasta add-tax-scripts-and-databases/custom.fasta
+cp ../../FreshTrain-files/FreshTrain25Mar2018SILVAv132/FreshTrain25Jan2018SILVAv132.taxonomy add-tax-scripts-and-databases/custom.taxonomy
 # add your comprehensive database (formatted according to TaxAss step 0, named general.fasta and general.taxonomy)</code></pre>
 </div>
 <div id="trim-full-length-sequences-to-different-v-regions" class="section level2">
@@ -168,9 +168,10 @@ cp ../../FreshTrain-files/FreshTrain25Jan2018NoBadLineage/FreshTrain25Jan2018NoB
 <p>Trim the Marathonas full-length 16S sequences to the variable regions amplified by primers in tag data. Do this for several commonly used primer sets that amplify regions of differing lengths. Put each V-region analysis in a different folder.</p>
 <p>This uses the shell script <code>trim_full-length_to_primer_region.sh</code> and requires the program mothur to be on your computer’s path. The syntax to call the script is:</p>
 <pre><code>./trim_full-length_to_primer_region.sh primers.oligos aligned-fasta-without-filetype name-for-trimmed.fasta</code></pre>
+<p>note: this is set to correct for a bug in mothur v.1.39.5, so script should be adjusted if a new verison fixes bug (says where in script)</p>
 <div id="v4-region" class="section level4">
 <h4>V4 region</h4>
-<pre class="bash"><code>mkdir v4_tags
+<pre class="bash"><code>mkdir v4_mara
 # add all the scripts and reference files
 cp add-tax-scripts-and-databases/* v4_mara/
 cp oligo-files/v4_515F-806R.oligos v4_mara/

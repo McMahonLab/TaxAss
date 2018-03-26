@@ -144,8 +144,8 @@ SILVA calls `unclassified`'s `unclutured`'s. just FYI.
 
 The change is for acV, needs a named order (b/c can't have names under unclassified), but it's order is not named in SILVA.
 
-Robin manually changed them to `acV-parent-order` for now. 
+Robin manually changed them to `Acidimicrobiales` for now, because that's what they were before and that order still exists in silva. 
 
-change should prob go into Josh's python re-naming script.
+change should prob go into Josh's python re-naming script. and figure out wtf it changed in the first place if the name still exists in silva.
 
 

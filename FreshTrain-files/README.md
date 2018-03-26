@@ -12,10 +12,9 @@ The zipped files in this folder contain the McMahon Lab's custom taxonomy databa
 zipped file name        | description
 ------------------------|----------------------------------------------------------------
 FreshTrain18Aug2016     | old version formatted for Greengenes (don't use)  
-FreshTrain25Jan2018.zip | (don't use)  
-FreshTrain25Jan2018NoBadLineage.zip | current version formatted for Greengenes  
-FreshTrain25Jan2018NoBadLineageSILVAv128.zip | current version formatted for SILVA v128  
-FreshTrain25Jan2018NoBadLineageSILVAv132.zip | current version formatted for SILVA v132  
+FreshTrain25Jan2018Greengenes13_5.zip | current version formatted for Greengenes  
+FreshTrain25Mar2018SILVAv128.zip | current version formatted for SILVA v128  
+FreshTrain25Mar2018SILVAv132.zip | current version formatted for SILVA v132  
 
 <br>
 The citation for the FreshTrain database is:  

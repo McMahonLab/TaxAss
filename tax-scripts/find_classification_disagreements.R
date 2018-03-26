@@ -34,15 +34,15 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 # -------------------------------------------------------------
 # input for troubleshooting
 # -------------------------------------------------------------
-# # CONFLICT FINDING ONLY:
+# CONFLICT FINDING ONLY:
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-# userprefs <- c("../../poster_mend-check/otus.98.taxonomy",
-#                "../../poster_mend-check/otus.general.taxonomy",
-#                "../../poster_mend-check/ids.above.98",
-#                "../../poster_mend-check/conflicts_98/",
+# userprefs <- c("../arb-scripts/Marathonas_test/v4_mara/otus.98.taxonomy",
+#                "../arb-scripts/Marathonas_test/v4_mara/otus.general.taxonomy",
+#                "../arb-scripts/Marathonas_test/v4_mara/ids.above.98",
+#                "../arb-scripts/Marathonas_test/v4_mara/conflicts_98/",
 #                98,
-#                70,
-#                70)
+#                80,
+#                80)
 # FINAL TABLE GENERATION: note you do need the otus.general.taxonomy file b/c it's used to prep a file for plot_classification_improvement.R in step 15
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
 # userprefs <- c("~/Desktop/TaxAssData/TaxAss-BatchFiles/Mendota/TaxAss-Mendota/otus.98.taxonomy",
@@ -232,39 +232,37 @@ find.fw.seqid.indeces <- function(FullTable, FWids){
 }
 
 uniform.unclass.names <- function(TaxonomyTable){
-  # makes all the unclassified/unknown/any other word for it names be uniformly called "unclassified"
-  # finds them b/c those names do not have bootstrap percents in parentheses, i.e. the (70)
-  # also changes k__(100) etc to unclassified
   # this is used in the function do.bootstrap.cutoff()
+  # all unnamed refs are called "unclassified" with no bootstrap value
+  # this can throw errors if new names are used for unknown things. For example, right now don't recognize NA 
   
   tax <- TaxonomyTable
   
-  # find 'odd entries' that don't have bootstrap percents after them, like Unknown
-  odd.entries <- unique(grep(pattern = '.*\\(', x = tax[ ,-1], value = TRUE, invert = TRUE))
-  
-  # find 'empty entries' that don't have names, like p__(100)
-  empty.entries <- grep(pattern = '.{1}__\\(\\d{0,3}\\)', x = tax[,-1], value = TRUE, invert = FALSE)
-  empty.entries <- unique(sub(x = empty.entries, pattern = '\\(\\d{0,3}\\)', replacement = ""))
-  
-  if ((length(odd.entries) + length(empty.entries)) > 0){
-  cat("Note: These names in your taxonomy table are missing a bootstrap taxonomy assignment value or name:\n",
-      odd.entries, " ", empty.entries,
-      "\nThese names will be renamed as \"unclassified\". If that seems incorrect",
-      "then you have to figure out why the parentheses are missing from them.", 
-      "\nHave ALL your names here? Check that in the classify.seqs() mothur command probs=T\n")
-  }
-  
-  # Change odd entries those names to unclassified (sometimes, for example, they might be "unknown")
+  # 'blank entries' based on the fact that they don't have bootstrap percents after them
+  blank.entries <- unique(grep(pattern = '.*\\(', x = tax[ ,-1], value = TRUE, invert = TRUE))
   index <- grep(pattern = '.*\\(', x = tax[ ,-1], value = FALSE, invert = TRUE)
   tax[ ,-1][index] <- "unclassified"
   
-  # Change all empty names to "unclassified" for ex. GG will say c__(100) for an unknown class it sorted into.
-  index2 <- grep(pattern = '.{1}__\\(\\d{0,3}\\)', x = tax[ ,-1], value = FALSE, invert = FALSE)
-  tax[ ,-1][index2] <- "unclassified"  
+  # 'empty entries' that don't have names, like p__(100) in greengenes
+  gg.unnamed.entries <- grep(pattern = '.{1}__\\(\\d{0,3}\\)', x = tax[ ,-1], value = TRUE, invert = FALSE)
+  index <- grep(pattern = '.{1}__\\(\\d{0,3}\\)', x = tax[ ,-1], value = FALSE, invert = FALSE)
+  tax[ ,-1][index] <- "unclassified"
   
-  # Also change any names that give a p-value to unclassified, like unclassified(85) to say just: unclassified
-  index3 <- grep(pattern = 'unclassified\\(\\d{0,3}\\)', x = tax[ ,-1], value = FALSE, invert = FALSE)
-  tax[ ,-1][index3] <- "unclassified"
+  # 'empty entries' that don't have level-specific names, like chloroplast_fa in silva
+  silva.unnamed.entries <- grep(pattern = '.*_((ph)|(cl)|(or)|(fa)|(ge))\\(\\d{0,3}\\)', x = tax[ ,-1], value = TRUE, invert = FALSE)
+  index <- grep(pattern = '.*_((ph)|(cl)|(or)|(fa)|(ge))\\(\\d{0,3}\\)', x = tax[ ,-1], value = FALSE, invert = FALSE)
+  tax[ ,-1][index] <- "unclassified"
+  
+  # 'unclassified' entries that got a bootstrap value for their non-specific name, like unclassified(85) to say just: unclassified
+  # finding unclassified uncultured unknown right now (case insensitive)
+  unclass.entries <- grep(pattern = '((unclassified)|(uncultured)|(unknown))\\(\\d{0,3}\\)', x = tax[ ,-1], value = TRUE, invert = FALSE, ignore.case = TRUE)
+  index <- grep(pattern = '((unclassified)|(uncultured)|(unknown))\\(\\d{0,3}\\)', x = tax[ ,-1], value = FALSE, invert = FALSE, ignore.case = TRUE)
+  tax[ ,-1][index] <- "unclassified"
+  
+  all.changed.names <- c(blank.entries, gg.unnamed.entries, silva.unnamed.entries, unclass.entries)
+  all.changed.names <- unique(gsub(pattern = '\\(\\d{0,3}\\)', replacement = "", x = all.changed.names))
+  
+  cat("\nThe following names were changed to \"unclassified\":", unique(all.changed.names), "\n", sep = "\" \"")
   
   return(tax)
 }
@@ -279,7 +277,8 @@ uniform.unclass.names.database <- function(TaxonomyDatabase){
   index <- which(tax[,-1] == "" | tax[,-1] == 0 | tax[,-1] == "0" | is.null(tax[,-1]) | tax[,-1] == "NULL" | is.na(tax[,-1])| tax[,-1] == "NA" |
                  tax[,-1] == "unknown" | tax[,-1] == "Unknown" | tax[,-1] == "UnKnown" | tax[,-1] == "UNKNOWN" | 
                  tax[,-1] == "Unclassified" | tax[,-1] == "UnClassified" | tax[,-1] == "UNCLASSIFIED" |
-                 tax[,-1] == "Unidentified" | tax[,-1] == "UnIdentified" | tax[,-1] == "UNIDENTIFIED")
+                 tax[,-1] == "unidentified" | tax[,-1] == "Unidentified" | tax[,-1] == "UnIdentified" | tax[,-1] == "UNIDENTIFIED" |
+                 tax[,-1] == "uncultured" | tax[,-1] == "Uncultured" | tax[,-1] == "UnCultured" | tax[,-1] == "UNCULTURED")
   tax[,-1][index] <- "unclassified"
   
   # Also change any empty names to "unclassified" for ex. GG will say c__(100) for an unknown class it sorted into.
@@ -316,7 +315,7 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   tax.nums <- apply(X = tax.nums, MARGIN = 2, FUN = as.numeric)
   tax.TF <- tax.nums >= cutoff
   
-  # make sure you never get a "classified" under an "unclassified" (this may not be necessary)
+  # make sure you never get a "classified" under an "unclassified" (this prevents downstream bugs)
   tax.TF <- t(apply(X = tax.TF, MARGIN = 1, FUN = cummin))
   
   # make all names in the taxonomy table unclassified if they're below the bootstrap cutoff
@@ -547,7 +546,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
 # Only compare the classifications made by the fw database to the gg classifications, not full tax tables
 }else{
 # -------------------------------------------------------------  
-  cat("\n\ncomparing seqIDs the workflow classified with custom database to how general database would have classified them.\n\n")
+  cat("\ncomparing seqIDs that TaxAss classified with the custom database to how the general database would have classified them.\n")
   
   fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path)
   gg.percents <- import.GG.names(FilePath = gg.only.tax.file.path)

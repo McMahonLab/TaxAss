@@ -134,3 +134,18 @@ and `output.taxonomy` is for example `FreshTrain25Jan2018SILVAv132.taxonomy`
 **note:** Josh's script `processSilvaFromMothur.py` adds the prefixes to all of silva at the same time as un-aligning it.
 But unaligning is not necessary, and the FreshTrain is smaller so makes more sense to change it, and the prefixes are annoying. So instead I'm recommending to create ready-to-use FreshTrain files that don't have the prefixes, with an optional step to un-align silva included in the TaxAss directions as a shell script.
 
+<br>
+
+## Manual change by Robin, needs to be added in!!
+
+Right now I only changed my local, expanded, gitignored version, not the zipped file.
+
+SILVA calls `unclassified`'s `unclutured`'s. just FYI.
+
+The change is for acV, needs a named order (b/c can't have names under unclassified), but it's order is not named in SILVA.
+
+Robin manually changed them to `acV-parent-order` for now. 
+
+change should prob go into Josh's python re-naming script.
+
+

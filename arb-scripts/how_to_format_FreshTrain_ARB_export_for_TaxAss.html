@@ -204,6 +204,15 @@ $(document).ready(function () {
 and <code>output.taxonomy</code> is for example <code>FreshTrain25Jan2018SILVAv132.taxonomy</code></p>
 <p><br></p>
 <p><strong>note:</strong> Josh’s script <code>processSilvaFromMothur.py</code> adds the prefixes to all of silva at the same time as un-aligning it. But unaligning is not necessary, and the FreshTrain is smaller so makes more sense to change it, and the prefixes are annoying. So instead I’m recommending to create ready-to-use FreshTrain files that don’t have the prefixes, with an optional step to un-align silva included in the TaxAss directions as a shell script.</p>
+<p><br></p>
+</div>
+<div id="manual-change-by-robin-needs-to-be-added-in" class="section level2">
+<h2>Manual change by Robin, needs to be added in!!</h2>
+<p>Right now I only changed my local, expanded, gitignored version, not the zipped file.</p>
+<p>SILVA calls <code>unclassified</code>’s <code>unclutured</code>’s. just FYI.</p>
+<p>The change is for acV, needs a named order (b/c can’t have names under unclassified), but it’s order is not named in SILVA.</p>
+<p>Robin manually changed them to <code>acV-parent-order</code> for now.</p>
+<p>change should prob go into Josh’s python re-naming script.</p>
 </div>
 
 

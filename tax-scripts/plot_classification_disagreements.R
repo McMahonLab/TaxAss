@@ -23,11 +23,11 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 
 # FOR PLOTTING FORCING  **don't forget to change the seqID.reads file path below!!
 # cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!\n")
-# userprefs <- c(NA, # if seqid.reads exists (i.e. you ran step 14) this is NA, otherwise it's otus.abund file path)
-#                "../../ME_plot_test/plots",
-#                "../../ME_plot_test/conflicts_forcing",
-#                "../../ME_plot_test/otus.custom.85.taxonomy",
-#                "../../ME_plot_test/otus.98.85.70.taxonomy")
+# userprefs <- c("../arb-scripts/Marathonas_test/v4_mara/otus.abund", # if seqid.reads exists (i.e. you ran step 14) this is NA, otherwise it's otus.abund file path)
+#                "../arb-scripts/Marathonas_test/v4_mara/plots",
+#                "../arb-scripts/Marathonas_test/v4_mara/conflicts_forcing",
+#                "../arb-scripts/Marathonas_test/v4_mara/otus.custom.80.taxonomy",
+#                "../arb-scripts/Marathonas_test/v4_mara/otus.98.80.80.taxonomy")
 
 # # FOR CHOOSING CUTOFF:
 # cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")

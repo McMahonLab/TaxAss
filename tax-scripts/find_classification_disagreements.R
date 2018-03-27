@@ -253,6 +253,11 @@ uniform.unclass.names <- function(TaxonomyTable){
   index <- grep(pattern = '.*_((ph)|(cl)|(or)|(fa)|(ge))\\(\\d{0,3}\\)', x = tax[ ,-1], value = FALSE, invert = FALSE)
   tax[ ,-1][index] <- "unclassified"
   
+  # 'empty entries' that don't have level-specific names, like Unknown_Family in silva (fucking irregular nomenclature)
+  silva.unnamed.entries2 <- grep(pattern = '((unclassified)|(uncultured)|(Unknown))_.*\\(\\d{0,3}\\)', x = tax[ ,-1], value = TRUE, invert = FALSE, ignore.case = TRUE)
+  index <- grep(pattern = '((unclassified)|(uncultured)|(Unknown))_.*\\(\\d{0,3}\\)', x = tax[ ,-1], value = FALSE, invert = FALSE, ignore.case = TRUE)
+  tax[ ,-1][index] <- "unclassified"
+  
   # 'unclassified' entries that got a bootstrap value for their non-specific name, like unclassified(85) to say just: unclassified
   # finding unclassified uncultured unknown right now (case insensitive)
   unclass.entries <- grep(pattern = '((unclassified)|(uncultured)|(unknown))\\(\\d{0,3}\\)', x = tax[ ,-1], value = TRUE, invert = FALSE, ignore.case = TRUE)

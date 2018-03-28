@@ -2,14 +2,27 @@
 title: "How to format the ARB-exported FreshTrain for use with TaxAss"
 author: "Robin Rohwer"
 date: "last updated Mar 25, 2018"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Overview of steps
+```{css, echo=FALSE}
+pre code, pre, code {
+  white-space: pre !important;
+  overflow-x: scroll !important;
+  word-break: keep-all !important;
+  word-wrap: initial !important;
+}
+```
+
+# Overview of steps
 
 * export all full-length 16S from ARB  
 * reformatting to make taxonomy file compatible with mothur  
@@ -18,7 +31,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 <br>
 
-## ARB export  
+# ARB export  
 
 The FreshTrain comes from an ARB database of 16S clone libraries from freshwater systems. 
 All of the clones were aligned in ARB alongside the Greengenes database to determine the 
@@ -29,7 +42,7 @@ sample but they are not one of the abundant freshwater taxa included in the Newt
 
 <br>
 
-## Simple Reformatting  
+# Simple Reformatting  
 
 Replace `U` and `.` with `T` and `-` (perl)  
 ```{bash, eval=F}
@@ -47,6 +60,9 @@ Replace blanks like `;;;` with unclassifieds like `unclassified;unclassified;unc
 ```{bash, eval=F}
 Rscript replace_blanks_with_unclassified.R semicolon-delim-input-file output-file
 ```
+The RDP classifier takes a computational shortcut when calculating bootstrap
+p-values. For higher taxonomy levels it simply sums the lower levels.  If the lower level is 
+totally blank there's nothing to sum up, so the highest level ends up being less than 100%.  
 <br>
   
 Return to first column being tab delimited for mothur-compatibility (bash)  
@@ -55,14 +71,16 @@ Return to first column being tab delimited for mothur-compatibility (bash)
 ```
 <br>
   
-## Remove Non-FreshTrain References
+# Remove Non-FreshTrain  
 
-Before taxonomy assignment with the FreshTrain and TaxAss, these sequences need to be removed 
-because only relevant reference sequences should exist for the percent identity calculation.
+Before taxonomy assignment with the FreshTrain and TaxAss, sequences that are not well flushed-out 
+by the freshwater taxonomy need to be removed because only relevant reference sequences should exist 
+for the percent identity calculation. The full set of freshwater sequences includes all of the clones,
+including ones that are not part of the well-defined freshwater taxonomy.
 
 Use the script `removeBadLineages.py` with this syntax:
 ```{bash, eval=F}
-./removeBadLineages.py inputFasta inputTaxon outputFasta outputTaxon
+python remove_non-FreshTrain_References.py inputFasta inputTaxon outputFasta outputTaxon
 ```
 This script requires four arguments, read from the command line:  
 
@@ -76,7 +94,7 @@ freshwate-specific lineage, and writes the remaining sequences to the output fil
 
 <br>
 
-## Adjust coarse-level nomenclature  
+# Adjust coarse-level    
 
 The FreshTrain phylogeny isn't currently integrated into a comprehensive database, like
 Greengenes or silva, which is why TaxAss is necessary. However, it's "coarse-level" taxonomic 
@@ -116,7 +134,7 @@ with the general database. This generates a list of conflicting names.
 
 <br>
 
-## Remove k\_\_, p\_\_, c\_\_, o\_\_ prefixes:
+# Remove k\_\_, p\_\_, c\_\_, o\_\_  
 
 Whether the prefixes are there or not needs to match between SILVA and the FreshTrain. Greengenes has them, SILVA doesn't. Therefore The FreshTrain as exported from ARB has the prefixes.  
   
@@ -136,7 +154,7 @@ But unaligning is not necessary, and the FreshTrain is smaller so makes more sen
 
 <br>
 
-## Manual change by Robin, needs to be added in!!
+# Manual change by Robin, needs to be added in!!
 
 Right now I only changed my local, expanded, gitignored version, not the zipped file.
 

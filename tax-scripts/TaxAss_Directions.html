@@ -533,6 +533,47 @@ If there are dashes it makes it difficult to switch between aligned and unaligne
 </ul>
 <pre><code>seqID   kingdom;phylum;class;order;family;genus;species;</code></pre>
 <hr />
+<div id="format-the-silva-taxonomy-database" class="section level4">
+<h4>Format the Silva Taxonomy Database:</h4>
+<p>Downloading from mothur, you shouldn’t need to worry about delimiters etc, this will be in the correct format.<br />
+BUT, SILVA uses inconsistent nomenclature for sequences that don’t have names. We <strong>strongly recommend re-formatting them into a more consistent nomenclature</strong> using the script <code>force_consistent_unclassifieds_on_database.R</code>.</p>
+<p>Full Command (type in terminal):</p>
+<pre><code>Rscript force_consistent_unclassifieds_on_database.R silva.nr_v132.tax general.taxonomy</code></pre>
+<table style="width:93%;">
+<colgroup>
+<col width="27%"></col>
+<col width="65%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>command argument</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>silva.nr_v132.tax</td>
+<td>input file. the mothur-formatted silva taxonomy with inconsistent names. If you are unaligning the fasta, you can do this step before or after removing the periods from the seqID names.</td>
+</tr>
+<tr class="even">
+<td>general.taxonomy</td>
+<td>silva taxonomy with consistent unclassified names that is ready-to-taxass!</td>
+</tr>
+</tbody>
+</table>
+<p>Comments in the script are very detailed as to examples of the changes. The new missing names are easier to deal with because they follow the consistent format where they begin with either:</p>
+<ul>
+<li>unnamed<br />
+</li>
+<li>unknown<br />
+</li>
+<li>uncultured<br />
+</li>
+<li>unclassified</li>
+</ul>
+<p>And are followed by a period and the closest available parent-name.</p>
+<hr />
+</div>
 <div id="format-the-greengenes-taxonomy-database" class="section level4">
 <h4>Format the Greengenes Taxonomy Database</h4>
 <p>Full 4 Commands (type in terminal):</p>
@@ -552,11 +593,6 @@ If there are dashes it makes it difficult to switch between aligned and unaligne
 </tbody>
 </table>
 <p>Output is a file called <code>general.taxonomy</code> that is formatted correctly.</p>
-<hr />
-</div>
-<div id="format-the-silva-database" class="section level4">
-<h4>Format the Silva database:</h4>
-<p>If you downloaded it from mothur, it’s ready-to-go. Optionally you can unalign the fasta to make the file size smaller (directions under fasta tab).</p>
 <hr />
 </div>
 </div>

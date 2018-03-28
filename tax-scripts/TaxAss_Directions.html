@@ -1441,53 +1441,6 @@ cat otus.general.wang.taxonomy &gt; otus.general.taxonomy</code></pre>
 </table>
 <hr />
 </div>
-<div id="dont-do-this-step" class="section level1">
-<h1><span style="color:SteelBlue">11.5 (don’t do this step)</span></h1>
-<div id="assign-taxonomy-to-custom-database-with-general-database-mothur-bash" class="section level5">
-<h5><span style="color:SteelBlue">11.5 assign taxonomy to custom database with general database (mothur, bash)</span></h5>
-<p>This is used in the <code>Database_Improvement_Workflow.txt</code> in the <code>arb-scripts</code> folder. It’s basically pointless to do if you’re not working on the quality of the custom database, but if you want to you can read more about that in a note at the end of step 14.</p>
-<p>By classifying the custom database with the general database you can:</p>
-<ul>
-<li>Compare your two databases to get an idea of the baseline level of disagreement you can expect from their taxonomy classifications. This was not super helpful so you can’t do it from the command line anymore, you have to open up step 14’s plot_classification_disagreements.R and uncomment out that part to do it manually.</li>
-<li>Generate a list of database disagreements that you can use to update your custom database classifications to better match your general database using the .csv files generated in step 12.</li>
-</ul>
-<p>Full Two Commands (Type in Terminal):</p>
-<pre><code>mothur &quot;#classify.seqs(fasta=custom.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)&quot;
-cat custom.general.wang.taxonomy custom.general.taxonomy</code></pre>
-<p>(See step 9 for a detailed explanation of these two commands and their arguments.)</p>
-<table>
-<colgroup>
-<col width="41%"></col>
-<col width="58%"></col>
-</colgroup>
-<thead>
-<tr class="header">
-<th>file names</th>
-<th>description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>custom.fasta</code></td>
-<td>the fasta file of the small, custom database</td>
-</tr>
-<tr class="even">
-<td><code>general.fasta</code></td>
-<td>the fasta file of the large, general database</td>
-</tr>
-<tr class="odd">
-<td><code>custom.general.wang.taxonomy</code></td>
-<td>the taxonomy of your custom database assigned by the general database<br>this is the default name created by mothur</td>
-</tr>
-<tr class="even">
-<td><code>custom.general.taxonomy</code></td>
-<td>the custom.general.wang.taxonomy file renamed</td>
-</tr>
-</tbody>
-</table>
-<hr />
-</div>
-</div>
 <div id="reformat-taxonomy-files" class="section level1">
 <h1><span style="color:SteelBlue">12. reformat taxonomy files</span></h1>
 <hr />

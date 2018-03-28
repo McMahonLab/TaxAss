@@ -857,41 +857,6 @@ file names                   | description
 
 __________________________________________________________________________________________
 
-# <span style="color:SteelBlue">11.5 (don't do this step)</span>
-
-#####  <span style="color:SteelBlue">11.5 assign taxonomy to custom database with general database (mothur, bash)</span>
-
-This is used in the `Database_Improvement_Workflow.txt` in the `arb-scripts` folder. 
-It's basically pointless to do if you're not working on the quality of the custom database,
-but if you want to you can read more about that in a note at the end of step 14.
-
-By classifying the custom database with the general database you can:  
-
-- Compare your two databases to get an idea of the baseline level of disagreement you 
-	  can expect from their taxonomy classifications.  This was not super helpful so you can't
-	  do it from the command line anymore, you have to open up step 14's 
-	  plot_classification_disagreements.R and uncomment out that part to do it manually.
-- Generate a list of database disagreements that you can use to update your custom
-	  database classifications to better match your general database using the .csv files
-	  generated in step 12. 
-
-Full Two Commands (Type in Terminal):
-```
-mothur "#classify.seqs(fasta=custom.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
-cat custom.general.wang.taxonomy custom.general.taxonomy
-```
-
-(See step 9 for a detailed explanation of these two commands and their arguments.)  
-
-file names                      | description
---------------------------------|----------------------------------------------
-`custom.fasta`					        | the fasta file of the small, custom database
-`general.fasta`					        | the fasta file of the large, general database
-`custom.general.wang.taxonomy`  | the taxonomy of your custom database assigned by the general database<br>this is the default name created by mothur
-`custom.general.taxonomy`			  | the custom.general.wang.taxonomy file renamed
-	
-	
-__________________________________________________________________________________________
 
 # <span style="color:SteelBlue">12. reformat taxonomy files</span>
 

@@ -183,7 +183,8 @@ remove.extra.voldemorts <- function(tax){
 revert.to.mothur.format <- function(silva){
   seqid.kingdom <- paste(silva[ ,1], silva[ ,2], sep = "\t")
   silva <- silva[ ,-(1:2)]
-  silva <- cbind(seqid.kingdom, silva)
+  # also add a blank column to get semicolons at the end of the line also
+  silva <- cbind(seqid.kingdom, silva, "")
   return(silva)
 }
 
@@ -206,5 +207,5 @@ stupid.silva[ ,-1] <- remove.extra.voldemorts(tax = stupid.silva[ ,-1])
 
 uniform.silva <- revert.to.mothur.format(silva = stupid.silva)
 
-write.table(x = uniform.silva, file = new.silva.file, quote = F, col.names = FALSE, row.names = FALSE)
+write.table(x = uniform.silva, file = new.silva.file, quote = F, col.names = FALSE, row.names = FALSE, sep = ";")
 cat("Made file: ", new.silva.file, "\n")

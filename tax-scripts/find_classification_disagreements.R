@@ -36,10 +36,10 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 # -------------------------------------------------------------
 # CONFLICT FINDING ONLY:
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-# userprefs <- c("../arb-scripts/Marathonas_test/v4_mara/otus.98.taxonomy",
-#                "../arb-scripts/Marathonas_test/v4_mara/otus.general.taxonomy",
-#                "../arb-scripts/Marathonas_test/v4_mara/ids.above.98",
-#                "../arb-scripts/Marathonas_test/v4_mara/conflicts_98/",
+# userprefs <- c("../../test4_smallsilva/otus.98.taxonomy",
+#                "../../test4_smallsilva/otus.general.taxonomy",
+#                "../../test4_smallsilva/ids.above.98",
+#                "../../test4_smallsilva/conflicts_98",
 #                98,
 #                80,
 #                80)
@@ -239,35 +239,34 @@ uniform.unclass.names <- function(TaxonomyTable){
   tax <- TaxonomyTable
   
   # 'blank entries' based on the fact that they don't have bootstrap percents after them
-  blank.entries <- unique(grep(pattern = '.*\\(', x = tax[ ,-1], value = TRUE, invert = TRUE))
+  # blank.entries <- unique(grep(pattern = '.*\\(', x = tax[ ,-1], value = TRUE, invert = TRUE))
   index <- grep(pattern = '.*\\(', x = tax[ ,-1], value = FALSE, invert = TRUE)
   tax[ ,-1][index] <- "unclassified"
   
   # 'empty entries' that don't have names, like p__(100) in greengenes
-  gg.unnamed.entries <- grep(pattern = '.{1}__\\(\\d{0,3}\\)', x = tax[ ,-1], value = TRUE, invert = FALSE)
+  # gg.unnamed.entries <- grep(pattern = '.{1}__\\(\\d{0,3}\\)', x = tax[ ,-1], value = TRUE, invert = FALSE)
   index <- grep(pattern = '.{1}__\\(\\d{0,3}\\)', x = tax[ ,-1], value = FALSE, invert = FALSE)
   tax[ ,-1][index] <- "unclassified"
   
-  # 'empty entries' that don't have level-specific names, like chloroplast_fa in silva
-  silva.unnamed.entries <- grep(pattern = '.*_((ph)|(cl)|(or)|(fa)|(ge))\\(\\d{0,3}\\)', x = tax[ ,-1], value = TRUE, invert = FALSE)
-  index <- grep(pattern = '.*_((ph)|(cl)|(or)|(fa)|(ge))\\(\\d{0,3}\\)', x = tax[ ,-1], value = FALSE, invert = FALSE)
+  # 'unnamed entries' in silva
+  # silva.unnamed.entries <- grep(pattern = 'unnamed*', x = tax[ ,-1], value = TRUE, invert = FALSE)
+  index <- grep(pattern = 'unnamed*', x = tax[ ,-1], value = FALSE, invert = FALSE)
   tax[ ,-1][index] <- "unclassified"
   
-  # 'empty entries' that don't have level-specific names, like Unknown_Family in silva (fucking irregular nomenclature)
-  silva.unnamed.entries2 <- grep(pattern = '((unclassified)|(uncultured)|(Unknown))_.*\\(\\d{0,3}\\)', x = tax[ ,-1], value = TRUE, invert = FALSE, ignore.case = TRUE)
-  index <- grep(pattern = '((unclassified)|(uncultured)|(Unknown))_.*\\(\\d{0,3}\\)', x = tax[ ,-1], value = FALSE, invert = FALSE, ignore.case = TRUE)
+  # 'unknown entries' in silva 
+  # silva.unknown.entries <- grep(pattern = 'unknown*', x = tax[ ,-1], value = TRUE, invert = FALSE, ignore.case = TRUE)
+  index <- grep(pattern = 'unknown*', x = tax[ ,-1], value = FALSE, invert = FALSE, ignore.case = TRUE)
   tax[ ,-1][index] <- "unclassified"
   
-  # 'unclassified' entries that got a bootstrap value for their non-specific name, like unclassified(85) to say just: unclassified
-  # finding unclassified uncultured unknown right now (case insensitive)
-  unclass.entries <- grep(pattern = '((unclassified)|(uncultured)|(unknown))\\(\\d{0,3}\\)', x = tax[ ,-1], value = TRUE, invert = FALSE, ignore.case = TRUE)
-  index <- grep(pattern = '((unclassified)|(uncultured)|(unknown))\\(\\d{0,3}\\)', x = tax[ ,-1], value = FALSE, invert = FALSE, ignore.case = TRUE)
+  # 'uncultured entries' in silva 
+  # silva.unknown.entries <- grep(pattern = 'uncultured*', x = tax[ ,-1], value = TRUE, invert = FALSE, ignore.case = TRUE)
+  index <- grep(pattern = 'uncultured*', x = tax[ ,-1], value = FALSE, invert = FALSE, ignore.case = TRUE)
   tax[ ,-1][index] <- "unclassified"
   
-  all.changed.names <- c(blank.entries, gg.unnamed.entries, silva.unnamed.entries, unclass.entries)
-  all.changed.names <- unique(gsub(pattern = '\\(\\d{0,3}\\)', replacement = "", x = all.changed.names))
-  
-  cat("\nThe following names were changed to \"unclassified\":", unique(all.changed.names), "\n", sep = "\" \"")
+  # 'unclassified' entries 
+  # unclass.entries <- grep(pattern = 'unclassified*', x = tax[ ,-1], value = TRUE, invert = FALSE, ignore.case = TRUE)
+  index <- grep(pattern = 'unclassified*', x = tax[ ,-1], value = FALSE, invert = FALSE, ignore.case = TRUE)
+  tax[ ,-1][index] <- "unclassified"
   
   return(tax)
 }
@@ -352,7 +351,7 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
     index <- which(gg[,t+1] != fw[,t+1] & gg[,t+1] != "unclassified" & fw[,t+1] != "unclassified")
   }
   
-  cat("there are ", length(index), " conflicting names at ", taxa.names[t], " level\n")
+  # cat("there are ", length(index), " conflicting names at ", taxa.names[t], " level\n")
   num.mismatches[t] <- length(index)
   
   # Compare the conflicting tables in entirety, use the original files with percents still in it
@@ -362,7 +361,9 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
   check.files.match(FWtable = conflicting[,9:16,drop=F], GGtable = conflicting[,1:8,drop=F])
   
   # Export a file with the conflicting rows side by side.
-  write.csv(conflicting, file = paste(results.folder.path, "/", t, "_", taxa.names[t],"_conflicts.csv", sep=""), row.names = FALSE)
+  conflict.file <- paste(results.folder.path, "/", t, "_", taxa.names[t],"_conflicts.csv", sep="")
+  write.csv(conflicting, file = conflict.file, row.names = FALSE)
+  cat("Made file: ", conflict.file, "\n")
   
   #Track the number of mismatches at each level
   return(num.mismatches)
@@ -591,6 +592,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
                                              FolderPath = results.folder.path)
   }
   export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw.fw.only, ALL_seqs = fw.percents, FileName = file.name.summary.stats)
+  cat("Made file: ", file.name.summary.stats, "\n")
 # ----
   # the following will be used by the plot_classification_disagreements step to help choose a good pident: 
 # ----
@@ -601,7 +603,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   
   tax.nums <- view.bootstraps(TaxonomyTable = workflow.taxonomy)
   write.csv(x = tax.nums, file = file.name.bootstrap.pvalues, quote = FALSE, row.names = FALSE)
-  
+  cat("Made file: ", file.name.bootstrap.pvalues, "\n")
 }
 
 

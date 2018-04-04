@@ -320,7 +320,8 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   tax.TF <- tax.nums >= cutoff
   
   # make sure you never get a "classified" under an "unclassified" (this prevents downstream bugs)
-  tax.TF <- t(apply(X = tax.TF, MARGIN = 1, FUN = cummin))
+  # tax.TF <- t(apply(X = tax.TF, MARGIN = 1, FUN = cummin))
+  # took this out for silva, because frequently happens like this in the silva database. hopefully unique unclass will solve bugs.
   
   # make all names in the taxonomy table unclassified if they're below the bootstrap cutoff
   index <- which(tax.TF == 0)

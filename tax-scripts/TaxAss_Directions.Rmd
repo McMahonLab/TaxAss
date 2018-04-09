@@ -947,27 +947,6 @@ command argument                      | description
 `80`									                | this is the bootstrap p-value cutoff for the custom database assigned sequences. This determines if a classification is good enough to be named or should be "unclassified." 
 `80`										              | this is the bootstrap p-value cutoff for the general database assigned sequences. This determines if a classification is good enough to be named or should be "unclassified." 
 
-```
-What the arguments are the second time you source the script:
-1.	Rscript									this opens R to accept arguments from the command line
-2.	find_classification_disagreements.R		this is the R script you're sourcing
-3.	custom.custom.taxonomy					this is the path to your custom taxonomy database 
-											after re-formatting it in step 12.
-4.	custom.general.taxonomy					this is the path to your custom taxonomy database
-											classified using the general database in step 11.
-5.	NA										NA is typed as a placeholder here
-6.	conflicts_database						this is the path to the folder you want the R script
-											to save the .csv results files in. You create this
-											folder in this step with the mkdir command.
-7.	NA										NA is typed as a placeholder here
-8.	NA										NA is typed as a placeholder here
-9.	70										this is the p-value cutoff for the general database
-											assignments of the custom database fastas. This 
-											determines if a classification is good enough to be
-											named or should be "unclassified." 	
-10.	database								This flag tells the script you are comparing two
-											databases instead of OTU classifications.
-```
 
 Generated files in your conflicts folders:  
 

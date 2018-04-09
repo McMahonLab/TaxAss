@@ -28,7 +28,7 @@ are scripts that you use before TaxAss directly on the files that arb exports.
 
 *the file names are not consistent yet*
 
-# I. Pre-workflow scripts 
+# <span style="color:SteelBlue">Pre-processing</span>  
 
 Follow these sections of `how_to_format_FreshTrain_ARB_export_for_TaxAss.html` to get the starting FreshTrain file:  
 
@@ -41,7 +41,7 @@ out *how* to adjust the coarse-level nomenclature.
 
 --------------------------------------------------------------------------------------------
 
-# II. In-workflow scripts 
+# <span style="color:SteelBlue">Overview</span> 
 
 These scripts are in the tax-scripts folder because they are also used in the TaxAss workflow. 
 They require files generated in the workflow. Call these scripts from within your working 
@@ -60,7 +60,7 @@ directory and at the correct point in the workflow processing.)
 
 --------------------------------------------------------------------------------------------
 
-## Update coarse-level nomenclature  
+# <span style="color:SteelBlue">Update coarse-level nomenclature</span>  
 
 Identify coarse-level nomenclature disagreements by comparing custom and general database names.
 This identifies drift in database curation as they are updated separately.
@@ -120,7 +120,7 @@ This generates a csv files that list nomenclature disagreements at each taxa-lev
 
 ___________________________________________________________________________________________
 
-## Find Typos  
+# <span style="color:SteelBlue">Find Typos</span>  
 
 Find typos that result in two fine-level taxa with the same name from having different coarse-level names.  
 
@@ -137,7 +137,7 @@ tax_typos                             | folder to put results into
 
 ___________________________________________________________________________________________
 
-## Find abundant non-custom seqs  
+# <span style="color:SteelBlue">Find abundant unrepresented seqs</span>  
 
 Find high-read seqIDs that are missing in the FW database- prioritize adding new references that represent them.
 

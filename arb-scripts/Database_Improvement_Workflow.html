@@ -233,8 +233,8 @@ pre code, pre, code {
 </style>
 <p>These are steps that you can add to TaxAss in order to check for mistakes in your custom database. Some of them are scripts that you run as part of TaxAss, and others are scripts that you use before TaxAss directly on the files that arb exports.</p>
 <p><em>the file names are not consistent yet</em></p>
-<div id="i.-pre-workflow-scripts" class="section level1">
-<h1>I. Pre-workflow scripts</h1>
+<div id="pre-processing" class="section level1">
+<h1><span style="color:SteelBlue">Pre-processing</span></h1>
 <p>Follow these sections of <code>how_to_format_FreshTrain_ARB_export_for_TaxAss.html</code> to get the starting FreshTrain file:</p>
 <ul>
 <li>ARB export<br />
@@ -245,8 +245,8 @@ pre code, pre, code {
 <p>Don’t do the later steps of adjusting coarse-level nomenclature, this workflow here helps you figure out <em>how</em> to adjust the coarse-level nomenclature.</p>
 <hr />
 </div>
-<div id="ii.-in-workflow-scripts" class="section level1">
-<h1>II. In-workflow scripts</h1>
+<div id="overview" class="section level1">
+<h1><span style="color:SteelBlue">Overview</span></h1>
 <p>These scripts are in the tax-scripts folder because they are also used in the TaxAss workflow. They require files generated in the workflow. Call these scripts from within your working directory and at the correct point in the workflow processing.)</p>
 <ul>
 <li><p><strong>Update coarse-level nomenclature</strong><br />
@@ -258,8 +258,9 @@ pre code, pre, code {
 <code>Find_Abund_SeqIDs_to_Add.R</code></p></li>
 </ul>
 <hr />
-<div id="update-coarse-level-nomenclature" class="section level2">
-<h2>Update coarse-level nomenclature</h2>
+</div>
+<div id="update-coarse-level-nomenclature" class="section level1">
+<h1><span style="color:SteelBlue">Update coarse-level nomenclature</span></h1>
 <p>Identify coarse-level nomenclature disagreements by comparing custom and general database names. This identifies drift in database curation as they are updated separately.</p>
 <div id="classify-custom-database-fastas-with-the-general-database" class="section level3">
 <h3>Classify custom database fastas with the general database</h3>
@@ -370,8 +371,8 @@ Rscript find_classification_disagreements.R custom.custom.taxonomy custom.genera
 <hr />
 </div>
 </div>
-<div id="find-typos" class="section level2">
-<h2>Find Typos</h2>
+<div id="find-typos" class="section level1">
+<h1><span style="color:SteelBlue">Find Typos</span></h1>
 <p>Find typos that result in two fine-level taxa with the same name from having different coarse-level names.</p>
 <pre><code>Rscript find_typos.R custom.taxonomy-semicolon tax_typos</code></pre>
 <table>
@@ -402,11 +403,10 @@ Rscript find_classification_disagreements.R custom.custom.taxonomy custom.genera
 </table>
 <hr />
 </div>
-<div id="find-abundant-non-custom-seqs" class="section level2">
-<h2>Find abundant non-custom seqs</h2>
+<div id="find-abundant-unrepresented-seqs" class="section level1">
+<h1><span style="color:SteelBlue">Find abundant unrepresented seqs</span></h1>
 <p>Find high-read seqIDs that are missing in the FW database- prioritize adding new references that represent them.</p>
 <p>Use from within RStudio <code>Find_Abund_SeqIDs_to_Add.R</code>.</p>
-</div>
 </div>
 
 

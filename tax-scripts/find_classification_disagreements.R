@@ -45,10 +45,10 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                80)
 # FINAL TABLE GENERATION: note you do need the otus.general.taxonomy file b/c it's used to prep a file for plot_classification_improvement.R in step 15
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-# userprefs <- c("~/Desktop/TaxAssData/TaxAss-BatchFiles/Mendota/TaxAss-Mendota/otus.98.taxonomy",
-#                "~/Desktop/TaxAssData/TaxAss-BatchFiles/Mendota/TaxAss-Mendota/otus.general.taxonomy", # make this one "quickie" if skipping general-only classification
-#                "~/Desktop/TaxAssData/TaxAss-BatchFiles/Mendota/TaxAss-Mendota/ids.above.98",
-#                "~/Desktop/TaxAssData/TaxAss-BatchFiles/Mendota/TaxAss-Mendota/conflicts_98",
+# userprefs <- c("../../test4_smallsilva/otus.98.taxonomy",
+#                "../../test4_smallsilva/otus.general.taxonomy", # make this one "quickie" if skipping general-only classification
+#                "../../test4_smallsilva/ids.above.98",
+#                "../../test4_smallsilva/conflicts_98",
 #                98,
 #                80,
 #                80,
@@ -415,7 +415,6 @@ view.bootstraps <- function(TaxonomyTable){
 # Generate a final taxonomy file:
 if (final.or.database == "final" | final.or.database == "Final" | final.or.database == "FINAL"){
 # -------------------------------------------------------------  
-  cat("\n\ngenerating final file- woohoo!\n\n")
   print.poem()
   
   fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path)
@@ -434,14 +433,17 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   colnames(final.taxonomy) <- c("seqID","kingdom","phylum","class","order","lineage","clade","tribe")
   
   write.table(x = final.taxonomy, file = file.name.final.taxonomy, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
+  cat("Made file: ", file.name.final.taxonomy, "\n")
   
   # the following will be used by the plot_classification_improvement.R script
   if (gg.only.tax.file.path != "quickie"){
     tax.nums <- view.bootstraps(TaxonomyTable = final.taxonomy)
     write.table(x = tax.nums, file = file.name.workflow.pvalues, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
+    cat("Made file: ", file.name.workflow.pvalues, "\n")
     
     tax.names <- apply(final.taxonomy, 2, remove.parentheses)
     write.table(x = tax.names, file = file.name.workflow.names, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
+    cat("Made file: ", file.name.workflow.names, "\n")
     
     gg.percents <- import.GG.names(FilePath = gg.only.tax.file.path)
     gg.percents <- reformat.gg(GGtable = gg.percents)
@@ -451,9 +453,11 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
     
     gg.nums <- view.bootstraps(TaxonomyTable = gg.taxonomy)
     write.table(x = gg.nums, file = file.name.general.pvalues, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
+    cat("Made file: ", file.name.general.pvalues, "\n")
     
     gg.names <- apply(X = gg.taxonomy, MARGIN = 2, FUN = remove.parentheses)
     write.table(x = gg.names, file = file.name.general.names, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
+    cat("Made file: ", file.name.general.names, "\n")
   }
   
   

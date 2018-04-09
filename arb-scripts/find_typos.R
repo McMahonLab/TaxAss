@@ -1,17 +1,18 @@
 # RRR 2-8-16
 # finding typos in FW taxonomy by looking for duplicate names with different phylogenies above them
 
-#####
-# Define File Paths
-#####
+# ---- Define File Paths ----
 
-comma.delim.trainingset <- "~/Desktop/TaxonomyTrainingSets/BLASTing/StartFiles-Databases/custom.taxonomy-semicolon"
-results.folder <- "~/Desktop/tax_typos/fix_check_2"
+userprefs <- commandArgs(trailingOnly = TRUE)
+comma.delim.trainingset <- userprefs[1]
+results.folder <- userprefs[2]
+
+# cat("\n\ncrap, need to uncomment file paths!!\n\n")
+# comma.delim.trainingset <- "~/Desktop/TaxonomyTrainingSets/BLASTing/StartFiles-Databases/custom.taxonomy-semicolon"
+# results.folder <- "~/Desktop/tax_typos/fix_check_2"
 
 
-#####
-# Define Functions
-#####
+# ---- Define Functions ----
 
 # import FW training set (semicolon delimited)
 import.taxonomy <- function(FilePath){
@@ -160,9 +161,7 @@ export.seqIDs.to.fix <- function(FilePath, SeqIDsWithTypos){
   write.csv(x = typo.seqIDs, file = paste(results.folder, "/SeqIDs_to_Fix.csv", sep = ""), row.names = FALSE)
 }
 
-#####
-# Use Functions
-#####
+# ---- Use Functions ----
 
 taxonomy <- import.taxonomy(FilePath = comma.delim.trainingset)
 

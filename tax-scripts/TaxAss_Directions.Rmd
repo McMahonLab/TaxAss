@@ -289,7 +289,7 @@ consistent format where they begin with either:
 * uncultured  
 * unclassified  
 
-And are followed by a period and the closest available parent-name.  
+And are followed by a period and the closest available parent-name. All the names that get changed will be spit out into the terminal output. Note there will be a lot due to the format "knownphylum_cl" for an unknown class name. These all get changed to "unnamed.knownphylum" to follow a consistent and easy-to-grep nomenclature.   
 
 ___________
 

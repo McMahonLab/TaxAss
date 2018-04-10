@@ -35,6 +35,7 @@ Follow these sections of `how_to_format_FreshTrain_ARB_export_for_TaxAss.html` t
 * ARB export  
 * Simple Reformatting 
 * Remove Non-FreshTrain References  
+* Remove k\_\_, p\_\_, c\_\_, o\_\_ (if using SILVA)
 
 Don't do the later steps of adjusting coarse-level nomenclature, this workflow here helps you figure 
 out *how* to adjust the coarse-level nomenclature.
@@ -63,8 +64,7 @@ directory and at the correct point in the workflow processing.)
 # <span style="color:SteelBlue">Update coarse-level nomenclature</span>  
 
 Identify coarse-level nomenclature disagreements by comparing custom and general database names.
-This identifies drift in database curation as they are updated separately.
-
+This identifies drift in database curation as the databases are updated separately.  
 
 ### Classify custom database fastas with the general database   
 
@@ -82,13 +82,13 @@ file names                      | description
 
 ### Reformat files
 
-Full 4 Commands (Type in Terminal):
+Full 2 Commands (Type in Terminal):
 ```
-cat custom.general.wang.taxonomy custom.general.taxonomy
-sed 's/[[:blank:]]/\;/' <custom.general.taxonomy >custom.general.taxonomy.reformatted
-mv custom.general.taxonomy.reformatted custom.general.taxonomy
+sed 's/[[:blank:]]/\;/' <custom.general.wang.taxonomy >custom.general.taxonomy
 sed 's/[[:blank:]]/\;/' <custom.taxonomy >custom.custom.taxonomy
 ```
+
+This makes the files semicolon delimited for import into the next R script. File names are consistent with those used in the TaxAss directions.    
 
 ### Find Nomenclature disagreements 
 

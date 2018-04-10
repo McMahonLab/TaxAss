@@ -240,7 +240,9 @@ pre code, pre, code {
 <li>ARB export<br />
 </li>
 <li>Simple Reformatting</li>
-<li>Remove Non-FreshTrain References</li>
+<li>Remove Non-FreshTrain References<br />
+</li>
+<li>Remove k__, p__, c__, o__ (if using SILVA)</li>
 </ul>
 <p>Don’t do the later steps of adjusting coarse-level nomenclature, this workflow here helps you figure out <em>how</em> to adjust the coarse-level nomenclature.</p>
 <hr />
@@ -261,7 +263,7 @@ pre code, pre, code {
 </div>
 <div id="update-coarse-level-nomenclature" class="section level1">
 <h1><span style="color:SteelBlue">Update coarse-level nomenclature</span></h1>
-<p>Identify coarse-level nomenclature disagreements by comparing custom and general database names. This identifies drift in database curation as they are updated separately.</p>
+<p>Identify coarse-level nomenclature disagreements by comparing custom and general database names. This identifies drift in database curation as the databases are updated separately.</p>
 <div id="classify-custom-database-fastas-with-the-general-database" class="section level3">
 <h3>Classify custom database fastas with the general database</h3>
 <p>Full Command (Type in Terminal):</p>
@@ -299,11 +301,10 @@ pre code, pre, code {
 </div>
 <div id="reformat-files" class="section level3">
 <h3>Reformat files</h3>
-<p>Full 4 Commands (Type in Terminal):</p>
-<pre><code>cat custom.general.wang.taxonomy custom.general.taxonomy
-sed 's/[[:blank:]]/\;/' &lt;custom.general.taxonomy &gt;custom.general.taxonomy.reformatted
-mv custom.general.taxonomy.reformatted custom.general.taxonomy
+<p>Full 2 Commands (Type in Terminal):</p>
+<pre><code>sed 's/[[:blank:]]/\;/' &lt;custom.general.wang.taxonomy &gt;custom.general.taxonomy
 sed 's/[[:blank:]]/\;/' &lt;custom.taxonomy &gt;custom.custom.taxonomy</code></pre>
+<p>This makes the files semicolon delimited for import into the next R script. File names are consistent with those used in the TaxAss directions.</p>
 </div>
 <div id="find-nomenclature-disagreements" class="section level3">
 <h3>Find Nomenclature disagreements</h3>

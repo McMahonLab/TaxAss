@@ -357,9 +357,9 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
   
   if (Database == TRUE){
     # identify unique mismatched upper-names of lineages (generate for database comparison)
-    unique.conflicts <- cbind(gg[index,1:6, drop=F], fw[index,1:6, drop=F])
-    check.files.match(FWtable = unique.conflicts[ ,1:6,drop=F], GGtable = unique.conflicts[ ,7:12,drop=F])
-    unique.conflicts <- unique.conflicts[ ,-c(1,7)]
+    unique.conflicts <- cbind(gg[index,1:(t+1), drop=F], fw[index,1:6, drop=F])
+    check.files.match(GGtable = unique.conflicts[ ,1:(t+1), drop=F], FWtable = unique.conflicts[ ,(t+2):(t+7), drop=F])
+    unique.conflicts <- unique.conflicts[ ,-c(1,t+2)]
     unique.conflicts <- unique(unique.conflicts)
     unique.conflict.file <- paste(results.folder.path, "/", "unique_conflicts_", t, "_", taxa.names[t],".csv", sep="")
     write.csv(unique.conflicts, file = unique.conflict.file, row.names = FALSE)

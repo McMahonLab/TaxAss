@@ -53,12 +53,12 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                80,
 #                80,
 #                "final")
-# # DATABASE COMPARISON: part of optional step 11.5
+# DATABASE COMPARISON: part of optional step 11.5
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-# userprefs <- c("../../take17/custom.custom.taxonomy",
-#                "../../take17/custom.general.taxonomy",
+# userprefs <- c("../../database_comparison/custom.custom.taxonomy",
+#                "../../database_comparison/custom.general.taxonomy",
 #                "NA",
-#                "../../take17/conflicts_database/",
+#                "../../database_comparison/conflicts_database/",
 #                NA,
 #                NA,
 #                70,
@@ -150,7 +150,7 @@ reformat.fw <- function(FWtable){
   
   # Remove strain and empty 10th column
   fw <- fw[,-c(9,10)]
-  colnames(fw) <- c("seqID.fw","kingdom.fw","phylum.fw","class.fw","order.fw","linege.fw","clade.fw","tribe.fw")
+  colnames(fw) <- c("seqID.fw","kingdom.fw","phylum.fw","class.fw","order.fw","lineage.fw","clade.fw","tribe.fw")
   
   # Reorder sequence IDs so can match them to the other file
   index <- order(fw[,1])
@@ -332,7 +332,7 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   return(tax)
 }
 
-find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_percents, TaxaLevel, tracker, FolderPath, forcing = FALSE){
+find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_percents, TaxaLevel, tracker, FolderPath, forcing = FALSE, Database = FALSE){
   # Find seqs misclassified at a given phylogenetic level, t
   fw <- FWtable
   gg <- GGtable
@@ -355,13 +355,20 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
   # cat("there are ", length(index), " conflicting names at ", taxa.names[t], " level\n")
   num.mismatches[t] <- length(index)
   
+  if (Database == TRUE){
+    # identify unique mismatched upper-names of lineages (generate for database comparison)
+    unique.conflicts <- cbind(gg[index,1:6, drop=F], fw[index,1:6, drop=F])
+    check.files.match(FWtable = unique.conflicts[ ,1:6,drop=F], GGtable = unique.conflicts[ ,7:12,drop=F])
+    unique.conflicts <- unique.conflicts[ ,-c(1,7)]
+    unique.conflicts <- unique(unique.conflicts)
+    unique.conflict.file <- paste(results.folder.path, "/", "unique_conflicts_", t, "_", taxa.names[t],".csv", sep="")
+    write.csv(unique.conflicts, file = unique.conflict.file, row.names = FALSE)
+    cat("Made file: ", unique.conflict.file, "\n")
+  }
+  
   # Compare the conflicting tables in entirety, use the original files with percents still in it
-  conflicting <- cbind(gg.percents[index,,drop=F], fw.percents[index,,drop=F])
-  
-  # Check that the files still line up correctly
-  check.files.match(FWtable = conflicting[,9:16,drop=F], GGtable = conflicting[,1:8,drop=F])
-  
-  # Export a file with the conflicting rows side by side.
+  conflicting <- cbind(gg.percents[index, ,drop=F], fw.percents[index, ,drop=F])
+  check.files.match(FWtable = conflicting[ ,9:16,drop=F], GGtable = conflicting[ ,1:8,drop=F])
   conflict.file <- paste(results.folder.path, "/", t, "_", taxa.names[t],"_conflicts.csv", sep="")
   write.csv(conflicting, file = conflict.file, row.names = FALSE)
   cat("Made file: ", conflict.file, "\n")
@@ -465,7 +472,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
 # Compare databases by looking at how GG classifies the FW representative sequences
 }else if (final.or.database == "database"){
 # -------------------------------------------------------------
-  cat("\n\ndoing database comparison\n\n")
+  cat("doing database comparison\n")
   
   fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path)
   gg.percents <- import.GG.names(FilePath = gg.only.tax.file.path)
@@ -490,7 +497,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
                                              FWtable_percents = fw.percents, 
                                              GGtable_percents = gg.percents, 
                                              TaxaLevel = t, tracker = num.mismatches,
-                                             FolderPath = results.folder.path)
+                                             FolderPath = results.folder.path, Database = TRUE)
   }
   export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw, ALL_seqs = fw, FileName = file.name.summary.stats)
   
@@ -557,7 +564,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
 # Only compare the classifications made by the fw database to the gg classifications, not full tax tables
 }else{
 # -------------------------------------------------------------  
-  cat("\ncomparing seqIDs that TaxAss classified with the custom database to how the general database would have classified them.\n")
+  cat("comparing seqIDs that TaxAss classified with the custom database to how the general database would have classified them.\n")
   
   fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path)
   gg.percents <- import.GG.names(FilePath = gg.only.tax.file.path)

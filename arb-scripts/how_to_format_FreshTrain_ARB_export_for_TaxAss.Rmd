@@ -27,7 +27,8 @@ pre code, pre, code {
 * export all full-length 16S from ARB  
 * reformatting to make taxonomy file compatible with mothur  
 * remove references lacking FreshTrain names  
-* adjust coarse-level nomenclature (phylum/class/order) to match comprehensive database of choice
+* adjust coarse-level nomenclature (phylum/class/order) to match comprehensive database of choice  
+* remove additional problem sequences  
 
 <br>
 
@@ -78,7 +79,7 @@ by the freshwater taxonomy need to be removed because only relevant reference se
 for the percent identity calculation. The full set of freshwater sequences includes all of the clones,
 including ones that are not part of the well-defined freshwater taxonomy.
 
-Use the script `removeBadLineages.py` with this syntax:
+Use the script `remove_non-FreshTrain_References.py` with this syntax:
 ```{bash, eval=F}
 python remove_non-FreshTrain_References.py inputFasta inputTaxon outputFasta outputTaxon
 ```
@@ -94,16 +95,40 @@ freshwate-specific lineage, and writes the remaining sequences to the output fil
 
 <br>
 
-# Adjust coarse-level    
+# Adjust coarse-level nomenclature   
 
 The FreshTrain phylogeny isn't currently integrated into a comprehensive database, like
 Greengenes or silva, which is why TaxAss is necessary. However, it's "coarse-level" taxonomic 
-nomenclature (e.g. phylum, class, order) currently matches the nomenclature used in Greengenes. 
-Therefore, if you plan to use the FreshTrain with SILVA, you need to adjust a few of the names. 
-Otherwise when you group by class, for example, some of them might appear to be different classes 
-that are really just a difference in nomenclature between the two databases.
+nomenclature (e.g. phylum, class, order) currently matches the nomenclature used in an old version 
+of Greengenes. If you don't do this, if for example you group by class, some of sequences might 
+appear to be different classes when really there's just a difference in nomenclature between the two databases.
 
-There are scripts to convert the FreshTrain from Greengenes-compatible to Silva-compatible:  
+### Make Greengenes-compatible  
+To match GG 13.5 this was done manually, as detailed in the `README-FreshTrain18Aug2016`:
+
+```
+FreshTrain version 18Aug2016:
+edited by Robin to fix "typos" (note: arb file may or may not be updated accordingly)
+
+deleted:
+Gm9Prot2
+Gm9Pro24
+Gm9Pro25
+UniBac24
+Gm9Prot5
+
+changed to be o_undefinedAlpha:
+McDucnp2
+CanPhyco
+
+changed to be o__Acidimicrobiales and c__Acidimicrobiia
+AcmBacte
+```
+
+### make SILVA-compatible
+To make the FreshTrain compatible with SILVA, you need to adjust more names. Start by removing 
+non-FreshTrain lineages from the 18Aug2016 version that was edited manually. Then use these scripts
+to convert the FreshTrain from Greengenes-compatible to Silva-compatible:  
 
 * `convertFreshTrainToSilvaV128.py`  
 * `convertFreshTrainToSilvaV132.py`  
@@ -129,12 +154,13 @@ This script requires two arguments, read from the command line:
 
 <br>
 The coarse-level names that needed to be changed were identified using the 
-optional TaxAss step 11.5, where the custom database references are classified 
-with the general database. This generates a list of conflicting names.  
+`Database_Improvement_Workflow.rmd` located in this same folder, where the 
+custom database references are classified with the general database to generate 
+a list of conflicting names.  
 
 <br>
 
-# Remove k\_\_, p\_\_, c\_\_, o\_\_  
+# Remove k\_\_, p\_\_, c\_\_, o\_\_ (with SILVA)  
 
 Whether the prefixes are there or not needs to match between SILVA and the FreshTrain. Greengenes has them, SILVA doesn't. Therefore The FreshTrain as exported from ARB has the prefixes.  
   
@@ -154,16 +180,11 @@ But unaligning is not necessary, and the FreshTrain is smaller so makes more sen
 
 <br>
 
-# Manual change by Robin, needs to be added in!!
+# Remove structural conflicts    
+A few references in the FreshTrain end up with phylogenetic conflicts (so structural conflicts beyond new names).
+These were identified because organisms assigned the same FreshTrain lineage had different SILVA orders, resulting 
+in a structure that is not monophyletic. With manual examination, they had very few references in the FreshTrain, so 
+to fix this problem we simply remove the less-well-represented half of the references with conflicting names.
 
-Right now I only changed my local, expanded, gitignored version, not the zipped file.
-
-SILVA calls `unclassified`'s `unclutured`'s. just FYI.
-
-The change is for acV, needs a named order (b/c can't have names under unclassified), but it's order is not named in SILVA.
-
-Robin manually changed them to `Acidimicrobiales` for now, because that's what they were before and that order still exists in silva. 
-
-change should prob go into Josh's python re-naming script. and figure out wtf it changed in the first place if the name still exists in silva.
 
 

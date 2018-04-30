@@ -27,5 +27,43 @@ end.taxonomy.file <- "~/Desktop/test.taxonomy"
 silva.version <- "v132"
 
 
+# ---- functions ----
+
+import.mothur.formatted.tax <- function(filepath){
+  # seqID delimited from taxonomy by tab, taxa levels delimited by semicolon
+  numcol <- max(count.fields(filepath, sep=";"))
+  silva <- read.table(file = filepath, sep=";", fill=T, colClasses = "character", col.names=1:numcol)
+  silva <- as.matrix(silva)
+  kingdom <- gsub(pattern = ".*\t", replacement = "", x = silva[ ,1])
+  seqid <- gsub(pattern = "\t.*$", replacement = "", x = silva[ ,1])
+  silva <- silva[ ,-1]
+  silva <- cbind(seqid, kingdom, silva)
+  if(ncol(silva) == 8){
+    colnames(silva) <- c("seqid","kingdom","phylum","class","order","family","genus","species")
+    cat("database imported with a species column, the unique species names are: ", unique(silva[ ,8]),"\n")
+  }else if(ncol(silva) == 7){
+    silva <- cbind(silva, "unnamed")
+    colnames(silva) <- c("seqid","kingdom","phylum","class","order","family","genus","species")
+    cat("database imported without a species column, added one filled with \"unnamed\"\n")
+  }else if(ncol(silva) == 9){
+    extracol <- unique(silva[ ,9])
+    silva <- silva[ ,1:8]
+    colnames(silva) <- c("seqid","kingdom","phylum","class","order","family","genus","species")
+    cat("database imported with an extra 9th column containing:", extracol, ". This column was removed.\n")
+  }else{
+    cat("something is wrong with the database import, it has ", ncol(silva), "columns in it.\n")
+  }
+  return(silva)
+}
+
+revert.to.mothur.format <- function(silva){
+  seqid.kingdom <- paste(silva[ ,1], silva[ ,2], sep = "\t")
+  silva <- silva[ ,-(1:2)]
+  # also add a blank column to get semicolons at the end of the line also
+  silva <- cbind(seqid.kingdom, silva, "")
+  return(silva)
+}
+
 # ---- go ----
 
+# this is so much more work than it's worth. doing it manually. 

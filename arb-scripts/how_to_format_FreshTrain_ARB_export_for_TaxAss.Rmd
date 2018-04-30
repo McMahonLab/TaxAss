@@ -184,7 +184,39 @@ But unaligning is not necessary, and the FreshTrain is smaller so makes more sen
 A few references in the FreshTrain end up with phylogenetic conflicts (so structural conflicts beyond new names).
 These were identified because organisms assigned the same FreshTrain lineage had different SILVA orders, resulting 
 in a structure that is not monophyletic. With manual examination, they had very few references in the FreshTrain, so 
-to fix this problem we simply remove the less-well-represented half of the references with conflicting names.
+to fix this problem we simply remove the less-well-represented half of the references with conflicting names.  
+  
+  
+I started to make a script to do it `remove_non-monophyletic_refs_for_SILVA-compatibility.R` but then I decided
+it really wasn't worth the effor because I'm only doing it once. So I manually removed in text wrangler:  
+  
+### v132 
+in FreshTrain these are all "Actinomycetales acSTL."  
+in SILVA 132 they are either order "Frankiales" or "PeM15".  
 
+Remove all "PeM15" refs from SILVA v132 FreshTrain-compatible:  
+```
+AbmAct53  
+LaeeEE00p1
+PavinActino1
+```
 
+### v128
 
+Same issue with acSTL, but different ones. I know, super weird it's not the same.  
+
+Remove all "PeM15" refs from SILVA v128 FreshTrain-compatible:  
+```
+LakecEC4
+LakStec6
+PavinActino1
+```
+
+Also an issue with betV. In FreshTrain they're all "undefined betV".  
+In SILVA 128 they are either order "Nitrosomonadales" or "TRA3-20".  
+  
+Remove all "TRA3-20" refs from SILVA v128 FreshTrain-compatible:  
+```
+LiUU2018
+LiUU2019
+```

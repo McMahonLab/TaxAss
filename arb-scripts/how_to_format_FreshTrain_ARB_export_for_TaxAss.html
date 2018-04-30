@@ -341,6 +341,29 @@ and <code>output.taxonomy</code> is for example <code>FreshTrain25Jan2018SILVAv1
 <div id="remove-structural-conflicts" class="section level1">
 <h1>Remove structural conflicts</h1>
 <p>A few references in the FreshTrain end up with phylogenetic conflicts (so structural conflicts beyond new names). These were identified because organisms assigned the same FreshTrain lineage had different SILVA orders, resulting in a structure that is not monophyletic. With manual examination, they had very few references in the FreshTrain, so to fix this problem we simply remove the less-well-represented half of the references with conflicting names.</p>
+<p>I started to make a script to do it <code>remove_non-monophyletic_refs_for_SILVA-compatibility.R</code> but then I decided it really wasn’t worth the effor because I’m only doing it once. So I manually removed in text wrangler:</p>
+<div id="v132" class="section level3">
+<h3>v132</h3>
+<p>in FreshTrain these are all “Actinomycetales acSTL.”<br />
+in SILVA 132 they are either order “Frankiales” or “PeM15”.</p>
+<p>Remove all “PeM15” refs from SILVA v132 FreshTrain-compatible:</p>
+<pre><code>AbmAct53  
+LaeeEE00p1
+PavinActino1</code></pre>
+</div>
+<div id="v128" class="section level3">
+<h3>v128</h3>
+<p>Same issue with acSTL, but different ones. I know, super weird it’s not the same.</p>
+<p>Remove all “PeM15” refs from SILVA v128 FreshTrain-compatible:</p>
+<pre><code>LakecEC4
+LakStec6
+PavinActino1</code></pre>
+<p>Also an issue with betV. In FreshTrain they’re all “undefined betV”.<br />
+In SILVA 128 they are either order “Nitrosomonadales” or “TRA3-20”.</p>
+<p>Remove all “TRA3-20” refs from SILVA v128 FreshTrain-compatible:</p>
+<pre><code>LiUU2018
+LiUU2019</code></pre>
+</div>
 </div>
 
 

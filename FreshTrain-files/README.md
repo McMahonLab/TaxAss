@@ -13,8 +13,10 @@ zipped file name        | description
 ------------------------|----------------------------------------------------------------
 FreshTrain18Aug2016     | old version formatted for Greengenes (don't use)  
 FreshTrain25Jan2018Greengenes13_5.zip | current version formatted for Greengenes  
-FreshTrain25Mar2018SILVAv128.zip | current version formatted for SILVA v128  
-FreshTrain25Mar2018SILVAv132.zip | current version formatted for SILVA v132  
+FreshTrain30Apr2018SILVAv128.zip | current version formatted for SILVA v128  
+FreshTrain30Apr2018SILVAv132.zip | current version formatted for SILVA v132  
+
+The different formats match the FreshTrain's coarse-level nomenclature to the nomenclature in the comprehensive database of choice. The FreshTrain defines lineage-clade-tribe (~family-genus-species) level phylogenies, so the phylum, class, and order names are changed in the different versions to be consistent with the chosen comprehensive database.
 
 <br>
 The citation for the FreshTrain database is:  

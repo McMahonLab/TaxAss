@@ -551,7 +551,7 @@ make.stacked.bar.for.manuscript <- function(){ # laxy calls from global env
   return(label.loc)
 } 
 
-make.example.table <- funciton(){ # all lazy calls to global env
+make.example.table <- function(){ # all lazy calls to global env
   
   half.spacing <- (word.heights[2] - word.heights[1]) * 1/2
   box.tops <- word.heights + half.spacing

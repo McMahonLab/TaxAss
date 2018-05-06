@@ -34,15 +34,15 @@ from the full-length alignments.
 
 ## Unzip and add TaxAss tax-scripts  
 
-Start with `Marathonas_test` as your present working directory.  
+Start with `arb-scripts/Marathonas_test/` as your present working directory.  
 
 Add the tax-scripts and taxonomy database files to the `add-tax-scripts-and-databases` folder:  
 
 ```{bash, eval=F}
 cp ../../tax-scripts/*  add-tax-scripts-and-databases
 # unzip your FreshTrain reference (using SILVA v132 for example:)
-cp ../../FreshTrain-files/FreshTrain25Mar2018SILVAv132/FreshTrain25Jan2018SILVAv132.fasta add-tax-scripts-and-databases/custom.fasta
-cp ../../FreshTrain-files/FreshTrain25Mar2018SILVAv132/FreshTrain25Jan2018SILVAv132.taxonomy add-tax-scripts-and-databases/custom.taxonomy
+cp ../../FreshTrain-files/FreshTrain30Apr2018SILVAv132/FreshTrain30Apr2018SILVAv132.fasta add-tax-scripts-and-databases/custom.fasta
+cp ../../FreshTrain-files/FreshTrain30Apr2018SILVAv132/FreshTrain30Apr2018SILVAv132.taxonomy add-tax-scripts-and-databases/custom.taxonomy
 # add your comprehensive database (formatted according to TaxAss step 0, named general.fasta and general.taxonomy)
 ```  
 
@@ -111,8 +111,9 @@ cd v3v4_mara
 cd ../
 ```
 
+
+```{bash, eval=F, echo=F}  
 #### V6 region
-```{bash, eval=F}  
 mkdir v6_mara
 # add all the scripts and reference files
 cp add-tax-scripts-and-databases/* v6_mara/
@@ -171,8 +172,9 @@ rm termout.txt
 cd ../
 ```
 
+
+```{bash, eval=F, echo=F}
 #### V6 region
-```{bash, eval=F}
 cd v6_mara
 ./RunSteps_1-14.sh > termout.txt
 ./deletemothurbarf.sh termout.txt > terminal_output_1-14.txt
@@ -208,7 +210,7 @@ folder.v4      | a (pre-existing) folder that you want to save the results in
 ```{bash, eval=F}
 cd v4_mara
 mkdir v4_results
-Rscript ../compare_full-length_to_taxass_results.R ../mara.taxonomy otus.98.80.80.taxonomy ids.above.98 v4_results
+Rscript ../compare_full-length_to_taxass_results.R ../mara.silva132.taxonomy otus.98.80.80.taxonomy ids.above.98 v4_results
 cd ../
 ```
 
@@ -216,7 +218,7 @@ cd ../
 ```{bash, eval=F}
 cd v4v5_mara
 mkdir v4v5_results
-Rscript ../compare_full-length_to_taxass_results.R ../mara.taxonomy otus.98.80.80.taxonomy ids.above.98 v4v5_results
+Rscript ../compare_full-length_to_taxass_results.R ../mara.silva132.taxonomy otus.98.80.80.taxonomy ids.above.98 v4v5_results
 cd ../
 ```
 
@@ -224,15 +226,16 @@ cd ../
 ```{bash, eval=F}
 cd v3v4_mara
 mkdir v3v4_results
-Rscript ../compare_full-length_to_taxass_results.R ../mara.taxonomy otus.98.80.80.taxonomy ids.above.98 v3v4_results
+Rscript ../compare_full-length_to_taxass_results.R ../mara.silva132.taxonomy otus.98.80.80.taxonomy ids.above.98 v3v4_results
 cd ../
 ```
 
+
+```{bash, eval=F, echo=F}
 #### V6 region
-```{bash, eval=F}
 cd v6_mara
 mkdir v6_results
-Rscript ../compare_full-length_to_taxass_results.R ../mara.taxonomy otus.98.80.80.taxonomy ids.above.98 v6_results
+Rscript ../compare_full-length_to_taxass_results.R ../mara.silva132.taxonomy otus.98.80.80.taxonomy ids.above.98 v6_results
 cd ../
 ```
 

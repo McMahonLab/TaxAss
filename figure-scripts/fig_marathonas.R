@@ -2,7 +2,7 @@
 # RRR
 
 # ---- paths ----
-file.path.summary.table <- "../arb-scripts/Marathonas_test/v4_mara/v4_results//summary_table.rds"
+file.path.summary.table <- "../arb-scripts/Marathonas_test/v3v4_mara/v3v4_results//summary_table.rds"
 
 file.path.created.plot <- "~/Desktop/mara.pdf"
 
@@ -31,20 +31,18 @@ make.stacked.bar.for.manuscript <- function(){ # laxy calls from global env
   par(mar = c(2,4,2.5,16))
   bar.loc <- barplot(results[ ,-(1:4)], col = col.vector, axisnames = F, axes = F)
   
-  mtext(text = colnames(results)[-(1:4)], side = 1, line = .5, at = bar.loc - c(.4,0,-.1), cex = label.cex)
+  mtext(text = colnames(results)[-(1:4)], side = 1, line = .5, at = bar.loc - c(.4,-.05,-.15), cex = label.cex)
   
   axis(side = 2, at = c(0, max.val), labels = F)
   tic.loc <- axis(side = 2, labels = F)
   label.scooch <- c(tic.loc + c(4, rep.int(x = 0, times = length(tic.loc) - 1)) , max.val + 15) # 0 up, 285 up
   mtext(text = c(tic.loc,max.val), side = 2, line = .5, outer = F, at = label.scooch, cex = axis.cex)
-  mtext(text = "Number of Sequences", side = 2, line = 2.3, cex = label.cex)
+  mtext(text = "Number of Sequences", side = 2, line = 2.4, cex = label.cex)
   
   text(x = rep.int(x = 4.2, times = nrow(results)), y = label.loc, labels = row.names(results), xpd = NA, adj = 0, cex = excel.cex, col = col.vector)
   for (n in 1:nrow(results)){
     lines(x = c(3.62,4.15), y = c(line.loc[n], label.loc[n]), xpd = T)
   }
-  
-  # mtext(text = "TaxAss Performance on Simulated Tags", side = 3, line = 3.2, cex = title.cex)
   
   return(label.loc)
 } 
@@ -53,6 +51,7 @@ make.example.table <- function(){ # all lazy calls to global env
   
   title.cex <- 1.2
   label.cex <- 1.2
+  table.cex <- 1.4
   
   half.spacing <- (word.heights[2] - word.heights[1]) * 1/2
   box.tops <- word.heights + half.spacing
@@ -61,18 +60,28 @@ make.example.table <- function(){ # all lazy calls to global env
   box.middles <- 12.4
   box.rights <- 15.6
   
+  col.correct <- adjustcolor(col = "darkgreen", alpha.f = .3)
+  col.under <- adjustcolor(col = rainbow(n = 20, v = .8)[4], alpha.f = .5)
+  col.wrong <- adjustcolor(col = "darkred", alpha.f = .3)
+  col.vector <- c(col.correct, col.correct, col.correct, col.correct, col.under, col.under, col.wrong, col.wrong)
+  
+  left.text.vect <- c("acI-A1", "bacI-unclassified", "n/a", "acI-A", "acI-B1", "n/a", "betI-A","acI-C")
+  right.text.vect <- c("acI-A1","bacI-unclassified", "Microcystaceae","acI", "Actinobacteria", "LD19","betI-B","acI-C1")
+  
   # left boxes
   for (b in 1:length(word.heights)){
-    rect(xleft = box.lefts, xright = box.middles, ybottom = box.bottoms[b], ytop = box.tops[b], xpd = NA)
+    rect(xleft = box.lefts, xright = box.middles, ybottom = box.bottoms[b], ytop = box.tops[b], xpd = NA, col = col.vector[b])
+    text(x = box.lefts + .2, y = word.heights[b], labels = left.text.vect[b], xpd = NA, adj = 0, cex = table.cex)
   }
   # right boxes
   for (b in 1:length(word.heights)){
-    rect(xleft = box.middles, xright = box.rights, ybottom = box.bottoms[b], ytop = box.tops[b], xpd = NA)
+    rect(xleft = box.middles, xright = box.rights, ybottom = box.bottoms[b], ytop = box.tops[b], xpd = NA, col = col.vector[b])
+    text(x = box.middles + .2, y = word.heights[b], labels = right.text.vect[b], xpd = NA, adj = 0, cex = table.cex)
   }
   
   middle.left <- box.lefts + (box.middles - box.lefts) * (1/2)
   middle.right <- box.middles + (box.rights - box.middles) * (1/2)
-  mtext(text = c("ARB","TaxAss"), side = 1, line = .5, at = c(middle.left, middle.right), cex = label.cex)
+  mtext(text = c("Correct","TaxAss"), side = 1, line = .5, at = c(middle.left, middle.right), cex = label.cex)
   mtext(text = "Examples of Each Category:", side = 3, line = 1, at = box.middles, cex = label.cex)
   
 }

@@ -92,7 +92,7 @@ find.correct.classifications <- function(fw.arb, fw.tag){
   
   # correct classification defined as: taxa names agree and exist
   
-  correct.class <- list("kingdom" = NULL,"phylum" = NULL,"class" = NULL,"order" = NULL,"lineage" = NULL,"clade" = NULL,"tribe" = NULL)
+  correct.class <- list("Kingdom" = NULL,"Phylum" = NULL,"Class" = NULL,"Order" = NULL,"Lineage" = NULL,"Clade" = NULL,"Tribe" = NULL)
   
   for (t in 1:length(correct.class)){
     # subset to only classified names
@@ -132,7 +132,7 @@ find.correct.unclassifications <- function(fw.arb, fw.tag){
   
   # correct unclassification defined as: taxa names agree at upper levels and don't exist at lower levels
   
-  correct.unclass <- list("kingdom" = NULL,"phylum" = NULL,"class" = NULL,"order" = NULL,"lineage" = NULL,"clade" = NULL,"tribe" = NULL)
+  correct.unclass <- list("Kingdom" = NULL,"Phylum" = NULL,"Class" = NULL,"Order" = NULL,"Lineage" = NULL,"Clade" = NULL,"Tribe" = NULL)
   
   # save to re-start each loop step-down
   fwa <- fw.arb
@@ -187,7 +187,7 @@ find.underclassifications <- function(fw.arb, fw.tag){
   # underclassification defined as: taxa name exists in arb and unclassified in tag, but all existing upper names agree
   # only includes FreshTrain seqs because don't know "correct" class of others
   
-  under.class <- list("kingdom" = NULL,"phylum" = NULL,"class" = NULL,"order" = NULL,"lineage" = NULL,"clade" = NULL,"tribe" = NULL)
+  under.class <- list("Kingdom" = NULL,"Phylum" = NULL,"Class" = NULL,"Order" = NULL,"Lineage" = NULL,"Clade" = NULL,"Tribe" = NULL)
   
   # save to re-start each loop step-down
   fwa <- fw.arb
@@ -255,7 +255,7 @@ find.over.classifications <- function(fw.arb, fw.tag){
   # only includes FreshTrain arb b/c no way to know if upper-levels match for the non-FreshTrain arb classifications
   # this is like a special type of misclassification
   
-  over.class <- list("kingdom" = NULL,"phylum" = NULL,"class" = NULL,"order" = NULL,"lineage" = NULL,"clade" = NULL,"tribe" = NULL)
+  over.class <- list("Kingdom" = NULL,"Phylum" = NULL,"Class" = NULL,"Order" = NULL,"Lineage" = NULL,"Clade" = NULL,"Tribe" = NULL)
   
   # save to re-start each loop step-down
   fwa <- fw.arb
@@ -387,7 +387,7 @@ find.mis.classifications <- function(c.class, c.unclass, under, over, c.gen, i.g
   # excludes: unclass with matching upper names (over & under classifications)
   # excludes: seqs classified in GG in one and FT in other & vice versa (incorrect gg and ft classifications)
   
-  mis.class <- list("kingdom" = NULL,"phylum" = NULL,"class" = NULL,"order" = NULL,"lineage" = NULL,"clade" = NULL,"tribe" = NULL)
+  mis.class <- list("Kingdom" = NULL,"Phylum" = NULL,"Class" = NULL,"Order" = NULL,"Lineage" = NULL,"Clade" = NULL,"Tribe" = NULL)
   
   all.tag <- as.data.frame(all.tag, stringsAsFactors = F)
   all.arb <- as.data.frame(all.arb, stringsAsFactors = F)

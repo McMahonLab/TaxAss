@@ -31,13 +31,13 @@ folder.v4 <- userprefs[4]
 # # troubleshoot: ----
 # cat("CRAP COMMENT OUT FILE PATHS!!!")
 # # for import
-# file.arb.tax <- "../arb-scripts/Marathonas_test/mara.taxonomy"
+# file.arb.tax <- "../arb-scripts/Marathonas_test/mara.silva132.taxonomy"
 # 
 # file.v4.tax <- "../arb-scripts/Marathonas_test/v4_mara/otus.98.80.80.taxonomy"
 # file.v4.ids <- "../arb-scripts/Marathonas_test/v4_mara/ids.above.98"
 # 
 # # for export
-# folder.v4 <- "../arb-scripts/Marathonas_test/v4_mara/v4_results_98/"
+# folder.v4 <- "../arb-scripts/Marathonas_test/v4_mara/v4_results/"
 # # end troubleshoot ----
 
 # ---- Functions taken from find_classification_disagreements.R ----
@@ -449,14 +449,14 @@ create.summary.table <- function(){ # lazy calls to global environment...
   }
   colnames(results.v4) <- results.v4[1, ]
   results.v4 <- results.v4[-1, ]
-  row.names(results.v4) <- c("overclassifications",
-                             "misclassifications", 
-                             "incorrectly in FreshTrain",
-                             "incorrectly in greengenes",
-                             "underclassifications",
-                             "correctly in greengenes",
-                             "correct unclassifications",
-                             "correct classifications")
+  row.names(results.v4) <- c("Overclassifications",
+                             "Misclassifications", 
+                             "Incorrectly in FreshTrain",
+                             "Incorrectly in SILVA",
+                             "Underclassifications",
+                             "Correctly in SILVA",
+                             "Correct Unclassifications",
+                             "Correct Classifications")
   results.v4 <- results.v4[8:1, ] # flip table so correct on bottom in bar plots
   temp <- row.names(results.v4)
   results.v4 <- as.matrix(results.v4)
@@ -631,13 +631,14 @@ list.to.csv(the.folder = the.folder, the.list = mis.class.list)
 # explore results ----
 results.v4 <- create.summary.table()
 write.csv(x = results.v4, file = paste(folder.v4, "summary_table.csv", sep = "/"), quote = F)
+saveRDS(object = results.v4, file = paste(folder.v4, "summary_table.rds", sep = "/"))
 
 pdf(file = paste(folder.v4, "stacked_bar.pdf", sep = "/"), width = 6.875, height = 3, family = "Helvetica", title = "Marathonas Validation", colormodel = "srgb")
 layout(mat = matrix(data = c(1,1,1,2,2), nrow = 1, ncol = 5))
 word.heights <- make.stacked.bar.for.manuscript()
-make.example.table
 dev.off()
 
+# manuscript plot moved to file in figure scripts with additional tweaks
 
 
 # x <- incorrect.gg.table[ ,c(1,6:8,14:16)]

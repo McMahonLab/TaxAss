@@ -2,9 +2,13 @@
 # RRR
 
 # ---- paths ----
-file.path.summary.table <- "../arb-scripts/Marathonas_test/v3v4_mara/v3v4_results//summary_table.rds"
+file.path.summary.table.v4 <- "../arb-scripts/Marathonas_test/v4_mara/v4_results/summary_table.rds"
+file.path.summary.table.v3v4 <- "../arb-scripts/Marathonas_test/v3v4_mara/v3v4_results/summary_table.rds"
+file.path.summary.table.v4v5 <- "../arb-scripts/Marathonas_test/v4v5_mara/v4v5_results/summary_table.rds"
 
-file.path.created.plot <- "~/Desktop/mara.pdf"
+
+file.path.created.plot <- "~/Dropbox/PhD/Write\ It/draft\ 7/res-submission_figures/mara_validation.pdf"
+file.path.created.table <- "~/Dropbox/PhD/Write\ It/draft\ 7/res-submission_figures/mara_validation.csv"
 
 # ---- functions ----
 
@@ -18,9 +22,9 @@ make.stacked.bar.for.manuscript <- function(){ # laxy calls from global env
   excel.cex <- 1.7
   
   col.correct <- adjustcolor(col = "darkgreen")
-  col.under <- adjustcolor(col = rainbow(n = 20, v = .8)[4])
+  col.under <- adjustcolor(col = rainbow(n = 20, v = .7)[4])
   col.wrong <- adjustcolor(col = "darkred")
-  col.vector <- c(col.correct, col.correct, col.correct, col.correct, col.under, col.under, col.wrong, col.wrong)
+  col.vector <- c(col.correct, col.correct, col.correct, col.correct, col.under, col.wrong, col.wrong, col.wrong)
   
   line.loc <- cumsum(results[ ,7])
   line.loc <- line.loc - (.5 * results[ ,7])
@@ -41,7 +45,7 @@ make.stacked.bar.for.manuscript <- function(){ # laxy calls from global env
   
   text(x = rep.int(x = 4.2, times = nrow(results)), y = label.loc, labels = row.names(results), xpd = NA, adj = 0, cex = excel.cex, col = col.vector)
   for (n in 1:nrow(results)){
-    lines(x = c(3.62,4.15), y = c(line.loc[n], label.loc[n]), xpd = T)
+    lines(x = c(3.65,4.15), y = c(line.loc[n], label.loc[n]), xpd = T, col = col.vector[n], lwd = 1.8)
   }
   
   return(label.loc)
@@ -61,9 +65,9 @@ make.example.table <- function(){ # all lazy calls to global env
   box.rights <- 15.6
   
   col.correct <- adjustcolor(col = "darkgreen", alpha.f = .3)
-  col.under <- adjustcolor(col = rainbow(n = 20, v = .8)[4], alpha.f = .5)
+  col.under <- adjustcolor(col = rainbow(n = 20, v = .7)[4], alpha.f = .5)
   col.wrong <- adjustcolor(col = "darkred", alpha.f = .3)
-  col.vector <- c(col.correct, col.correct, col.correct, col.correct, col.under, col.under, col.wrong, col.wrong)
+  col.vector <- c(col.correct, col.correct, col.correct, col.correct, col.under, col.wrong, col.wrong, col.wrong)
   
   left.text.vect <- c("acI-A1", "bacI-unclassified", "n/a", "acI-A", "acI-B1", "n/a", "betI-A","acI-C")
   right.text.vect <- c("acI-A1","bacI-unclassified", "Microcystaceae","acI", "Actinobacteria", "LD19","betI-B","acI-C1")
@@ -86,10 +90,11 @@ make.example.table <- function(){ # all lazy calls to global env
   
 }
 
+make.csv.table.for.manuscript <- function()
 
 # ---- go ----
 
-results <- readRDS(file = file.path.summary.table)
+results <- readRDS(file = file.path.summary.table.v4)
 
 pdf(file = file.path.created.plot, width = 6.875, height = 3, family = "Helvetica", title = "Marathonas Validation", colormodel = "srgb")
 layout(mat = matrix(data = c(1,1,1,2,2), nrow = 1, ncol = 5))

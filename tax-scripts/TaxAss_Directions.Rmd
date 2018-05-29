@@ -22,13 +22,15 @@ pre code, pre, code {
 }
 ```
 
-TaxAss assigns taxonomy to a fasta file of otu sequences using both a 
+TaxAss assigns taxonomy to a fasta file of OTU sequences using both a 
 small, custom taxonomy database and a large general database.
 
 Download the scripts from the github repo: https://github.com/McMahonLab/TaxAss
 
 # <span style="color:SteelBlue">List of Steps</span>
-This is a list of all the steps and possible commands. There are details for each step in separate sections.  
+This is a list of all the commands in each step. There is a more detailed section for each step.  
+<br>
+**You can run most of the steps in one go by using the batch scripts listed at the bottom of this section.**  
 
 ````
 -1. Download/Install 

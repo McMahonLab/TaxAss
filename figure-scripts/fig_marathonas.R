@@ -90,7 +90,13 @@ make.example.table <- function(){ # all lazy calls to global env
   
 }
 
-make.csv.table.for.manuscript <- function()
+make.csv.table.for.manuscript <- function(v4,v5,v3){
+  x <- cbind(v4[ ,5:7], v5[ ,5:7], v3[ ,5:7])
+  x <- x[nrow(x):1, ] # flip to match plot order
+  x <- rbind(colnames(x), x)
+  x <- rbind(rep(c("Simulated V4 Tags", "Simulated V4-V5 Tags", "Simulated V3-V4 Tags"), each = 3), x)
+  return(x)
+}
 
 # ---- go ----
 
@@ -101,3 +107,19 @@ layout(mat = matrix(data = c(1,1,1,2,2), nrow = 1, ncol = 5))
 word.heights <- make.stacked.bar.for.manuscript()
 make.example.table()
 dev.off()
+
+v4 <- readRDS(file = file.path.summary.table.v4)
+v5 <- readRDS(file = file.path.summary.table.v4v5)
+v3 <- readRDS(file = file.path.summary.table.v3v4)
+supp.table <- make.csv.table.for.manuscript(v4 = v4, v5 = v5, v3 = v3)
+write.csv(x = supp.table, file = file.path.created.table)
+# in excel:
+# delete top row, merge primer labels into 1 cell each, add cell outlines
+# change font to helvetica, center text, color background to match figure with eyedropper
+# save as pdf in excel
+# open powerpoint and insert the pdf, crop off white space
+# resize the image using the format picture pane- lock aspect ratio and set width to 6.87
+# right click and re-save the image as a pdf
+
+
+

@@ -196,7 +196,7 @@ x.lim <- c(min(pidents), max(pidents))
 y.label <- "Reads Classified (%)"
 x.label <- "Percent Identity Cutoff"
 taxa.levels <- c("Phylum","Class","Order","Family/\nLineage","Genus/\nClade","Species/\nTribe")
-num.taxa <- 6
+num.taxa <- 5
 
 max.eco.val <- as.vector(x = rep(0, times = num.taxa))
 for (t in (7 - num.taxa):6){
@@ -216,7 +216,7 @@ y.axis.ticks <- list("p" = c(85,90,95,100), "c" = c(85,90,95,100), "o" = c(80,85
 save.to <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/pident_all.pdf"
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
 
-par(mfrow = c(1,num.taxa), omi = c(.05,.18,.1,.1), mai = c(.3,.3,.4,0)) # bottom, left, top, right
+par(mfrow = c(1,num.taxa + 1), omi = c(.06,.18,.09,.08), mai = c(.3,.3,.2,0)) # bottom, left, top, right
 
 for (t in (7 - num.taxa):6){
   plot(x = pidents, y = pidents, type = "n", ann = F, lwd = 3, axes = F, ylim = y.axis.ranges[ ,t])
@@ -227,7 +227,7 @@ for (t in (7 - num.taxa):6){
   axis(side = 2, at = y.axis.ticks[[t]], labels = F, tck = -.03, line = .2)
   mtext(text = y.axis.ticks[[t]], side = 2, at = y.axis.ticks[[t]], las = 2, line = .65, cex = .7, xpd = NA)
   
-  mtext(text = taxa.levels[t], side = 3, line = 1, outer = F, cex = .8, padj = 1)
+  mtext(text = taxa.levels[t], side = 3, line = 1.7, outer = F, cex = .8, padj = 1)
   
   
   lines(x = c(98,98), y = c(y.axis.ranges[1,t], max.eco.val[t]), col = adjustcolor("black", alpha.f = .1), lwd = 3)
@@ -238,91 +238,18 @@ for (t in (7 - num.taxa):6){
   }
 }
 
-
-# Phylum ----
-ass <- sum.named[ ,1]
-plot.title <- taxa.levels[1]
-min(ass)
-max(ass)
-y.lim <- c(85,100)
-y.ticks <- c(85,90,95,100)
-y.tick.labs <- c(85,90,95,100)
-repeat.these <- function(){
-  plot(x = pidents, y = ass, col = line.col, type = "n", ann = F, lwd = 3, axes = F, ylim = y.lim)
-  points(x = pidents, y = ass, col = line.col, pch = 19)
-  lines(x = pidents, y = ass, col = line.col, lwd = 3)
-  # vertical max line
-  index <- which(ass == max(ass))
-  max.names <- pidents[index]
-  lines(x = c(pidents[index],pidents[index]),y = c(y.lim[1], ass[index]), col = pointer.col, lwd = 3)
-  # x axis
-  x.lab.text <- c(100,99,98,97,96,95) # expression(bold("98")) if wanted to bold the chosen pident
-  axis(side = 1, at = pidents, labels = F, tck = -.035, line = -.5)
-  mtext(text = x.lab.text, side = 1, line = -.2, at = pidents, col = "black", cex = .6)
-  # Y Axis
-  axis(side = 2, at = y.ticks, labels = F, tck = -.03, line = .2)
-  mtext(text = y.tick.labs, side = 2, at = y.ticks, las = 2, line = .65, cex = .7)
-  # plot title
-  mtext(text = plot.title, side = 3, line = 1, outer = F, cex = .8, padj = 1)
-}
-repeat.these()
-
-# Class ----
-ass <- sum.named[ ,2]
-plot.title <- taxa.levels[2]
-min(ass)
-max(ass)
-y.lim <- c(85,100)
-y.ticks <- c(85,90,95,100)
-y.tick.labs <- c(85,90,95,100)
-repeat.these()
-
-# ----
-# box(which = "plot", col=adjustcolor("purple", alpha.f = .5), lwd = 3)
-# box(which = "figure", col=adjustcolor("orange", alpha.f = .5), lwd = 3)
-
-# Order ----
-ass <- sum.named[ ,3]
-plot.title <- taxa.levels[3]
-min(ass)
-max(ass)
-y.lim <- c(80,95)
-y.ticks <- c(80,85,90,95)
-y.tick.labs <- c(80,85,90,95)
-repeat.these()
-# Family ----
-ass <- sum.named[ ,4]
-plot.title <- taxa.levels[4]
-min(ass)
-max(ass)
-y.lim <- c(65,85)
-y.ticks <- c(65,70,75,80,85)
-y.tick.labs <- c(65,70,75,80,85)
-repeat.these()
-# Genus ----
-ass <- sum.named[ ,5]
-plot.title <- taxa.levels[5]
-min(ass)
-max(ass)
-y.lim <- c(45,65)
-y.ticks <- c(45,50,55,60,65)
-y.tick.labs <- c(45,50,55,60,65)
-repeat.these()
-# Species ----
-ass <- sum.named[ ,6]
-plot.title <- taxa.levels[6]
-min(ass)
-max(ass)
-y.lim <- c(15,45)
-y.ticks <- c(15,20,25,30,35,40,45)
-y.tick.labs <- c(15,20,25,30,35,40,45)
-repeat.these()
-
-
 # ----
 mtext(text = x.label, side = 1, line = -.8, outer = T, cex = .8)
 mtext(text = y.label, side = 2, line = 0, outer = T, cex = .8)
-mtext(text = big.title, side = 3, line = -.7, outer = T, at = .15, adj = 0)
+
+plot(x = pidents, y = pidents, type = "n", ylim = y.axis.ranges[ ,6], axes = F)
+text.level <- seq(from = 43, to = 18, along.with = 1:5)
+line.level <- seq(from = 41, to = 16, along.with = 1:5)
+text(x = 93.5, y = text.level, labels = names(ecosystem.list), adj = 0, xpd = NA, col = ecosystem.colors.labels, cex = 1.32)
+for (l in 1:length(line.level)){
+  lines(x = c(93.8,95.8), y = c(line.level[l], line.level[l]), col = ecosystem.colors.lines[l], lwd = 3, xpd = NA)
+  points(x = c(93.8,94.8,95.8), y = c(line.level[l], line.level[l], line.level[l]), col = ecosystem.colors.lines[l], pch = 19, xpd = NA)
+}
 
 # box(which = "inner", col=adjustcolor("red", alpha.f = .5), lwd = 3)
 # box(which = "outer", col=adjustcolor("blue", alpha.f = .5), lwd = 3)

@@ -47,20 +47,20 @@ stacked.tax.list$`Family/Lineage`[2, ] + stacked.tax.list$`Family/Lineage`[3, ]
 
 # Richness maintained (fig 3) ----
 
+# go to supp_fig_1_pident_recalc_needed.R, run the "quick look" section ** skip to the "==> cyanos" comment to save time
 # Percent Mendota dataset that is cyanobacteria:
-# go to supp_fig_1_pident_recalc_needed.R, run the "quick look" section
 sum(cyanos.all.reads[ ,2])
 
-# percent cyanos classified as something else:
 # go to supp_fig_1_pident_recalc_needed.R, run the "quick look" section
+# percent cyanos classified as something else:
 perc.cyano.classifications
 
 # amount of focing at fine-level (fig 3b)
-# source beginning of fig 3 script
+# source beginning of fig 3 script (select for Mendota)
 # bacI looks worst:
-forcing.data$lineage
-forcing.data$lineage[2,5]
-forcing.data$lineage[1,5]
+forcing.data$lineage[ ,1:10]
+forcing.data$lineage[2,5] # 2 = red bar, 5 = bacI
+forcing.data$lineage[1,5] # 1 = grey bar
 forcing.data$lineage[2,5] / forcing.data$lineage[1,5] * 100
 
 

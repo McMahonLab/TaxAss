@@ -6,9 +6,9 @@
 # Decided including it just made it a little confusing.
 # Also removing the lower pidents, 90 - 94
 
-taxass.file <- "~/Desktop/TaxAss-BatchFiles-go/Mendota/TaxAss-Mendota/analysis/plots/step_4_check_BLAST_settings/BLAST_hits_used_for_pidents_0-100.csv"
+taxass.file <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/Mendota/TaxAss-Mendota/plots/step_4_check_BLAST_settings/BLAST_hits_used_for_pidents_0-100.csv"
 
-paper.file <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Table_2.csv"
+# paper.file <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/table_blast-hit.csv"
 
 paper.table <- read.csv(file = taxass.file)
 

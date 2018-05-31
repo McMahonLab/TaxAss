@@ -7,8 +7,8 @@ file.path.summary.table.v3v4 <- "../arb-scripts/Marathonas_test/v3v4_mara/v3v4_r
 file.path.summary.table.v4v5 <- "../arb-scripts/Marathonas_test/v4v5_mara/v4v5_results/summary_table.rds"
 
 
-file.path.created.plot <- "~/Dropbox/PhD/Write\ It/draft\ 7/res-submission_figures/mara_validation.pdf"
-file.path.created.table <- "~/Dropbox/PhD/Write\ It/draft\ 7/res-submission_figures/mara_validation.csv"
+# file.path.created.plot <- "~/Dropbox/PhD/Write\ It/draft\ 7/res-submission_figures/mara_validation.pdf"
+# file.path.created.table <- "~/Dropbox/PhD/Write\ It/draft\ 7/res-submission_figures/mara_validation.csv"
 
 # ---- functions ----
 

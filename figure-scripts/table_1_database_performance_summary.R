@@ -5,9 +5,9 @@
 
 # ---- Define File Paths ----
 
-run.folder <- "~/Desktop/TaxAss-BatchFiles-go/Mendota/TaxAss-Mendota/analysis/plots/"
+run.folder <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/Mendota/TaxAss-Mendota/plots/"
 
-output.file.path <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Table_1.csv"
+# output.file.path <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/table_best-of-both-databases.csv"
 
 # these filenames shouldn't change b/c scripts output as named:
 taxass.and.gg.alpha <- "step_15_5a_Improvement_over_general-only/alpha_diversity_TaxAss_vs_General.csv"
@@ -21,8 +21,8 @@ p <- read.csv(file = paste(run.folder, taxass.and.gg.perc, sep = "/"))
 f <- read.csv(file = paste(run.folder, fw.alpha.and.perc, sep = "/"))
 
 table.1 <- data.frame(TaxaLevel = c("Kingdom", "Phylum", "Class", "Order", "Family/Lineage", "Genus/Clade", "Species/Tribe"),
-                      Greengenes.perc = unlist(p[1,-1]), TaxAss.perc = unlist(p[2,-1]), FreshTrain.perc = f[ ,2],
-                      Greengenes.alpha = a[ ,3], TaxAss.alpha = a[ ,2], FreshTrain.alpha = f[ ,3])
+                      Silva.perc = unlist(p[1,-1]), TaxAss.perc = unlist(p[2,-1]), FreshTrain.perc = f[ ,2],
+                      Silva.alpha = a[ ,3], TaxAss.alpha = a[ ,2], FreshTrain.alpha = f[ ,3])
 
 table.1 <- table.1[-1, ]
 
@@ -43,3 +43,22 @@ cat("Made file: ", output.file.path)
 # not sure how to format, but can save as .ps from excel. 
 # for now did this: 
 # print to pdf from excel, open in ppt (word resizes), crop to size, select cropped image, save as image, as pdf
+
+# ---- repeat with this input for supplemental other datasets views ----
+run.folder <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/Michigan/TaxAss-Michigan/plots/"
+# output.file.path <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/Supplemental_table_best-of-both-Michigan.csv"
+
+run.folder <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/Danube/TaxAss-Danube/plots/"
+# output.file.path <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/Supplemental_table_best-of-both-Danube.csv"
+
+run.folder <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/TroutBogEpi/TaxAss-TroutBogEpi/plots/"
+# output.file.path <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/Supplemental_table_best-of-both-BogEpi.csv"
+
+run.folder <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/TroutBogHypo/TaxAss-TroutBogHypo/plots/"
+# output.file.path <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/Supplemental_table_best-of-both-BogHypo.csv"
+
+run.folder <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/MouseGut/TaxAss-MouseGut/plots/"
+# output.file.path <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/Supplemental_table_best-of-both-MouseGut.csv"
+
+
+# ----

@@ -27,10 +27,41 @@ min(newly.named$tribe)
 max(newly.named$tribe)
 mean(newly.named$tribe)
 
+# Marathonas error rates
+# run fig_marathonas script to import data.
+v3
+v4
+v5
+
+incorrect <- cbind(v4[6:8,5:7], v5[6:8,5:7], v3[6:8,5:7])
+incorrect <- rbind(incorrect, "tot" = colSums(incorrect))
+incorrect # goes v4, v4-5, v3-4 
+
+incorrect.perc <- incorrect / sum(v4[,1]) * 100
+incorrect.perc # goes v4, v4-5, v3-4  (285 tot clones)
+
+correct.perc <- 100 - incorrect.perc[4, ]
+correct.perc
+
 # (Results) ----
 
-# Fine Res Class Increased (fig 2) ----
-# run beginning of fig_2 script
+# Mara validation (fig 2) ----
+# run fig_marathonas script to import data.
+
+v4
+
+correct.tribe.perc <- sum(v4[1:4,7]) / sum(v4[ ,7]) * 100 # correct, correct unclass, correct in Silva, underclass
+correct.tribe.perc # all green / tot
+
+perc.incorrect.incorrectly.in.silva <- v4[5,7] / sum(v4[5:8,7]) * 100
+perc.incorrect.incorrectly.in.silva # yellow / red + yellow
+
+really.bad.tribe <- c(v4[6:8,7], sum(v4[6:8,7])) / sum(v4[ ,7]) * 100 
+really.bad.tribe # red and sum of red / tot
+
+
+# Fine Res Class Increased (fig 3) ----
+# run beginning of red-yellow fig script
 
 # to list the increases in classification percent:
 beside.eco.list$Mendota

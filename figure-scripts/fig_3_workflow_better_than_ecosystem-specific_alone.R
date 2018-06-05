@@ -22,17 +22,17 @@
 
 # note: the exported csv's are already filtered to be only the top taxa. cutoff = .5 % rel abundance (max bar any color) I think.
 
-mendota.forcing.folder <- "~/Desktop/TaxAss-BatchFiles-go/Mendota/TaxAss-Mendota/analysis/plots/step_15_5b_Improvement_over_custom-only/"
+mendota.forcing.folder <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/Mendota/TaxAss-Mendota/plots/step_15_5b_Improvement_over_custom-only/"
 
-danube.forcing.folder <- "~/Desktop/TaxAss-BatchFiles-go/Danube/TaxAss-Danube/analysis/plots/step_15_5b_Improvement_over_custom-only/"
+danube.forcing.folder <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/Danube/TaxAss-Danube/plots/step_15_5b_Improvement_over_custom-only/"
 
-mouse.forcing.folder <- "~/Desktop/TaxAss-BatchFiles-go/MouseGut/TaxAss-MouseGut/analysis/plots/step_15_5b_Improvement_over_custom-only/"
+mouse.forcing.folder <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/MouseGut/TaxAss-MouseGut/plots/step_15_5b_Improvement_over_custom-only/"
 
-michigan.forcing.folder <- "~/Desktop/TaxAss-BatchFiles-go/Michigan/TaxAss-Michigan/analysis/plots/step_15_5b_Improvement_over_custom-only/"
+michigan.forcing.folder <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/Michigan/TaxAss-Michigan/plots/step_15_5b_Improvement_over_custom-only/"
 
-bog.epi.forcing.folder <- "~/Desktop/TaxAss-BatchFiles-go/TroutBogEpi/TaxAss-TroutBogEpi/analysis/plots/step_15_5b_Improvement_over_custom-only/"
+bog.epi.forcing.folder <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/TroutBogEpi/TaxAss-TroutBogEpi/plots/step_15_5b_Improvement_over_custom-only/"
 
-bog.hypo.forcing.folder <- "~/Desktop/TaxAss-BatchFiles-go/TroutBogHypo/TaxAss-TroutBogHypo/analysis/plots/step_15_5b_Improvement_over_custom-only/"
+bog.hypo.forcing.folder <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/TroutBogHypo/TaxAss-TroutBogHypo/plots/step_15_5b_Improvement_over_custom-only/"
 
 # choose one:
 forcing.folder <- mendota.forcing.folder
@@ -135,7 +135,7 @@ plot.forcing.diffs <- function(PlotData, FolderPath = NULL, PlottingLevels = 1:l
 }
 
 
-# ---- use functions for quick look at all taxa levels ----
+# ---- use functions for QUICK LOOK at all taxa levels ----
 
 forcing.files <- get.csv.filenames(Folder = forcing.folder)
 
@@ -149,7 +149,7 @@ plot.forcing.diffs(PlotData = forcing.data)
 
 # ---- PAPER ----
 
-save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Figure_3.pdf"
+# save.to <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/blue-red_diversity.pdf"
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
 layout(mat = matrix(c(1,2,2), nrow = 1))
 par(mai = c(.55, .2, .24, 0), omi = c(0, .27, .05, .27)) # bottom, left, top, right
@@ -173,7 +173,7 @@ loc.labels <- barplot(height = panel.data, beside = F, col = bar.colors, las = 2
 # X axis----
 text(x = loc.labels - .1, y = -1, labels = bar.labels, srt = -30, xpd = NA, cex = .95, adj = 0)
 # Y axis
-axis(side = 2, at = y.axis.ticks, labels = F, line = -.2, xpd = T, tck = -.02)
+axis(side = 2, at = y.axis.ticks, labels = F, line = -.2, xpd = F, tck = -.02) # made xpd = F when next tick was far away
 mtext(text = y.tick.labels, side = 2, at = y.axis.ticks, line = .2, las = 1, cex = .7)
 # Title
 mtext(text = plot.title, side = 3, line = .8, cex = 1, at = .5, adj = 0)
@@ -189,8 +189,8 @@ panel.data <- panel.data[ ,1:20]
 plot.title <- "Family/Lineage Rank Abundance"
 max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
 max.bar # choose axis max based on this
-y.axis.ticks <- c(0,5,10,15,20,25,30)
-y.tick.labels <- c(0,"",10,"",20,"",30)
+y.axis.ticks <- c(0,5,10,15,20,25,30,35)
+y.tick.labels <- c(0,"",10,"",20,"",30,"")
 
 # stays same for both panels ----
 bar.labels <- colnames(panel.data)
@@ -202,11 +202,11 @@ loc.labels <- barplot(height = panel.data, beside = F, col = bar.colors, las = 2
 lab.y <- c(-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1) # put lowercase ones higher
 text(x = loc.labels - .1, y = -.9, labels = bar.labels, srt = -30, xpd = NA, cex = .9, adj = 0)
 # Y axis
-axis(side = 2, at = y.axis.ticks, labels = F, line = -.75, xpd = T, tck = -.02)
+axis(side = 2, at = y.axis.ticks, labels = F, line = -.75, xpd = F, tck = -.02) # made xpd = F when next tick was far away
 mtext(text = y.tick.labels, side = 2, at = y.axis.ticks, line = -.35, las = 1, cex = .7)
 # Title
 mtext(text = plot.title, side = 3, line = .8, cex = 1, at = 3, adj = 0)
-# ----
+# ---- legend ----
 legend.text <- c("Prevented Inaccuracy", "Maintained Richness")
 text(x = 17, y = c(20.8,17.8), labels = legend.text, adj = 0, xpd = NA, cex = 1.1)
 rect(xleft = 15.5, xright = 16.5, ybottom = 20, ytop = 22, col = bar.colors[2], border = F, xpd = NA)
@@ -216,7 +216,7 @@ rect(xleft = 15.5, xright = 16.5, ybottom = 17, ytop = 19, col = bar.colors[3], 
 # box(which = "outer", col=adjustcolor("blue", alpha.f = .5), lwd = 3)
 # box(which = "plot", col=adjustcolor("purple", alpha.f = .5), lwd = 3)
 # box(which = "figure", col=adjustcolor("orange", alpha.f = .5), lwd = 3)
-#----
+# ----
 dev.off()
 
 
@@ -225,7 +225,7 @@ dev.off()
 # Michigan ----
 forcing.folder <- michigan.forcing.folder
 # Run "quick look" section to load data
-save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_3_Michigan.pdf"
+# save.to <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/Supplemental_blue-red_Michigan.pdf"
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
 layout(mat = matrix(c(1,2,2), nrow = 1))
 par(mai = c(.55, .2, .24, 0), omi = c(0, .27, .05, .4)) # bottom, left, top, right
@@ -243,15 +243,15 @@ panel.data <- panel.data[ ,1:20]
 plot.title <- "Family/Lineage Rank Abundance"
 max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
 max.bar # choose axis max based on this
-y.axis.ticks <- c(0,5,10,15,20,25,30,35)
-y.tick.labels <- c(0,"",10,"",20,"",30,"")
-# Run paper figure lines 195 to 219
+y.axis.ticks <- c(0,5,10,15,20,25,30,35,40)
+y.tick.labels <- c(0,"",10,"",20,"",30,"","")
+# Run paper figure lines 195 to 219 with xpd = F
 mtext(text = expression(bold("Lake Michigan")), side = 3, line = -5, at = 18, cex = 2)
 dev.off()
 
 # Danube ----
 forcing.folder <- danube.forcing.folder
-save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_3_Danube.pdf"
+# save.to <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/Supplemental_blue-red_Danube.pdf"
 # Run "quick look" section to load data
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
 layout(mat = matrix(c(1,2,2), nrow = 1))
@@ -264,21 +264,25 @@ y.axis.ticks <- c(0,5,10,15,20,25,30)
 y.tick.labels <- c(0,"", 10, "", 20,"",30)
 y.axis.label <- "Relative Abundance (% reads)"
 y.max <- 30
-# Run paper figure line 167 to 186
+# Run paper figure line 167 to 173
+text(x = loc.labels - .1, y = -.6, labels = bar.labels, srt = -30, xpd = NA, cex = .9, adj = 0)
+# Run paper figure line 175 to 186
 panel.data <- forcing.data$lineage
 panel.data <- panel.data[ ,1:20]
 plot.title <- "Family/Lineage Rank Abundance"
 max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
 max.bar # choose axis max based on this
-y.axis.ticks <- c(0,5,10,15,20,25,30,35,40)
-y.tick.labels <- c(0,"",10,"",20,"",30,"",40)
-# Run paper figure lines 195 to 219
+y.axis.ticks <- c(0,5,10,15,20,25,30,35,40,45)
+y.tick.labels <- c(0,"",10,"",20,"",30,"",40,"")
+# Run paper figure lines 195 to 202 
+text(x = loc.labels - .1, y = -.7, labels = bar.labels, srt = -37, xpd = NA, cex = .85, adj = 0)
+# Run paper figure lines 204 to 219 with xpd = F
 mtext(text = expression(bold("Danube River")), side = 3, line = -5, at = 18, cex = 2)
 dev.off()
 
 # Bog Epi ----
 forcing.folder <- bog.epi.forcing.folder
-save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_3_Bog_Epi.pdf"
+# save.to <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/Supplemental_blue-red_BogEpi.pdf"
 # Run "quick look" section to load data
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
 layout(mat = matrix(c(1,2,2), nrow = 1))
@@ -287,25 +291,25 @@ panel.data <- forcing.data$phylum
 plot.title <- "Phylum Rank Abundance"
 max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
 max.bar # choose axis max based on this
-y.axis.ticks <- c(0,5,10,15,20,25,30,35,40,45,50)
-y.tick.labels <- c(0,"", 10, "", 20,"",30,"",40,"",50)
+y.axis.ticks <- c(0,5,10,15,20,25,30,35,40,45,50,55)
+y.tick.labels <- c(0,"", 10, "", 20,"",30,"",40,"",50,"")
 y.axis.label <- "Relative Abundance (% reads)"
-y.max <- 50
-# Run paper figure line 167 to 186
+y.max <- max.bar
+# Run paper figure line 167 to 186 with xpd = F
 panel.data <- forcing.data$lineage
 panel.data <- panel.data[ ,1:20]
 plot.title <- "Family/Lineage Rank Abundance"
 max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
 max.bar # choose axis max based on this
-y.axis.ticks <- c(0,5,10,15,20,25,30,35,40,45)
-y.tick.labels <- c(0,"",10,"",20,"",30,"",40,"")
-# Run paper figure lines 195 to 219
+y.axis.ticks <- c(0,5,10,15,20,25,30,35,40,45,50)
+y.tick.labels <- c(0,"",10,"",20,"",30,"",40,"","")
+# Run paper figure lines 195 to 219 with xpd = F
 mtext(text = expression(bold("Bog Epilimnion")), side = 3, line = -5, at = 18, cex = 2)
 dev.off()
 
 # Bog Hypo ----
 forcing.folder <- bog.epi.forcing.folder
-save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_3_Bog_Hypo.pdf"
+# save.to <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/Supplemental_blue-red_BogHypo.pdf"
 # Run "quick look" section to load data
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
 layout(mat = matrix(c(1,2,2), nrow = 1))
@@ -314,25 +318,25 @@ panel.data <- forcing.data$phylum
 plot.title <- "Phylum Rank Abundance"
 max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
 max.bar # choose axis max based on this
-y.axis.ticks <- c(0,5,10,15,20,25,30,35,40,45,50)
-y.tick.labels <- c(0,"", 10, "", 20,"",30,"",40,"",50)
+y.axis.ticks <- c(0,5,10,15,20,25,30,35,40,45,50,55)
+y.tick.labels <- c(0,"", 10, "", 20,"",30,"",40,"",50,"")
 y.axis.label <- "Relative Abundance (% reads)"
-y.max <- 50
-# Run paper figure line 167 to 186
+y.max <- max.bar
+# Run paper figure line 167 to 186 with xpd = F
 panel.data <- forcing.data$lineage
 panel.data <- panel.data[ ,1:20]
 plot.title <- "Family/Lineage Rank Abundance"
 max.bar <- max(panel.data[1, ] + panel.data[2, ]) # grey bar + red bar
 max.bar # choose axis max based on this
-y.axis.ticks <- c(0,5,10,15,20,25,30,35,40,45)
-y.tick.labels <- c(0,"",10,"",20,"",30,"",40,"")
-# Run paper figure lines 195 to 219
+y.axis.ticks <- c(0,5,10,15,20,25,30,35,40,45,50)
+y.tick.labels <- c(0,"",10,"",20,"",30,"",40,"","")
+# Run paper figure lines 195 to 219 with xpd = F
 mtext(text = expression(bold("Bog Hypolimnion")), side = 3, line = -5, at = 18, cex = 2)
 dev.off()
 
 # Mouse Gut ----
 forcing.folder <- mouse.forcing.folder
-save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_3_Mouse_Gut.pdf"
+# save.to <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/Supplemental_blue-red_MouseGut.pdf"
 # Run "quick look" section to load data
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Fig 2", colormodel = "srgb")
 layout(mat = matrix(c(1,2,2), nrow = 1))
@@ -353,10 +357,10 @@ max.bar # choose axis max based on this
 y.axis.ticks <- c(0,10,20,30,40,50,60,70,80,90,100)
 y.tick.labels <- c(0,"",20,"",40,"",60,"",80,"",100)
 # Run paper figure lines 195 to 202
-text(x = loc.labels - .1, y = -1.1, labels = bar.labels, srt = -30, xpd = NA, cex = .9, adj = 0)
-# Run paper figure lines 204 to 219
+text(x = loc.labels - .1, y = -3, labels = bar.labels, srt = -30, xpd = NA, cex = .9, adj = 0)
+# Run paper figure lines 204 to 209
 # just paste the stupid legend on later.
-mtext(text = expression(bold("Mouse Gut")), side = 3, line = -5, at = 9, cex = 2)
+mtext(text = expression(bold("Mouse Gut")), side = 3, line = -3, at = 5, cex = 2)
 dev.off()
 
 #

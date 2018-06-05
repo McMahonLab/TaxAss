@@ -7,9 +7,9 @@
 
 # ---- define file paths ----
 
-all.hits.blast.file.path <- "~/Desktop/TaxAss-BatchFiles-go/Mendota/Quickie-TaxAss-Mendota/otus.custom.blast.table"
+all.hits.blast.file.path <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/Mendota/TaxAss-Mendota/otus.custom.blast.table"
 
-blast.file.path <- "~/Desktop/TaxAss-BatchFiles-go/Mendota/Quickie-TaxAss-Mendota/otus.custom.blast.table.modified"
+blast.file.path <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/Mendota/TaxAss-Mendota/otus.custom.blast.table.modified"
 
 # ---- define functions ----
 

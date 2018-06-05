@@ -1,0 +1,222 @@
+---
+title: "How to format the ARB-exported FreshTrain for use with TaxAss"
+author: "Robin Rohwer"
+date: "last updated Mar 25, 2018"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{css, echo=FALSE}
+pre code, pre, code {
+  white-space: pre !important;
+  overflow-x: scroll !important;
+  word-break: keep-all !important;
+  word-wrap: initial !important;
+}
+```
+
+# Overview of steps
+
+* export all full-length 16S from ARB  
+* reformatting to make taxonomy file compatible with mothur  
+* remove references lacking FreshTrain names  
+* adjust coarse-level nomenclature (phylum/class/order) to match comprehensive database of choice  
+* remove additional problem sequences  
+
+<br>
+
+# ARB export  
+
+The FreshTrain comes from an ARB database of 16S clone libraries from freshwater systems. 
+All of the clones were aligned in ARB alongside the Greengenes database to determine the 
+phylogeny of abundant freshwater taxa introduced in [Newton *et al.* 2011](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3063352/). 
+Currently all full-length 16S sequences are exported from ARB, and this includes some of 
+the freshwater clones that do not have "FreshTrain names," i.e. they were found in a freshwater
+sample but they are not one of the abundant freshwater taxa included in the Newton nomenclature.  
+
+<br>
+
+# Simple Reformatting  
+
+Replace `U` and `.` with `T` and `-` (perl)  
+```{bash, eval=F}
+cat myseqs.fa | prepareARBaligns4tree.pl > mycleanseqs.fa
+```
+<br>
+  
+Make file semicolon delimited (bash)  
+```{bash, eval=F}
+sed 's/[[:blank:]]/\;/' <otus.98.taxonomy >otus.98.taxonomy.reformatted
+```
+<br>
+  
+Replace blanks like `;;;` with unclassifieds like `unclassified;unclassified;unclassified;` (R)  
+```{bash, eval=F}
+Rscript replace_blanks_with_unclassified.R semicolon-delim-input-file output-file
+```
+The RDP classifier takes a computational shortcut when calculating bootstrap
+p-values. For higher taxonomy levels it simply sums the lower levels.  If the lower level is 
+totally blank there's nothing to sum up, so the highest level ends up being less than 100%.  
+<br>
+  
+Return to first column being tab delimited for mothur-compatibility (bash)  
+```{bash, eval=F}
+./replace_first_semicolon_with_tab.sh
+```
+<br>
+  
+# Remove Non-FreshTrain  
+
+Before taxonomy assignment with the FreshTrain and TaxAss, sequences that are not well flushed-out 
+by the freshwater taxonomy need to be removed because only relevant reference sequences should exist 
+for the percent identity calculation. The full set of freshwater sequences includes all of the clones,
+including ones that are not part of the well-defined freshwater taxonomy.
+
+Use the script `remove_non-FreshTrain_References.py` with this syntax:
+```{bash, eval=F}
+python remove_non-FreshTrain_References.py inputFasta inputTaxon outputFasta outputTaxon
+```
+This script requires four arguments, read from the command line:  
+
+`inputFasta`  = Input fasta file, from which to remove lineages: i.e., FreshTrain18Aug2016.fasta  
+`inputTaxon`  = Input taxonomy file, from which to remove lineages: i.e., FreshTrain18Aug2016.taxonomy  
+`outputFasta` = Output fasta file, i.e., FreshTrain25Jan2018.fasta  
+`outputTaxon` = Output taxonomy file, i.e., FreshTrain25Jan2018.taxonomy  
+
+From the input files, this script removes any sequences not assigned to a 
+freshwate-specific lineage, and writes the remaining sequences to the output files.  
+
+<br>
+
+# Adjust coarse-level nomenclature   
+
+The FreshTrain phylogeny isn't currently integrated into a comprehensive database, like
+Greengenes or silva, which is why TaxAss is necessary. However, it's "coarse-level" taxonomic 
+nomenclature (e.g. phylum, class, order) currently matches the nomenclature used in an old version 
+of Greengenes. If you don't do this, if for example you group by class, some of sequences might 
+appear to be different classes when really there's just a difference in nomenclature between the two databases.
+
+### Make Greengenes-compatible  
+To match GG 13.5 this was done manually, as detailed in the `README-FreshTrain18Aug2016`:
+
+```
+FreshTrain version 18Aug2016:
+edited by Robin to fix "typos" (note: arb file may or may not be updated accordingly)
+
+deleted:
+Gm9Prot2
+Gm9Pro24
+Gm9Pro25
+UniBac24
+Gm9Prot5
+
+changed to be o_undefinedAlpha:
+McDucnp2
+CanPhyco
+
+changed to be o__Acidimicrobiales and c__Acidimicrobiia
+AcmBacte
+```
+
+### make SILVA-compatible
+To make the FreshTrain compatible with SILVA, you need to adjust more names. Start by removing 
+non-FreshTrain lineages from the 18Aug2016 version that was edited manually. Then use these scripts
+to convert the FreshTrain from Greengenes-compatible to Silva-compatible:  
+
+* `convertFreshTrainToSilvaV128.py`  
+* `convertFreshTrainToSilvaV132.py`  
+<br>
+
+**SILVA v132 syntax is:**
+```{bash, eval=F}
+convertFreshTrainToSilvaV132.py inputTaxon outputTaxon
+```
+This script requires two arguments, read from the command line:  
+`inputTaxon` = Input taxonomy file to make compliant with silva v132. For example, FreshTrain25Jan2018Greengenes13_5.taxonomy
+`outputTaxon` = Output taxonomy file. For example, FreshTrain25Jan2018SILVAv128.taxonomy  
+
+<br>
+
+**SILVA v128 syntax is:**
+```{bash, eval=F}
+convertFreshTrainToSilvaV128.py inputTaxon outputTaxon
+```
+This script requires two arguments, read from the command line:  
+`inputTaxon` = Input taxonomy file to make compliant with silva v128  
+`outputTaxon` = Output taxonomy file  
+
+<br>
+The coarse-level names that needed to be changed were identified using the 
+`Database_Improvement_Workflow.rmd` located in this same folder, where the 
+custom database references are classified with the general database to generate 
+a list of conflicting names.  
+
+<br>
+
+# Remove k\_\_, p\_\_, c\_\_, o\_\_ (with SILVA)  
+
+Whether the prefixes are there or not needs to match between SILVA and the FreshTrain. Greengenes has them, SILVA doesn't. Therefore The FreshTrain as exported from ARB has the prefixes.  
+  
+Remove the prefixes from the FreshTrain with `remove_gg_taxa_level_prefixes.sh`
+
+syntax:
+```{bash, eval=F}
+./remove_gg_taxa_level_prefixes.sh input.taxonomy output.taxonomy
+```
+where `input.taxonomy` is for example `FreshTrain25Jan2018SILVAv132_temp.taxonomy`  
+and `output.taxonomy` is for example `FreshTrain25Jan2018SILVAv132.taxonomy`
+
+<br>
+
+**note:** Josh's script `processSilvaFromMothur.py` adds the prefixes to all of silva at the same time as un-aligning it.
+But unaligning is not necessary, and the FreshTrain is smaller so makes more sense to change it, and the prefixes are annoying. So instead I'm recommending to create ready-to-use FreshTrain files that don't have the prefixes, with an optional step to un-align silva included in the TaxAss directions as a shell script.
+
+<br>
+
+# Remove structural conflicts    
+A few references in the FreshTrain end up with phylogenetic conflicts (so structural conflicts beyond new names).
+These were identified because organisms assigned the same FreshTrain lineage had different SILVA orders, resulting 
+in a structure that is not monophyletic. With manual examination, they had very few references in the FreshTrain, so 
+to fix this problem we simply remove the less-well-represented half of the references with conflicting names.  
+  
+  
+I started to make a script to do it `remove_non-monophyletic_refs_for_SILVA-compatibility.R` but then I decided
+it really wasn't worth the effor because I'm only doing it once. So I manually removed in text wrangler:  
+  
+### v132 
+in FreshTrain these are all "Actinomycetales acSTL."  
+in SILVA 132 they are either order "Frankiales" or "PeM15".  
+
+Remove all "PeM15" refs from SILVA v132 FreshTrain-compatible:  
+```
+AbmAct53  
+LaeeEE00p1
+PavinActino1
+```
+
+### v128
+
+Same issue with acSTL, but different ones. I know, super weird it's not the same.  
+
+Remove all "PeM15" refs from SILVA v128 FreshTrain-compatible:  
+```
+LakecEC4
+LakStec6
+PavinActino1
+```
+
+Also an issue with betV. In FreshTrain they're all "undefined betV".  
+In SILVA 128 they are either order "Nitrosomonadales" or "TRA3-20".  
+  
+Remove all "TRA3-20" refs from SILVA v128 FreshTrain-compatible:  
+```
+LiUU2018
+LiUU2019
+```

@@ -7,7 +7,7 @@
 
 # Rscript replace_blanks_with_unclassified.R inputfile outputfile
 
-# ---- Import Files ----
+# ---- Define Input ----
 
 # # cat("\nfuck you forgot to comment out the file paths!!!\n")
 # file.with.blanks.semicolon.delim <- "~/Desktop/TaxonomyTrainingSets/BLASTing/SILVA_downloads/12-7-16_format_mothur_silva/semicolons.tax"
@@ -16,6 +16,8 @@
 userprefs <- commandArgs(trailingOnly = TRUE)
 file.with.blanks.semicolon.delim <- userprefs[1] 
 reformatted.file.semicolon.delim <- userprefs[2]
+
+# ---- Go ----
 
 # import taxonomy file:
 numcol <- max(count.fields(file.with.blanks.semicolon.delim, sep=";", quote=""))

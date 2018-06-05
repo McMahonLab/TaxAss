@@ -14,23 +14,23 @@
 
 # ---- Define File Paths and other User Choices ----
 
-mendota.beside.file.path <- "~/Desktop/TaxAss-BatchFiles-go/Mendota/TaxAss-Mendota/analysis/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-BesideData-Reads.csv"
-mendota.stacked.file.path <- "~/Desktop/TaxAss-BatchFiles-go/Mendota/TaxAss-Mendota/analysis/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-StackedData-Reads.csv"
+mendota.beside.file.path <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/Mendota/TaxAss-Mendota/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-BesideData-Reads.csv"
+mendota.stacked.file.path <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/Mendota/TaxAss-Mendota/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-StackedData-Reads.csv"
 
-michigan.beside.file.path <- "~/Desktop/TaxAss-BatchFiles-go/Michigan/TaxAss-Michigan/analysis/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-BesideData-Reads.csv"
-michigan.stacked.file.path <- "~/Desktop/TaxAss-BatchFiles-go/Michigan/TaxAss-Michigan/analysis/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-StackedData-Reads.csv"
+michigan.beside.file.path <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/Michigan/TaxAss-Michigan/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-BesideData-Reads.csv"
+michigan.stacked.file.path <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/Michigan/TaxAss-Michigan/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-StackedData-Reads.csv"
 
-danube.beside.file.path <- "~/Desktop/TaxAss-BatchFiles-go/Danube/TaxAss-Danube/analysis/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-BesideData-Reads.csv"
-danube.stacked.file.path <- "~/Desktop/TaxAss-BatchFiles-go/Danube/TaxAss-Danube/analysis/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-StackedData-Reads.csv"
+danube.beside.file.path <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/Danube/TaxAss-Danube/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-BesideData-Reads.csv"
+danube.stacked.file.path <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/Danube/TaxAss-Danube/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-StackedData-Reads.csv"
 
-bogs.beside.file.path <- "~/Desktop/TaxAss-BatchFiles-go/TroutBogEpi/TaxAss-TroutBogEpi/analysis/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-BesideData-Reads.csv"
-bogs.stacked.file.path <- "~/Desktop/TaxAss-BatchFiles-go/TroutBogEpi/TaxAss-TroutBogEpi/analysis/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-StackedData-Reads.csv"
+bogs.beside.file.path <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/TroutBogEpi/TaxAss-TroutBogEpi/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-BesideData-Reads.csv"
+bogs.stacked.file.path <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/TroutBogEpi/TaxAss-TroutBogEpi/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-StackedData-Reads.csv"
 
-bogs.hypo.beside.file.path <- "~/Desktop/TaxAss-BatchFiles-go/TroutBogHypo/TaxAss-TroutBogHypo/analysis/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-BesideData-Reads.csv"
-bogs.hypo.stacked.file.path <- "~/Desktop/TaxAss-BatchFiles-go/TroutBogHypo/TaxAss-TroutBogHypo/analysis/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-StackedData-Reads.csv"
+bogs.hypo.beside.file.path <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/TroutBogHypo/TaxAss-TroutBogHypo/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-BesideData-Reads.csv"
+bogs.hypo.stacked.file.path <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/TroutBogHypo/TaxAss-TroutBogHypo/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-StackedData-Reads.csv"
 
-mouse.beside.file.path <- "~/Desktop/TaxAss-BatchFiles-go/MouseGut/TaxAss-MouseGut/analysis/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-BesideData-Reads.csv"
-mouse.stacked.file.path <- "~/Desktop/TaxAss-BatchFiles-go/MouseGut/TaxAss-MouseGut/analysis/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-StackedData-Reads.csv"
+mouse.beside.file.path <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/MouseGut/TaxAss-MouseGut/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-BesideData-Reads.csv"
+mouse.stacked.file.path <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/MouseGut/TaxAss-MouseGut/plots/step_15_5a_Improvement_over_general-only/WorkflowImprovement-StackedData-Reads.csv"
 
 
 file.paths.beside <- c(mendota.beside.file.path, michigan.beside.file.path, danube.beside.file.path, bogs.beside.file.path, bogs.hypo.beside.file.path, mouse.beside.file.path)
@@ -112,21 +112,6 @@ fancy.barplot <- function(BesideData, StackedData, BarSpacing = c(0,1), YaxisMax
   return(loc.labels)
 }
 
-# left over from inside of fancy.barplot 
-# y.axis.label <- paste(DataType, "Classified (%)")
-# beside.legend <- c("Left Bars- Greegenes", "Right Bars- Workflow")
-# stacked.legend <- c("Unchanged", "Re-Classified","Newly-Classified")
-# title.label <- "Classification Improvement"
-# file.name <- paste(FolderPath, "/WorkflowImprovement-", DataType, "Classified.png", sep = "")
-# 
-# mtext(text = colnames(z), side = 1, line = 1, at = loc.labels)
-# mtext(text = y.axis.label, side = 2, line = 2.2, cex = 1.5)
-# mtext(text = beside.legend, side = 1, line = 3, col = col.y, at = c(1, 18), cex = 1.5, adj = c(0,1))
-# mtext(text = stacked.legend, side = 3, line = c(0, -1.5, -3), at = 14, cex = 1.5, col = col.z, adj = 0)
-# mtext(text = title.label, side = 3, line = 1.5, cex = 1.5, at = 3, adj = 0)
-# unnecessary.message <- dev.off()
-
-
 # ---- Use Functions to Import and Format ----
 
 beside.eco.list <- make.empty.list.structure(ListNames = ecosystem.names)
@@ -160,7 +145,8 @@ for (t in 1:length(taxa.names)){
 }
 
 # ---- Paper Figure 2----
-save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Figure_2.pdf"
+
+save.to <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/red_yellow_improvement.pdf"
 
 # setEPS()
 # postscript(file = save.to, width = 6.875, height = 3, title = "TaxAss Fig 2", colormodel = "srgb", family = "Helvetica")
@@ -255,7 +241,7 @@ mtext(text = plot.title, side = 3, line = .7, cex = 1, at = 1, adj = 0)
 # ----------------------------------------------------------------------------------------------------
 
 # legend beside 
-beside.legend <- c("Left Bar: Greegenes", "Right Bar: TaxAss")
+beside.legend <- c("Left Bar: Silva", "Right Bar: TaxAss")
 text(x = 16.8, y = c(102, 92), labels = beside.legend, adj = 0, xpd = NA, cex = .8)
 rect(xleft = 15.5, xright = 16.5, ybottom = 100, ytop = 105, col = col.z[1], xpd = NA)
 rect(xleft = 15.5, xright = 16.5, ybottom = 90, ytop = 91.7, col = col.z[1], xpd = NA)
@@ -276,7 +262,7 @@ dev.off()
 # same fig with other datasets. split into 1 panel each. easiest way, just crop off an empty plot.new at end.
 
 # Mendota ----
-save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_2_Mendota.pdf"
+# save.to <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/Supplemental_red-yellow_Mendota.pdf"
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Supplemental Fig 2", colormodel = "srgb")
 par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
 # 2a.
@@ -287,7 +273,7 @@ z <- z[ ,-1]
 plot.title <- "Mendota by Taxa Level"
 x.axis.labels <- c("Phylum", "Class", "Order", "Family/Lineage", "Genus/Clade", "Species/Tribe")
 
-# ***** RUN "GUTS" section, line 181 *****
+# ***** RUN "GUTS" section *****
 
 mtext(text = y.axis.label, side = 2, line = 1, cex = 1.1)
 # empty side:
@@ -295,7 +281,7 @@ plot.new()
 dev.off()
 
 # Michigan ----
-save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_2_Michigan.pdf"
+# save.to <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/Supplemental_red-yellow_Michigan.pdf"
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Supplemental Fig 2", colormodel = "srgb")
 par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
 # 2a.
@@ -306,7 +292,7 @@ z <- z[ ,-1]
 plot.title <- "Michigan by Taxa Level"
 x.axis.labels <- c("Phylum", "Class", "Order", "Family/Lineage", "Genus/Clade", "Species/Tribe")
 
-# ***** RUN "GUTS" section, line 181 *****
+# ***** RUN "GUTS" section *****
 
 mtext(text = y.axis.label, side = 2, line = 1, cex = 1.1)
 # empty side:
@@ -314,7 +300,7 @@ plot.new()
 dev.off()
 
 # Danube ----
-save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_2_Danube.pdf"
+# save.to <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/Supplemental_red-yellow_Danube.pdf"
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Supplemental Fig 2", colormodel = "srgb")
 par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
 # 2a.
@@ -325,7 +311,7 @@ z <- z[ ,-1]
 plot.title <- "Danube by Taxa Level"
 x.axis.labels <- c("Phylum", "Class", "Order", "Family/Lineage", "Genus/Clade", "Species/Tribe")
 
-# ***** RUN "GUTS" section, line 181 *****
+# ***** RUN "GUTS" section *****
 
 mtext(text = y.axis.label, side = 2, line = 1, cex = 1.1)
 # empty side:
@@ -333,7 +319,7 @@ plot.new()
 dev.off()
 
 # Bog Epi ----
-save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_2_BogEpi.pdf"
+# save.to <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/Supplemental_red-yellow_BogEpi.pdf"
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Supplemental Fig 2", colormodel = "srgb")
 par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
 # 2a.
@@ -353,7 +339,7 @@ dev.off()
 
 
 # Bog Hypo ----
-save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_2_BogHypo.pdf"
+# save.to <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/Supplemental_red-yellow_BogHypo.pdf"
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Supplemental Fig 2", colormodel = "srgb")
 par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
 # 2a.
@@ -364,7 +350,7 @@ z <- z[ ,-1]
 plot.title <- "Bog Hypolimnion by Taxa Level"
 x.axis.labels <- c("Phylum", "Class", "Order", "Family/Lineage", "Genus/Clade", "Species/Tribe")
 
-# ***** RUN "GUTS" section, line 181 *****
+# ***** RUN "GUTS" section *****
 
 mtext(text = y.axis.label, side = 2, line = 1, cex = 1.1)
 # empty side:
@@ -372,7 +358,7 @@ plot.new()
 dev.off()
 
 # Mouse Gut ----
-save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_2_MouseGut.pdf"
+# save.to <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/Supplemental_red-yellow_MouseGut.pdf"
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Supplemental Fig 2", colormodel = "srgb")
 par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
 # 2a.
@@ -383,7 +369,7 @@ z <- z[ ,-1]
 plot.title <- "Mouse Gut by Taxa Level"
 x.axis.labels <- c("Phylum", "Class", "Order", "Family/Lineage", "Genus/Clade", "Species/Tribe")
 
-# ***** RUN "GUTS" section, line 181 *****
+# ***** RUN "GUTS" section *****
 
 mtext(text = y.axis.label, side = 2, line = 1, cex = 1.1)
 # empty side:
@@ -391,7 +377,7 @@ plot.new()
 dev.off()
 
 # Phylum ----
-save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_2_Phylum.pdf"
+# save.to <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/Supplemental_red-yellow_Phylum.pdf"
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Supplemental Fig 2", colormodel = "srgb")
 par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
 # 2b. 
@@ -406,8 +392,10 @@ mtext(text = y.axis.label, side = 2, line = 1, cex = 1.1)
 # empty side:
 plot.new()
 dev.off()
+
+
 # Class ----
-save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_2_Class.pdf"
+# save.to <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/Supplemental_red-yellow_Class.pdf"
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Supplemental Fig 2", colormodel = "srgb")
 par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
 # 2b. 
@@ -423,8 +411,9 @@ mtext(text = y.axis.label, side = 2, line = 1, cex = 1.1)
 plot.new()
 dev.off()
 
+
 # Order ----
-save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_2_Order.pdf"
+# save.to <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/Supplemental_red-yellow_Order.pdf"
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Supplemental Fig 2", colormodel = "srgb")
 par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
 # 2b. 
@@ -440,8 +429,9 @@ mtext(text = y.axis.label, side = 2, line = 1, cex = 1.1)
 plot.new()
 dev.off()
 
+
 # Family/Lineage ----
-save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_2_Lineage.pdf"
+# save.to <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/Supplemental_red-yellow_Lineage.pdf"
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Supplemental Fig 2", colormodel = "srgb")
 par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
 # 2b. 
@@ -458,7 +448,7 @@ plot.new()
 dev.off()
 
 # Genus/Clade ----
-save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_2_Clade.pdf"
+# save.to <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/Supplemental_red-yellow_Clade.pdf"
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Supplemental Fig 2", colormodel = "srgb")
 par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
 # 2b. 
@@ -475,7 +465,7 @@ plot.new()
 dev.off()
 
 # Species/Tribe ----
-save.to <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Figure_2_Tribe.pdf"
+# save.to <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/Supplemental_red-yellow_Tribe.pdf"
 pdf(file = save.to, width = 6.875, height = 3, family = "Helvetica", title = "TaxAss Supplemental Fig 2", colormodel = "srgb")
 par(mfrow = c(1,2), mai = c(.65, .05, .33, 0), omi = c(0, .36, 0, .9)) # bottom, left, top, right
 # 2b. 
@@ -490,6 +480,7 @@ mtext(text = y.axis.label, side = 2, line = 1, cex = 1.1)
 # empty side:
 plot.new()
 dev.off()
+
 
 #
 # ---- Poster Figure ----

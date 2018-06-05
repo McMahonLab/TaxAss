@@ -1,7 +1,7 @@
 ---
 title: "README-TaxAss-BatchFiles"
 author: "Robin Rohwer"
-date: "September 12, 2017"
+date: "March 13, 2018"
 output: html_document
 ---
 
@@ -18,12 +18,12 @@ mothur        | v.1.39.5            | mothur.org
 SraToolkit    | 2.7.0-mac64         | ncbi.nlm.nih.gov  
 BLAST         | 2.2.31+             | ncbi.nlm.nih.gov  
 vsearch       | 2.4.3-macos-x86_64  | github.com/torognes/vsearch
-TaxAss        | SHA 371108d803f35ed2d23afa7d1150cb303bb297e7  | github.com/McMahonLab/TaxAss/tax-scripts <br> (And included in these batch files)
+TaxAss        | SHA 01e99fe0cb91570f4533e1a78af1e2c23662bfdf  | github.com/McMahonLab/TaxAss/tax-scripts <br> (And included in these batch files)
 
 Database      | Version | File Name          | Download From
 --------------|---------|--------------------|-------------------------  
 FreshTrain    | 18Aug2016 | FreshTrain18Aug2016.zip | github.com/McMahonLab/TaxAss/FreshTrain-files
-Greengenes    | May 2013  | gg_13_5.fasta <br> gg_13_5_taxonomy.txt| greengenes.secondgenome.com/downloads
+Silva NR99    | V132      | Silva.nr_v132 | mothur.org
 Silva Seed    | v128      | silva.seed_v128.align     | mothur.org    
 
 #### Add these programs to your path after installing:  
@@ -32,12 +32,12 @@ Silva Seed    | v128      | silva.seed_v128.align     | mothur.org
 * SraToolkit  
 * BLAST (probably automatically installs to path)  
  
-The TaxAss tax-scripts are already in each ecosystem folder here. Otherwise you would add them to your working directory (not on the path).
+The TaxAss tax-scripts will already be in each ecosystem folder here. Otherwise you would add them to your working directory (not on the path).
 
 #### Download the reference databases into the existing folder called ReferenceDatabases:  
 
 * FreshTrain  
-* Greengenes  
+* Silva  
 * Silva seed
 
 Unzip the files, and move them so that they are not nested within other folders after expanding. Do not change any names. This is what the contents of `ReferenceDatabases` should look like:
@@ -45,14 +45,31 @@ Unzip the files, and move them so that they are not nested within other folders 
 ```{bash, eval=F}
 ls ReferenceDatabases/
 
-# FreshTrain18Aug2016.fasta
-# FreshTrain18Aug2016.taxonomy
+# FreshTrain25Jan2018SILVAv132.fasta
+# FreshTrain25Jan2018SILVAv132.taxonomy
+# README-FreshTrain25Jan2018SILVAv132.txt
 # README.txt
-# gg_13_5.fasta
-# gg_13_5_taxonomy.txt
+# silva.nr_v132.align
+# silva.nr_v132.tax
 # silva.seed_v128.align
 
 ```
+
+#### Re-format the reference databases used by TaxAss:
+
+Simply re-name the ecosystem-specific FreshTrain:
+
+```{bash, eval=F}
+mv FreshTrain25Jan2018SILVAv132.fasta custom.fasta
+mv FreshTrain25Jan2018SILVAv132.taxonomy custom.taxonomy
+```
+
+The silva database does not _need_ to be reformatted, but right now it is aligned and it does not _need_ to be aligned. By un-aligning it will save ~10 GB of space:
+
+```{bash, eval=F}
+./un-align_silva.sh silva.nr_v132.align general.fasta silva.nr_v132.tax general.taxonomy
+```
+
 
 #### Navegate into the main TaxAss-BatchFiles folder within the terminal.  
 These notes assume starting in that folder as the present working directory at the beginning of each of the following "Process ..." steps.  
@@ -75,14 +92,12 @@ Each lake-specific folder contains separate folders for different processing ste
 ls Mendota/
 
 # QC-Mendota/
-# Quickie-TaxAss-Mendota/
 # TaxAss-Mendota/
 ```
 
 #### Notes on these batch files:  
 - QC downloads raw fastq files and converts them to fasta files using standard QC settings.  
 - TaxAss runs the full TaxAss workflow, including optional steps to identify a good percent identity cutoff.  
-- Quickie TaxAss runs only one pident, skipping optional checks.  
   
 - These batch files are "all inclusive" because they're just meant to provide reproducible results. If you're running TaxAss on your own data and want to run as a batch file, you should adjust the provided batch files within the tax-scripts folder with names `RunSteps_*.sh`.  
   
@@ -99,9 +114,6 @@ cd Mendota/QC-Mendota/
 
 cd ../TaxAss-Mendota/
 ./taxass_mendota.sh 
-
-cd ../Quickie-TaxAss-Mendota/
-./taxass_mendota_99.sh 
 ```
 
 ## Process Trout Bog Epilimnion!
@@ -112,9 +124,6 @@ cd TroutBogEpi/QC-TroutBogEpi/
 
 cd ../TaxAss-TroutBogEpi/
 ./taxass_bog_epi.sh 
-
-cd ../Quickie-TaxAss-TroutBogEpi/
-./taxass_bog_epi_99.sh 
 ```
 
 ## Process Trout Bog Hypolimnion!
@@ -125,9 +134,6 @@ cd TroutBogHypo/QC-TroutBogHypo/
 
 cd ../TaxAss-TroutBogHypo/
 ./taxass_bog_hypo.sh 
-
-cd ../Quickie-TaxAss-TroutBogHypo/
-./taxass_bog_hypo_99.sh 
 ```
 
 ## Process Lake Michigan!  
@@ -138,9 +144,6 @@ cd Michigan/QC-Michigan/
 
 cd ../TaxAss-Michigan/
 ./taxass_michigan.sh 
-
-cd ../Quickie-TaxAss-Michigan/
-./taxass_michigan_99.sh 
 ```
 
 ## Process Danube River!  
@@ -151,9 +154,6 @@ cd Danube/QC-Danube/
 
 cd ../TaxAss-Danube/
 ./taxass_danube.sh 
-
-cd ../Quickie-TaxAss-Danube/
-./taxass_danube_99.sh 
 ```
 
 ## Process Mouse Gut!  
@@ -169,7 +169,8 @@ rm StabilityNoMetaG.tar # delete large file
 ./qc_mousegut.sh > terminal_output.txt
 ./deletemothurbarf.sh terminal_output.txt > terminal_output_qc.txt ; rm terminal_output.txt
 
-
+cd ../TaxAss-MouseGut/
+./taxass_mousegut.sh
 ```
 
 <br>

@@ -23,51 +23,36 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 
 # FOR PLOTTING FORCING  **don't forget to change the seqID.reads file path below!!
 # cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!\n")
-# userprefs <- c(NA, # if seqid.reads exists (i.e. you ran step 14) this is NA, otherwise it's otus.abund file path)
-#                "../../ME_plot_test/plots",
-#                "../../ME_plot_test/conflicts_forcing",
-#                "../../ME_plot_test/otus.custom.85.taxonomy",
-#                "../../ME_plot_test/otus.98.85.70.taxonomy")
+# userprefs <- c("../arb-scripts/Marathonas_test/v4_mara/otus.abund", # if seqid.reads exists (i.e. you ran step 14) this is NA, otherwise it's otus.abund file path)
+#                "../arb-scripts/Marathonas_test/v4_mara/plots",
+#                "../arb-scripts/Marathonas_test/v4_mara/conflicts_forcing",
+#                "../arb-scripts/Marathonas_test/v4_mara/otus.custom.80.taxonomy",
+#                "../arb-scripts/Marathonas_test/v4_mara/otus.98.80.80.taxonomy")
 
 # # FOR CHOOSING CUTOFF:
 # cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
-# userprefs <- c("../../poster_mend-check/otus.abund",
-#                "../../poster_mend-check/plots",
+# userprefs <- c("../../test2_smallsilva/otus.abund",
+#                "../../test2_smallsilva/plots",
 #                "regular",
 #                NA,
 #                NA,
-#                "../../poster_mend-check/conflicts_90",
-#                "../../poster_mend-check/ids.above.90",
-#                90,
-#                "../../poster_mend-check/conflicts_91",
-#                "../../poster_mend-check/ids.above.91",
-#                91,
-#                "../../poster_mend-check/conflicts_92",
-#                "../../poster_mend-check/ids.above.92",
-#                92,
-#                "../../poster_mend-check/conflicts_93",
-#                "../../poster_mend-check/ids.above.93",
-#                93,
-#                "../../poster_mend-check/conflicts_94",
-#                "../../poster_mend-check/ids.above.94",
-#                94,
-#                "../../poster_mend-check/conflicts_95",
-#                "../../poster_mend-check/ids.above.95",
+#                "../../test2_smallsilva/conflicts_95",
+#                "../../test2_smallsilva/ids.above.95",
 #                95,
-#                "../../poster_mend-check/conflicts_96",
-#                "../../poster_mend-check/ids.above.96",
+#                "../../test2_smallsilva/conflicts_96",
+#                "../../test2_smallsilva/ids.above.96",
 #                96,
-#                "../../poster_mend-check/conflicts_97",
-#                "../../poster_mend-check/ids.above.97",
+#                "../../test2_smallsilva/conflicts_97",
+#                "../../test2_smallsilva/ids.above.97",
 #                97,
-#                "../../poster_mend-check/conflicts_98",
-#                "../../poster_mend-check/ids.above.98",
+#                "../../test2_smallsilva/conflicts_98",
+#                "../../test2_smallsilva/ids.above.98",
 #                98,
-#                "../../poster_mend-check/conflicts_99",
-#                "../../poster_mend-check/ids.above.99",
+#                "../../test2_smallsilva/conflicts_99",
+#                "../../test2_smallsilva/ids.above.99",
 #                99,
-#                "../../poster_mend-check/conflicts_100",
-#                "../../poster_mend-check/ids.above.100",
+#                "../../test2_smallsilva/conflicts_100",
+#                "../../test2_smallsilva/ids.above.100",
 #                100)
 # # JUST MAKE SEQID.READS FILE, SKIPPING STEP 14 BUT DOING 15.5.A
 # cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
@@ -95,8 +80,8 @@ seqID.reads.file.path <- "total.reads.per.seqID.csv"
 present.working.directory <- "."
 
 # cat("fuck you forgot to comment out the seqid.reads file path in plot_classification_disagreements!\n")
-# seqID.reads.file.path <- "../../ME_plot_test/total.reads.per.seqID.csv"
-# present.working.directory <- "../../ME_plot_test/"
+# seqID.reads.file.path <- "../../test2_smallsilva/total.reads.per.seqID.csv"
+# present.working.directory <- "../../test2_smallsilva/"
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -1145,32 +1130,42 @@ plot.total.classified <- function(SummaryMatrix, PidentValues, FolderPath, DataT
       extend.by <- 2.5 - half.range
       y.min <- y.min - extend.by
       y.max <- y.max + extend.by
+      y.min <- ceiling(y.min)
+      y.max <- ceiling(y.max)
+    }else{
+      y.min <- floor(y.min)
+      y.max <- ceiling(y.max)
     }
     
     # basic plot
     plot(x = pidents, y = ass, col = line.col[t], type = "l", ann = F, lwd = 3, axes = F, ylim = c(y.min, y.max))
     mtext(text = taxa.levels[t], side = 3, line = .5, outer = F, cex = 1.2, col = line.col[t])
     
-    # vertical max line
+    # vertical max line if single max exists
     index <- which(ass == max(ass))
-    max.names <- pidents[index]
-    lines(x = c(max.names, max.names), y = c(0, max(ass)), col = adjustcolor(col = line.col[t], alpha.f = .3), lwd = 3)
+    if (length(index) == 1){
+      max.names <- pidents[index]
+      lines(x = c(max.names, max.names), y = c(0, max(ass)), col = adjustcolor(col = line.col[t], alpha.f = .3), lwd = 3)
+    }
     
     # x axis labels
     x.lab.cols <- rep("black", times = length(pidents))
-    x.lab.cols[index] <- line.col[t]
     x.lab.cex <- rep(.7, times = length(pidents))
-    x.lab.cex[index] <- 2
     x.lab.line <- rep(.5, times = length(pidents))
-    x.lab.line[index] <- 1.5
+    if (length(index) == 1){
+      x.lab.cols[index] <- line.col[t]
+      x.lab.cex[index] <- 2
+      x.lab.line[index] <- 1.5
+    }
     empty.x.labels <- rep("", times = length(pidents))
     axis(side = 1, at = pidents, labels = empty.x.labels)
     mtext(text = pidents, side = 1, line = x.lab.line, at = pidents, col = x.lab.cols, cex = x.lab.cex)
     
     # y axis labels
-    span <- y.max - y.min
-    y.ax <- c(y.min, y.min + (span * 1/3), y.min + (span * 2/3), y.max)
-    y.ax.lab <- round(x = y.ax, digits = 0)
+    # span <- y.max - y.min
+    # y.ax <- c(y.min, y.min + (span * 1/3), y.min + (span * 2/3), y.max)
+    y.ax <- pretty(x = c(y.min, y.max), eps.correct = 2)
+    y.ax.lab <- y.ax
     empty.y.labels <- rep("", times = length(y.ax))
     axis(side = 2, at = y.ax, labels = empty.y.labels)
     mtext(text = y.ax.lab, side = 2, line = .7, at = y.ax)

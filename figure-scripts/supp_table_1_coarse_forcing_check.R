@@ -6,9 +6,9 @@
 # note: in draft had all the different pident choices so could see increase in forcing at lower levels.
 # but the increase not noticeable until like 92% or so. So better to have just one simple example as used pident.
 
-file.path <- "~/Desktop/TaxAss-BatchFiles-go/Mendota/TaxAss-Mendota/analysis/conflicts_98/conflicts_summary.csv"
+file.path <- "~/Desktop/2018-05-10_taxass_server_results_for_resubmission/Mendota/TaxAss-Mendota/conflicts_98/conflicts_summary.csv"
 
-table.path <- "~/Dropbox/PhD/Write It/draft 6/new_figs/Supplemental_Table_1.csv"
+# table.path <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/Supplemental_table_coarse-conflicts.csv"
 
 coarse.conflicts <- read.csv(file = file.path, stringsAsFactors = F)
 

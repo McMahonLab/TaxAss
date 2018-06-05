@@ -34,31 +34,31 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 # -------------------------------------------------------------
 # input for troubleshooting
 # -------------------------------------------------------------
-# # CONFLICT FINDING ONLY:
+# CONFLICT FINDING ONLY:
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-# userprefs <- c("../../poster_mend-check/otus.98.taxonomy",
-#                "../../poster_mend-check/otus.general.taxonomy",
-#                "../../poster_mend-check/ids.above.98",
-#                "../../poster_mend-check/conflicts_98/",
+# userprefs <- c("../../test4_smallsilva/otus.98.taxonomy",
+#                "../../test4_smallsilva/otus.general.taxonomy",
+#                "../../test4_smallsilva/ids.above.98",
+#                "../../test4_smallsilva/conflicts_98",
 #                98,
-#                70,
-#                70)
+#                80,
+#                80)
 # FINAL TABLE GENERATION: note you do need the otus.general.taxonomy file b/c it's used to prep a file for plot_classification_improvement.R in step 15
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-# userprefs <- c("~/Desktop/TaxAssData/TaxAss-BatchFiles/Mendota/TaxAss-Mendota/otus.98.taxonomy",
-#                "~/Desktop/TaxAssData/TaxAss-BatchFiles/Mendota/TaxAss-Mendota/otus.general.taxonomy", # make this one "quickie" if skipping general-only classification
-#                "~/Desktop/TaxAssData/TaxAss-BatchFiles/Mendota/TaxAss-Mendota/ids.above.98",
-#                "~/Desktop/TaxAssData/TaxAss-BatchFiles/Mendota/TaxAss-Mendota/conflicts_98",
+# userprefs <- c("../../test4_smallsilva/otus.98.taxonomy",
+#                "../../test4_smallsilva/otus.general.taxonomy", # make this one "quickie" if skipping general-only classification
+#                "../../test4_smallsilva/ids.above.98",
+#                "../../test4_smallsilva/conflicts_98",
 #                98,
 #                80,
 #                80,
 #                "final")
-# # DATABASE COMPARISON: part of optional step 11.5
+# DATABASE COMPARISON: part of optional step 11.5
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-# userprefs <- c("../../take17/custom.custom.taxonomy",
-#                "../../take17/custom.general.taxonomy",
+# userprefs <- c("../../database_comparison/custom.custom.taxonomy",
+#                "../../database_comparison/custom.general.taxonomy",
 #                "NA",
-#                "../../take17/conflicts_database/",
+#                "../../database_comparison/conflicts_database/",
 #                NA,
 #                NA,
 #                70,
@@ -150,7 +150,7 @@ reformat.fw <- function(FWtable){
   
   # Remove strain and empty 10th column
   fw <- fw[,-c(9,10)]
-  colnames(fw) <- c("seqID.fw","kingdom.fw","phylum.fw","class.fw","order.fw","linege.fw","clade.fw","tribe.fw")
+  colnames(fw) <- c("seqID.fw","kingdom.fw","phylum.fw","class.fw","order.fw","lineage.fw","clade.fw","tribe.fw")
   
   # Reorder sequence IDs so can match them to the other file
   index <- order(fw[,1])
@@ -232,39 +232,41 @@ find.fw.seqid.indeces <- function(FullTable, FWids){
 }
 
 uniform.unclass.names <- function(TaxonomyTable){
-  # makes all the unclassified/unknown/any other word for it names be uniformly called "unclassified"
-  # finds them b/c those names do not have bootstrap percents in parentheses, i.e. the (70)
-  # also changes k__(100) etc to unclassified
   # this is used in the function do.bootstrap.cutoff()
+  # all unnamed refs are called "unclassified" with no bootstrap value
+  # this can throw errors if new names are used for unknown things. For example, right now don't recognize NA 
   
   tax <- TaxonomyTable
   
-  # find 'odd entries' that don't have bootstrap percents after them, like Unknown
-  odd.entries <- unique(grep(pattern = '.*\\(', x = tax[ ,-1], value = TRUE, invert = TRUE))
-  
-  # find 'empty entries' that don't have names, like p__(100)
-  empty.entries <- grep(pattern = '.{1}__\\(\\d{0,3}\\)', x = tax[,-1], value = TRUE, invert = FALSE)
-  empty.entries <- unique(sub(x = empty.entries, pattern = '\\(\\d{0,3}\\)', replacement = ""))
-  
-  if ((length(odd.entries) + length(empty.entries)) > 0){
-  cat("Note: These names in your taxonomy table are missing a bootstrap taxonomy assignment value or name:\n",
-      odd.entries, " ", empty.entries,
-      "\nThese names will be renamed as \"unclassified\". If that seems incorrect",
-      "then you have to figure out why the parentheses are missing from them.", 
-      "\nHave ALL your names here? Check that in the classify.seqs() mothur command probs=T\n")
-  }
-  
-  # Change odd entries those names to unclassified (sometimes, for example, they might be "unknown")
+  # 'blank entries' based on the fact that they don't have bootstrap percents after them
+  # blank.entries <- unique(grep(pattern = '.*\\(', x = tax[ ,-1], value = TRUE, invert = TRUE))
   index <- grep(pattern = '.*\\(', x = tax[ ,-1], value = FALSE, invert = TRUE)
   tax[ ,-1][index] <- "unclassified"
   
-  # Change all empty names to "unclassified" for ex. GG will say c__(100) for an unknown class it sorted into.
-  index2 <- grep(pattern = '.{1}__\\(\\d{0,3}\\)', x = tax[ ,-1], value = FALSE, invert = FALSE)
-  tax[ ,-1][index2] <- "unclassified"  
+  # 'empty entries' that don't have names, like p__(100) in greengenes
+  # gg.unnamed.entries <- grep(pattern = '.{1}__\\(\\d{0,3}\\)', x = tax[ ,-1], value = TRUE, invert = FALSE)
+  index <- grep(pattern = '.{1}__\\(\\d{0,3}\\)', x = tax[ ,-1], value = FALSE, invert = FALSE)
+  tax[ ,-1][index] <- "unclassified"
   
-  # Also change any names that give a p-value to unclassified, like unclassified(85) to say just: unclassified
-  index3 <- grep(pattern = 'unclassified\\(\\d{0,3}\\)', x = tax[ ,-1], value = FALSE, invert = FALSE)
-  tax[ ,-1][index3] <- "unclassified"
+  # 'unnamed entries' in silva
+  # silva.unnamed.entries <- grep(pattern = 'unnamed*', x = tax[ ,-1], value = TRUE, invert = FALSE)
+  index <- grep(pattern = 'unnamed*', x = tax[ ,-1], value = FALSE, invert = FALSE)
+  tax[ ,-1][index] <- "unclassified"
+  
+  # 'unknown entries' in silva 
+  # silva.unknown.entries <- grep(pattern = 'unknown*', x = tax[ ,-1], value = TRUE, invert = FALSE, ignore.case = TRUE)
+  index <- grep(pattern = 'unknown*', x = tax[ ,-1], value = FALSE, invert = FALSE, ignore.case = TRUE)
+  tax[ ,-1][index] <- "unclassified"
+  
+  # 'uncultured entries' in silva 
+  # silva.unknown.entries <- grep(pattern = 'uncultured*', x = tax[ ,-1], value = TRUE, invert = FALSE, ignore.case = TRUE)
+  index <- grep(pattern = 'uncultured*', x = tax[ ,-1], value = FALSE, invert = FALSE, ignore.case = TRUE)
+  tax[ ,-1][index] <- "unclassified"
+  
+  # 'unclassified' entries 
+  # unclass.entries <- grep(pattern = 'unclassified*', x = tax[ ,-1], value = TRUE, invert = FALSE, ignore.case = TRUE)
+  index <- grep(pattern = 'unclassified*', x = tax[ ,-1], value = FALSE, invert = FALSE, ignore.case = TRUE)
+  tax[ ,-1][index] <- "unclassified"
   
   return(tax)
 }
@@ -279,7 +281,8 @@ uniform.unclass.names.database <- function(TaxonomyDatabase){
   index <- which(tax[,-1] == "" | tax[,-1] == 0 | tax[,-1] == "0" | is.null(tax[,-1]) | tax[,-1] == "NULL" | is.na(tax[,-1])| tax[,-1] == "NA" |
                  tax[,-1] == "unknown" | tax[,-1] == "Unknown" | tax[,-1] == "UnKnown" | tax[,-1] == "UNKNOWN" | 
                  tax[,-1] == "Unclassified" | tax[,-1] == "UnClassified" | tax[,-1] == "UNCLASSIFIED" |
-                 tax[,-1] == "Unidentified" | tax[,-1] == "UnIdentified" | tax[,-1] == "UNIDENTIFIED")
+                 tax[,-1] == "unidentified" | tax[,-1] == "Unidentified" | tax[,-1] == "UnIdentified" | tax[,-1] == "UNIDENTIFIED" |
+                 tax[,-1] == "uncultured" | tax[,-1] == "Uncultured" | tax[,-1] == "UnCultured" | tax[,-1] == "UNCULTURED")
   tax[,-1][index] <- "unclassified"
   
   # Also change any empty names to "unclassified" for ex. GG will say c__(100) for an unknown class it sorted into.
@@ -316,8 +319,9 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   tax.nums <- apply(X = tax.nums, MARGIN = 2, FUN = as.numeric)
   tax.TF <- tax.nums >= cutoff
   
-  # make sure you never get a "classified" under an "unclassified" (this may not be necessary)
-  tax.TF <- t(apply(X = tax.TF, MARGIN = 1, FUN = cummin))
+  # make sure you never get a "classified" under an "unclassified" (this prevents downstream bugs)
+  # tax.TF <- t(apply(X = tax.TF, MARGIN = 1, FUN = cummin))
+  # took this out for silva, because frequently happens like this in the silva database. hopefully unique unclass will solve bugs.
   
   # make all names in the taxonomy table unclassified if they're below the bootstrap cutoff
   index <- which(tax.TF == 0)
@@ -328,7 +332,7 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   return(tax)
 }
 
-find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_percents, TaxaLevel, tracker, FolderPath, forcing = FALSE){
+find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_percents, TaxaLevel, tracker, FolderPath, forcing = FALSE, Database = FALSE){
   # Find seqs misclassified at a given phylogenetic level, t
   fw <- FWtable
   gg <- GGtable
@@ -348,17 +352,26 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
     index <- which(gg[,t+1] != fw[,t+1] & gg[,t+1] != "unclassified" & fw[,t+1] != "unclassified")
   }
   
-  cat("there are ", length(index), " conflicting names at ", taxa.names[t], " level\n")
+  # cat("there are ", length(index), " conflicting names at ", taxa.names[t], " level\n")
   num.mismatches[t] <- length(index)
   
+  if (Database == TRUE){
+    # identify unique mismatched upper-names of lineages (generate for database comparison)
+    unique.conflicts <- cbind(gg[index,1:(t+1), drop=F], fw[index,1:6, drop=F])
+    check.files.match(GGtable = unique.conflicts[ ,1:(t+1), drop=F], FWtable = unique.conflicts[ ,(t+2):(t+7), drop=F])
+    unique.conflicts <- unique.conflicts[ ,-c(1,t+2)]
+    unique.conflicts <- unique(unique.conflicts)
+    unique.conflict.file <- paste(results.folder.path, "/", "unique_conflicts_", t, "_", taxa.names[t],".csv", sep="")
+    write.csv(unique.conflicts, file = unique.conflict.file, row.names = FALSE)
+    cat("Made file: ", unique.conflict.file, "\n")
+  }
+  
   # Compare the conflicting tables in entirety, use the original files with percents still in it
-  conflicting <- cbind(gg.percents[index,,drop=F], fw.percents[index,,drop=F])
-  
-  # Check that the files still line up correctly
-  check.files.match(FWtable = conflicting[,9:16,drop=F], GGtable = conflicting[,1:8,drop=F])
-  
-  # Export a file with the conflicting rows side by side.
-  write.csv(conflicting, file = paste(results.folder.path, "/", t, "_", taxa.names[t],"_conflicts.csv", sep=""), row.names = FALSE)
+  conflicting <- cbind(gg.percents[index, ,drop=F], fw.percents[index, ,drop=F])
+  check.files.match(FWtable = conflicting[ ,9:16,drop=F], GGtable = conflicting[ ,1:8,drop=F])
+  conflict.file <- paste(results.folder.path, "/", t, "_", taxa.names[t],"_conflicts.csv", sep="")
+  write.csv(conflicting, file = conflict.file, row.names = FALSE)
+  cat("Made file: ", conflict.file, "\n")
   
   #Track the number of mismatches at each level
   return(num.mismatches)
@@ -409,7 +422,6 @@ view.bootstraps <- function(TaxonomyTable){
 # Generate a final taxonomy file:
 if (final.or.database == "final" | final.or.database == "Final" | final.or.database == "FINAL"){
 # -------------------------------------------------------------  
-  cat("\n\ngenerating final file- woohoo!\n\n")
   print.poem()
   
   fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path)
@@ -428,14 +440,17 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   colnames(final.taxonomy) <- c("seqID","kingdom","phylum","class","order","lineage","clade","tribe")
   
   write.table(x = final.taxonomy, file = file.name.final.taxonomy, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
+  cat("Made file: ", file.name.final.taxonomy, "\n")
   
   # the following will be used by the plot_classification_improvement.R script
   if (gg.only.tax.file.path != "quickie"){
     tax.nums <- view.bootstraps(TaxonomyTable = final.taxonomy)
     write.table(x = tax.nums, file = file.name.workflow.pvalues, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
+    cat("Made file: ", file.name.workflow.pvalues, "\n")
     
     tax.names <- apply(final.taxonomy, 2, remove.parentheses)
     write.table(x = tax.names, file = file.name.workflow.names, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
+    cat("Made file: ", file.name.workflow.names, "\n")
     
     gg.percents <- import.GG.names(FilePath = gg.only.tax.file.path)
     gg.percents <- reformat.gg(GGtable = gg.percents)
@@ -445,9 +460,11 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
     
     gg.nums <- view.bootstraps(TaxonomyTable = gg.taxonomy)
     write.table(x = gg.nums, file = file.name.general.pvalues, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
+    cat("Made file: ", file.name.general.pvalues, "\n")
     
     gg.names <- apply(X = gg.taxonomy, MARGIN = 2, FUN = remove.parentheses)
     write.table(x = gg.names, file = file.name.general.names, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
+    cat("Made file: ", file.name.general.names, "\n")
   }
   
   
@@ -455,7 +472,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
 # Compare databases by looking at how GG classifies the FW representative sequences
 }else if (final.or.database == "database"){
 # -------------------------------------------------------------
-  cat("\n\ndoing database comparison\n\n")
+  cat("doing database comparison\n")
   
   fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path)
   gg.percents <- import.GG.names(FilePath = gg.only.tax.file.path)
@@ -480,7 +497,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
                                              FWtable_percents = fw.percents, 
                                              GGtable_percents = gg.percents, 
                                              TaxaLevel = t, tracker = num.mismatches,
-                                             FolderPath = results.folder.path)
+                                             FolderPath = results.folder.path, Database = TRUE)
   }
   export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw, ALL_seqs = fw, FileName = file.name.summary.stats)
   
@@ -547,7 +564,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
 # Only compare the classifications made by the fw database to the gg classifications, not full tax tables
 }else{
 # -------------------------------------------------------------  
-  cat("\n\ncomparing seqIDs the workflow classified with custom database to how general database would have classified them.\n\n")
+  cat("comparing seqIDs that TaxAss classified with the custom database to how the general database would have classified them.\n")
   
   fw.percents <- import.FW.names(FilePath = fw.plus.gg.tax.file.path)
   gg.percents <- import.GG.names(FilePath = gg.only.tax.file.path)
@@ -587,6 +604,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
                                              FolderPath = results.folder.path)
   }
   export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw.fw.only, ALL_seqs = fw.percents, FileName = file.name.summary.stats)
+  cat("Made file: ", file.name.summary.stats, "\n")
 # ----
   # the following will be used by the plot_classification_disagreements step to help choose a good pident: 
 # ----
@@ -597,7 +615,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   
   tax.nums <- view.bootstraps(TaxonomyTable = workflow.taxonomy)
   write.csv(x = tax.nums, file = file.name.bootstrap.pvalues, quote = FALSE, row.names = FALSE)
-  
+  cat("Made file: ", file.name.bootstrap.pvalues, "\n")
 }
 
 

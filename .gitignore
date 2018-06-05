@@ -3,12 +3,20 @@
 .DS_Store
 .Rproj.user/
 tax-scripts/.RData
+.Rproj.user
 
-# Databases
+# Other Databases
 FreshTrain-files/gg_13_5.fasta
 FreshTrain-files/gg_13_5.taxonomy
-FreshTrain-files/FreshTrain18Aug2016
-FreshTrain-files/FreshTrain11Feb2016
+
+# Expanded FreshTrain Folders
+FreshTrain-files/FreshTrain18Aug2016/
+FreshTrain-files/FreshTrain11Feb2016/
+FreshTrain-files/FreshTrain25Jan2018Greengenes13_5/
+FreshTrain-files/FreshTrain25Mar2018SILVAv128/
+FreshTrain-files/FreshTrain25Mar2018SILVAv132/
+FreshTrain-files/FreshTrain30Apr2018SILVAv128/
+FreshTrain-files/FreshTrain30Apr2018SILVAv132/
 
 # Data Directories
 processedData
@@ -22,5 +30,12 @@ workflow-flowchart.pptx
 Rplot*.pdf
 mothur.*
 
+# Marathonas Analysis Folders
+arb-scripts/Marathonas_test/v4_mara/
+arb-scripts/Marathonas_test/v4v5_mara/
+arb-scripts/Marathonas_test/v3v4_mara/
+arb-scripts/Marathonas_test/v6_mara/
+arb-scripts/Marathonas_test/with_greengenes/
 
-.Rproj.user
+# temp hide
+arb-scripts/Marathonas_test/add-tax-scripts-and-databases

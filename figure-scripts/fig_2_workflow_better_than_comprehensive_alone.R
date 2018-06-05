@@ -146,7 +146,7 @@ for (t in 1:length(taxa.names)){
 
 # ---- Paper Figure 2----
 
-# save.to <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/red_yellow_improvement.pdf"
+save.to <- "~/Dropbox/PhD/Write It/draft 7/re-submission_figures/red_yellow_improvement.pdf"
 
 # setEPS()
 # postscript(file = save.to, width = 6.875, height = 3, title = "TaxAss Fig 2", colormodel = "srgb", family = "Helvetica")
@@ -241,7 +241,7 @@ mtext(text = plot.title, side = 3, line = .7, cex = 1, at = 1, adj = 0)
 # ----------------------------------------------------------------------------------------------------
 
 # legend beside 
-beside.legend <- c("Left Bar: Greegenes", "Right Bar: TaxAss")
+beside.legend <- c("Left Bar: Silva", "Right Bar: TaxAss")
 text(x = 16.8, y = c(102, 92), labels = beside.legend, adj = 0, xpd = NA, cex = .8)
 rect(xleft = 15.5, xright = 16.5, ybottom = 100, ytop = 105, col = col.z[1], xpd = NA)
 rect(xleft = 15.5, xright = 16.5, ybottom = 90, ytop = 91.7, col = col.z[1], xpd = NA)

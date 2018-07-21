@@ -408,7 +408,7 @@ _i.e._ you're choosing a pident from the start, and just making the taxonomy tab
 - **no "totals" row/column**  
    (as might have been added by mother)
 - **numbers only for all abundance values**  
-   Note that if you had a sample the failed sequencing, there might be no reads left in it after QC. This sample should be removed before TaxAss or normalizing it could cause a NaN non-number value.
+   Note that if you had a sample that failed sequencing, there might be no reads left in it after QC. This sample should be removed before TaxAss or normalizing it could cause a NaN non-number value.
 
 ```
 colname	colname		colname		colname		colname

@@ -25,10 +25,10 @@ abund.output <- userprefs[3]
 import.dada2.file <- function(path){
   is.rds <- grepl(pattern = "*.rds", x = path)
   if (is.rds){
-    seqtab_nochim <- readRDS(file = "~/Desktop/dada2-meV45/seqtab_nochim.rds")
+    seqtab_nochim <- readRDS(file = path)
     return(seqtab_nochim)
   }else{
-    cat("input must be rds file ending in \".rds\"\n Save it in this format at the end of dada2 pipeline using saveRDS()")
+    cat("input must be rds file ending in \".rds\"\nSave it in this format at the end of dada2 pipeline using\nsaveRDS(object = seqtab_nochim, file = \"filename\")")
   }  
 }
 

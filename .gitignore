@@ -9,12 +9,15 @@ tax-scripts/.RData
 FreshTrain-files/gg_13_5.fasta
 FreshTrain-files/gg_13_5.taxonomy
 
-# Expanded FreshTrain Folders
+# Expanded FreshTrain Folders and unreleased FreshTrain versions
 FreshTrain-files/FreshTrain18Aug2016/
 FreshTrain-files/FreshTrain11Feb2016/
+FreshTrain-files/FreshTrain11Feb2016.zip
 FreshTrain-files/FreshTrain25Jan2018Greengenes13_5/
 FreshTrain-files/FreshTrain25Mar2018SILVAv128/
+FreshTrain-files/FreshTrain25Mar2018SILVAv128.zip
 FreshTrain-files/FreshTrain25Mar2018SILVAv132/
+FreshTrain-files/FreshTrain25Mar2018SILVAv132.zip
 FreshTrain-files/FreshTrain30Apr2018SILVAv128/
 FreshTrain-files/FreshTrain30Apr2018SILVAv132/
 

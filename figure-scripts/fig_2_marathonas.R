@@ -7,7 +7,7 @@ file.path.summary.table.v3v4 <- "../arb-scripts/Marathonas_test/v3v4_mara/v3v4_r
 file.path.summary.table.v4v5 <- "../arb-scripts/Marathonas_test/v4v5_mara/v4v5_results/summary_table.rds"
 
 
-# file.path.created.plot <- "~/Dropbox/PhD/Write\ It/draft\ 7/res-submission_figures/mara_validation.pdf"
+# file.path.created.plot <- "~/Dropbox/PhD/TaxAss_manuscript/draft 7/re-submission_figures/mara_validation-referencelabel.pdf"
 # file.path.created.table <- "~/Dropbox/PhD/Write\ It/draft\ 7/res-submission_figures/mara_validation.csv"
 
 # ---- functions ----
@@ -69,6 +69,7 @@ make.example.table <- function(){ # all lazy calls to global env
   col.wrong <- adjustcolor(col = "darkred", alpha.f = .3)
   col.vector <- c(col.correct, col.correct, col.correct, col.correct, col.under, col.wrong, col.wrong, col.wrong)
   
+  # these are actual examples I found in the results, not just made-up examples
   left.text.vect <- c("acI-A1", "bacI-unclassified", "n/a", "acI-A", "acI-B1", "n/a", "betI-A","acI-C")
   right.text.vect <- c("acI-A1","bacI-unclassified", "Microcystaceae","acI", "Actinobacteria", "LD19","betI-B","acI-C1")
   
@@ -85,7 +86,7 @@ make.example.table <- function(){ # all lazy calls to global env
   
   middle.left <- box.lefts + (box.middles - box.lefts) * (1/2)
   middle.right <- box.middles + (box.rights - box.middles) * (1/2)
-  mtext(text = c("Correct","TaxAss"), side = 1, line = .5, at = c(middle.left, middle.right), cex = label.cex)
+  mtext(text = c("Reference","TaxAss"), side = 1, line = .5, at = c(middle.left, middle.right), cex = label.cex)
   mtext(text = "Examples of Each Category:", side = 3, line = 1, at = box.middles, cex = label.cex)
   
 }

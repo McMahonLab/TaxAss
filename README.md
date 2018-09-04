@@ -7,12 +7,12 @@ How do I TaxAss?
 
 **Step-by-step directions:** [tax-scripts/TaxAss_Directions.html](https://htmlpreview.github.io/?https://github.com/McMahonLab/TaxAss/blob/master/tax-scripts/TaxAss_Directions.html)
 
-For now, please cite our preprint:  
-TaxAss: Leveraging Custom Databases Achieves Fine-Scale Taxonomic Resolution
-Robin Rebecca Rohwer, Joshua J Hamilton, Ryan J Newton, Katherine D McMahon
-bioRxiv 214288; doi: https://doi.org/10.1101/214288
+Please cite our mSphere paper:  
+TaxAss: Leveraging a Custom Freshwater Database Achieves Fine-Scale Taxonomic Resolution
+Robin R Rohwer, Joshua J Hamilton, Ryan J Newton, Katherine D McMahon
+mSphere; doi: https://doi.org/10.1128/mSphere.00327-18
 
-TaxAss uses a series of python, R, and bash scripts in addition to using BLAST+ and mothur's classify.seqs() command.  The scripts are sourced from the terminal window (mac or linux). You'll need to download this repository (green "Clone or download" button, top right), and then just add the tax-scripts folder to your working diriectory.
+TaxAss uses a series of R, python, and bash scripts in addition to using BLAST+ and mothur's classify.seqs() command.  The scripts are sourced from the terminal window (mac or linux). You'll need to download this repository (green "Clone or download" button, top right), and then just add the tax-scripts folder to your working diriectory.
 
 Where's the stuff I need?
 ---
@@ -24,16 +24,17 @@ Where's the stuff I need?
 
 **The stuff you can ignore:**  
 1. Scripts to process & edit the FreshTrain arb files are in the `arb-scripts` folder  
-2. Scripts for making poster/paper figures are in `figure-scripts` folder.  
+2. Scripts for making the paper figures are in the `figure-scripts` folder.  
 3. A pdf of my ISME16 poster (that might be a good overview): `poster-ISME16.pdf`  
 
 What if it doesn't work?
 ---
 
-Please tell me!  If you find a bug (or if you get confused) I want to fix it/help you.  If you're all github savvy you can submit an issue, or you can just send me an e-mail with TaxAss in the title: robin.rohwer@gmail.com
+Please tell me!  If you find a bug (or if you get confused) I want to fix it/help you.  If you're all github savvy you can submit an issue, or you can just send me an e-mail with TaxAss in the subject: robin.rohwer@gmail.com
 
 Who made TaxAss?
 ---
 The McMahon lab studies lake microbial ecology (and some of it also studies wastewater). We are at the Univerisity of Wisconsin-Madison.  
 Lab Website: https://mcmahonlab.wisc.edu/  
-Lab Twitter: @mcmahonlab 
+Lab Twitter: @mcmahonlab  
+Robin Twitter: @RobinRohwer

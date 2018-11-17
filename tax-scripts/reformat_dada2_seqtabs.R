@@ -3,10 +3,11 @@
 # dada2 has an internal implementation of the Wang classifier/ RDP classifier / mothur default / TaxAss choice
 # BUT, just keep using mothur with TaxAss because formatting is painful.
 # this script takes the dada2 output file (seqtab_nochim) and cretes otus.fasta and otus.abund
+# it also creates an file otus.count which lists the total reads in each sample.
 
 # command line syntax:
 
-# Rscript reformat.dada2.seqtabs.R seqtab_nochim.rds otus.fasta otus.abund
+# Rscript reformat_dada2_seqtabs.R seqtab_nochim.rds otus.fasta otus.abund otus.count
 
 # ---- Accept Arguments from Terminal Command Line ----
 
@@ -14,12 +15,13 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 path.to.seqtab <- userprefs[1] 
 fasta.output <- userprefs[2] 
 abund.output <- userprefs[3]
+count.output <- userprefs[4]
 
-cat("fuck you forgot to comment out the file paths in reformat_dada2_seqtabs.R!")
-path.to.seqtab <- "/Users/athena/Desktop/dada2-meV45/dada2/seqtab_nochim.rds"
-fasta.output <- "~/Desktop/otus.fasta"
-abund.output <- "~/Desktop/otus.abund"
-count.output <- "/Users/athena/Desktop/dada2-meV45/taxass_gg/data/otus.count"
+# cat("\nfuck you forgot to comment out the file paths in reformat_dada2_seqtabs.R!\n")
+# path.to.seqtab <- "/Users/athena/Desktop/dada2-meV34/dada2/seqtab_nochim.rds"
+# fasta.output <- "/Users/athena/Desktop/dada2-meV34/taxass/otus.fasta"
+# abund.output <- "/Users/athena/Desktop/dada2-meV34/taxass/otus.abund"
+# count.output <- "/Users/athena/Desktop/dada2-meV34/taxass/otus.count"
 
 # ---- define functions ----
 
@@ -45,8 +47,16 @@ make.fasta.file <- function(dadatable, fasta.path){
 
 find.zero.samples <- function(tot.reads, otu.table){
   read.stats <- boxplot(x = tot.reads, plot = F)
-  cat("These samples have outlier read counts. Samples with zero reads are being removed.\n",paste(names(read.stats$out), " : ", read.stats$out, sep = "", "\n"))
+  if(length(read.stats$out) < 1){
+    cat("No samples have an outlier number of total reads. Your samples have ", 
+        round(mean(tot.reads), 0),"+/-", round(sd(tot.reads), 0), "(+/-", round(sd(tot.reads)/mean(tot.reads) * 100), "%) total reads.\n")
+  }else{
+    cat("These samples have outlier read counts:\n", paste(names(read.stats$out), " : ", read.stats$out, sep = "", "\n"))
+  }
   index <- which(tot.reads == 0)
+  if (length(index) > 0){
+    cat("The samples with ZERO reads are being removed to avoid errors in TaxAss.\n")
+  }
   return(index)
 }
 

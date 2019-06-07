@@ -25,4 +25,5 @@ The citation for the original FreshTrain database and the arb version of it is:
 
 <br>
 The citation for these taxonomy assignment-compatible formats of the FreshTrain and the TaxAss method is:  
+
 [Rohwer RR, Hamilton JJ, Newton RJ, McMahon KD. 2018. TaxAss: Leveraging a Custom Freshwater Database Achieves Fine-Scale Taxonomic Resolution. mSphere 3:e00327-18.](https://msphere.asm.org/content/3/5/e00327-18)  

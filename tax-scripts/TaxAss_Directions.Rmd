@@ -27,11 +27,28 @@ small, custom taxonomy database and a large general database.
 
 Download the scripts from the github repo: https://github.com/McMahonLab/TaxAss
 
-# <span style="color:SteelBlue">List of Steps</span>
-This is a list of all the commands in each step. There is a more detailed section for each step.  
-<br>
-**You can run most of the steps in one go by using the batch scripts listed at the bottom of this section.**  
 
+# <span style="color:SteelBlue">List of Steps</span>
+
+The steps listed here include extra validation steps used in the [paper](https://msphere.asm.org/content/3/5/e00327-18) that you don't need to include to just assign taxonomy to your data.  
+
+**To assign FreshTrain taxonomy to your own data, we recommend:**  
+
+* add your data files and the `tax-scripts` files to an otherwise empty folder (your working directory)
+* format your files and file names according to `step 0`  
+* run a batch script from within your working directory: `./RunSteps_quickie.sh`  
+* run a batch script that deletes all the intermediate files: `./RunStep_16.sh`
+
+The RunSteps_quickie.sh batch script uses a taxass percent identity of 98 to assign the database, a mothur bootstrap confidence of 80 to assign taxonomy, and 2 processors for mothur commands. You can change these settings at the top of the batch script file.  
+<br>
+If you encounter error messages or if your data is very large, we recommend troubleshooting by running the steps included in RunSteps_quickie.sh individually with a small subset of your data by following the directions in  
+**steps 0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 12, 15**   
+Navigate to detailed instructions for each step using the table of contents.  
+<br>
+<br>
+
+
+Below is a list of all the commands in each step, including the optional ones:  
 ````
 -1. Download/Install 
   BLAST+
@@ -40,7 +57,7 @@ This is a list of all the commands in each step. There is a more detailed sectio
   (your computer already has python)
   taxonomy databases
 
-0. format files (textwrangler or bash)
+0. format files (textwrangler/bash/R)
 	depends on your starting file formats
 	for Green Genes database as general.taxonomy:
 		sed 's/ //g' <general.taxonomy >NoSpaces
@@ -135,12 +152,8 @@ This is a list of all the commands in each step. There is a more detailed sectio
     mkdir data ; mv otus* data
     mkdir databases ; mv *.taxonomy *.fasta databases
 
-````
-<br>
-<br>
-**OR: Run steps as a block using these batch scripts:**  
-(you have to open the batch script and enter your chosen pident and confidence values at the beginning)
-````
+Batch Scripts:
+
 Full TaxAss:
   a. Run a bunch of pidents
     ./RunSteps_1-14.sh
@@ -149,14 +162,10 @@ Full TaxAss:
   c. clean up after everything worked
     ./RunStep_16.sh
 
-As few steps as possible (choose pident at start):
+As few steps as possible (choose pident without comparing):
   ./RunSteps_quickie.sh
   
 ````
-
-		
-
-Detailed explanations of commands and inputs are below:
 
 __________________________________________________________________________________________
 
@@ -166,13 +175,13 @@ ________________________________________________________________________________
 
 Program       | Version             | Source                  | Specific Link
 --------------|---------------------|-------------------------|------------------------------------------  
-mothur        | v.1.39.5            | www.mothur.org          | https://github.com/mothur/mothur/releases/tag/v1.39.5  
-BLAST         | 2.2.31+             | ncbi.nlm.nih.gov        | https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download  
+mothur        | v.1.42.1            | www.mothur.org          | https://github.com/mothur/mothur/releases  
+BLAST         | 2.9.0               | ncbi.nlm.nih.gov        | ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/  
 TaxAss        | master branch       | `tax-scripts` folder    | https://github.com/McMahonLab/TaxAss <br> You don't need your own github account; you can click the green download button on the top right of the main page (do have to download all folders unfortunately)  
-python        | 2.7.11              | your computer already has this | don't need anything extra
+python        | 2.7 or 3.7          | your computer already has this | don't need anything extra
 
 You want mothur and BLAST on your "path" (that means if you type them, your computer recognizes it as a program and runs it).
-BLAST does that automatically when you install it I think, but mothur does not. 
+BLAST does that automatically if you use the `.dmg` file to install it, but mothur does not. 
 First make sure mothur is downloaded to your home directory- should open if you type `~/mothur/mothur`.   
 
 **To add mothur to your path:**   
@@ -184,7 +193,7 @@ First make sure mothur is downloaded to your home directory- should open if you 
 ~ $ touch .bash_profile
 ~ $ open .bash_profile
 
-# add this line to the .bash_profile doc
+# add this line to the .bash_profile document
 export PATH=~/mothur:$PATH
 ```
 Now you can open the mothur program just by typing `mothur` from any location. (after restarting terminal)
@@ -193,7 +202,7 @@ Now you can open the mothur program just by typing `mothur` from any location. (
 
 Database      | Version | File Name          | Download From
 --------------|---------|--------------------|-------------------------  
-FreshTrain    | 18Aug2016 | FreshTrain18Aug2016.zip | https://github.com/McMahonLab/TaxAss/FreshTrain-files<br>(You can download the single zip file without the whole TaxAss repository by clicking on it)
+FreshTrain    | 30Apr2018<br>or<br>25Jan2018 | FreshTrain30Apr2018SILVAv132.zip<br>FreshTrain30Apr2018SILVAv128.zip<br>FreshTrain25Jan2018Greengenes13_5.zip | https://github.com/McMahonLab/TaxAss/FreshTrain-files
 Greengenes    | Aug 2013  | "greengenes reference taxonomy" <br> "greengenes reference alignment" | https://www.mothur.org/wiki/Greengenes-formatted_databases
 Silva         | v.132 <br> v.128 | "Full length sequences and taxonomy references" | https://www.mothur.org/wiki/Silva_reference_files
 
@@ -210,12 +219,12 @@ These are the files you supply as input into the workflow:
 
 File                | Description
 --------------------|------------------------------------------------------------------
-	custom.fasta		  | fasta sequences in your small, ecosystem-specific taxonomy database
-	custom.taxonomy		| taxonomy names in your small, ecosystem-specific taxonomy database
+	otus.fasta			  | fasta sequences for each of your OTUs (OTUs can be clustered or unique sequences)
+	otus.abund			  | relative abundance of each OTU (i.e. the OTU table)<br>(Optional- don't need if following "quickie" procedure)
 	general.fasta		  | fasta sequences in your large, general comrpehensive taxonomy database
 	general.taxonomy	| taxonomy names in your large, general comprehensive taxonomy database
-	otus.fasta			  | fasta sequences for each of your OTUs (OTUs can be clustered or unique sequences)
-	otus.abund			  | relative abundance of each OTU (i.e. the OTU table)  
+	custom.fasta		  | fasta sequences in your small, ecosystem-specific taxonomy database
+	custom.taxonomy		| taxonomy names in your small, ecosystem-specific taxonomy database
 
 **Move everything into the same folder, and make that your working directory.**  
 In other words, create a folder that all the tax-scripts and database and data files are inside of, 

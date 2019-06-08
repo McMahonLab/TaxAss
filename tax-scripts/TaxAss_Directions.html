@@ -1559,12 +1559,13 @@ pre code, pre, code {
 </style>
 <p>TaxAss assigns taxonomy to a fasta file of OTU sequences using both a small, custom taxonomy database and a large general database.</p>
 <p>Download the scripts from the github repo: <a href="https://github.com/McMahonLab/TaxAss" class="uri">https://github.com/McMahonLab/TaxAss</a></p>
+<p>Please cite TaxAss: <a href="https://msphere.asm.org/content/3/5/e00327-18">Rohwer RR, Hamilton JJ, Newton RJ, McMahon KD. 2018. TaxAss: Leveraging a Custom Freshwater Database Achieves Fine-Scale Taxonomic Resolution. mSphere 3:e00327-18.</a></p>
 <div id="list-of-steps" class="section level1">
 <h1><span style="color:SteelBlue">List of Steps</span></h1>
-<p>The steps listed here include extra validation steps used in the <a href="https://msphere.asm.org/content/3/5/e00327-18">paper</a> that you don’t need to include to just assign taxonomy to your data.</p>
+<p>These directions include extra validation steps used in the <a href="https://msphere.asm.org/content/3/5/e00327-18">paper</a> that you don’t need to include to just assign taxonomy to your data.</p>
 <p><strong>To assign FreshTrain taxonomy to your own data, we recommend:</strong></p>
 <ul>
-<li>add your data files and the <code>tax-scripts</code> files to an otherwise empty folder (your working directory)</li>
+<li>add your data files, database files, and the <code>tax-scripts</code> files to an otherwise empty folder (your working directory)</li>
 <li>format your files and file names according to <code>step 0</code><br />
 </li>
 <li>run a batch script from within your working directory: <code>./RunSteps_quickie.sh</code><br />
@@ -1576,6 +1577,7 @@ pre code, pre, code {
 <strong>steps 0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 12, 15</strong><br />
 Navigate to detailed instructions for each step using the table of contents.<br />
 <br> <br></p>
+<hr />
 <p>Below is a list of all the commands in each step, including the optional ones:</p>
 <pre><code>-1. Download/Install 
   BLAST+
@@ -1586,17 +1588,17 @@ Navigate to detailed instructions for each step using the table of contents.<br 
 
 0. format files (textwrangler/bash/R)
     depends on your starting file formats
-    for Green Genes database as general.taxonomy:
-        sed 's/ //g' &lt;general.taxonomy &gt;NoSpaces
-        sed 's/$/;/' &lt;NoSpaces &gt;EndLineSemicolons
-        mv EndLineSemicolons general.taxonomy
-        rm NoSpaces
-    for aligned fasta files:
+    for Green Genes as general database:
+        ./reformat_greengenes.sh gg_13_5_taxonomy.txt
+    for Silva as general database:
+        ./un-align_silva.sh silva.nr_v132.align general.fasta silva.nr_v132.tax general.taxonomy
+        Rscript force_consistent_unclassifieds_on_database.R silva.nr_v132.tax general.taxonomy
+    for mothur count_table files:
         sed 's/-//g' &lt;aligned.fasta &gt;otus.fasta
-    for mothur .count_table as OTU table:
+        sed 's/-//g' &lt;names-with-dashed.count_table &gt;otus.count_table
         Rscript reformat_mothur_OTU_tables.R StupidLongMothurName.count_table count_table otus.abund
-
-
+    for dada2 seqtab_nochim as OTU table:
+        Rscript reformat_dada2_seqtabs.R seqtab_nochim.rds otus.fasta otus.abund otus.count
         
 1. make BLAST database file (blast)
     makeblastdb -dbtype nucl -in custom.fasta -input_type fasta -parse_seqids -out custom.db
@@ -1632,35 +1634,40 @@ Navigate to detailed instructions for each step using the table of contents.<br 
 10. combine taxonomy files (bash)
     cat otus.above.98.custom.wang.taxonomy otus.below.98.general.wang.taxonomy &gt; otus.98.taxonomy
 
-11. assign taxonomy with general database only (mothur, bash)
+11. OPTIONAL- assign taxonomy with general database only (mothur, bash)
+    (needed for validation steps 13, 14, 15.5)
     mothur &quot;#classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)&quot;
     cat otus.general.wang.taxonomy &gt; otus.general.taxonomy
 
-11.5 OPTIONAL- feeds into Database_Improvement_Workflow
-    assign taxonomy to custom database with general database (mothur, bash)
+11.5 OPTIONAL- assign taxonomy to custom database with general database (mothur, bash)
+    (feeds into Database_Improvement_Workflow)
     mothur &quot;#classify.seqs(fasta=custom.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)&quot;
     cat custom.general.wang.taxonomy custom.general.taxonomy
 
 12. reformat taxonomy files (bash)
     sed 's/[[:blank:]]/\;/' &lt;otus.98.taxonomy &gt;otus.98.taxonomy.reformatted
     mv otus.98.taxonomy.reformatted otus.98.taxonomy
+    OPTIONAL- need if did step 11
     sed 's/[[:blank:]]/\;/' &lt;otus.general.taxonomy &gt;otus.general.taxonomy.reformatted
     mv otus.general.taxonomy.reformatted otus.general.taxonomy
     
-13. compare taxonomy files (R)
+13. OPTIONAL- compare taxonomy files (R)
+    (needed for validation steps 11, 14, 15.5)
     mkdir conflicts_98
     Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 80 80
     
 14. OPTIONAL: choose appropriate pident cutoff (R)
+    (needed for validation steps 11, 13, 15.5)
     note: you have to repeat steps 5, 7-10, &amp; 12-13 with multiple pident cutoffs to do this step
     Rscript plot_classification_disagreements.R otus.abund plots regular NA NA conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98
 
 15. generate final taxonomy file (R)
+    OPTIONAL- if did all the validation steps 11, 13, 14, 15.5a
     Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 final
-        If skipping optional steps 11-14 or 15.5.a.:
-        Rscript find_classification_disagreements.R otus.98.taxonomy quickie ids.above.98 conflicts_98 98 85 70 final
+    If doing only &quot;quickie&quot; steps.:
+    Rscript find_classification_disagreements.R otus.98.taxonomy quickie ids.above.98 conflicts_98 98 85 70 final
     
-15.5 OPTIONAL: plot benefits of using this workflow (R, mothur, bash)
+15.5 OPTIONAL- plot benefits of using this workflow (R, mothur, bash)
     a. Improvement over general database only:
         Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID.csv plots final.taxonomy.names final.general.names
     b. Improvement over custom database only:
@@ -1791,15 +1798,16 @@ export PATH=~/mothur:$PATH</code></pre>
 </tr>
 </tbody>
 </table>
-<p>(Note that if you’re a non-academic or commercial user you have to pay to use silva.) __________________________________________________________________________________________</p>
+<p>(Note that if you’re a non-academic or commercial user you have to pay to use silva.)</p>
+<hr />
 </div>
 </div>
 <div id="format-files" class="section level1 tabset">
 <h1><span style="color:SteelBlue">0. format files</span></h1>
 <div id="files-needed" class="section level2">
 <h2>Files Needed</h2>
-<div id="use-this-sections-tabs-for-details-on-formatting-each-file-type." class="section level4">
-<h4><span style="color:SteelBlue">(Use this section’s tabs for details on formatting each file type.)</span></h4>
+<div id="use-the-tabs-above-for-details-on-formatting-each-file-type." class="section level4">
+<h4><span style="color:SteelBlue">Use the tabs (above) for details on formatting each file type.</span></h4>
 <p>These are the files you supply as input into the workflow:</p>
 <table>
 <colgroup>
@@ -1840,15 +1848,16 @@ export PATH=~/mothur:$PATH</code></pre>
 </tbody>
 </table>
 <p><strong>Move everything into the same folder, and make that your working directory.</strong><br />
-In other words, create a folder that all the tax-scripts and database and data files are inside of, and then use that as your present working directory (<code>pwd</code>) to source all the scripts from.<br />
-<br> It might also help to rename your files to match the above names so that you can copy and paste commands from this workflow.</p>
+To make your life easier, create a new folder that contains the tax-scripts, the database and data files listed above, and nothing else. Then navigate to this folder in the terminal to make it your present working directory (<code>pwd</code>). Also, rename your files to match the above names so that you can copy and paste commands from this workflow.</p>
 <hr />
 </div>
 </div>
-<div id="seqid-formats" class="section level2">
-<h2>seqID formats</h2>
-<p>General notes on the seqIDs in all files:</p>
-<p>OTU seqID’s:</p>
+<div id="otu-files" class="section level2">
+<h2>OTU files</h2>
+<p>How to format <code>otus.fasta</code> and <code>otus.abund</code>, including specific directions for converting mothur and dada2 file formats. <br><br></p>
+<div id="format-your-sequence-ids" class="section level3">
+<h3>Format your sequence ID’s</h3>
+<p>The seqIDs in your otus.fasta and otus.abund files must follow these requirements:</p>
 <ul>
 <li><strong>cannot contain any whitespace</strong><br />
 BLAST will call some parts the seqID and some parts comments if they’re separated. Having BLAST seqIDs that don’t match the full <code>&gt;comment</code> line of the fasta file will throw off the python script that creates fasta files for the chosen seqIDs in step 8. Having any spaces will also throw off the R script that checks blast hit numbers.</li>
@@ -1860,107 +1869,35 @@ If there are dashes it makes it difficult to switch between aligned and unaligne
 (though consistent ordering is not necessary.)</li>
 </ul>
 <hr />
+<p><br></p>
 </div>
-<div id="taxonomy-files" class="section level2">
-<h2>.taxonomy files</h2>
-<div id="taxonomy-file-format" class="section level3">
-<h3><code>.taxonomy</code> file format</h3>
-<p>Must be compatible with mothur, example format:</p>
-<ul>
-<li>no whitespace except for the tab between seqID and taxonomy</li>
-<li>taxonomy level names separated by semicolons</li>
-<li>must have a semicolon at the end of each line, too!</li>
-</ul>
-<pre><code>seqID   kingdom;phylum;class;order;family;genus;species;</code></pre>
-<hr />
-<div id="format-the-silva-taxonomy-database" class="section level4">
-<h4>Format the Silva Taxonomy Database:</h4>
-<p>Downloading from mothur, you shouldn’t need to worry about delimiters etc, this will be in the correct format.<br />
-BUT, SILVA uses inconsistent nomenclature for sequences that don’t have names. We <strong>strongly recommend re-formatting them into a more consistent nomenclature</strong> using the script <code>force_consistent_unclassifieds_on_database.R</code>.</p>
-<p>Full Command (type in terminal):</p>
-<pre><code>Rscript force_consistent_unclassifieds_on_database.R silva.nr_v132.tax general.taxonomy</code></pre>
-<table>
-<colgroup>
-<col width="29%"></col>
-<col width="70%"></col>
-</colgroup>
-<thead>
-<tr class="header">
-<th>command argument</th>
-<th>description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>silva.nr_v132.tax</td>
-<td>input file. the mothur-formatted silva taxonomy with inconsistent names. If you are unaligning the fasta, you can do this step before or after removing the periods from the seqID names.</td>
-</tr>
-<tr class="even">
-<td>general.taxonomy</td>
-<td>silva taxonomy with consistent unclassified names that is ready-to-taxass!</td>
-</tr>
-</tbody>
-</table>
-<p>Comments in the script are very detailed as to examples of the changes. The new missing names are easier to deal with because they follow the consistent format where they begin with either:</p>
-<ul>
-<li>unnamed<br />
-</li>
-<li>unknown<br />
-</li>
-<li>uncultured<br />
-</li>
-<li>unclassified</li>
-</ul>
-<p>And are followed by a period and the closest available parent-name. All the names that get changed will be spit out into the terminal output. Note there will be a lot due to the format “knownphylum_cl” for an unknown class name. These all get changed to “unnamed.knownphylum” to follow a consistent and easy-to-grep nomenclature.</p>
-<hr />
-</div>
-<div id="format-the-greengenes-taxonomy-database" class="section level4">
-<h4>Format the Greengenes Taxonomy Database</h4>
-<p>Full 4 Commands (type in terminal):</p>
-<pre><code>reformat_greengenes.sh general.taxonomy</code></pre>
-<table>
-<thead>
-<tr class="header">
-<th>command argument</th>
-<th>description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>general.taxonomy</code></td>
-<td>the downloaded greengenes file: <code>gg_13_5_taxonomy.txt</code></td>
-</tr>
-</tbody>
-</table>
-<p>Output is a file called <code>general.taxonomy</code> that is formatted correctly.</p>
-<hr />
-</div>
-</div>
-</div>
-<div id="fasta-files" class="section level2">
-<h2>.fasta files:</h2>
-<div id="fasta-file-format" class="section level3">
-<h3><code>.fasta</code> file format</h3>
+<div id="format-otus.fasta" class="section level3">
+<h3>Format <code>otus.fasta</code></h3>
 <p>These should be in fasta format:</p>
 <ul>
-<li>carrot before the seqID (formatted according to seqID formats tab)</li>
+<li>carrot before the seqID</li>
 <li>a new line separating seqID from sequence</li>
 <li>sequence can be one line or multiple lines</li>
 <li>OTU sequences should not be aligned (taxonomy reference can be aligned)</li>
 </ul>
-<p>example correct format:</p>
+<p>Example of correct format:</p>
 <pre><code>&gt;seqID
 TACGTAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAG
 &gt;seqID
 TACGTAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAG</code></pre>
-<div id="how-to-un-align" class="section level4">
-<h4>How to un-align:</h4>
-<p>The dashes in aligned sequences don’t work with BLAST. An Aligned file would look something like this:</p>
+<hr />
+<p><br></p>
+</div>
+<div id="un-align-otus.fasta" class="section level3">
+<h3>Un-align <code>otus.fasta</code>:</h3>
+<p>If you are using mothur to process your data, the fasta files will be aligned, but the dashes in aligned sequences don’t work with BLAST.<br />
+An Aligned file looks something like this:</p>
 <pre><code>&gt;SRR1531609.6
 GAG-G-A-A--TA-TT--GG-T-C----AA-T-G-G--GC-----GC-A--A---G-C-C-T-G-A-A-C-C-A---GC-C--A--T-GCC-G-A-G-T------G-C-A--G--GA-----------------------------T-G--A--C--G-G-TC----C---TA-TG-----G-A-T-----T-G-T-A---AA-C-T-GC--------------------TT-TT-G-T--A-CAG----G--A-A--G---AA-ACAC-T---C-C-C--T---------------------C----------------------------GT---------------------------G------------------------A-GGG-A-GC-T-T-G-A-C-G-----G-T---A-C-TG--------T-A-A-G----</code></pre>
-<p>You can remove hyphens using this terminal command:</p>
-<p>Full Command (Type in Terminal):</p>
-<pre><code>sed 's/-//g' &lt;aligned.fasta &gt;otus.fasta</code></pre>
+<p><br> You can remove hyphens using this terminal command:</p>
+<p>Full 2 Commands (Type in Terminal):</p>
+<pre><code>sed 's/-//g' &lt;aligned.fasta &gt;otus.fasta
+sed 's/-//g' &lt;names-with-dashed.count_table &gt;otus.count_table</code></pre>
 <table>
 <colgroup>
 <col width="17%"></col>
@@ -1999,59 +1936,12 @@ GAG-G-A-A--TA-TT--GG-T-C----AA-T-G-G--GC-----GC-A--A---G-C-C-T-G-A-A-C-C-A---GC-
 </tr>
 </tbody>
 </table>
-<p><strong>NOTE: this removes hyphens from everywhere!</strong> If you had hyphens in your seqID names you have to also remove hyphens from the names in your abund file. SeqIDs must match exactly btwn the two files (tho order doesn’t matter)</p>
-<p>So may also want to do:</p>
-<pre><code>sed 's/-//g' &lt;names-with-dashed.count_table &gt;otus.count_table</code></pre>
+<p><strong>NOTE: this removes hyphens from everywhere!</strong> In case there are hyphens in any seqID names, you have to also remove hyphens from the names in your abund file (the second terminal command). SeqIDs must match exactly btwn the two files.</p>
+<hr />
 <p><br></p>
 </div>
-<div id="optionally-you-can-un-align-the-silva-taxonomy-reference-to-make-it-smaller" class="section level4">
-<h4>Optionally you can un-align the silva taxonomy reference to make it smaller:</h4>
-<p>The silva reference downloaded from mothur is aligned. Using this file directly for taxonomy assignment works just fine. BUT, if you want to save 10GB of space you don’t need it aligned for taxonomy assignment so you can un-align it using the shell script <code>un-align_silva.sh</code>. This reduces the file size (for v132) from <strong>10.68 GB to 318 MB.</strong> <em>dang!</em> It takes about 7 minutes to run this script to remove hyphens and semicolons, and it saves about 7 minutes later on during taxonomy assignment. None of the intermediate files change sizes, the processing time breaks even, so this is optional, just saves you 10GB of space if you’re keeping the reference around.</p>
-<p>Example syntax:</p>
-<pre><code>./un-align_silva.sh silva.nr_v132.align general.fasta silva.nr_v132.tax general.taxonomy</code></pre>
-<table>
-<colgroup>
-<col width="17%"></col>
-<col width="82%"></col>
-</colgroup>
-<thead>
-<tr class="header">
-<th>command</th>
-<th>description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>un-align_silva.sh</code></td>
-<td>script located in tax-scripts folder</td>
-</tr>
-<tr class="even">
-<td><code>silva.nr_v132.align</code></td>
-<td>the silva database fasta file downloaded from mothur</td>
-</tr>
-<tr class="odd">
-<td><code>general.fasta</code></td>
-<td>a new name for the output unaligned database.</td>
-</tr>
-<tr class="even">
-<td><code>silva.nr_v132.tax</code></td>
-<td>the silva database taxonomy file downloaded from mothur <br> Removing the <code>.</code>’s to un-align the fasta also removes dots from the sequence ID name. So need to remove the same dots from the sequence IDs in the taxonomy file.</td>
-</tr>
-<tr class="odd">
-<td><code>general.taxonomy</code></td>
-<td>a new name for the output unaligned database.</td>
-</tr>
-</tbody>
-</table>
-<p><br> (It is possible I made up the word “un-align”)</p>
-<hr />
-</div>
-</div>
-</div>
-<div id="abund-file" class="section level2">
-<h2>.abund file</h2>
-<div id="abund-file-format" class="section level3">
-<h3><code>.abund</code> file format</h3>
+<div id="format-otus.abund" class="section level3">
+<h3>Format <code>otus.abund</code></h3>
 <p>NOTE: you don’t need this file if you are taking the “quickie” route and not running the validation steps. <em>i.e.</em> you’re choosing a pident from the start, and just making the taxonomy table with no other checks.</p>
 <p><strong>This is the table of relative abundances for each OTU in each sample, aka your OTU table:</strong></p>
 <ul>
@@ -2065,16 +1955,17 @@ That means you could either have subsampled during QC, or have divided all abund
 <li><strong>no “totals” row/column</strong><br />
 (as might have been added by mother)</li>
 <li><strong>numbers only for all abundance values</strong><br />
-Note that if you had a sample that failed sequencing, there might be no reads left in it after QC. This sample should be removed before TaxAss or normalizing it could cause a NaN non-number value.</li>
+Note that if you had a sample that failed sequencing, there might be no reads left in it after QC. This sample should be removed before TaxAss or normalizing it could cause a <code>NaN</code> not-a-number value.</li>
 </ul>
 <pre><code>colname colname     colname     colname     colname
 seqID   Abundance   Abundance   Abundance   Abundance
 seqID   Abundance   Abundance   Abundance   Abundance
 seqID   Abundance   Abundance   Abundance   Abundance</code></pre>
 <hr />
+<p><br></p>
 </div>
-<div id="format-a-mothur-.count_table-file" class="section level3">
-<h3>Format a mothur <code>.count_table</code> file</h3>
+<div id="get-otus.abund-from-a-mothur-.count_table" class="section level3">
+<h3>Get <code>otus.abund</code> from a mothur <code>.count_table</code></h3>
 <p>If you used mothur for QC and are proceeding with unique sequences, as in the TaxAss paper, you can reformat the outs.count_table file this way:</p>
 <p>Full Command (type in terminal):</p>
 <pre><code>Rscript reformat_mothur_OTU_tables.R StupidLongMothurName.count_table count_table otus.abund</code></pre>
@@ -2118,6 +2009,194 @@ seqID   Abundance   Abundance   Abundance   Abundance</code></pre>
 <li><code>.shared</code> : use if you clustered sequences<br />
 In other words, whatever your last OTU-esque table is prior to assigning taxonomy. Note that the .abund mothur file is a non-table-y space-saving format that you can’t use here. Sorry for the confusing file extension choice.</li>
 </ul>
+<hr />
+<p><br></p>
+</div>
+<div id="get-otus.fasta-and-otus.abund-from-a-dada2-seqtab_nochim" class="section level3">
+<h3>Get <code>otus.fasta</code> and <code>otus.abund</code> from a dada2 <code>seqtab_nochim</code></h3>
+<p>If you are using dada2 within RStudio, save the <code>seqtab_nochim</code> object as an R data structure:</p>
+<pre><code>saveRDS(object = seqtab_nochim, file = &quot;seqtab_nochim.rds)</code></pre>
+<p>You can convert this into both the otus.fasta and the otus.abund files this way:</p>
+<p>Full Command (type in terminal):</p>
+<pre><code>Rscript reformat_dada2_seqtabs.R seqtab_nochim.rds otus.fasta otus.abund otus.count</code></pre>
+<table>
+<colgroup>
+<col width="43%"></col>
+<col width="56%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>command argument</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>Rscript</code></td>
+<td>way to source an R script with arguments</td>
+</tr>
+<tr class="even">
+<td><code>reformat_dada2_seqtabs.R</code></td>
+<td>Name of R script to run</td>
+</tr>
+<tr class="odd">
+<td><code>seqtab_nochim.rds</code></td>
+<td>saved dada2 object file</td>
+</tr>
+<tr class="even">
+<td><code>otus.fasta</code></td>
+<td>name of created fasta file to feed into TaxAss</td>
+</tr>
+<tr class="odd">
+<td><code>otus.abund</code></td>
+<td>name of created relative abundance table to feed into TaxAss<br> note: this has been converted to relatve abundance (normalized by sample so that abundance values in each sample sum to 100)</td>
+</tr>
+<tr class="even">
+<td><code>otus.count</code></td>
+<td>name of created file that saves the total reads per sample. This is not used in TaxAss, but saves the information you would need to un-normalize your abundance data so that it’s not lost.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+</div>
+</div>
+<div id="silva-files" class="section level2">
+<h2>Silva files</h2>
+<p>How to format the <code>general.taxonomy</code> and <code>general.fasta</code> files when using the silva database as your taxonomy reference. <br><br></p>
+<div id="format-delimiters-in-general.taxonomy" class="section level3">
+<h3>Format delimiters in <code>general.taxonomy</code></h3>
+<p>Downloading from mothur, you shouldn’t need to worry about reformatting. But if you are exporting the file from Arb yourself, it must be compatible with mothur:</p>
+<ul>
+<li>no whitespace except for the tab between seqID and taxonomy</li>
+<li>taxonomy level names separated by semicolons</li>
+<li>must have a semicolon at the end of each line, too!</li>
+</ul>
+<p>Example of correct format:</p>
+<pre><code>seqID   kingdom;phylum;class;order;family;genus;species;</code></pre>
+<hr />
+<p><br></p>
+</div>
+<div id="format-unclassifieds-in-general.taxonomy" class="section level3">
+<h3>Format unclassifieds in <code>general.taxonomy</code></h3>
+<p>SILVA uses inconsistent nomenclature for sequences that don’t have names. We strongly recommend re-formatting them into a more consistent nomenclature using the script <code>force_consistent_unclassifieds_on_database.R</code>.</p>
+<p>Full Command (type in terminal):</p>
+<pre><code>Rscript force_consistent_unclassifieds_on_database.R silva.nr_v132.tax general.taxonomy</code></pre>
+<table>
+<colgroup>
+<col width="29%"></col>
+<col width="70%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>command argument</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>silva.nr_v132.tax</td>
+<td>input file. the mothur-formatted silva taxonomy with inconsistent names. If you are unaligning the fasta, you can do this step before or after removing the periods from the seqID names.</td>
+</tr>
+<tr class="even">
+<td>general.taxonomy</td>
+<td>silva taxonomy with consistent unclassified names that is ready-to-taxass!</td>
+</tr>
+</tbody>
+</table>
+<p>Comments in the script are very detailed as to examples of the changes. The new missing names are easier to deal with because they follow the consistent format where they begin with either:</p>
+<ul>
+<li>unnamed<br />
+</li>
+<li>unknown<br />
+</li>
+<li>uncultured<br />
+</li>
+<li>unclassified</li>
+</ul>
+<p>And are followed by a period and the closest available parent-name. All the names that get changed will be spit out into the terminal output. Note there will be a lot due to the format “knownphylum_cl” for an unknown class name. These all get changed to “unnamed.knownphylum” to follow a consistent and easy-to-grep nomenclature.</p>
+<hr />
+<p><br></p>
+</div>
+<div id="unalign-general.fasta-optional" class="section level3">
+<h3>Unalign <code>general.fasta</code> (optional):</h3>
+<p>The silva reference downloaded from mothur is aligned. Using this file directly for taxonomy assignment works just fine and takes the same amount of time computationally. BUT, if you want to save 10GB of space you don’t need it aligned for taxonomy assignment so you can un-align it using the shell script <code>un-align_silva.sh</code>. This reduces the file size (for v132) from <strong>10.68 GB to 318 MB.</strong> <em>dang!</em> It takes about 10 minutes to run this script to remove hyphens and semicolons, and it saves about 10 minutes later on during taxonomy assignment. None of the intermediate files change sizes, the processing time breaks even, so this is optional, just saves you 10GB of space if you’re keeping the reference around.</p>
+<p>Example syntax:</p>
+<pre><code>./un-align_silva.sh silva.nr_v132.align general.fasta silva.nr_v132.tax general.taxonomy</code></pre>
+<table>
+<colgroup>
+<col width="17%"></col>
+<col width="82%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>command</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>un-align_silva.sh</code></td>
+<td>script located in tax-scripts folder</td>
+</tr>
+<tr class="even">
+<td><code>silva.nr_v132.align</code></td>
+<td>the silva database fasta file downloaded from mothur</td>
+</tr>
+<tr class="odd">
+<td><code>general.fasta</code></td>
+<td>a new name for the output unaligned database.</td>
+</tr>
+<tr class="even">
+<td><code>silva.nr_v132.tax</code></td>
+<td>the silva database taxonomy file downloaded from mothur <br> Removing the <code>.</code>’s to un-align the fasta also removes dots from the sequence ID name. So need to remove the same dots from the sequence IDs in the taxonomy file.</td>
+</tr>
+<tr class="odd">
+<td><code>general.taxonomy</code></td>
+<td>a new name for the output unaligned database.</td>
+</tr>
+</tbody>
+</table>
+<p><br> (It is possible I made up the word “un-align”)</p>
+<hr />
+</div>
+</div>
+<div id="greengenes-files" class="section level2">
+<h2>Greengenes files</h2>
+<p>How to format the <code>general.taxonomy</code> and <code>general.fasta</code> files when using Greengenes as your general database. <br><br></p>
+<div id="format-general.taxonomy" class="section level3">
+<h3>Format <code>general.taxonomy</code></h3>
+<p>The Greengenes file needs to be in a format compatible with mothur:</p>
+<ul>
+<li>no whitespace except for the tab between seqID and taxonomy</li>
+<li>taxonomy level names separated by semicolons</li>
+<li>must have a semicolon at the end of each line, too!</li>
+</ul>
+<p>Example of correct format:</p>
+<pre><code>seqID   kingdom;phylum;class;order;family;genus;species;</code></pre>
+<p>To convert Greengenes to a mothur-compatible format:</p>
+<p>Full Command (type in terminal):</p>
+<pre><code>./reformat_greengenes.sh gg_13_5_taxonomy.txt</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>command argument</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>gg_13_5_taxonomy.txt</code></td>
+<td>the downloaded greengenes file: <code>gg_13_5_taxonomy.txt</code></td>
+</tr>
+</tbody>
+</table>
+<p>Output is a file called <code>general.taxonomy</code> that is formatted correctly.</p>
+<hr />
+<p><br></p>
+</div>
+<div id="format-general.fasta" class="section level3">
+<h3>Format <code>general.fasta</code></h3>
+<p>This file should not require additional formatting. If for some reason you get errors, check that it meets the fasta requirements explained in the OTU files tab.</p>
 <hr />
 </div>
 </div>

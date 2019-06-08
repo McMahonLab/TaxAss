@@ -9,7 +9,7 @@ How do I TaxAss?
 
 **Please cite TaxAss:** [Rohwer RR, Hamilton JJ, Newton RJ, McMahon KD. 2018. TaxAss: Leveraging a Custom Freshwater Database Achieves Fine-Scale Taxonomic Resolution. mSphere 3:e00327-18.](https://msphere.asm.org/content/3/5/e00327-18)
 
-TaxAss uses a series of R, python, and bash scripts in addition to using BLAST+ and mothur's classify.seqs() command.  The scripts are sourced from the terminal window (mac or linux). You'll need to download this repository (green "Clone or download" button, top right), and then just add the tax-scripts folder to your working diriectory.
+TaxAss only assigns taxonomy, so you can use TaxAss after using mothur, dada2, vsearch, or whatever QC pipeline you prefer. TaxAss uses a series of R, python, and bash scripts in addition to using BLAST+ and mothur's classify.seqs() command.  The scripts are sourced from the terminal window (mac or linux). You'll need to download this repository (green "Clone or download" button, top right), and add the tax-scripts folder to your working diriectory.
 
 Where's the stuff I need?
 ---

@@ -7,10 +7,7 @@ How do I TaxAss?
 
 **Step-by-step directions:** [tax-scripts/TaxAss_Directions.html](https://htmlpreview.github.io/?https://github.com/McMahonLab/TaxAss/blob/master/tax-scripts/TaxAss_Directions.html)
 
-Please cite our mSphere paper:  
-TaxAss: Leveraging a Custom Freshwater Database Achieves Fine-Scale Taxonomic Resolution
-Robin R Rohwer, Joshua J Hamilton, Ryan J Newton, Katherine D McMahon
-mSphere; doi: https://doi.org/10.1128/mSphere.00327-18
+**Please cite TaxAss:** [Rohwer RR, Hamilton JJ, Newton RJ, McMahon KD. 2018. TaxAss: Leveraging a Custom Freshwater Database Achieves Fine-Scale Taxonomic Resolution. mSphere 3:e00327-18.](https://msphere.asm.org/content/3/5/e00327-18)
 
 TaxAss uses a series of R, python, and bash scripts in addition to using BLAST+ and mothur's classify.seqs() command.  The scripts are sourced from the terminal window (mac or linux). You'll need to download this repository (green "Clone or download" button, top right), and then just add the tax-scripts folder to your working diriectory.
 

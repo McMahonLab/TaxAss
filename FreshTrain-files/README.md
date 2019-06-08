@@ -14,10 +14,16 @@ zipped file name        | description
 FreshTrain18Aug2016     | old version formatted for Greengenes (don't use)  
 FreshTrain25Jan2018Greengenes13_5.zip | current version formatted for Greengenes  
 FreshTrain30Apr2018SILVAv128.zip | current version formatted for SILVA v128  
-FreshTrain30Apr2018SILVAv132.zip | current version formatted for SILVA v132  
+**FreshTrain30Apr2018SILVAv132.zip** | **current version formatted for SILVA v132**  
 
-The different formats match the FreshTrain's coarse-level nomenclature to the nomenclature in the comprehensive database of choice. The FreshTrain defines lineage-clade-tribe (~family-genus-species) level phylogenies, so the phylum, class, and order names are changed in the different versions to be consistent with the chosen comprehensive database.
+The different formats match the FreshTrain's coarse-level nomenclature to the nomenclature in the comprehensive database of choice. The FreshTrain defines lineage-clade-tribe (~family-genus-species) level phylogenies, so the phylum, class, and order names are changed in the different FreshTrain versions to be consistent with the paired comprehensive database.  
 
 <br>
-The citation for the FreshTrain database is:  
-[Newton, R. J., Jones, S. E., Eiler, A., McMahon, K. D. & Bertilsson, S. A guide to the natural history of freshwater lake bacteria. Microbiol. Mol. Biol. Rev. 75, 14–49 (2011).](http://mmbr.asm.org/content/75/1/14.full)
+The citation for the original FreshTrain database and the arb version of it is:  
+
+[Newton RJ, Jones SE, Eiler A, McMahon KD, Bertilsson S. 2011. A Guide to the Natural History of Freshwater Lake Bacteria. Microbiol Mol Biol Rev 75:14–49.](https://mmbr.asm.org/content/75/1/14.full)  The arb files are available at [github.com/McMahonLab/FWMFG](https://github.com/McMahonLab/FWMFG).
+
+<br>
+The citation for these taxonomy assignment-compatible formats of the FreshTrain and the TaxAss method is:  
+
+[Rohwer RR, Hamilton JJ, Newton RJ, McMahon KD. 2018. TaxAss: Leveraging a Custom Freshwater Database Achieves Fine-Scale Taxonomic Resolution. mSphere 3:e00327-18.](https://msphere.asm.org/content/3/5/e00327-18)  

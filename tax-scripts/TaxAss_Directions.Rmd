@@ -1,7 +1,7 @@
 ---
 title: "TaxAss Workflow"
 author: "Robin Rohwer"
-date: "last updated: 11/5/2017"
+date: "last updated: June 7, 2019"
 output: 
   html_document:
     toc: true
@@ -25,13 +25,33 @@ pre code, pre, code {
 TaxAss assigns taxonomy to a fasta file of OTU sequences using both a 
 small, custom taxonomy database and a large general database.
 
-Download the scripts from the github repo: https://github.com/McMahonLab/TaxAss
+Download the scripts from the github repo: https://github.com/McMahonLab/TaxAss  
+
+Please cite TaxAss: [Rohwer RR, Hamilton JJ, Newton RJ, McMahon KD. 2018. TaxAss: Leveraging a Custom Freshwater Database Achieves Fine-Scale Taxonomic Resolution. mSphere 3:e00327-18.](https://msphere.asm.org/content/3/5/e00327-18)
+
 
 # <span style="color:SteelBlue">List of Steps</span>
-This is a list of all the commands in each step. There is a more detailed section for each step.  
-<br>
-**You can run most of the steps in one go by using the batch scripts listed at the bottom of this section.**  
 
+These directions include extra validation steps used in the [paper](https://msphere.asm.org/content/3/5/e00327-18) that you don't need to include to just assign taxonomy to your data.  
+
+**To assign FreshTrain taxonomy to your own data, we recommend:**  
+
+* add your data files, database files, and the `tax-scripts` files to an otherwise empty folder (your working directory)
+* format your files and file names according to `step 0`  
+* run a batch script from within your working directory: `./RunSteps_quickie.sh`  
+* run a batch script that deletes all the intermediate files: `./RunStep_16.sh`
+
+The RunSteps_quickie.sh batch script uses a taxass percent identity of 98 to assign the database, a mothur bootstrap confidence of 80 to assign taxonomy, and 2 processors for mothur commands. You can change these settings at the top of the batch script file.  
+<br>
+If you encounter error messages or if your data is very large, we recommend troubleshooting by running the steps included in RunSteps_quickie.sh individually with a small subset of your data by following the directions in  
+**steps 0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 12, 15**   
+Navigate to detailed instructions for each step using the table of contents.  
+<br>
+<br>
+
+___________
+
+Below is a list of all the commands in each step, including the optional ones:  
 ````
 -1. Download/Install 
   BLAST+
@@ -40,19 +60,19 @@ This is a list of all the commands in each step. There is a more detailed sectio
   (your computer already has python)
   taxonomy databases
 
-0. format files (textwrangler or bash)
+0. format files (textwrangler/bash/R)
 	depends on your starting file formats
-	for Green Genes database as general.taxonomy:
-		sed 's/ //g' <general.taxonomy >NoSpaces
-		sed 's/$/;/' <NoSpaces >EndLineSemicolons
-		mv EndLineSemicolons general.taxonomy
-		rm NoSpaces
-	for aligned fasta files:
+	for Green Genes as general database:
+		./reformat_greengenes.sh gg_13_5_taxonomy.txt
+	for Silva as general database:
+		./un-align_silva.sh silva.nr_v132.align general.fasta silva.nr_v132.tax general.taxonomy
+		Rscript force_consistent_unclassifieds_on_database.R silva.nr_v132.tax general.taxonomy
+	for mothur count_table files:
 		sed 's/-//g' <aligned.fasta >otus.fasta
-	for mothur .count_table as OTU table:
+		sed 's/-//g' <names-with-dashed.count_table >otus.count_table
 		Rscript reformat_mothur_OTU_tables.R StupidLongMothurName.count_table count_table otus.abund
-
-
+	for dada2 seqtab_nochim as OTU table:
+		Rscript reformat_dada2_seqtabs.R seqtab_nochim.rds otus.fasta otus.abund otus.count
 		
 1. make BLAST database file (blast)
 	makeblastdb -dbtype nucl -in custom.fasta -input_type fasta -parse_seqids -out custom.db
@@ -88,35 +108,40 @@ This is a list of all the commands in each step. There is a more detailed sectio
 10. combine taxonomy files (bash)
 	cat otus.above.98.custom.wang.taxonomy otus.below.98.general.wang.taxonomy > otus.98.taxonomy
 
-11. assign taxonomy with general database only (mothur, bash)
+11. OPTIONAL- assign taxonomy with general database only (mothur, bash)
+	(needed for validation steps 13, 14, 15.5)
 	mothur "#classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
 	cat otus.general.wang.taxonomy > otus.general.taxonomy
 
-11.5 OPTIONAL- feeds into Database_Improvement_Workflow
-	assign taxonomy to custom database with general database (mothur, bash)
+11.5 OPTIONAL- assign taxonomy to custom database with general database (mothur, bash)
+	(feeds into Database_Improvement_Workflow)
 	mothur "#classify.seqs(fasta=custom.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
 	cat custom.general.wang.taxonomy custom.general.taxonomy
 
 12. reformat taxonomy files (bash)
 	sed 's/[[:blank:]]/\;/' <otus.98.taxonomy >otus.98.taxonomy.reformatted
 	mv otus.98.taxonomy.reformatted otus.98.taxonomy
+	OPTIONAL- need if did step 11
 	sed 's/[[:blank:]]/\;/' <otus.general.taxonomy >otus.general.taxonomy.reformatted
 	mv otus.general.taxonomy.reformatted otus.general.taxonomy
 	
-13. compare taxonomy files (R)
+13. OPTIONAL- compare taxonomy files (R)
+	(needed for validation steps 11, 14, 15.5)
 	mkdir conflicts_98
 	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 80 80
 	
 14. OPTIONAL: choose appropriate pident cutoff (R)
+	(needed for validation steps 11, 13, 15.5)
 	note: you have to repeat steps 5, 7-10, & 12-13 with multiple pident cutoffs to do this step
 	Rscript plot_classification_disagreements.R otus.abund plots regular NA NA conflicts_94 ids.above.94 94 conflicts_96 ids.above.96 96 conflicts_98 ids.above.98 98
 
 15. generate final taxonomy file (R)
+	OPTIONAL- if did all the validation steps 11, 13, 14, 15.5a
 	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70 final
-		If skipping optional steps 11-14 or 15.5.a.:
-		Rscript find_classification_disagreements.R otus.98.taxonomy quickie ids.above.98 conflicts_98 98 85 70 final
+	If doing only "quickie" steps.:
+	Rscript find_classification_disagreements.R otus.98.taxonomy quickie ids.above.98 conflicts_98 98 85 70 final
 	
-15.5 OPTIONAL: plot benefits of using this workflow (R, mothur, bash)
+15.5 OPTIONAL- plot benefits of using this workflow (R, mothur, bash)
 	a. Improvement over general database only:
 		Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID.csv plots final.taxonomy.names final.general.names
 	b. Improvement over custom database only:
@@ -135,12 +160,8 @@ This is a list of all the commands in each step. There is a more detailed sectio
     mkdir data ; mv otus* data
     mkdir databases ; mv *.taxonomy *.fasta databases
 
-````
-<br>
-<br>
-**OR: Run steps as a block using these batch scripts:**  
-(you have to open the batch script and enter your chosen pident and confidence values at the beginning)
-````
+Batch Scripts:
+
 Full TaxAss:
   a. Run a bunch of pidents
     ./RunSteps_1-14.sh
@@ -149,14 +170,10 @@ Full TaxAss:
   c. clean up after everything worked
     ./RunStep_16.sh
 
-As few steps as possible (choose pident at start):
+As few steps as possible (choose pident without comparing):
   ./RunSteps_quickie.sh
   
 ````
-
-		
-
-Detailed explanations of commands and inputs are below:
 
 __________________________________________________________________________________________
 
@@ -166,13 +183,13 @@ ________________________________________________________________________________
 
 Program       | Version             | Source                  | Specific Link
 --------------|---------------------|-------------------------|------------------------------------------  
-mothur        | v.1.39.5            | www.mothur.org          | https://github.com/mothur/mothur/releases/tag/v1.39.5  
-BLAST         | 2.2.31+             | ncbi.nlm.nih.gov        | https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download  
+mothur        | v.1.42.1            | www.mothur.org          | https://github.com/mothur/mothur/releases  
+BLAST         | 2.9.0               | ncbi.nlm.nih.gov        | ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/  
 TaxAss        | master branch       | `tax-scripts` folder    | https://github.com/McMahonLab/TaxAss <br> You don't need your own github account; you can click the green download button on the top right of the main page (do have to download all folders unfortunately)  
-python        | 2.7.11              | your computer already has this | don't need anything extra
+python        | 2.7 or 3.7          | your computer already has this | don't need anything extra
 
 You want mothur and BLAST on your "path" (that means if you type them, your computer recognizes it as a program and runs it).
-BLAST does that automatically when you install it I think, but mothur does not. 
+BLAST does that automatically if you use the `.dmg` file to install it, but mothur does not. 
 First make sure mothur is downloaded to your home directory- should open if you type `~/mothur/mothur`.   
 
 **To add mothur to your path:**   
@@ -184,7 +201,7 @@ First make sure mothur is downloaded to your home directory- should open if you 
 ~ $ touch .bash_profile
 ~ $ open .bash_profile
 
-# add this line to the .bash_profile doc
+# add this line to the .bash_profile document
 export PATH=~/mothur:$PATH
 ```
 Now you can open the mothur program just by typing `mothur` from any location. (after restarting terminal)
@@ -193,43 +210,44 @@ Now you can open the mothur program just by typing `mothur` from any location. (
 
 Database      | Version | File Name          | Download From
 --------------|---------|--------------------|-------------------------  
-FreshTrain    | 18Aug2016 | FreshTrain18Aug2016.zip | https://github.com/McMahonLab/TaxAss/FreshTrain-files<br>(You can download the single zip file without the whole TaxAss repository by clicking on it)
+FreshTrain    | 30Apr2018<br>or<br>25Jan2018 | FreshTrain30Apr2018SILVAv132.zip<br>FreshTrain30Apr2018SILVAv128.zip<br>FreshTrain25Jan2018Greengenes13_5.zip | https://github.com/McMahonLab/TaxAss/FreshTrain-files
 Greengenes    | Aug 2013  | "greengenes reference taxonomy" <br> "greengenes reference alignment" | https://www.mothur.org/wiki/Greengenes-formatted_databases
 Silva         | v.132 <br> v.128 | "Full length sequences and taxonomy references" | https://www.mothur.org/wiki/Silva_reference_files
 
 (Note that if you're a non-academic or commercial user you have to pay to use silva.)
+
 __________________________________________________________________________________________
 
 # <span style="color:SteelBlue">0. format files</span> {.tabset}
 
 ## Files Needed
 
-#### <span style="color:SteelBlue">(Use this section's tabs for details on formatting each file type.)</span>
+#### <span style="color:SteelBlue">Use the tabs (above) for details on formatting each file type.</span>
 
 These are the files you supply as input into the workflow:  
 
 File                | Description
 --------------------|------------------------------------------------------------------
-	custom.fasta		  | fasta sequences in your small, ecosystem-specific taxonomy database
-	custom.taxonomy		| taxonomy names in your small, ecosystem-specific taxonomy database
+	otus.fasta			  | fasta sequences for each of your OTUs (OTUs can be clustered or unique sequences)
+	otus.abund			  | relative abundance of each OTU (i.e. the OTU table)<br>(Optional- don't need if following "quickie" procedure)
 	general.fasta		  | fasta sequences in your large, general comrpehensive taxonomy database
 	general.taxonomy	| taxonomy names in your large, general comprehensive taxonomy database
-	otus.fasta			  | fasta sequences for each of your OTUs (OTUs can be clustered or unique sequences)
-	otus.abund			  | relative abundance of each OTU (i.e. the OTU table)  
+	custom.fasta		  | fasta sequences in your small, ecosystem-specific taxonomy database
+	custom.taxonomy		| taxonomy names in your small, ecosystem-specific taxonomy database
 
 **Move everything into the same folder, and make that your working directory.**  
-In other words, create a folder that all the tax-scripts and database and data files are inside of, 
-and then use that as your present working directory (`pwd`) to source all the scripts from.  
-<br>
-It might also help to rename your files to match the above names so that you can copy and paste commands from this workflow.
+To make your life easier, create a new folder that contains the tax-scripts, the database and data files listed above, and nothing else. Then navigate to this folder in the terminal to make it your present working directory (`pwd`). Also, rename your files to match the above names so that you can copy and paste commands from this workflow.
 
 _____________________________________________
 
-## seqID formats  
+## OTU files  
 
-General notes on the seqIDs in all files:
+How to format `otus.fasta` and `otus.abund`, including specific directions for converting mothur and dada2 file formats.
+<br><br>
 
-OTU seqID's:  
+### Format your sequence ID's  
+
+The seqIDs in your otus.fasta and otus.abund files must follow these requirements:
 
 - **cannot contain any whitespace**  
 			 	BLAST will call some parts the seqID and some parts comments if they're separated.
@@ -245,30 +263,176 @@ OTU seqID's:
 - **must match between the otus.fasta file and the otus.abund file**  
 			 	(though consistent ordering is not necessary.)
 
+___________
+
+<br>
+
+### Format `otus.fasta`   
+
+These should be in fasta format: 
+
+- carrot before the seqID
+- a new line separating seqID from sequence
+- sequence can be one line or multiple lines 
+- OTU sequences should not be aligned (taxonomy reference can be aligned)
+
+Example of correct format:
+```
+>seqID
+TACGTAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAG
+>seqID
+TACGTAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAG
+```
+___________
+
+<br>
+
+### Un-align `otus.fasta`:
+
+If you are using mothur to process your data, the fasta files will be aligned, but the dashes in aligned sequences don't work with BLAST.  
+An Aligned file looks something like this:  
+```
+>SRR1531609.6
+GAG-G-A-A--TA-TT--GG-T-C----AA-T-G-G--GC-----GC-A--A---G-C-C-T-G-A-A-C-C-A---GC-C--A--T-GCC-G-A-G-T------G-C-A--G--GA-----------------------------T-G--A--C--G-G-TC----C---TA-TG-----G-A-T-----T-G-T-A---AA-C-T-GC--------------------TT-TT-G-T--A-CAG----G--A-A--G---AA-ACAC-T---C-C-C--T---------------------C----------------------------GT---------------------------G------------------------A-GGG-A-GC-T-T-G-A-C-G-----G-T---A-C-TG--------T-A-A-G----
+```  
+<br>
+You can remove hyphens using this terminal command:
+
+Full 2 Commands (Type in Terminal):
+```
+sed 's/-//g' <aligned.fasta >otus.fasta
+sed 's/-//g' <names-with-dashed.count_table >otus.count_table
+```  
+
+command   | description
+----------|----------------------------------------------
+`sed`     | a "stream editor" for streams of text, built-in bash function  
+`s` 		  | tells it to do a substitution 
+`/-//`		|	is format `/find/replace/`, so find `-`, replace with nothing
+`g` 		  | tells it to do a global substitution (ie. every instance not just first on the line)
+`aligned.fasta` | the name of your aligned fasta file 
+`otus.fasta`	  | the name of the reformatted file you're creating (note it must have a different name than input)
+
+**NOTE: this removes hyphens from everywhere!** In case there are hyphens in any seqID names, you have to also remove
+hyphens from the names in your abund file (the second terminal command). SeqIDs must match exactly btwn the two files.
+
+___________
+
+<br>
+
+### Format `otus.abund` 
+
+NOTE: you don't need this file if you are taking the "quickie" route and not running the validation steps. 
+_i.e._ you're choosing a pident from the start, and just making the taxonomy table with no other checks.
+
+**This is the table of relative abundances for each OTU in each sample, aka your OTU table:** 
+
+- **relative abundance not raw counts**  
+	 That means you could either have subsampled during QC, or have divided all abundances
+	 in a given sample by the total reads in that samples.  In other words, it must be 
+	 relativized by sample so that each sample has the same total reads. This is important 
+	 for the plot in step 14 that helps you choose an appropriate pident cutoff.
+- **tab delimited**  
+- **seqIDs in 1st column, abundances in rest of columns** 
+- **with headers (column names), but no row names**  
+- **no "totals" row/column**  
+   (as might have been added by mother)
+- **numbers only for all abundance values**  
+   Note that if you had a sample that failed sequencing, there might be no reads left in it after QC. This sample should be removed before TaxAss or normalizing it could cause a `NaN` not-a-number value.
+
+```
+colname	colname		colname		colname		colname
+seqID	Abundance	Abundance	Abundance	Abundance
+seqID	Abundance	Abundance	Abundance	Abundance
+seqID	Abundance	Abundance	Abundance	Abundance
+```
+___________
+		
+<br>
+		
+### Get `otus.abund` from a mothur `.count_table`
+
+If you used mothur for QC and are proceeding with unique sequences, as in the TaxAss paper, you can reformat the outs.count_table file this way:  
+		
+Full Command (type in terminal):
+```
+Rscript reformat_mothur_OTU_tables.R StupidLongMothurName.count_table count_table otus.abund
+```
+
+command argument                   | description
+-----------------------------------|----------------------------------------------
+`Rscript`					                 | way to source an R script with arguments  
+`reformat_mothur_OTU_tables.R`     | Name of R script to run
+`StupidLongMothurName.count_table` | name of the mothur file you're starting with
+`count_table`                      | type of mothur file, as specified by it's extension. <br> ideally this will include shared or the qiime version at some point...
+`otus.abund`							         | name of the OTU table you feed into this workflow
+		
+More notes on the mothur file types:  
+
+* `.count_table` : use if you are not clustering sequences, just cleaning sequencing errors
+* `.shared` : use if you clustered sequences  
+  In other words, whatever your last OTU-esque table is prior to assigning taxonomy.
+	Note that the .abund mothur file is a non-table-y space-saving format that you can't use here.
+	Sorry for the confusing file extension choice.
+
+
+___________
+
+<br>
+
+### Get `otus.fasta` and `otus.abund` from a dada2 `seqtab_nochim` 
+
+If you are using dada2 within RStudio, save the `seqtab_nochim` object as an R data structure:  
+```
+saveRDS(object = seqtab_nochim, file = "seqtab_nochim.rds)
+```
+
+You can convert this into both the otus.fasta and the otus.abund files this way: 
+
+Full Command (type in terminal):
+```
+Rscript reformat_dada2_seqtabs.R seqtab_nochim.rds otus.fasta otus.abund otus.count
+```
+
+command argument                   | description
+-----------------------------------|----------------------------------------------
+`Rscript`					                 | way to source an R script with arguments  
+`reformat_dada2_seqtabs.R`         | Name of R script to run
+`seqtab_nochim.rds`                | saved dada2 object file
+`otus.fasta`                       | name of created fasta file to feed into TaxAss
+`otus.abund`							         | name of created relative abundance table to feed into TaxAss<br> note: this has been converted to relatve abundance (normalized by sample so that abundance values in each sample sum to 100)
+`otus.count`                       | name of created file that saves the total reads per sample. This is not used in TaxAss, but saves the information you would need to un-normalize your abundance data so that it's not lost.  
+
+
 _____________________________________________
 
-## .taxonomy files
+## Silva files
 
-### `.taxonomy` file format  
+How to format the `general.taxonomy` and `general.fasta` files when using the silva database as your taxonomy reference.
+<br><br>
 
-Must be compatible with mothur, example format:  
+### Format delimiters in `general.taxonomy`  
+
+Downloading from mothur, you shouldn't need to worry about reformatting. 
+But if you are exporting the file from Arb yourself, it must be compatible with mothur:  
 
 - no whitespace except for the tab between seqID and taxonomy
 - taxonomy level names separated by semicolons
 - must have a semicolon at the end of each line, too!
 
+Example of correct format:  
 ```		
 seqID	kingdom;phylum;class;order;family;genus;species;
 ```
 
 ___________		
 
-#### Format the Silva Taxonomy Database: 
+<br>
 
-Downloading from mothur, you shouldn't need to worry about delimiters etc, 
-this will be in the correct format.   
-BUT, SILVA uses inconsistent nomenclature for sequences that don't have names. 
-We **strongly recommend re-formatting them into a more consistent nomenclature** using 
+### Format unclassifieds in `general.taxonomy` 
+
+SILVA uses inconsistent nomenclature for sequences that don't have names. 
+We strongly recommend re-formatting them into a more consistent nomenclature using 
 the script `force_consistent_unclassifieds_on_database.R`.  
 
 Full Command (type in terminal):
@@ -295,80 +459,11 @@ And are followed by a period and the closest available parent-name. All the name
 
 ___________
 
-#### Format the Greengenes Taxonomy Database  
-
-Full 4 Commands (type in terminal):
-
-```
-reformat_greengenes.sh general.taxonomy
-```
-
-command argument   | description
--------------------|----------------------------------------------
-`general.taxonomy` | the downloaded greengenes file: `gg_13_5_taxonomy.txt`
-
-Output is a file called `general.taxonomy` that is formatted correctly.
-
-
-______________________
-
-## .fasta files:
-
-### `.fasta` file format  
-
-These should be in fasta format: 
-
-- carrot before the seqID (formatted according to seqID formats tab)
-- a new line separating seqID from sequence
-- sequence can be one line or multiple lines 
-- OTU sequences should not be aligned (taxonomy reference can be aligned)
-
-example correct format:
-```
->seqID
-TACGTAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAG
->seqID
-TACGTAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAG
-```
-
-#### How to un-align:
-
-The dashes in aligned sequences don't work with BLAST.
-An Aligned file would look something like this:  
-```
->SRR1531609.6
-GAG-G-A-A--TA-TT--GG-T-C----AA-T-G-G--GC-----GC-A--A---G-C-C-T-G-A-A-C-C-A---GC-C--A--T-GCC-G-A-G-T------G-C-A--G--GA-----------------------------T-G--A--C--G-G-TC----C---TA-TG-----G-A-T-----T-G-T-A---AA-C-T-GC--------------------TT-TT-G-T--A-CAG----G--A-A--G---AA-ACAC-T---C-C-C--T---------------------C----------------------------GT---------------------------G------------------------A-GGG-A-GC-T-T-G-A-C-G-----G-T---A-C-TG--------T-A-A-G----
-```
-
-You can remove hyphens using this terminal command:
-
-Full Command (Type in Terminal):
-```
-sed 's/-//g' <aligned.fasta >otus.fasta
-```  
-
-command   | description
-----------|----------------------------------------------
-`sed`     | a "stream editor" for streams of text, built-in bash function  
-`s` 		  | tells it to do a substitution 
-`/-//`		|	is format `/find/replace/`, so find `-`, replace with nothing
-`g` 		  | tells it to do a global substitution (ie. every instance not just first on the line)
-`aligned.fasta` | the name of your aligned fasta file 
-`otus.fasta`	  | the name of the reformatted file you're creating (note it must have a different name than input)
-
-**NOTE: this removes hyphens from everywhere!** If you had hyphens in your seqID names you have to also remove
-hyphens from the names in your abund file. SeqIDs must match exactly btwn the two files (tho order doesn't matter)
-
-So may also want to do:
-```
-sed 's/-//g' <names-with-dashed.count_table >otus.count_table
-```
-
 <br>
 
-#### Optionally you can un-align the silva taxonomy reference to make it smaller:  
+### Unalign `general.fasta` (optional):  
 
-The silva reference downloaded from mothur is aligned. Using this file directly for taxonomy assignment works just fine. BUT, if you want to save 10GB of space you don't need it aligned for taxonomy assignment so you can un-align it using the shell script `un-align_silva.sh`. This reduces the file size (for v132) from **10.68 GB to 318 MB.** _dang!_ It takes about 7 minutes to run this script to remove hyphens and semicolons, and it saves about 7 minutes later on during taxonomy assignment. None of the intermediate files change sizes, the processing time breaks even, so this is optional, just saves you 10GB of space if you're keeping the reference around. 
+The silva reference downloaded from mothur is aligned. Using this file directly for taxonomy assignment works just fine and takes the same amount of time computationally. BUT, if you want to save 10GB of space you don't need it aligned for taxonomy assignment so you can un-align it using the shell script `un-align_silva.sh`. This reduces the file size (for v132) from **10.68 GB to 318 MB.** _dang!_ It takes about 10 minutes to run this script to remove hyphens and semicolons, and it saves about 10 minutes later on during taxonomy assignment. None of the intermediate files change sizes, the processing time breaks even, so this is optional, just saves you 10GB of space if you're keeping the reference around. 
 
 Example syntax:
 ```
@@ -388,60 +483,45 @@ command   | description
 
 _____________________________________________
 
-## .abund file
+## Greengenes files
 
-### `.abund` file format 
+How to format the `general.taxonomy` and `general.fasta` files when using Greengenes as your general database.
+<br><br>
 
-NOTE: you don't need this file if you are taking the "quickie" route and not running the validation steps. 
-_i.e._ you're choosing a pident from the start, and just making the taxonomy table with no other checks.
+### Format `general.taxonomy`  
 
-**This is the table of relative abundances for each OTU in each sample, aka your OTU table:** 
+The Greengenes file needs to be in a format compatible with mothur:  
 
-- **relative abundance not raw counts**  
-	 That means you could either have subsampled during QC, or have divided all abundances
-	 in a given sample by the total reads in that samples.  In other words, it must be 
-	 relativized by sample so that each sample has the same total reads. This is important 
-	 for the plot in step 14 that helps you choose an appropriate pident cutoff.
-- **tab delimited**  
-- **seqIDs in 1st column, abundances in rest of columns** 
-- **with headers (column names), but no row names**  
-- **no "totals" row/column**  
-   (as might have been added by mother)
-- **numbers only for all abundance values**  
-   Note that if you had a sample that failed sequencing, there might be no reads left in it after QC. This sample should be removed before TaxAss or normalizing it could cause a NaN non-number value.
+- no whitespace except for the tab between seqID and taxonomy
+- taxonomy level names separated by semicolons
+- must have a semicolon at the end of each line, too!
 
+Example of correct format:
+```		
+seqID	kingdom;phylum;class;order;family;genus;species;
 ```
-colname	colname		colname		colname		colname
-seqID	Abundance	Abundance	Abundance	Abundance
-seqID	Abundance	Abundance	Abundance	Abundance
-seqID	Abundance	Abundance	Abundance	Abundance
-```
-___________
-		
-### Format a mothur `.count_table` file  
 
-If you used mothur for QC and are proceeding with unique sequences, as in the TaxAss paper, you can reformat the outs.count_table file this way:  
-		
+To convert Greengenes to a mothur-compatible format:
+
 Full Command (type in terminal):
+
 ```
-Rscript reformat_mothur_OTU_tables.R StupidLongMothurName.count_table count_table otus.abund
+./reformat_greengenes.sh gg_13_5_taxonomy.txt
 ```
 
-command argument                   | description
------------------------------------|----------------------------------------------
-`Rscript`					                 | way to source an R script with arguments  
-`reformat_mothur_OTU_tables.R`     | Name of R script to run
-`StupidLongMothurName.count_table` | name of the mothur file you're starting with
-`count_table`                      | type of mothur file, as specified by it's extension. <br> ideally this will include shared or the qiime version at some point...
-`otus.abund`							         | name of the OTU table you feed into this workflow
-		
-More notes on the mothur file types:  
+command argument   | description
+-------------------|----------------------------------------------
+`gg_13_5_taxonomy.txt` | the downloaded greengenes file: `gg_13_5_taxonomy.txt`
 
-* `.count_table` : use if you are not clustering sequences, just cleaning sequencing errors
-* `.shared` : use if you clustered sequences  
-  In other words, whatever your last OTU-esque table is prior to assigning taxonomy.
-	Note that the .abund mothur file is a non-table-y space-saving format that you can't use here.
-	Sorry for the confusing file extension choice.
+Output is a file called `general.taxonomy` that is formatted correctly.
+
+___________
+
+<br>
+
+### Format `general.fasta`
+
+This file should not require additional formatting. If for some reason you get errors, check that it meets the fasta requirements explained in the OTU files tab.
 
 	
 __________________________________________________________________________________________

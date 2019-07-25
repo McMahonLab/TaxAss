@@ -51,11 +51,14 @@ find.zero.samples <- function(tot.reads, otu.table){
     cat("No samples have an outlier number of total reads. Your samples have ", 
         round(mean(tot.reads), 0),"+/-", round(sd(tot.reads), 0), "(+/-", round(sd(tot.reads)/mean(tot.reads) * 100), "%) total reads.\n")
   }else{
-    cat("These samples have outlier read counts:\n", paste(names(read.stats$out), " : ", read.stats$out, sep = "", "\n"))
+    cat("Your samples have ",
+        round(mean(tot.reads), 0),"+/-", round(sd(tot.reads), 0), "(+/-", round(sd(tot.reads)/mean(tot.reads) * 100), "%) total reads.\n")
+    cat("\nThese samples have outlier read counts (You might consider removing them later):\n", paste(names(read.stats$out), " : ", read.stats$out, sep = "", "\n"))
   }
   index <- which(tot.reads == 0)
   if (length(index) > 0){
-    cat("The samples with ZERO reads are being removed to avoid errors in TaxAss.\n")
+    cat("These samples with ZERO reads are being removed now to avoid errors in TaxAss:\n",
+        names(tot.reads)[index], "\n")
   }
   return(index)
 }

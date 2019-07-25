@@ -1387,11 +1387,13 @@ rm -r conflicts* plots/
 
 **16.4 save your actual data files in a folder called data**
 
-Full Two commands (Type in Terminal):
-``
+Full Two commands (Type in Terminal):  
+
+```
 mkdir data
-mv otus* data/
-``
+mv otus* *.rds data/
+```
+
 Yeyy!  This is what you're gonna use to actually do stuff now!!  
 It includes:	 
 
@@ -1399,7 +1401,8 @@ file                    | description
 ------------------------|------------------------------------------
 otus.98.70.70.taxonomy	|	your final taxonomy file
 				otus.abund			|		the relative abundance OTU table you started with
-				otus.fasta			|		the OTU fasta file you started with
+				otus.fasta			|		the OTU fasta file you started with  
+		seqtab_nochim.rds   | your starting file if you started with dada2 QC
 
 
 ## 16.5 databases

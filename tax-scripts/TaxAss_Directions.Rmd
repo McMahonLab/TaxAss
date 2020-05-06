@@ -183,10 +183,13 @@ ________________________________________________________________________________
 
 Program       | Version             | Source                  | Specific Link
 --------------|---------------------|-------------------------|------------------------------------------  
-mothur        | v.1.44.1            | www.mothur.org          | https://github.com/mothur/mothur/releases  
+mothur        | v.1.44.1 *          | www.mothur.org          | https://github.com/mothur/mothur/releases  
 BLAST         | 2.10.0              | ncbi.nlm.nih.gov        | ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/  
 TaxAss        | master branch       | `tax-scripts` folder    | https://github.com/McMahonLab/TaxAss <br> You don't need your own github account; you can click the green download button on the top right of the main page (do have to download all folders unfortunately)  
 python        | 2.7 or 3.7          | your computer already has this | don't need anything extra
+r             | 3 or 4              | cran.r-project.org      | https://cran.r-project.org/
+
+\* Older versions of mothur use a different delimiter in some files and will throw errors.  
 
 You want mothur and BLAST on your "path" (that means if you type them, your computer recognizes it as a program and runs it).
 BLAST does that automatically if you use the `.dmg` file to install it, but mothur does not. 

@@ -623,7 +623,7 @@ the best corrected, full length pident.  It returns a similar, tab delimited out
 includes the corrected full length pident and which BLAST hit number had the best corrected pident.  
 
 NOTE: If you are curious about this equation/calculation, there's a REALLY DETAILED explanation in the TaxAss paper's
-Supplemental Document 2. It lists what each BLAST term refers to, derives the equation using those terms, and then 
+[Supplemental Document 2](https://github.com/McMahonLab/TaxAss/blob/master/figure-scripts/text_S1_BLAST_example_calc.pdf). It lists what each BLAST term refers to, derives the equation using those terms, and then 
 provides an example alignment to show examples of all the calculations. And it's color coded.  
 
 Full Command (type in terminal):

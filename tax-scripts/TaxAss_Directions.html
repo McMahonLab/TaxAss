@@ -2308,7 +2308,7 @@ Need to create a database because:</p>
 <p>Calculation:<br />
 “full length pident” = pident * length / (length - (qend - qstart) + qlen)</p>
 <p>This script performs those calculations, and then checks which of the top 5 reported BLAST hits had the best corrected, full length pident. It returns a similar, tab delimited output file that includes the corrected full length pident and which BLAST hit number had the best corrected pident.</p>
-<p>NOTE: If you are curious about this equation/calculation, there’s a REALLY DETAILED explanation in the TaxAss paper’s Supplemental Document 2. It lists what each BLAST term refers to, derives the equation using those terms, and then provides an example alignment to show examples of all the calculations. And it’s color coded.</p>
+<p>NOTE: If you are curious about this equation/calculation, there’s a REALLY DETAILED explanation in the TaxAss paper’s <a href="https://github.com/McMahonLab/TaxAss/blob/master/figure-scripts/text_S1_BLAST_example_calc.pdf">Supplemental Document 2</a>. It lists what each BLAST term refers to, derives the equation using those terms, and then provides an example alignment to show examples of all the calculations. And it’s color coded.</p>
 <p>Full Command (type in terminal):</p>
 <pre><code>Rscript calc_full_length_pident.R otus.custom.blast.table otus.custom.blast.table.modified</code></pre>
 <table>

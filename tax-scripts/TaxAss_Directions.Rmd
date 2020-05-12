@@ -902,8 +902,16 @@ file names                              | description
 ----------------------------------------|----------------------------------------------
 `otus.above.98.custom.wang.taxonomy`		| the taxonomy file for sequences classified with custom database
 `otus.below.98.general.wang.taxonomy`		| the taxonomy file for sequences classified with general database
-`otus.taxonomy`							            | the name you choose for the output complete taxonomy file for all your sequences.<br>I'm going with `otus.pidentcutoff.taxonomy`
+`otus.98.taxonomy`							            | the name you choose for the output complete taxonomy file for all your sequences.<br>I'm going with `otus.pidentcutoff.taxonomy`
 
+The taxonomy files formatted with a tab separating the sequence ID, semicolons separating each taxon level, and a semicolon at the end of the line. Example format where 1,2,3,4,5 are the names of sequence IDs:  
+```
+1	Bacteria(100);Actinobacteria(100);Actinobacteria(100);Frankiales(100);acI(100);acI-B(98);acI-B1(98);
+2	Bacteria(100);Actinobacteria(99);Actinobacteria(99);Frankiales(99);acI(98);acI-A(93);acI-A6(70);
+3	Bacteria(100);Actinobacteria(100);Actinobacteria(100);Frankiales(100);acTH1(100);acTH1-A(100);acTH1-A1(100);
+4	Bacteria(100);Proteobacteria(100);Alphaproteobacteria(100);SAR11_clade(100);alfV(100);alfV-A(100);LD12(100);
+5	Bacteria(100);Proteobacteria(100);Gammaproteobacteria(100);Betaproteobacteriales(100);betI(99);betI-A(99);Lhab-A1(92);
+```
 
 __________________________________________________________________________________________
 
@@ -974,7 +982,16 @@ mv otus.general.taxonomy.reformatted otus.general.taxonomy
 ```
 
 Command syntax: `sed 's/find/replace/ <input >output`  
-had to use blank because it doesn't recognize `\t` as tab for some reason, need a shell script you source with an actual tab in it. Or blank is convenient, since there is no other white space anyway.
+had to use blank because it doesn't recognize `\t` as tab for some reason, need a shell script you source with an actual tab in it. Or blank is convenient, since there is no other white space anyway.  
+
+The new format is all semicolon delimited. Example format where 1,2,3,4,5 are the names of sequence IDs:  
+```
+1;Bacteria(100);Actinobacteria(100);Actinobacteria(100);Frankiales(100);acI(100);acI-B(98);acI-B1(98);
+2;Bacteria(100);Actinobacteria(99);Actinobacteria(99);Frankiales(99);acI(98);acI-A(93);acI-A6(70);
+3;Bacteria(100);Actinobacteria(100);Actinobacteria(100);Frankiales(100);acTH1(100);acTH1-A(100);acTH1-A1(100);
+4;Bacteria(100);Proteobacteria(100);Alphaproteobacteria(100);SAR11_clade(100);alfV(100);alfV-A(100);LD12(100);
+5;Bacteria(100);Proteobacteria(100);Gammaproteobacteria(100);Betaproteobacteriales(100);betI(99);betI-A(99);Lhab-A1(92);
+```  
 
 __________________________________________________________________________________________
 

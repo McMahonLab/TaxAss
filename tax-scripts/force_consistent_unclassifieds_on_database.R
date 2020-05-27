@@ -203,8 +203,8 @@ uniform.unnamed.gg <- function(tax){
 uniform.unclassified <- function(tax){
   # anything with unclassified in the name
   index <- grep(pattern = 'unclassified', x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
-  cat("changing",length(index), "\n", unique(tax[index]), "\nto say \"unclassified\"\n")
-  tax[index] <- "unclassified"
+  cat("changing",length(index), "\n", unique(tax[index]), "\nto say \"unnamed\"\n")
+  tax[index] <- "unnamed"
   return(tax)
 }
 
@@ -234,22 +234,18 @@ remove.extra.voldemorts <- function(tax){
   # grep(pattern = "uncertain.unnamed", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
   # grep(pattern = "uncertain.unknown", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
   # grep(pattern = "uncertain.uncultured", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
-  # grep(pattern = "uncertain.unclassified", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
   # 
   # grep(pattern = "uncultured.unnamed", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
   # grep(pattern = "uncultured.unknown", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
   # grep(pattern = "uncultured.uncertain", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
-  # grep(pattern = "uncultured.unclassified", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
   # 
   # grep(pattern = "unknown.unnamed", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
   # grep(pattern = "unknown.uncertain", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
   # grep(pattern = "unknown.uncultured", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
-  # grep(pattern = "unknown.unclassified", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
   # 
   # grep(pattern = "unnamed.uncertain", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
   # grep(pattern = "unnamed.unknown", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
   # grep(pattern = "unnamed.uncultured", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
-  # grep(pattern = "unnamed.unclassified", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
   # 
   # grep(pattern = "unclassified", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
   
@@ -295,7 +291,6 @@ stupid.silva[ ,-1] <- make.degenerates.unique(tax = stupid.silva[ ,-1], voldemor
 stupid.silva[ ,-1] <- make.degenerates.unique(tax = stupid.silva[ ,-1], voldemort = "unknown")
 stupid.silva[ ,-1] <- make.degenerates.unique(tax = stupid.silva[ ,-1], voldemort = "uncertain")
 stupid.silva[ ,-1] <- make.degenerates.unique(tax = stupid.silva[ ,-1], voldemort = "unnamed")
-stupid.silva[ ,-1] <- make.degenerates.unique(tax = stupid.silva[ ,-1], voldemort = "unclassified")
 stupid.silva[ ,-1] <- remove.extra.voldemorts(tax = stupid.silva[ ,-1])
 
 uniform.silva <- revert.to.mothur.format(silva = stupid.silva)

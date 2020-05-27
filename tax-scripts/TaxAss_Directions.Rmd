@@ -217,7 +217,7 @@ FreshTrain    | 30Apr2018<br>or<br>25Jan2018 | FreshTrain30Apr2018SILVAv132.zip<
 Greengenes    | Aug 2013  | "greengenes reference taxonomy" <br> "greengenes reference alignment" | https://www.mothur.org/wiki/Greengenes-formatted_databases
 Silva         | v.132 <br> v.128 | "Full length sequences and taxonomy references" | https://www.mothur.org/wiki/Silva_reference_files
 
-(Note that if you're a non-academic or commercial user you have to pay to use silva.)
+(Note that if you're a non-academic or commercial user you have to pay to use silva releases earlier than v.138.)
 
 __________________________________________________________________________________________
 

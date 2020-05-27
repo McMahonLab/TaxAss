@@ -34,10 +34,15 @@
 # 2. This script makes all the unclassified entries unique based on their upper-level taxonomy.
 # Example:
   # phylum-A;uncultured;order-A;... becomes
-  # phylum-A;uncultured.phylum-A;order-A;...
+  # phylum-A;uncultured.phylum-A_C;order-A;...
 # Example:
   # phylum-A;uncultured;uncultured;... becomes
-# phylum-A;uncultured.phylum-A;uncultured.phylum-A;...
+# phylum-A;uncultured.phylum-A_C;uncultured.phylum-A_O;...
+
+# 3. This script makes all repeated names unique based on their taxon-level.
+# Example: Actinobacteria is a phylum name and a class name
+  # Actinobacteria;Actinobacteria;order-A;... becomes
+  # Actinobacteria_P;Actinobacteria_C;order-A;...
 
 # Why does that fix it?
 # 1. Each daughter name will end up with unique parent names.
@@ -54,18 +59,39 @@
 # all it changes is k__ p__ c__ etc that are blank afterwards.
 # Also, greengenes reads in with 9 columns, so 9th column must be manually deleted after import.
 
+# Note: when taxon-level identifiers are added, uppercase letters are used for general taxonomy, 
+# and lowercase letters are used for FreshTrain taxonomy. That way you know capitol C is Class 
+# and lowercase c is clade.  
+
 # ---- file paths/commandline input ----
 
 userprefs <- commandArgs(trailingOnly = TRUE)
 mothur.formatted.silva <- userprefs[1]
 new.silva.file <- userprefs[2]
+if (exists(userprefs[3])){
+  file.type <- userprefs[3]
+}else{
+  file.type <- "General"
+}
+ 
 
-# # Troubleshoot with local paths:
-# cat("crap forgot to comment out file paths!!!")
-# mothur.formatted.silva <- "../../StartFiles-Databases/Silva.nr_v132/silva_132_noperiod.taxonomy"
-# mothur.formatted.silva <- "../../StartFiles-Databases/withGG/general.taxonomy"
-# mothur.formatted.silva <- "../../StartFiles-Databases/with132/custom.taxonomy"
-# new.silva.file <- "~/Desktop/cleansilva.taxonomy"
+# Troubleshoot with local paths:
+cat("crap forgot to comment out file paths!!!")
+mothur.formatted.silva <- "../../StartFiles-Databases/Silva.nr_v132/silva.nr_v132.tax"
+mothur.formatted.silva <- "../../StartFiles-Databases/withGG/general.taxonomy"
+mothur.formatted.silva <- "../../StartFiles-Databases/with132/custom.taxonomy"
+new.silva.file <- "~/Desktop/cleansilva.taxonomy"
+file.type <- "FreshTrain"
+file.type <- "General"
+
+if(file.type <- "FreshTrain"){
+  level.abbreviations <- c("K","P","C","O","l","c","t")
+}else{
+  level.abbreviations <- c("K","P","C","O","F","G","S")
+}
+
+
+
 
 # ---- functions ----
 
@@ -94,6 +120,27 @@ import.mothur.formatted.tax <- function(filepath){
     cat("something is wrong with the database import, it has ", ncol(silva), "columns in it.\n")
   }
   return(silva)
+}
+
+make.taxon.names.unique.across.levels <- function(tax, abbr){
+  all.names <- NULL
+  for (t in 1:ncol(tax)){
+    level.names <- unique(tax[ ,t])
+    all.names <- c(all.names, level.names)
+  }
+  non.uniq.names <- all.names[duplicated(all.names)]
+  non.uniq.names <- unique(non.uniq.names)
+  for (t in 1:ncol(tax)){
+    for (n in 1:length(non.uniq.names)){
+      index <- which(tax[ ,t] == non.uniq.names[n])
+      if (length(index) > 0){
+        new.name <- paste0(non.uniq.names[n], ".", abbr[t])
+        tax[index,t] <- new.name
+        cat("Replacing  ",  non.uniq.names[n], "  with  ", new.name, "\n")
+      }
+    }
+  }
+  return(tax)
 }
 
 fill.blanks.with.unnamed <- function(tax){
@@ -191,6 +238,8 @@ revert.to.mothur.format <- function(silva){
 # ---- go ----
 
 stupid.silva <- import.mothur.formatted.tax(filepath = mothur.formatted.silva)
+
+stupid.silva[ ,-1] <- make.taxon.names.unique.across.levels(tax = stupid.silva[ ,-1], abbr = level.abbreviations)
 
 stupid.silva[ ,-1] <- fill.blanks.with.unnamed(tax = stupid.silva[ ,-1])
 stupid.silva[ ,-1] <- uniform.uncultured(tax = stupid.silva[ ,-1])

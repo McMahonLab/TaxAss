@@ -2037,22 +2037,9 @@ In other words, whatever your last OTU-esque table is prior to assigning taxonom
 <div id="silva-files" class="section level2">
 <h2>Silva files</h2>
 <p>How to format the <code>general.taxonomy</code> and <code>general.fasta</code> files when using the silva database as your taxonomy reference. <br><br></p>
-<div id="format-delimiters-in-general.taxonomy" class="section level3">
-<h3>Format delimiters in <code>general.taxonomy</code></h3>
-<p>Downloading from mothur, you shouldn’t need to worry about reformatting. But if you are exporting the file from Arb yourself, it must be compatible with mothur:</p>
-<ul>
-<li>no whitespace except for the tab between seqID and taxonomy</li>
-<li>taxonomy level names separated by semicolons</li>
-<li>must have a semicolon at the end of each line, too!</li>
-</ul>
-<p>Example of correct format:</p>
-<pre><code>seqID   kingdom;phylum;class;order;family;genus;species;</code></pre>
-<hr />
-<p><br></p>
-</div>
-<div id="format-unclassifieds-in-general.taxonomy" class="section level3">
-<h3>Format unclassifieds in <code>general.taxonomy</code></h3>
-<p>SILVA uses inconsistent nomenclature for sequences that don’t have names. We strongly recommend re-formatting them into a more consistent nomenclature using the script <code>force_consistent_unclassifieds_on_database.R</code>.</p>
+<div id="format-unclassifieds-and-duplicate-names-in-general.taxonomy" class="section level3">
+<h3>Format unclassifieds and duplicate names in <code>general.taxonomy</code></h3>
+<p>SILVA uses inconsistent nomenclature for sequences that don’t have names, and it contains some identical names at different taxon-levels. To be compatible with the FreshTrain, re-format silva into a more consistent nomenclature using the script <code>force_consistent_unclassifieds_on_database.R</code>.</p>
 <p>Full Command (type in terminal):</p>
 <pre><code>Rscript force_consistent_unclassifieds_on_database.R silva.nr_v132.tax general.taxonomy</code></pre>
 <table>
@@ -2087,7 +2074,22 @@ In other words, whatever your last OTU-esque table is prior to assigning taxonom
 </li>
 <li>unclassified</li>
 </ul>
-<p>And are followed by a period and the closest available parent-name. All the names that get changed will be spit out into the terminal output. Note there will be a lot due to the format “knownphylum_cl” for an unknown class name. These all get changed to “unnamed.knownphylum” to follow a consistent and easy-to-grep nomenclature.</p>
+<p>And are followed by a period, the closest available parent-name, an underscore, and the capitol first letter of the unclassified’s taxon-level. All the names that get changed will be spit out into the terminal output. Note there will be a lot due to the format “knownphylum_cl” for an unknown class name. These all get changed to “unnamed.knownphylum_C” to follow a consistent and easy-to-grep nomenclature.</p>
+<p>This script additionally makes all taxonomy names unique. For only those names that are duplicated, a capitol letter indicating the taxon-level is added to the end of the name, separated by a period. For example, “Actinobacteria” is a phylum and a class, so it becomes “Actinobacteria.P” and “Actinobacteria.C” .</p>
+<p>The capitol letters “K P C O F G S” are used for silva/greengenes-derived names, and the lowercase letters “l c t” are used for FreshTrain-derived names. This way you know that a capitol C mean class and a lowercase c means clade.</p>
+<hr />
+<p><br></p>
+</div>
+<div id="format-delimiters-in-general.taxonomy" class="section level3">
+<h3>Format delimiters in <code>general.taxonomy</code></h3>
+<p>Downloading from mothur, you shouldn’t need to worry about reformatting. But if you are exporting the file from Arb yourself, it must be compatible with mothur:</p>
+<ul>
+<li>no whitespace except for the tab between seqID and taxonomy</li>
+<li>taxonomy level names separated by semicolons</li>
+<li>must have a semicolon at the end of each line, too!</li>
+</ul>
+<p>Example of correct format:</p>
+<pre><code>seqID   kingdom;phylum;class;order;family;genus;species;</code></pre>
 <hr />
 <p><br></p>
 </div>

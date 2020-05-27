@@ -25,11 +25,15 @@
 # Example: uncultured
   # phylum-A;uncultured;order-A;... becomes
   # phylum-A;uncultured;order-A;...
+# Example: uncertain
+  # phylum-A;Incertae_Sedis_phylum-A;order-A;... becomes
+  # phylum-A;uncertain;order-A;...
 # Example: blank
   # order-A;family-A;genus-A;; becomes
   # order-A;family-A;genus-A;unnamed;
 # Example: unclassified
   # there are no unclassifieds in silva right now, but anything with unclassified in it will be changed to simply "unclassified"
+
 
 # 2. This script makes all the unclassified entries unique based on their upper-level taxonomy.
 # Example:
@@ -68,7 +72,7 @@
 userprefs <- commandArgs(trailingOnly = TRUE)
 mothur.formatted.silva <- userprefs[1]
 new.silva.file <- userprefs[2]
-if (exists(userprefs[3])){
+if (!is.na(userprefs[3])){
   file.type <- userprefs[3]
 }else{
   file.type <- "General"
@@ -84,13 +88,13 @@ new.silva.file <- "~/Desktop/cleansilva.taxonomy"
 file.type <- "FreshTrain"
 file.type <- "General"
 
-if(file.type <- "FreshTrain"){
+
+
+if(file.type == "FreshTrain"){
   level.abbreviations <- c("K","P","C","O","l","c","t")
 }else{
   level.abbreviations <- c("K","P","C","O","F","G","S")
 }
-
-
 
 
 # ---- functions ----
@@ -167,12 +171,22 @@ uniform.unknown <- function(tax){
   return(tax)
 }
 
+uniform.uncertain <- function(tax){
+  # anything with Incertae_Sedis in the name, esp like Unknown_Family
+  index <- grep(pattern = 'Incertae_Sedis', x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
+  cat("changing",length(index), "\n", unique(tax[index]), "\nto say \"uncertain\"\n")
+  tax[index] <- "uncertain"
+  return(tax)
+}
+
 uniform.unnamed.silva <- function(tax){
   # anything in front, _fa _ge with nothing after at end
   index <- grep(pattern = '.*_((ph)|(cl)|(or)|(fa)|(ge))$', x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
-  cat("changing",length(index), "\n", unique(tax[index]), "\nto say \"unnamed\"\n")
   if (length(index) > 20){
+    cat("changing",length(index), "names like \n", unique(tax[index])[1:20], "\nto say \"unnamed\"\n")
     cat("It might seem like some of these are real names, but if you search for them in silva you'll see they are just listing the name from an upper level. So don't worry. They'll get that upper level name back, just with unnamed as the prefix instead.\n")
+  }else{
+    cat("changing",length(index), "\n", unique(tax[index]), "\nto say \"unnamed\"\n")
   }
   tax[index] <- "unnamed"
   return(tax)
@@ -203,7 +217,7 @@ make.degenerates.unique <- function(tax, voldemort){
   }
   
   remove.extra.u <- function(x){
-    dot.voldemort <- paste(".", voldemort, sep = "")
+    dot.voldemort <- paste0(".", voldemort)
     x <- gsub(pattern = dot.voldemort, replacement = "", x = x)
     return(x)
   }
@@ -216,13 +230,40 @@ remove.extra.voldemorts <- function(tax){
   # since there's multiple way things must not be named, make sure each thing just has one not-named label
   # these are the only 2 I saw in silva 132, may need to re-check in future versions for other combos
   
-  index <- grep(pattern = 'unnamed.unknown', x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
-  cat("changing", length(index), "\n", unique(tax[index]), "\nto lead with just \"unknown\"\n")
+  # # Check for additional ones to fix with new versions:
+  # grep(pattern = "uncertain.unnamed", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
+  # grep(pattern = "uncertain.unknown", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
+  # grep(pattern = "uncertain.uncultured", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
+  # grep(pattern = "uncertain.unclassified", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
+  # 
+  # grep(pattern = "uncultured.unnamed", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
+  # grep(pattern = "uncultured.unknown", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
+  # grep(pattern = "uncultured.uncertain", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
+  # grep(pattern = "uncultured.unclassified", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
+  # 
+  # grep(pattern = "unknown.unnamed", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
+  # grep(pattern = "unknown.uncertain", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
+  # grep(pattern = "unknown.uncultured", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
+  # grep(pattern = "unknown.unclassified", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
+  # 
+  # grep(pattern = "unnamed.uncertain", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
+  # grep(pattern = "unnamed.unknown", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
+  # grep(pattern = "unnamed.uncultured", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
+  # grep(pattern = "unnamed.unclassified", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
+  # 
+  # grep(pattern = "unclassified", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
+  
+  index <- grep(pattern = "unnamed.unknown", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
+  cat("changing", length(index), " \"unnamed.unknown\" to lead with just \"unknown\"\n")
   tax <- gsub(pattern = "unnamed.unknown", replacement = "unknown", x = tax, ignore.case = TRUE)
   
-  index <- grep(pattern = 'unnamed.uncultured', x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
-  cat("changing", length(index), "\n", unique(tax[index]), "\nto lead with just \"uncultured\"\n")
+  index <- grep(pattern = "unnamed.uncultured", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
+  cat("changing", length(index), "\"unnamed.uncultured\" to lead with just \"uncultured\"\n")
   tax <- gsub(pattern = "unnamed.uncultured", replacement = "uncultured", x = tax, ignore.case = TRUE)
+  
+  index <- grep(pattern = "unnamed.uncertain", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
+  cat("changing", length(index), " \"unnamed.uncertain\" to lead with just \"uncertain\"\n")
+  tax <- gsub(pattern = "unnamed.uncertain", replacement = "uncertain", x = tax, ignore.case = TRUE)
   
   return(tax)
 }
@@ -244,12 +285,15 @@ stupid.silva[ ,-1] <- make.taxon.names.unique.across.levels(tax = stupid.silva[ 
 stupid.silva[ ,-1] <- fill.blanks.with.unnamed(tax = stupid.silva[ ,-1])
 stupid.silva[ ,-1] <- uniform.uncultured(tax = stupid.silva[ ,-1])
 stupid.silva[ ,-1] <- uniform.unknown(tax = stupid.silva[ ,-1])
+stupid.silva[ ,-1] <- uniform.uncertain(tax = stupid.silva[ ,-1])
 stupid.silva[ ,-1] <- uniform.unnamed.silva(tax = stupid.silva[ ,-1])
-stupid.silva[ ,-1] <- uniform.unnamed.silva(tax = stupid.silva[ ,-1])
+stupid.silva[ ,-1] <- uniform.unnamed.gg(tax = stupid.silva[ ,-1])
 stupid.silva[ ,-1] <- uniform.unclassified(tax = stupid.silva[ ,-1])
+
 
 stupid.silva[ ,-1] <- make.degenerates.unique(tax = stupid.silva[ ,-1], voldemort = "uncultured")
 stupid.silva[ ,-1] <- make.degenerates.unique(tax = stupid.silva[ ,-1], voldemort = "unknown")
+stupid.silva[ ,-1] <- make.degenerates.unique(tax = stupid.silva[ ,-1], voldemort = "uncertain")
 stupid.silva[ ,-1] <- make.degenerates.unique(tax = stupid.silva[ ,-1], voldemort = "unnamed")
 stupid.silva[ ,-1] <- make.degenerates.unique(tax = stupid.silva[ ,-1], voldemort = "unclassified")
 stupid.silva[ ,-1] <- remove.extra.voldemorts(tax = stupid.silva[ ,-1])

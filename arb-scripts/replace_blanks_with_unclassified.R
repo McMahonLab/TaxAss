@@ -1,6 +1,6 @@
 # RRR 2/11/16
 # reformat the taxonomy training set so that there are no empty spots.
-# replace empty levels with the word "unclassified"
+# replace empty levels with the word "unnamed"
 # empty spots at genus level yield incorrect p-values in RDP classifier
 
 # syntax from command line:
@@ -28,9 +28,9 @@ taxonomy.unformatted <- read.table(file = file.with.blanks.semicolon.delim, head
 taxonomy <- taxonomy.unformatted[ ,1:8]
 taxonomy <- as.matrix(taxonomy)
 index <- which(taxonomy[ ,-1] == "")
-taxonomy[ ,-1][index] <- "unclassified"
+taxonomy[ ,-1][index] <- "unnamed"
 index <- which(is.na(taxonomy[ ,-1]))
-taxonomy[ ,-1][index] <- "unclassified"
+taxonomy[ ,-1][index] <- "unnamed"
 
 # export new version- this is semicolon delim.
 

@@ -75,8 +75,8 @@
 # ---- file paths/commandline input ----
 
 userprefs <- commandArgs(trailingOnly = TRUE)
-mothur.formatted.silva <- userprefs[1]
-new.silva.file <- userprefs[2]
+mothur.formatted.tax <- userprefs[1]
+new.tax.file <- userprefs[2]
 if (!is.na(userprefs[3])){
   file.type <- userprefs[3]
 }else{
@@ -86,10 +86,10 @@ if (!is.na(userprefs[3])){
 
 # Troubleshoot with local paths:
 cat("crap forgot to comment out file paths!!!")
-mothur.formatted.silva <- "../../StartFiles-Databases/Silva.nr_v132/silva.nr_v132.tax"
-mothur.formatted.silva <- "../../StartFiles-Databases/withGG/general.taxonomy"
-mothur.formatted.silva <- "../../StartFiles-Databases/with132/custom.taxonomy"
-new.silva.file <- "~/Desktop/cleansilva.taxonomy"
+mothur.formatted.tax <- "../../StartFiles-Databases/Silva.nr_v138/silva.nr_v138.tax"
+mothur.formatted.tax <- "../../StartFiles-Databases/withGG/general.taxonomy"
+mothur.formatted.tax <- "../../StartFiles-Databases/with132/custom.taxonomy"
+new.tax.file <- "~/Desktop/cleansilva.taxonomy"
 file.type <- "FreshTrain"
 file.type <- "General"
 
@@ -152,6 +152,14 @@ make.taxon.names.unique.across.levels <- function(tax, abbr){
   return(tax)
 }
 
+uniform.unnamed <- function(tax){
+  # anything with unnamed in the name 
+  index <- grep(pattern = 'unnamed', x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
+  cat("changing",length(index), "\n", unique(tax[index]), "\nto say \"unnamed\"\n")
+  tax[index] <- "unnamed"
+  return(tax)
+}
+
 fill.blanks.with.unnamed <- function(tax){
   # tax is only the taxonomy columns, seqID not included
   index <- which(tax == "")
@@ -163,24 +171,24 @@ fill.blanks.with.unnamed <- function(tax){
 uniform.uncultured <- function(tax){
   # anything with uncultured in the name 
   index <- grep(pattern = 'uncultured', x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
-  cat("changing",length(index), "\n", unique(tax[index]), "\nto say \"uncultured\"\n")
-  tax[index] <- "uncultured"
+  cat("changing",length(index), "\n", unique(tax[index]), "\nto say \"unnamed\"\n")
+  tax[index] <- "unnamed"
   return(tax)
 }
 
 uniform.unknown <- function(tax){
   # anything with unknown in the name, esp like Unknown_Family
   index <- grep(pattern = 'unknown', x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
-  cat("changing",length(index), "\n", unique(tax[index]), "\nto say \"unknown\"\n")
-  tax[index] <- "unknown"
+  cat("changing",length(index), "\n", unique(tax[index]), "\nto say \"unnamed\"\n")
+  tax[index] <- "unnamed"
   return(tax)
 }
 
 uniform.uncertain <- function(tax){
   # anything with Incertae_Sedis in the name, esp like Unknown_Family
   index <- grep(pattern = 'Incertae_Sedis', x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
-  cat("changing",length(index), "\n", unique(tax[index]), "\nto say \"uncertain\"\n")
-  tax[index] <- "uncertain"
+  cat("changing",length(index), "\n", unique(tax[index]), "\nto say \"unnamed\"\n")
+  tax[index] <- "unnamed"
   return(tax)
 }
 
@@ -216,6 +224,7 @@ uniform.unclassified <- function(tax){
 make.degenerates.unique <- function(tax, voldemort){
   # tax is the taxonomy table without seqid column
   # voldemort is whatever text you're making unique (b/c it cannot be named... voldemort...)
+  # orininally this script maintained all the different words, but now they all just become unnamed
   for (t in 1:ncol(tax)){
     index <- which(tax[ ,t] == voldemort)
     tax[index,t] <- paste(tax[index,t], tax[index,t - 1], sep = ".")
@@ -232,6 +241,8 @@ make.degenerates.unique <- function(tax, voldemort){
 }
 
 remove.extra.voldemorts <- function(tax){
+  # Not used anymore, got too complicated so just all voldemorts "unnamed"
+  
   # since there's multiple way things must not be named, make sure each thing just has one not-named label
   # these are the only 2 I saw in silva 132, may need to re-check in future versions for other combos
   
@@ -304,29 +315,24 @@ revert.to.mothur.format <- function(silva){
 
 # ---- go ----
 
-stupid.silva <- import.mothur.formatted.tax(filepath = mothur.formatted.silva)
+stupid <- import.mothur.formatted.tax(filepath = mothur.formatted.tax)
 
-stupid.silva[ ,-1] <- make.taxon.names.unique.across.levels(tax = stupid.silva[ ,-1], abbr = level.abbreviations)
+stupid[ ,-1] <- make.taxon.names.unique.across.levels(tax = stupid[ ,-1], abbr = level.abbreviations)
 
-stupid.silva[ ,-1] <- fill.blanks.with.unnamed(tax = stupid.silva[ ,-1])
-stupid.silva[ ,-1] <- uniform.uncultured(tax = stupid.silva[ ,-1])
-stupid.silva[ ,-1] <- uniform.unknown(tax = stupid.silva[ ,-1])
-stupid.silva[ ,-1] <- uniform.uncertain(tax = stupid.silva[ ,-1])
-stupid.silva[ ,-1] <- uniform.unnamed.silva(tax = stupid.silva[ ,-1])
-stupid.silva[ ,-1] <- uniform.unnamed.gg(tax = stupid.silva[ ,-1])
-stupid.silva[ ,-1] <- uniform.unclassified(tax = stupid.silva[ ,-1])
+stupid[ ,-1] <- uniform.unnamed(tax = stupid[ ,-1])
+stupid[ ,-1] <- fill.blanks.with.unnamed(tax = stupid[ ,-1])
+stupid[ ,-1] <- uniform.uncultured(tax = stupid[ ,-1])
+stupid[ ,-1] <- uniform.unknown(tax = stupid[ ,-1])
+stupid[ ,-1] <- uniform.uncertain(tax = stupid[ ,-1])
+stupid[ ,-1] <- uniform.unnamed.silva(tax = stupid[ ,-1])
+stupid[ ,-1] <- uniform.unnamed.gg(tax = stupid[ ,-1])
+stupid[ ,-1] <- uniform.unclassified(tax = stupid[ ,-1])
 
+stupid[ ,-1] <- make.degenerates.unique(tax = stupid[ ,-1], voldemort = "unnamed")
 
-stupid.silva[ ,-1] <- make.degenerates.unique(tax = stupid.silva[ ,-1], voldemort = "uncultured")
-stupid.silva[ ,-1] <- make.degenerates.unique(tax = stupid.silva[ ,-1], voldemort = "unknown")
-stupid.silva[ ,-1] <- make.degenerates.unique(tax = stupid.silva[ ,-1], voldemort = "uncertain")
-stupid.silva[ ,-1] <- make.degenerates.unique(tax = stupid.silva[ ,-1], voldemort = "unnamed")
-stupid.silva[ ,-1] <- remove.extra.voldemorts(tax = stupid.silva[ ,-1])
+stupid[ ,-1] <- make.taxon.names.unique.within.level(tax = stupid[ ,-1])
 
-test <- make.taxon.names.unique.within.level(tax = stupid.silva[ ,-1])
+less.stupid <- revert.to.mothur.format(silva = stupid)
 
-
-uniform.silva <- revert.to.mothur.format(silva = stupid.silva)
-
-write.table(x = uniform.silva, file = new.silva.file, quote = F, col.names = FALSE, row.names = FALSE, sep = ";")
-cat("Made file: ", new.silva.file, "\n")
+write.table(x = less.stupid, file = new.tax.file, quote = F, col.names = FALSE, row.names = FALSE, sep = ";")
+cat("Made file: ", new.tax.file, "\n")

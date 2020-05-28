@@ -1,52 +1,60 @@
 # RRR 3-27-18 ----
 
 # SILVA database has extremely inconsistent names for unclassified entries.
-# This is a problem.
+# This is a problem because can't group your abundances by taxonomy when the names aren't unique,
+# and the whole point of TaxAss and good taxa names is to explore by taxa-groups instead of OTUs!
+# (Also, TaxAss needs names to be unique to tally-up unclassified entries, as done in step 15.5.a.)
 
-# Why?
-# 1. Names need to be unique for downstream analysis.
-# Example: 
-  # phylum-A;nonunique-class;order-A;...
-  # phylum-B;nonunique-class;order-B;...
-# Analysis scripts would group order-A and order-B as belonging to the same class, 
-# when really those are different classes because they belong to different phylums.
-# 2. TaxAss needs names to be unique to tally-up unclassified entries.
-# Example: this is done for Figure 2 in the manuscript, in step 15.5.a.
+# How does this script adjust unclassified names?
 
-# How does this script fix it?
-
-# 1. This script takes all things meaning "we don't know the name" and changes them to a few versions of "we don't know the name". 
-# Example: unknown
-  # phylum-A;Unknown_Class;order-A;... becomes
-  # phylum-A;unknown;order-A;...
-# Example: unnamed
-  # phylum-A;phylum-A_cl;order-A;... becomes
-  # phylum-A;unnamed;order-A;...
-# Example: uncultured
-  # phylum-A;uncultured;order-A;... becomes
-  # phylum-A;uncultured;order-A;...
-# Example: uncertain
-  # phylum-A;Incertae_Sedis_phylum-A;order-A;... becomes
-  # phylum-A;uncertain;order-A;...
-# Example: blank
-  # order-A;family-A;genus-A;; becomes
-  # order-A;family-A;genus-A;unnamed;
-# Example: unclassified
-  # there are no unclassifieds in silva right now, but anything with unclassified in it will be changed to simply "unclassified"
+# 1. This script takes all things meaning "we don't know the name" and changes them to "unnamed". 
+     # This looses any info carried by the specific starting word, but I can't figure out if they 
+     # mean anything and it saves SOOO much time and confusion to just make everything the same.
+     # I chose the "word" unnamed because it has no implications except that there wasn't a name.
+     # I was tempted to call everything that couldn't be named Voldemort, but I want deatheaters to cite me too  
+  # unknown
+  # unnamed
+  # uncultured
+  # Incertae_Sedis
+  # blank
+  # p__ etc (what blanks look like in greengenes)
+  # unclassified
+  # known-name_ge etc (what unknown genus of known-name coarser level looks like in silva)
 
 
-# 2. This script makes all the unclassified entries unique based on their upper-level taxonomy.
-# Example:
-  # phylum-A;uncultured;order-A;... becomes
-  # phylum-A;uncultured.phylum-A_C;order-A;...
-# Example:
-  # phylum-A;uncultured;uncultured;... becomes
-# phylum-A;uncultured.phylum-A_C;uncultured.phylum-A_O;...
+# 2. This script changes all the created "unnamed" entries to "unnamed.nearest-known-coarser-name"
+     # Note that sometimes silva has gaps with no name followed by a fine-resolution name
+  # Example:
+    # phylum-A    unnamed             unnamed             unnamed             ...   becomes
+    # phylum-A    unnamed.phylum-A    unnamed.phylum-A    unnamed.phylum-A    ...
+  # Example:
+    # phylum-A    unnamed             order-B             unnamed             ...   becomes
+    # phylum-A    unnamed.phylum-A    order-B             unnamed.order-B    ...
 
-# 3. This script makes all repeated names unique based on their taxon-level.
-# Example: Actinobacteria is a phylum name and a class name
-  # Actinobacteria;Actinobacteria;order-A;... becomes
-  # Actinobacteria_P;Actinobacteria_C;order-A;...
+
+# How does this script enforce unique names?
+
+# 3. This script finds any names that exist at more than one taxa-level and then 
+     # adds to the end a period followed by a the first letter of the taxa-level.
+     # The letter is uppercase for general and lowercase letters for FreshTrain. 
+     # That way you know capitol C is Class and lowercase c is clade.
+  # Example: in silva 132
+    # Actinobacteria        Actinobacteria        order-A     ...     becomes
+    # Actinobacteria_P      Actinobacteria_C      order-A     ...     
+  # Example: in FreshTrain 
+    # alfI-A                alfI-A                tribe-A     ...     becomes
+    # alfI-A_l              alfI-A_c              tribe-A     ...     
+
+# 4. This script finds any daughter names that have multiple parent-names and then 
+    # adds to the end a period followed by the parent name that it belongs to. 
+    # This could potentially become unweildy, but hopefully this hardly ever happens!
+  # Example:
+    # phylum-A      class-A         order-C               family-D          ...   
+    # phylum-A      class-B         order-C               family-E          ...
+    #                                                                         becomes
+    # phylum-A      class-A         order-C.class-A       family-D          ...   
+    # phylum-A      class-B         order-C.class-B       family-E          ...
+
 
 # Why does that fix it?
 # 1. Each daughter name will end up with unique parent names.
@@ -55,7 +63,7 @@
 
 # What doesn't it fix?
 # 1. I don't know if "uncultured" and "unknown" should actually be distinguished or not. 
-# Now they are being distinguished, but possibly that's incorrect and would be simpler to group them all.
+# Now they are not being distinguished, but possibly that's incorrect and I'm losing information.
 # 2. There are still daughter names below unknown names. 
 # This somewhat breaks logic, but with the parent names made unique hopefully it will not break scripts.
 
@@ -63,9 +71,6 @@
 # all it changes is k__ p__ c__ etc that are blank afterwards.
 # Also, greengenes reads in with 9 columns, so 9th column must be manually deleted after import.
 
-# Note: when taxon-level identifiers are added, uppercase letters are used for general taxonomy, 
-# and lowercase letters are used for FreshTrain taxonomy. That way you know capitol C is Class 
-# and lowercase c is clade.  
 
 # ---- file paths/commandline input ----
 
@@ -261,6 +266,31 @@ remove.extra.voldemorts <- function(tax){
   cat("changing", length(index), " \"unnamed.uncertain\" to lead with just \"uncertain\"\n")
   tax <- gsub(pattern = "unnamed.uncertain", replacement = "uncertain", x = tax, ignore.case = TRUE)
   
+  index <- grep(pattern = "uncertain.unnamed", x = tax, value = FALSE, invert = FALSE, ignore.case = TRUE)
+  cat("changing", length(index), " \"uncertain.unnamed\" to lead with just \"uncertain\"\n")
+  tax <- gsub(pattern = "uncertain.unnamed", replacement = "uncertain", x = tax, ignore.case = TRUE)
+  
+  return(tax)
+}
+
+make.taxon.names.unique.within.level <- function(tax){
+  # # test data
+  # tax <- matrix(data = c(letters[1:3], letters[1:3], letters[c(1,26,3)], letters[c(1,2,4)], letters[5:7], letters[c(5,6,8)], letters[c(24,6,16)], letters[9:11], letters[9:11], letters[c(9,10,12)], letters[c(9,13,14)], letters[c(9,13,14)], letters[c(9,13,15)] ), ncol = 3, byrow = T)
+  
+  for (t in 2:ncol(tax)){
+    temp <- tax[ ,1:t]
+    temp <- unique(temp)
+    index <- duplicated(temp[ ,t])
+    dups <- unique(temp[index,t])
+    cat("at level ", t, "\n")
+    if (length(dups) > 0){
+      for (d in 1:length(dups)){
+        index <- which(tax[ ,t] == dups[d])
+        cat(unique(tax[index,t]), " is not unique and is being replaced by:  ", unique(paste0(tax[index,t], ".", tax[index,t-1])), "\n")
+        tax[index,t] <- paste0(tax[index,t], ".", tax[index,t-1])
+      }
+    }
+  }
   return(tax)
 }
 
@@ -292,6 +322,9 @@ stupid.silva[ ,-1] <- make.degenerates.unique(tax = stupid.silva[ ,-1], voldemor
 stupid.silva[ ,-1] <- make.degenerates.unique(tax = stupid.silva[ ,-1], voldemort = "uncertain")
 stupid.silva[ ,-1] <- make.degenerates.unique(tax = stupid.silva[ ,-1], voldemort = "unnamed")
 stupid.silva[ ,-1] <- remove.extra.voldemorts(tax = stupid.silva[ ,-1])
+
+test <- make.taxon.names.unique.within.level(tax = stupid.silva[ ,-1])
+
 
 uniform.silva <- revert.to.mothur.format(silva = stupid.silva)
 

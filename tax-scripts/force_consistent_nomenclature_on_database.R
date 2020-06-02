@@ -84,14 +84,14 @@ if (!is.na(userprefs[3])){
 }
  
 
-# Troubleshoot with local paths:
-cat("crap forgot to comment out file paths!!!")
-mothur.formatted.tax <- "../../StartFiles-Databases/Silva.nr_v138/silva.nr_v138.tax"
-mothur.formatted.tax <- "../../StartFiles-Databases/withGG/general.taxonomy"
-mothur.formatted.tax <- "../../StartFiles-Databases/with132/custom.taxonomy"
-new.tax.file <- "~/Desktop/cleansilva.taxonomy"
-file.type <- "FreshTrain"
-file.type <- "General"
+# # Troubleshoot with local paths:
+# cat("crap forgot to comment out file paths!!!")
+# # mothur.formatted.tax <- "../../StartFiles-Databases/Silva.nr_v138/silva.nr_v138.tax"
+# # mothur.formatted.tax <- "../../StartFiles-Databases/withGG/general.taxonomy"
+# mothur.formatted.tax <- "../../2020-06-02_update_freshtrain/FT_semicol_noprefix_mothur-fmt.tax"
+# new.tax.file <- "../../2020-06-02_update_freshtrain/FT_semicol_noprefix_mothur-fmt_unnamed.tax"
+# file.type <- "FreshTrain"
+# # file.type <- "General"
 
 
 
@@ -317,10 +317,11 @@ revert.to.mothur.format <- function(silva){
 
 stupid <- import.mothur.formatted.tax(filepath = mothur.formatted.tax)
 
+stupid[ ,-1] <- fill.blanks.with.unnamed(tax = stupid[ ,-1])
+
 stupid[ ,-1] <- make.taxon.names.unique.across.levels(tax = stupid[ ,-1], abbr = level.abbreviations)
 
 stupid[ ,-1] <- uniform.unnamed(tax = stupid[ ,-1])
-stupid[ ,-1] <- fill.blanks.with.unnamed(tax = stupid[ ,-1])
 stupid[ ,-1] <- uniform.uncultured(tax = stupid[ ,-1])
 stupid[ ,-1] <- uniform.unknown(tax = stupid[ ,-1])
 stupid[ ,-1] <- uniform.uncertain(tax = stupid[ ,-1])

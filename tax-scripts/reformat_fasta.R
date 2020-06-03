@@ -21,11 +21,15 @@ replace.U <- userprefs[4]
 # replace.U <- userprefs[4]
 
 
-if (!is.na(userprefs[3])){
+if (is.na(userprefs[3])){
   format.ids <- FALSE
+}else{
+  format.ids <- TRUE
 }
-if (!is.na(userprefs[4])){
+if (is.na(userprefs[4])){
   replace.U <- FALSE
+}else{
+  replace.U <- TRUE
 }
 
 # ---- do things ----
@@ -37,12 +41,20 @@ ids <- seq.int(from = 1, to = length(fasta) - 1, by = 2)
 seqs <- seq.int(from = 2, to = length(fasta), by = 2)
 
 fasta[seqs] <- gsub(pattern = "-", replacement = "", x = fasta[seqs])
+cat("Removed alignment dashes\n")
 
 fasta[seqs] <- gsub(pattern = "\\.", replacement = "", x = fasta[seqs])
+cat("Removed alignment dots\n")
 
-fasta[seqs] <- gsub(pattern = "U", replacement = "T", x = fasta[seqs], ignore.case = TRUE)
+if (replace.U){
+  fasta[seqs] <- gsub(pattern = "U", replacement = "T", x = fasta[seqs], ignore.case = TRUE)
+  cat("Replaced U and u with T.\n")
+}
 
-fasta[ids] <- gsub(pattern = "[[:blank:]].*$", replacement = "", x = fasta[ids])
+if (format.ids){
+  fasta[ids] <- gsub(pattern = "[[:blank:]].*$", replacement = "", x = fasta[ids])
+  cat("Deleted any white space and anything after it from the seqIDs.\n")
+}
 
 
 # ---- export ----

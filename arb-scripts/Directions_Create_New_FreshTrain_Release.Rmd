@@ -1,0 +1,440 @@
+---
+title: "How to format the ARB-exported FreshTrain for use with TaxAss"
+author: "Robin Rohwer"
+date: "last updated May 28, 2020"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{css, echo=FALSE}
+pre code, pre, code {
+  white-space: pre !important;
+  overflow-x: scroll !important;
+  word-break: keep-all !important;
+  word-wrap: initial !important;
+}
+```
+
+# Get Started  
+
+## Overview of steps  
+
+* do a first pass of reformatting FreshTrain  
+  * export all full-length 16S from ARB  
+  * basic text-based reformatting of taxonomy and fasta files  
+  * fix duplicated taxon names and standardize unnamed nomenclature
+  * remove references lacking FreshTrain names  
+* do a first pass of reformatting Silva
+  * basic text-based reformatting of fasta file
+  * fix duplicated taxon names and standardize unnamed nomenclature
+* identify coarse-level nomenclature disagreements between the databases
+  * classify FreshTrain with SILVA  
+  * compare coarse-level disagreements
+* change FreshTrain coarse-level nomenclature to match Silva  
+  * create a custom python script to reformat FreshTrain names
+* manually check for non-monophyletic sequences
+  * manually adjust them
+  
+<br>
+
+## Set Up Working Directory
+
+Move all needed scripts & files into a new working directory folder:
+
+location    | filename  
+------------|-------------------------------
+arb export  | version.txt  
+arb export  | version.fasta  
+mothur silva download | version.tax  
+mothur silva download | version.align
+arb-scripts    | remove_gg_taxon-level_prefixes.sh  
+arb-scripts    | replace_first_semicolon_with_tab.sh  
+tax-scripts    | reformat_fasta.R
+tax-scripts    | force_consistent_nomenclature_on_database.R
+
+
+<br>
+
+# First-Pass FreshTrain
+
+## ARB export  
+
+The FreshTrain comes from an ARB database of 16S clone libraries from freshwater systems. 
+All of the clones were aligned in ARB alongside the Greengenes database to determine the 
+phylogeny of abundant freshwater taxa introduced in [Newton *et al.* 2011](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3063352/). 
+
+**Format of raw exports looks like:**  
+```
+$ head -n 5 FreshTrain_version.fasta
+>ClonLD29
+..............................................AAC-GAAC-GCUGGCGGCGUGGAU-AAGACAUGCAAGUCGAACG--GG----AUUUUU------UUCUGUA-GCAA-UA--CAGAA-------AAA-AGU-CU---AGUG-G-C--GA--ACGGG-UGCGU-AACACGUGAG-CAACCUAC-CGUGAAG-UGGGGGAUAGCUCGC-C-GAAA-GGCG-AA-UUAAUACCGCAU-GU-G-GCCA--A-GGAAG--ACAU-CUU--CCU-GACGC-CAAA--GCCGGG----------------------GUAA---------------------CCUGG-CGC-UUCUCGAGGGGCUCGCGGCCUAUCAGCUUG-UUGGUGAGGUAACGGCUCACCAA-GGCUAUGACGGGUAG-CUGGUCUGAGA-GGACGACCAGCCACACUGGAA-CUGAGACACG-GUCCAGA-CACC-UACGGGUGGC-AGCAGUCGAGAAUUUU-U-CA-CAAUGGGGGAAACCCUGAUGGAGC-GAC-GCC-GCGUGGAGGAUGAA-GGUU-UU-CG--GA-UCGUAAA-CUCCUGUC-AUUA-GA-GA--AC-AAGGCACAUGGU-UUAACUG-ACU-G-UG-UG--UUGAUAGUAUC-UGA-AG-AGGAAGGGACGG-CU-AACUCUGUGCCA-GCAGCC-GC-GGUAAUAC-A-GAG-GUCUC-AAGCGUUGUUC-GGAUUCA-UUGGGC-GUAAA-GGGUGCG-UAGGUGGCGAGGU-AA-GUCG-G-AUGUGAAAUCUCC-AAG-C-UCAACUU-GG-A-AAC-UG-CAUUC-GA-UACU-GCUU-UGC-UA-G-AGGAUUGUAGAGGGCAUU--GGAAUU-CACGGU-GUA-GCA-GUGAAA-UGC-GU-AGAU-AUC-GUGAGG-AAG-A-CCAGUGGC-GAA-GGCGAAUGCCUG-GGCA-AUUCCUGACA-CUGAGG-CAC-GAAGGCCA-GG-GGAGCAAA-CG-GGAUUA-GA-UAC-CCC-GG-UA-GUC-CUGGCA-GU-AAAC-GGU-GCA-CGUUUGGUGU-GGGAGG------AUUCGACC--C-C-UU-CCG-UGCCGGA--GC-UAA-CG-CG-UUAA-ACGU-GC-CGCCU-GGG-GAGUAC-GGUC--GCAA-G-AUU-AAAACUC-AAA-GAAAU-U-G-A-CGGG-G-A-CCC-GCACA-AGC-G-GUGG-A-GUAU-GU-GGC-UUAA-UU-CG-AUGCAACG-CGAA-GAA-CC-UUA-CCUGGCC--UUGAC-A-UG---C-AUCU---CUAAUC-CG-GUGAAA-GCC-G-GUG-A--GU--GUA-GC----AA-UAC---AC--AAUUU-GCAC--AGGU-GC-UGCAUGGCUGUCGUCA--GCU-CG-UGU-C-GUGA-GAUGUUGGG-UUAAGU-CCCGCAACGAGC-GCAACCCCUG-UGAAC-UG-UUGC-CAU-GGAG-ACGUGAGU-CUCCGG-CACUCU-GUUCAGACUG-CCCUG-UUCAA-CGG-G-G-AGGA-AGGUGGGG-AC-GACGUCAAGUC-AGUAUGGC-CCUUACGGCCA-GGGC-UGCACACGUACUACAAUGCC-C-GA-CA-CAGA-AGGA-U-CCGAGAC-CGCAA-GGUG-GAGGAAA-UCACC--AAA-G-UC-G-GGCCCAGUU-CGGAUUGGAGGCUGCAACUC-GCCUCCAUGAA-GCCGGAAUCGC-U-AGUAAU-GGC-GCA-UCAGCUAC-GGCG-CCGUG-AAUACGUU-CCCGGG-UCUUGUACACACCGCCC-GUCACAUCA-UGGGA--GUCGUUU-GUACCC-GAAG-UGCG-CGC-GCC-AA-CC----------GCAA---GGAGG-CAGCGCCC-UA-AG-GU-AU--GAGC-GG-UAACU-GGGA-UG---..................................................................................................................................................
+>ClonLD21
+..............................................GAU-GAAC-GCUAGCGGGAGGCUU-AACACAUGCAAGUCGAGGG--GC-AG-CAC----------GAGGUA-GCAA-UA--CUUU----------G-GUG-GC--GACCG-G-C--GC--ACGGG-UGAGU-AACGCGUAUG-CAACCUAC-CCUGUAC-UGGGGGAUAACCCGG-A-GAAA-UUCG-GA-CUAAUACCCCAU-AAUG-AUAU--U-CGGAG--GCAU-CUU--UGA-AUAUU-UAAA--GUC--------------------------AC-------------------------GA-CGG-UACGGGCUGGGCAUGCGUAAGAUUAGCUAG-UUGGUAGGGUAACGGCCUACCAA-GGCUACGAUCUUUAG-GGGUCCUGAGA-GGGUGAUCCCCCACACUGGUA-CUGAGACACG-GACCAGA-CUCC-UACGGGAGGC-AGCAGUGAGGAAUAUU-G-GU-CAAUGGGCGCAAGCCUGAACCAGC-CAU-CCC-GCGUGAAGGAAGAA-GGCGCUA-UG--CG-UUAUAAA-CUUCUUUU-CCAG-GG-GAA-GA-AAACCUCCGAU----GU-----AU-C-GG-GGn-UUGCCUGUACC-CUG-GG-AAUAAGCAUCGG-CU-AACUCCGUGCCA-GCAGCC-GC-GGUAAUAC-G-GAG-GAUGC-AAGCGUUAUCC-GGAUUUA-UUGGGU-UUAAA-GGGUGCG-CAGGCGGAAUAGU-AA-GUCA-G-UGGCGAAAACCUG-CAG-C-UUAACUG-UA-G-AAU-UG-CCGUU-GA-UACU-GUUA-UUC-UU-G-AGUAUGGUCAAGGUAGGC--GGAAUG-UGUAAU-GUA-GCG-GUGAAA-UGC-UU-AGAU-AUU-ACACAG-AAC-A-CCGAUUGC-GAA-GGCAGCUUGCUG-GGCC-AUUACUGACG-CUCAUG-CAC-GAAAGCGU-GG-GGAUCGAA-CA-GGAUUA-GA-UAC-CCU-GG-UA-GUC-CACGCC-GU-GAAC-GAU-GAU-CACUCGCUGU-UAGCG--------AUACAC-----U-GU-UAG-CGGCUAA--GC-AAA-AG-CA-UUAA-GUGA-UC-CACCU-GGG-GAGUAC-GGCC--GCAA-G-GCU-GAAACUC-AAA-GGAAU-U-G-A-CGGG-G-G-CCC-GCACA-AGC-G-GAGG-A-ACAU-GU-GGU-UUAA-UU-CG-AUGAUACG-CGAG-GAA-CC-UUA-CCUGGGC--UUAAA-U-GU-A-G-AGUG----CAUUG-GU-GUGAAA-ACA-U-CAU-U--U----UC-UU----CG-GA-----A--CUCUCU-GCA--AGGU-GC-UGCAUGGUUGUCGUCA--GCU-CG-UGC-C-GUGA-GGUGUCGGG-UUAAGU-CCCAUAACGAGC-GCAACCCUUA-UCGUU-AG-UUGC-CAG-CGG--GUAAUG----CCGGG-AACUCU-AACGAAACUG-CCGGU--GUAA-ACC-GAG-AGGA-AGGUGGGG-AU-GACGUCAAAUC-AGCACGGC-CCUUAUGUCCA-GGGC-UACACACGUGUUACAAUGGC-C-GG-UA-CAGA-GGGC-A-GUUACCU-AUUGA-UAGG-AUACGAA-UCUCC--AAA-G-CC-G-GUCUCAGUU-CGGAUCGGAGUCUGCAACUC-GACUCCGUGAA-GCUGGAUUCGC-U-AGUAAU-CGC-GCA-UCAGCCAU-GGCG-CGGUG-AAUACGUU-CCCGGG-CCUUGUACACACCGCCC-GUCAAGCCA-UGGAA--GUUGGGG-GUACCU-GAAG-UCCG-U-------AA-CC----------GCAA---GGA-----GCGGCC-UA-GG-GU-AA--AACC-AG-UGACU-GGGG-CU.....................................................................................................................................................
+>FlvAquat
+```
+**Note that:**  
+
+* The fasta file contains U's instead of T's
+* The fasta file contains dots `.` and dashes `-`
+
+```
+$ head -n 5 FreshTrain_version_taxonomy.txt
+ClonLD29,k__Bacteria;p__Verrucomicrobia;c__Spartobacteria;o__Chthoniobacterales;verI-A;
+ClonLD21,k__Bacteria;p__Bacteroidetes;
+FlvAquat,k__Bacteria;p__Bacteroidetes;c__Flavobacteriia;o__Flavobacteriales;bacII;bacII-A;
+B61FlSp2,k__Bacteria;p__Bacteroidetes;c__Cytophagia;o__Cytophagales;bacIII;bacIII-A;
+St0rFro8,k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rhodobacterales;alfVI;
+```
+
+**Note that:**  
+
+* The taxonomy file has a comma delimiter btwn seqID and taxonomy names  
+* Some exported references lack FreshTrain-specific names  
+* Some references with FreshTrain names are blank at finer taxon resolutions  
+
+
+
+<br>
+
+
+## fasta formatting
+
+#### Replace `U` with `T` and unalign (R)  
+
+```{bash, eval=F}
+Rscript reformat_fasta.R FreshTrain_version.fasta FreshTrain_unaligned.fasta format.ids replace.U
+```
+Argument  | Description  
+----------|---------------
+`reformat_fasta.R` | Name of script.
+`FreshTrain_version_taxonomy.txt` | input mothur-formatted taxonomy file
+`FreshTrain_unaligned.tax` | output mothur-formatted taxonomy file with no no U's, dots, or dashes
+`format.ids` | this doesn't do anything because there's no blanks in the seqIDs anyway. (If there were, it would delete them and everything after)
+`replace.U` | this tells it to find all the `U`s or `u`s and replace them with `T`  
+<br>
+
+## taxonomy formatting  
+
+#### Make file semicolon delimited (bash)  
+
+```{bash, eval=F}
+sed 's/,/\;/' <FreshTrain_version_taxonomy.txt >FT_semicol.tax
+```
+<br>
+
+#### Remove k\_\_, p\_\_, c\_\_, o\_\_ (bash)  
+
+```{bash, eval=F}
+./remove_gg_taxon-level_prefixes.sh FT_semicol.tax FT_semicol_noprefix.tax
+```
+Argument  | Description  
+----------|---------------  
+`./remove_gg_taxon-level_prefixes.sh` | name of script  
+`FT_semicol.tax`  | The input taxonomy file, semicolon delimited      
+`FT_semicol_noprefix.tax` | The output taxonomy file, same but without `k__` `p__` `c__` or `o__` in front of the coarse-level names. This makes it compatible with silva, because only greengenes uses those prefixes.    
+<br>
+
+#### Make first column tab delimited for mothur-compatibility (bash)  
+
+```{bash, eval=F}
+./replace_first_semicolon_with_tab.sh FT_semicol_noprefix.tax FT_semicol_noprefix_mothur-fmt.tax
+```
+Argument  | Description  
+----------|---------------
+`FT_semicol_noprefix.tax` | The input taxonomy file that is semicolon delimited    
+`FT_semicol_noprefix_mothur-fmt.tax` | The output taxonomy file that has semicolons between taxon-levels but a tab between the sequence ID and the taxa-names. This is the mothur format for taxonomy files.  
+<br>
+
+
+#### Fill missing names and fix any duplicate names in the FreshTrain (R)  
+
+```{bach, eval=F}
+$ Rscript force_consistent_nomenclature_on_database.R FT_semicol_noprefix_mothur-fmt.tax FT_semicol_noprefix_mothur-fmt_unnamed.tax FreshTrain
+```  
+Argument  | Description  
+----------|---------------
+`force_consistent_nomenclature_on_database.R` | Name of script.  
+`FT_semicol_noprefix_mothur-fmt.tax` | The input taxonomy file, mothur-formatted.  
+`FT_semicol_noprefix_mothur-fmt_unnamed.tax` | The output taxonomy file, also mothur-formatted. All missing names (blanks or placeholders indicating there is no name at that level) have been changed to `unnamed.NearestCoarserName`. Any duplicate names have had suffixes added to make them unique.  
+FreshTrain | This flag is necessary because it tells the script to use `.l` `.c` `.t` instead of `.F` `.G` `.S` as level-suffixes when it makes duplicated names unique.  
+
+The top-of-script descriptions of what this does, along with examples, is very detailed.  
+  
+The terminal output for this is extensive and informative- read it carefully for mistakes where names changed that shouldn't have.   
+It tells you which names are changed, for example:  
+
+  * alfI-A is a lineage and clade, so it is changed to alfI-A.l and alf_I-A.c .  
+  * Similarly, it lets you know that 845 blanks were changed to say "unnamed".  
+<br>
+
+It is really important that blanks are filled with placeholder "unnamed..." becuase the RDP classifier takes a computational shortcut when calculating bootstrap p-values. For higher taxonomy levels it simply sums the lower levels.  If the lower level is totally blank there's nothing to sum up, so the highest level ends up being less than 100%.  
+<br>
+
+## Remove Non-FreshTrain  
+
+Before taxonomy assignment with the FreshTrain and TaxAss, sequences that are not well flushed-out by the freshwater taxonomy need to be removed because only relevant reference sequences should exist for the percent identity calculation. The full set of freshwater sequences includes all of the clones, including ones that are not part of the well-defined freshwater taxonomy.  
+
+Use the script `remove_non-FreshTrain_References.py` with this syntax:
+```{bash, eval=F}
+python remove_non-FreshTrain_References.py inputFasta inputTaxon outputFasta outputTaxon
+```
+This script requires four arguments, read from the command line:  
+
+`inputFasta`  = Input fasta file, from which to remove lineages: i.e., FreshTrain18Aug2016.fasta  
+`inputTaxon`  = Input taxonomy file, from which to remove lineages: i.e., FreshTrain18Aug2016.taxonomy  
+`outputFasta` = Output fasta file, i.e., FreshTrain25Jan2018.fasta  
+`outputTaxon` = Output taxonomy file, i.e., FreshTrain25Jan2018.taxonomy  
+
+From the input files, this script removes any sequences not assigned to a 
+freshwater-specific lineage, and writes the remaining sequences to the output files.  
+
+<br>
+
+
+## Check files  
+
+They should look like this:  
+
+```
+
+```
+
+```
+
+```
+  
+  <br>
+
+# Silva First-Pass
+
+## Download  
+
+#### Download Silva from mothur website  
+
+https://mothur.org/wiki/silva_reference_files/  
+Choose the "Full-length sequences and taxonomy references" file.  
+
+**The mothur-formatted files look like:**  
+```
+$ head -n 5 silva.nr_v138.align
+>CP026050.S49M2367	99.47	Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Yersiniaceae;Serratia;
+...................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................A-T-T--G-A--A-C-G-C--T-G-G-C--G-G--C-A-G-G----------C----T-T--AA-C--AC-A----T-G--C----A-A-G--T-C--GA-G-CG-----------G-TAG--C-A--C-------------------------------AG-G-G-G-A-G---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------CTT-G----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------C--T--C-C-C-C--G------------------G-G-T----G--AC--G-------AG-C-G-G-C-GG-A--C-------------G-G-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------G--T--G-A--G-T-A---AT-G-T-C--T-G-GG---A-A--A-CT-G--C-C-TGA--TG-G-----------------(deleted rest of line)...
+>JQ864435.O10Acti2	93.57	Bacteria;Proteobacteria;Alphaproteobacteria;Rhodobacterales;Rhodobacteraceae;Oceanicella;
+...................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................A-A-C--G-A--A-C-G-C--T-G-G-C--G-G--C-A-G-G----------C----C-T--AA-C--AC-A----T-G--C----A-A-G--T-C--GA-G-CG-G---------G-C--------------------------------------------------C-C---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------TTC-G----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------G--G------------------------------------------GT--C-------AG-C-G-G-C-GG-A--C-------------G-G-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------G--T--G-A--G-T-A---AC-G-C-G--T-G-GG---A-A--C-GT-G--C-C-TTT--CG-G-----------------(deleted rest of line)...
+>AP012292.FU3Rum11	97.21	Bacteria;Firmicutes;Negativicutes;Veillonellales-Selenomonadales;Selenomonadaceae;Selenomonas;
+```
+**Note that:**  
+
+* The fasta file contains dots `.` and dashes `-` 
+* The alignment file size if fucking huge because of all that dashes
+* The seqID is followed by some other crap in the same line, separated by tabs.
+
+```
+$ head -n 5 silva.nr_v138.tax
+CP026050.S49M2367	Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Yersiniaceae;Serratia;
+JQ864435.O10Acti2	Bacteria;Proteobacteria;Alphaproteobacteria;Rhodobacterales;Rhodobacteraceae;Oceanicella;
+AP012292.FU3Rum11	Bacteria;Firmicutes;Negativicutes;Veillonellales-Selenomonadales;Selenomonadaceae;Selenomonas;
+KC672487.UncFu112	Eukaryota;Basidiomycota;Tremellomycetes;Filobasidiales;Filobasidiaceae;Heterocephalacria;
+JQ771493.AKOEnri2	Archaea;Euryarchaeota;Thermococci;Methanofastidiosales;uncultured;uncultured_ge;
+```
+**Note that:**  
+
+* The taxonomy file has a tab delimiter btwn seqID and taxonomy names  
+* Unclassified nomenclature is all over the place (have to look further to see it all)
+
+
+
+## taxonomy formatting  
+
+#### Fill missing names and fix any duplicate names in Silva (R)  
+
+```{bach, eval=F}
+$ Rscript force_consistent_nomenclature_on_database.R silva.nr_v138.tax silva.nr_v138_unnamed.tax General
+```  
+Argument  | Description  
+----------|---------------
+`force_consistent_nomenclature_on_database.R` | Name of script.  
+`silva.nr_v138.tax` | The input taxonomy file, mothur-downloaded.  
+`silva.nr_v138_unnamed.tax` | The output taxonomy file, also mothur-formatted. All missing names (blanks or placeholders indicating there is no name at that level) have been changed to `unnamed.NearestCoarserName`. Any duplicate names have had suffixes added to make them unique.  
+General | This is the default so this flag could be left out. It tells it to use  `.F` `.G` `.S` instead of `.l` `.c` `.t` fine-level suffixes when it makes duplicated names unique.  
+
+See the FreshTrain call of this script above for more details.  
+<br>
+
+
+## fasta formatting
+
+#### Un-align and delete crap after IDs (R)
+
+This takes ~20 minutes but reduces the file size from ~10GB to MBs. 
+
+```{bash, eval=F}
+$ Rscript reformat_fasta.R silva.nr_v138.align silva.nr_v138_unaligned.fasta format.seqIDs
+```
+Argument  | Description  
+----------|---------------
+`reformat_fasta.R` | Name of script.
+`silva.nr_v138.align` | input mothur-formatted taxonomy file
+`silva.nr_v138_unaligned.fasta` | output mothur-formatted taxonomy file with no no U's, dots, or dashes
+`format.seqIDs` | This could say anything. As long as the 3rd argument isn't blank, the script will delete any blank space in the sequence ID lines, along with everything after the first blank.
+  | Leave 4th argument blank. It would tell it to find all the `U`s and replace them with `T`s but there are no U's in silva so it would just waste time.   
+
+
+
+
+
+
+
+
+#### Check files  
+
+They should look like this:  
+
+```
+
+```
+
+```
+
+```
+  
+  <br>
+
+
+# Identify Conflicts  
+
+## Classify FreshTrain with Silva  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Adjust coarse-level nomenclature   
+
+The FreshTrain phylogeny isn't currently integrated into a comprehensive database, like
+Greengenes or silva, which is why TaxAss is necessary. However, it's "coarse-level" taxonomic 
+nomenclature (e.g. phylum, class, order) currently matches the nomenclature used in an old version 
+of Greengenes. If you don't do this, if for example you group by class, some of sequences might 
+appear to be different classes when really there's just a difference in nomenclature between the two databases.
+
+### Make Greengenes-compatible  
+To match GG 13.5 this was done manually, as detailed in the `README-FreshTrain18Aug2016`:
+
+```
+FreshTrain version 18Aug2016:
+edited by Robin to fix "typos" (note: arb file may or may not be updated accordingly)
+
+deleted:
+Gm9Prot2
+Gm9Pro24
+Gm9Pro25
+UniBac24
+Gm9Prot5
+
+changed to be o_undefinedAlpha:
+McDucnp2
+CanPhyco
+
+changed to be o__Acidimicrobiales and c__Acidimicrobiia
+AcmBacte
+```
+
+### make SILVA-compatible
+To make the FreshTrain compatible with SILVA, you need to adjust more names. Start by removing 
+non-FreshTrain lineages from the 18Aug2016 version that was edited manually. Then use these scripts
+to convert the FreshTrain from Greengenes-compatible to Silva-compatible:  
+
+* `convertFreshTrainToSilvaV128.py`  
+* `convertFreshTrainToSilvaV132.py`  
+<br>
+
+**SILVA v132 syntax is:**
+```{bash, eval=F}
+convertFreshTrainToSilvaV132.py inputTaxon outputTaxon
+```
+This script requires two arguments, read from the command line:  
+`inputTaxon` = Input taxonomy file to make compliant with silva v132. For example, FreshTrain25Jan2018Greengenes13_5.taxonomy
+`outputTaxon` = Output taxonomy file. For example, FreshTrain25Jan2018SILVAv128.taxonomy  
+
+<br>
+
+**SILVA v128 syntax is:**
+```{bash, eval=F}
+convertFreshTrainToSilvaV128.py inputTaxon outputTaxon
+```
+This script requires two arguments, read from the command line:  
+`inputTaxon` = Input taxonomy file to make compliant with silva v128  
+`outputTaxon` = Output taxonomy file  
+
+<br>
+The coarse-level names that needed to be changed were identified using the 
+`Database_Improvement_Workflow.rmd` located in this same folder, where the 
+custom database references are classified with the general database to generate 
+a list of conflicting names.  
+
+<br>
+
+
+
+<br>
+
+# Remove structural conflicts    
+A few references in the FreshTrain end up with phylogenetic conflicts (so structural conflicts beyond new names).
+These were identified because organisms assigned the same FreshTrain lineage had different SILVA orders, resulting 
+in a structure that is not monophyletic. With manual examination, they had very few references in the FreshTrain, so 
+to fix this problem we simply remove the less-well-represented half of the references with conflicting names.  
+  
+  
+I started to make a script to do it `remove_non-monophyletic_refs_for_SILVA-compatibility.R` but then I decided
+it really wasn't worth the effor because I'm only doing it once. So I manually removed in text wrangler:  
+  
+### v132 
+in FreshTrain these are all "Actinomycetales acSTL."  
+in SILVA 132 they are either order "Frankiales" or "PeM15".  
+
+Remove all "PeM15" refs from SILVA v132 FreshTrain-compatible:  
+```
+AbmAct53  
+LaeeEE00p1
+PavinActino1
+```
+
+### v128
+
+Same issue with acSTL, but different ones. I know, super weird it's not the same.  
+
+Remove all "PeM15" refs from SILVA v128 FreshTrain-compatible:  
+```
+LakecEC4
+LakStec6
+PavinActino1
+```
+
+Also an issue with betV. In FreshTrain they're all "undefined betV".  
+In SILVA 128 they are either order "Nitrosomonadales" or "TRA3-20".  
+  
+Remove all "TRA3-20" refs from SILVA v128 FreshTrain-compatible:  
+```
+LiUU2018
+LiUU2019
+```

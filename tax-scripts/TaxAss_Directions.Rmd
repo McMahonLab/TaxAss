@@ -66,7 +66,7 @@ Below is a list of all the commands in each step, including the optional ones:
 		./reformat_greengenes.sh gg_13_5_taxonomy.txt
 	for Silva as general database:
 		./un-align_silva.sh silva.nr_v132.align general.fasta silva.nr_v132.tax general.taxonomy
-		Rscript force_consistent_unclassifieds_on_database.R silva.nr_v132.tax general.taxonomy
+		Rscript reformat_taxonomy_nomenclature.R silva.nr_v132.tax general.taxonomy
 	for mothur count_table files:
 		sed 's/-//g' <aligned.fasta >otus.fasta
 		sed 's/-//g' <names-with-dashed.count_table >otus.count_table
@@ -419,12 +419,12 @@ How to format the `general.taxonomy` and `general.fasta` files when using the si
 SILVA uses inconsistent nomenclature for sequences that don't have names, 
 and it contains some identical names at different taxon-levels. 
 To be compatible with the FreshTrain, re-format silva into a more consistent nomenclature using 
-the script `force_consistent_unclassifieds_on_database.R`.  
+the script `reformat_taxonomy_nomenclature.RR`.  
 
 Full Command (type in terminal):
 
 ```
-Rscript force_consistent_unclassifieds_on_database.R silva.nr_v132.tax general.taxonomy
+Rscript reformat_taxonomy_nomenclature.R silva.nr_v132.tax general.taxonomy
 ```
 
 command argument   | description

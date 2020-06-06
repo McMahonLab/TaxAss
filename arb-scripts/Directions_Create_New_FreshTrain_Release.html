@@ -1525,7 +1525,7 @@ pre code, pre, code {
 }
 </style>
 <div id="get-started" class="section level1">
-<h1>Get Started</h1>
+<h1><span style="color:SteelBlue"> Get Started </span></h1>
 <div id="overview-of-steps" class="section level2">
 <h2>Overview of steps</h2>
 <ul>
@@ -1601,20 +1601,156 @@ pre code, pre, code {
 <td>check_included_lineages.R</td>
 </tr>
 <tr class="even">
+<td>arb-scripts</td>
+<td>Expected_FreshTrain_Lineages.xlsx</td>
+</tr>
+<tr class="odd">
 <td>tax-scripts</td>
 <td>reformat_fasta.R</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>tax-scripts</td>
 <td>reformat_taxonomy_nomenclature.R</td>
 </tr>
 </tbody>
 </table>
+<p><br> <br></p>
+</div>
+</div>
+<div id="format-silva" class="section level1">
+<h1><span style="color:SteelBlue"> Format Silva </span></h1>
+<div id="download" class="section level2">
+<h2>Download</h2>
+<div id="download-silva-from-mothur-website" class="section level4">
+<h4>Download Silva from mothur website</h4>
+<p><a href="https://mothur.org/wiki/silva_reference_files/" class="uri">https://mothur.org/wiki/silva_reference_files/</a><br />
+Choose the “Full-length sequences and taxonomy references” file.</p>
+<p><strong>The mothur-formatted files look like:</strong></p>
+<pre><code>$ head -n 5 silva.nr_v138.align
+&gt;CP026050.S49M2367  99.47   Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Yersiniaceae;Serratia;
+...................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................A-T-T--G-A--A-C-G-C--T-G-G-C--G-G--C-A-G-G----------C----T-T--AA-C--AC-A----T-G--C----A-A-G--T-C--GA-G-CG-----------G-TAG--C-A--C-------------------------------AG-G-G-G-A-G---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------CTT-G----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------C--T--C-C-C-C--G------------------G-G-T----G--AC--G-------AG-C-G-G-C-GG-A--C-------------G-G-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------G--T--G-A--G-T-A---AT-G-T-C--T-G-GG---A-A--A-CT-G--C-C-TGA--TG-G-----------------(deleted rest of line)...
+&gt;JQ864435.O10Acti2  93.57   Bacteria;Proteobacteria;Alphaproteobacteria;Rhodobacterales;Rhodobacteraceae;Oceanicella;
+...................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................A-A-C--G-A--A-C-G-C--T-G-G-C--G-G--C-A-G-G----------C----C-T--AA-C--AC-A----T-G--C----A-A-G--T-C--GA-G-CG-G---------G-C--------------------------------------------------C-C---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------TTC-G----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------G--G------------------------------------------GT--C-------AG-C-G-G-C-GG-A--C-------------G-G-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------G--T--G-A--G-T-A---AC-G-C-G--T-G-GG---A-A--C-GT-G--C-C-TTT--CG-G-----------------(deleted rest of line)...
+&gt;AP012292.FU3Rum11  97.21   Bacteria;Firmicutes;Negativicutes;Veillonellales-Selenomonadales;Selenomonadaceae;Selenomonas;</code></pre>
+<p><strong>Note that:</strong></p>
+<ul>
+<li>The fasta file contains dots <code>.</code> and dashes <code>-</code></li>
+<li>The alignment file size is HUUUGE because of all the dashes</li>
+<li>The seqID is followed by some other crap in the same line, separated by tabs.</li>
+</ul>
+<pre><code>$ head -n 5 silva.nr_v138.tax
+CP026050.S49M2367   Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Yersiniaceae;Serratia;
+JQ864435.O10Acti2   Bacteria;Proteobacteria;Alphaproteobacteria;Rhodobacterales;Rhodobacteraceae;Oceanicella;
+AP012292.FU3Rum11   Bacteria;Firmicutes;Negativicutes;Veillonellales-Selenomonadales;Selenomonadaceae;Selenomonas;
+KC672487.UncFu112   Eukaryota;Basidiomycota;Tremellomycetes;Filobasidiales;Filobasidiaceae;Heterocephalacria;
+JQ771493.AKOEnri2   Archaea;Euryarchaeota;Thermococci;Methanofastidiosales;uncultured;uncultured_ge;</code></pre>
+<p><strong>Note that:</strong></p>
+<ul>
+<li>The taxonomy file has a tab delimiter btwn seqID and taxonomy names<br />
+</li>
+<li>Unclassified nomenclature is all over the place (have to look further to see it all)</li>
+</ul>
+</div>
+</div>
+<div id="taxonomy-formatting" class="section level2">
+<h2>taxonomy formatting</h2>
+<div id="fill-missing-names-and-fix-any-duplicate-names-in-silva-r" class="section level4">
+<h4>Fill missing names and fix any duplicate names in Silva (R)</h4>
+<pre class="bach"><code>Rscript reformat_taxonomy_nomenclature.R silva.nr_v138.tax silva.nr_v138_unnamed.tax General</code></pre>
+<table>
+<colgroup>
+<col width="40%"></col>
+<col width="60%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>reformat_taxonomy_nomenclature.R</code></td>
+<td>Name of script.</td>
+</tr>
+<tr class="even">
+<td><code>silva.nr_v138.tax</code></td>
+<td>The input taxonomy file, mothur-downloaded.</td>
+</tr>
+<tr class="odd">
+<td><code>silva.nr_v138_unnamed.tax</code></td>
+<td>The output taxonomy file, also mothur-formatted. All missing names (blanks or placeholders indicating there is no name at that level) have been changed to <code>unnamed.NearestCoarserName</code>. Any duplicate names have had suffixes added to make them unique.</td>
+</tr>
+<tr class="even">
+<td><code>General</code></td>
+<td>This is the default so this flag could be left out. It tells it to use <code>.F</code> <code>.G</code> <code>.S</code> instead of <code>.l</code> <code>.c</code> <code>.t</code> fine-level suffixes when it makes duplicated names unique.</td>
+</tr>
+</tbody>
+</table>
+<p>See the FreshTrain call of this script above for more details.</p>
+<p>Now it looks like:</p>
+<pre><code>$ head -n 5 silva.nr_v138_unnamed.tax
+CP026050.S49M2367   Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Yersiniaceae;Serratia;unnamed.Serratia;
+JQ864435.O10Acti2   Bacteria;Proteobacteria;Alphaproteobacteria;Rhodobacterales;Rhodobacteraceae;Oceanicella;unnamed.Oceanicella;
+AP012292.FU3Rum11   Bacteria;Firmicutes;Negativicutes;Veillonellales-Selenomonadales;Selenomonadaceae;Selenomonas;unnamed.Selenomonas;
+KC672487.UncFu112   Eukaryota;Basidiomycota;Tremellomycetes;Filobasidiales;Filobasidiaceae;Heterocephalacria;unnamed.Heterocephalacria;
+JQ771493.AKOEnri2   Archaea;Euryarchaeota;Thermococci;Methanofastidiosales;unnamed.Methanofastidiosales;unnamed.Methanofastidiosales;unnamed.Methanofastidiosales;</code></pre>
 <p><br></p>
 </div>
 </div>
+<div id="fasta-formatting" class="section level2">
+<h2>fasta formatting</h2>
+<div id="un-align-and-delete-crap-after-ids-r" class="section level4">
+<h4>Un-align and delete crap after IDs (R)</h4>
+<p>This takes ~20 minutes but reduces the file size from GBs to MBs.</p>
+<pre class="bash"><code>Rscript reformat_fasta.R silva.nr_v138.align silva.nr_v138_unaligned.fasta format.seqIDs</code></pre>
+<table>
+<colgroup>
+<col width="40%"></col>
+<col width="60%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>reformat_fasta.R</code></td>
+<td>Name of script.</td>
+</tr>
+<tr class="even">
+<td><code>silva.nr_v138.align</code></td>
+<td>input mothur-formatted taxonomy file</td>
+</tr>
+<tr class="odd">
+<td><code>silva.nr_v138_unaligned.fasta</code></td>
+<td>output mothur-formatted taxonomy file with no no U’s, dots, or dashes</td>
+</tr>
+<tr class="even">
+<td><code>format.seqIDs</code></td>
+<td>This could say anything. As long as the 3rd argument isn’t blank, the script will delete any blank space in the sequence ID lines, along with everything after the first blank.</td>
+</tr>
+<tr class="odd">
+<td><code></code></td>
+<td>Leave 4th argument blank. It would tell it to find all the <code>U</code>s and replace them with <code>T</code>s but there are no U’s in silva so it would just waste time.</td>
+</tr>
+</tbody>
+</table>
+<p>Now it looks like:</p>
+<pre><code>$ head -n 5 silva.nr_v138_unaligned.fasta
+&gt;CP026050.S49M2367
+ATTGAACGCTGGCGGCAGGCTTAACACATGCAAGTCGAGCGGTAGCACAGGGGAGCTTGCTCCCCGGGTGACGAGCGGCGGACGGGTGAGTAATGTCTGGGAAACTGCCTGATGGAGGGGGATAACTACTGGAAACGGTAGCTAATACCGCATAACGTCGCAAGACCAAAGAGGGGGACCTTCGGGCCTCTTGCCATCAGATGTGCCCAGATGGGATTAGCTAGTAGGTGGGGTAATGGCTCACCTAGGCGACGATCCCTAGCTGGTCTGAGAGGATGACCAGCCACACTGGAACTGAGACACGGTCCAGACTCCTACGGGAGGCAGCAGTGGGGAATATTGCACAATGGGCGCAAGCCTGATGCAGCCATGCCGCGTGTGTGAAGAAGGCCTTCGGGTTGTAAAGCACTTTCAGCGAGGAGGAAGGTGGTGAACTTAATACGTTCATCAATTGACGTTACTCGCAGAAGAAGCACCGGCTAACTCCGTGCCAGCAGCCGCGGTAATACGGAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAGCGCACGCAGGCGGTTTGTTAAGTCAGATGTGAAATCCCCGGGCTCAACCTGGGAACTGCATTTGAAACTGGCAAGCTAGAGTCTCGTAGAGGGGGGTAGAATTCCAGGTGTAGCGGTGAAATGCGTAGAGATCTGGAGGAATACCGGTGGCGAAGGCGGCCCCCTGGACGAAGACTGACGCTCAGGTGCGAAAGCGTGGGGAGCAAACAGGATTAGATACCCTGGTAGTCCACGCTGTAAACGATGTCGATTTGGAGGTTGTGCCCTTGAGGCGTGGCTTCCGGAGCTAACGCGTTAAATCGACCGCCTGGGGAGTACGGCCGCAAGGTTAAAACTCAAATGAATTGACGGGGGCCCGCACAAGCGGTGGAGCATGTGGTTTAATTCGATGCAACGCGAAGAACCTTACCTACTCTTGACATCCAGAGAACTTTCCAGAGATGGATTGGTGCCTTCGGGAACTCTGAGACAGGTGCTGCATGGCTGTCGTCAGCTCGTGTTGTGAAATGTTGGGTTAAGTCCCGCAACGAGCGCAACCCTTATCCTTTGTTGCCAGCGGTTCGGCCGGGAACTCAAAGGAGACTGCCAGTGATAAACTGGAGGAAGGTGGGGATGACGTCAAGTCATCATGGCCCTTACGAGTAGGGCTACACACGTGCTACAATGGCGTATACAAAGAGAAGCGACCTCGCGAGAGCAAGCGGACCTCATAAAGTATGTCGTAGTCCGGATTGGAGTCTGCAACTCGACTCCATGAAGTCGGAATCGCTAGTAATCGTAGATCAGAATGCTACGGTGAATACGTTCCCGGGCCTTGTACACACCGCCCGTCACACCATGGGAGTGGGTTGCAAAAGAAGTAGGTAGCTTAACCTTCGGGAGGGCGCTTACCACTTTGTGATTCATGACTGGGGTG
+&gt;JQ864435.O10Acti2
+AACGAACGCTGGCGGCAGGCCTAACACATGCAAGTCGAGCGGGCCCTTCGGGGTCAGCGGCGGACGGGTGAGTAACGCGTGGGAACGTGCCTTTCGGTTCGGAATAGCCCCGGGAAACTGGGATTAACGCCGGATACGCCCTTCGGGGGAAAGATTTATCGCCGAGAGATCGGCCCGCGTCTGATTAGGTAGTTGGTGGGGTAACGGCCTACCAAGCCGACGATCAGTAGCTGGTTTGAGAGGATGATCAGCCACACTGGGACTGAGACACGGCCCAGACTCCTACGGGAGGCAGCAGTGGGGAATCTTGGACAATGGGCGCAAGCCTGATCCAGCCATGCCGCGTGAGCGATGAAGGCCTTAGGGTTGTAAAGCTCTTTCAGCGGGGACGATAATGACGGTACCCGCAGAAGAAGCCCCGGCTAACTCCGTGCCAGCAGCCGCGGTAATACGGAGGGGGCTAGCGTTGTTCGGAATTACTGGGCGTAAAGCGCACGTAGGCGGACCAGTCAGTCAGGGGTGAAATCCCGGGGCTCAACCCCGGAACTGCCTTTGATACTGCTGGTCTGGAGGTCGAGAGAGGTGAGTGGAATTCCGAGTGTAGAGGTGAAATTCGTAGATATTCGGAGGAACACCAGTGGCGAAGGCGGCTCACTGGCTCGATACTGACGCTGAGGTGCGAAAGCGTGGGGAGCAAACAGGATTAGATACCCTGGTAGTCCACGCCGTAAACGATGAATGCCAGACGTCGGGCGGCTTGCCGTTCGGTGTCGCAGCTAACGCATTAAGCATTCCGCCTGGGGAGTACGGCCGCAAGGTTAAAACTCAAAGGAATTGACGGGGGCCCGCACAAGCGGTGGAGCATGTGGTTTAATTCGAAGCAACGCGCAGAACCTTACCATCCCTTGACATCCCCAACGCGGGCCTGCGAGAGCGGGCCCTTCAGTTCGGCTGGTTGGGTGACAGGTGCTGCATGGCTGTCGTCAGCTCGTGTCGTGAGATGTTGGGTTAAGTCCCGCAACGAGCGCAACCCTCGCCTTCAGTTGCCAGCATTCGGTTGGGCACTCTGAAGGAACCGCCGGTGATAAGCCGGAGGAAGGTGGGGATGACGTCAAGTCCTCATGGCCCTTACGGGATGGGCTACACACGTGCTACAATGGCGGTGACAATGGGTTAATCCCCAAAAGCCGTCTCAGTTCGGATTGTCCTCTGCAACTCGAGGGCATGAAGTCGGAATCGCTAGTAATCGCGTAACAGCATGACGCGGTGAATACGTTCCCGGGCCTTGTACACACCGCCCGTCACACCATGGGAGTTGGGTTTACCCGAAGACGGTGCGCCAACCTCGCAAGAGGAGGCAGCCGGCCACGGTAAGCTCAGCGACTGGGGTG
+&gt;AP012292.FU3Rum11</code></pre>
+<p><br> <br></p>
+</div>
+</div>
+</div>
 <div id="first-pass-freshtrain" class="section level1">
-<h1>First-Pass FreshTrain</h1>
+<h1><span style="color:SteelBlue"> First-Pass FreshTrain </span></h1>
 <div id="arb-export" class="section level2">
 <h2>ARB export</h2>
 <p>The FreshTrain comes from an ARB database of 16S clone libraries from freshwater systems. All of the clones were aligned in ARB alongside the Greengenes database to determine the phylogeny of abundant freshwater taxa introduced in <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3063352/">Newton <em>et al.</em> 2011</a>.</p>
@@ -1646,7 +1782,7 @@ ShnBacte,k__Bacteria;p__Bacteroidetes;c__Flavobacteriia;o__Flavobacteriales;bacI
 <p>In arb there are also references that don’t have good representation or specific FreshTrain names, and these is a field that marks each sequence as part of the FreshTrain or not. It’s important that only the FreshTrain sequences are exported, so you can spot check for unclassified lineages here. We will also check for these more carefully later.</p>
 <p><br></p>
 </div>
-<div id="fasta-formatting" class="section level2">
+<div id="fasta-formatting-1" class="section level2">
 <h2>fasta formatting</h2>
 <div id="replace-u-with-t-and-unalign-r" class="section level4">
 <h4>Replace <code>U</code> with <code>T</code> and unalign (R)</h4>
@@ -1695,7 +1831,7 @@ NTACGATGAAGAGTTTGATCCTGGCTCAGGATGAACGCTAGCGGCAGGCTTAACACATGCAAGTCGAGGGGTATATGTCT
 <p><br></p>
 </div>
 </div>
-<div id="taxonomy-formatting" class="section level2">
+<div id="taxonomy-formatting-1" class="section level2">
 <h2>taxonomy formatting</h2>
 <div id="make-file-semicolon-delimited-bash" class="section level4">
 <h4>Make file semicolon delimited (bash)</h4>
@@ -1783,7 +1919,7 @@ St0rFr10    Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;alfIV;a
 </div>
 <div id="fill-missing-names-and-fix-any-duplicate-names-in-the-freshtrain-r" class="section level4">
 <h4>Fill missing names and fix any duplicate names in the FreshTrain (R)</h4>
-<pre class="bach"><code>$ Rscript reformat_taxonomy_nomenclature.R FT_semicol_noprefix_mothur.tax FT_semicol_noprefix_mothur_unnamed.tax FreshTrain</code></pre>
+<pre class="bach"><code>Rscript reformat_taxonomy_nomenclature.R FT_semicol_noprefix_mothur.tax FT_semicol_noprefix_mothur_unnamed.tax FreshTrain</code></pre>
 <table>
 <colgroup>
 <col width="40%"></col>
@@ -1834,11 +1970,13 @@ St0rFr10    Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;alfIV;a
 <p><br></p>
 </div>
 </div>
-<div id="check-for-non-freshtrain-r" class="section level2">
-<h2>Check for Non-FreshTrain (R)</h2>
+<div id="remove-non-freshtrain" class="section level2">
+<h2>Remove Non-FreshTrain</h2>
+<div id="check-for-non-freshtrain-references-lurking-in-the-freshtrain-export-r" class="section level4">
+<h4>Check for Non-FreshTrain references lurking in the FreshTrain export (R)</h4>
 <p>The full set of freshwater sequences in arb includes all of the clones, including ones that are not part of the well-defined freshwater taxonomy. These non-FreshTrain sequences cannot be present for TaxAss because only named reference sequences should recruit reads into the FreshTrain classification.</p>
 <p>Within Arb, sequences are identified as part of the FreshTrain or not, and when data is exported from Arb you should select to only export the FW sequences. Here we check to make sure that only FreshTrain sequences are included (because it’s really bad if they are!):</p>
-<pre class="bash"><code>$ Rscript check_included_lineages.R FT_semicol_noprefix_mothur_unnamed.tax ./</code></pre>
+<pre class="bash"><code>Rscript check_included_lineages.R FT_semicol_noprefix_mothur_unnamed.tax ./</code></pre>
 <table>
 <colgroup>
 <col width="40%"></col>
@@ -1865,7 +2003,7 @@ St0rFr10    Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;alfIV;a
 </tr>
 </tbody>
 </table>
-<p>It there are sequences where the lineage is unnamed, these are flagged as sequences to definitely remove. This is exported in the file <code>STOP-remove_these_from_FreshTrain_export.csv</code> in csv format for easy opening in excel:</p>
+<p>If there are sequences where the lineage is unnamed, these are flagged as sequences to definitely remove. This is exported in the file <code>STOP-remove_these_from_FreshTrain_export.csv</code> in csv format for easy opening in excel:</p>
 <pre><code>$ head -n 5 STOP-remove_these_from_FreshTrain_export.csv
 seqid,kingdom,phylum,class,order,family,genus,species
 SphClo28,Bacteria,Bacteroidetes,unnamed.Bacteroidetes,unnamed.Bacteroidetes,unnamed.Bacteroidetes,unnamed.Bacteroidetes,unnamed.Bacteroidetes
@@ -1892,89 +2030,181 @@ Bacteria,Actinobacteria.P,Acidimicrobiia,Acidimicrobiales,acIV
 Bacteria,Actinobacteria.P,Acidimicrobiia,Acidimicrobiales,acV
 Bacteria,Actinobacteria.P,Actinobacteria.C,Corynebacteriales,acTH2
 Bacteria,Actinobacteria.P,Actinobacteria.C,Frankiales,acI</code></pre>
-<p><br> <br></p>
+<p><br></p>
 </div>
-</div>
-<div id="silva-first-pass" class="section level1">
-<h1>Silva First-Pass</h1>
-<div id="download" class="section level2">
-<h2>Download</h2>
-<div id="download-silva-from-mothur-website" class="section level4">
-<h4>Download Silva from mothur website</h4>
-<p><a href="https://mothur.org/wiki/silva_reference_files/" class="uri">https://mothur.org/wiki/silva_reference_files/</a><br />
-Choose the “Full-length sequences and taxonomy references” file.</p>
-<p><strong>The mothur-formatted files look like:</strong></p>
-<pre><code>$ head -n 5 silva.nr_v138.align
-&gt;CP026050.S49M2367  99.47   Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Yersiniaceae;Serratia;
-...................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................A-T-T--G-A--A-C-G-C--T-G-G-C--G-G--C-A-G-G----------C----T-T--AA-C--AC-A----T-G--C----A-A-G--T-C--GA-G-CG-----------G-TAG--C-A--C-------------------------------AG-G-G-G-A-G---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------CTT-G----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------C--T--C-C-C-C--G------------------G-G-T----G--AC--G-------AG-C-G-G-C-GG-A--C-------------G-G-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------G--T--G-A--G-T-A---AT-G-T-C--T-G-GG---A-A--A-CT-G--C-C-TGA--TG-G-----------------(deleted rest of line)...
-&gt;JQ864435.O10Acti2  93.57   Bacteria;Proteobacteria;Alphaproteobacteria;Rhodobacterales;Rhodobacteraceae;Oceanicella;
-...................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................A-A-C--G-A--A-C-G-C--T-G-G-C--G-G--C-A-G-G----------C----C-T--AA-C--AC-A----T-G--C----A-A-G--T-C--GA-G-CG-G---------G-C--------------------------------------------------C-C---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------TTC-G----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------G--G------------------------------------------GT--C-------AG-C-G-G-C-GG-A--C-------------G-G-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------G--T--G-A--G-T-A---AC-G-C-G--T-G-GG---A-A--C-GT-G--C-C-TTT--CG-G-----------------(deleted rest of line)...
-&gt;AP012292.FU3Rum11  97.21   Bacteria;Firmicutes;Negativicutes;Veillonellales-Selenomonadales;Selenomonadaceae;Selenomonas;</code></pre>
-<p><strong>Note that:</strong></p>
-<ul>
-<li>The fasta file contains dots <code>.</code> and dashes <code>-</code></li>
-<li>The alignment file size if fucking huge because of all that dashes</li>
-<li>The seqID is followed by some other crap in the same line, separated by tabs.</li>
-</ul>
-<pre><code>$ head -n 5 silva.nr_v138.tax
-CP026050.S49M2367   Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Yersiniaceae;Serratia;
-JQ864435.O10Acti2   Bacteria;Proteobacteria;Alphaproteobacteria;Rhodobacterales;Rhodobacteraceae;Oceanicella;
-AP012292.FU3Rum11   Bacteria;Firmicutes;Negativicutes;Veillonellales-Selenomonadales;Selenomonadaceae;Selenomonas;
-KC672487.UncFu112   Eukaryota;Basidiomycota;Tremellomycetes;Filobasidiales;Filobasidiaceae;Heterocephalacria;
-JQ771493.AKOEnri2   Archaea;Euryarchaeota;Thermococci;Methanofastidiosales;uncultured;uncultured_ge;</code></pre>
-<p><strong>Note that:</strong></p>
-<ul>
-<li>The taxonomy file has a tab delimiter btwn seqID and taxonomy names<br />
-</li>
-<li>Unclassified nomenclature is all over the place (have to look further to see it all)</li>
-</ul>
-</div>
-</div>
-<div id="taxonomy-formatting-1" class="section level2">
-<h2>taxonomy formatting</h2>
-<div id="fill-missing-names-and-fix-any-duplicate-names-in-silva-r" class="section level4">
-<h4>Fill missing names and fix any duplicate names in Silva (R)</h4>
-<pre class="bach"><code>$ Rscript force_consistent_nomenclature_on_database.R silva.nr_v138.tax silva.nr_v138_unnamed.tax General</code></pre>
-<table>
-<colgroup>
-<col width="40%"></col>
-<col width="60%"></col>
-</colgroup>
-<thead>
-<tr class="header">
-<th>Argument</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>force_consistent_nomenclature_on_database.R</code></td>
-<td>Name of script.</td>
-</tr>
-<tr class="even">
-<td><code>silva.nr_v138.tax</code></td>
-<td>The input taxonomy file, mothur-downloaded.</td>
-</tr>
-<tr class="odd">
-<td><code>silva.nr_v138_unnamed.tax</code></td>
-<td>The output taxonomy file, also mothur-formatted. All missing names (blanks or placeholders indicating there is no name at that level) have been changed to <code>unnamed.NearestCoarserName</code>. Any duplicate names have had suffixes added to make them unique.</td>
-</tr>
-<tr class="even">
-<td>General</td>
-<td>This is the default so this flag could be left out. It tells it to use <code>.F</code> <code>.G</code> <code>.S</code> instead of <code>.l</code> <code>.c</code> <code>.t</code> fine-level suffixes when it makes duplicated names unique.</td>
-</tr>
-</tbody>
-</table>
-<p>See the FreshTrain call of this script above for more details.<br />
+<div id="manually-remove-any-non-freshtrain-references-within-arb" class="section level4">
+<h4>Manually remove any non-FreshTrain references within Arb</h4>
+<p>Compare your list of unique lineages, clades, and tribes with the expected lists. I recommend pasting them side by side in excel and then using conditional highlighting to spot any that are unique to the new export (maybe should be excluded in ARB) and unique to the expected list (maybe should be included in ARB).</p>
+<p>There is a reference files in excel of what’s expected at each FreshTrain level:</p>
+<pre><code>arb-scripts/Expected_FreshTrain_Lineages.xlsx</code></pre>
+<p>Paste these expected lineages next to your unique lineages and use conditional highlighting to spot anything unique. Then update ARB to fix export mistakes or the reference excel file if new FreshTrain references have been added.<br />
 <br></p>
 </div>
 </div>
-<div id="fasta-formatting-1" class="section level2">
-<h2>fasta formatting</h2>
-<div id="un-align-and-delete-crap-after-ids-r" class="section level4">
-<h4>Un-align and delete crap after IDs (R)</h4>
-<p>This takes ~20 minutes but reduces the file size from ~10GB to MBs.</p>
-<pre class="bash"><code>$ Rscript reformat_fasta.R silva.nr_v138.align silva.nr_v138_unaligned.fasta format.seqIDs</code></pre>
+</div>
+<div id="second-pass-freshtrain" class="section level1">
+<h1><span style="color:SteelBlue">Second-Pass FreshTrain </span></h1>
+<p>After fixing which are exported in Arb, <span style="color:Red"> re-export from Arb and repeat all of these formatting steps </span> (including checking that the non-FreshTrain sequences were removed!) If Trina leaves you hanging (even though she insisted you change the workflow to have her do this part in Arb), then you can just manually delete each of the non-FreshTrain sequence IDs and keep going.</p>
+<p><br> <br></p>
+</div>
+<div id="fix-conflicts" class="section level1">
+<h1><span style="color:SteelBlue"> Fix Conflicts </span></h1>
+<div id="classify-freshtrain-with-silva" class="section level2">
+<h2>Classify FreshTrain with Silva</h2>
+<div id="make-a-subfolder-for-the-taxass-working-directory" class="section level4">
+<h4>Make a subfolder for the TaxAss working directory</h4>
+<p>Add:</p>
+<ul>
+<li>the contents of <code>tax-scripts</code><br />
+</li>
+<li><code>FT_unaligned.fasta</code></li>
+<li><code>FT_semicol_noprefix_mothur_unnamed.tax</code><br />
+</li>
+<li><code>silva.nr_v138_unaligned.fasta</code></li>
+<li><code>silva.nr_v138_unnamed.tax</code></li>
+</ul>
+<p><strong>Numbers refer to TaxAss Directions</strong><br />
+<br></p>
+</div>
+<div id="general-only-taxonomy" class="section level4">
+<h4>11. general-only taxonomy</h4>
+<pre class="bash"><code>mothur &quot;#classify.seqs(fasta=FT_unaligned.fasta, template=silva.nr_v138_unaligned.fasta,
+taxonomy=silva.nr_v138_unnamed.tax, method=wang, probs=T, processors=2, cutoff=0)&quot;
+
+cat FT_unaligned.nr_v138_unnamed.wang.taxonomy &gt; FT_with_silva.taxonomy</code></pre>
+<p>Looks like this now:</p>
+<pre><code>$ head -n 5 FT_with_silva.taxonomy
+ClonLD29    Bacteria(100);Verrucomicrobiota(100);Verrucomicrobiae(100);Chthoniobacterales(100);Chthoniobacteraceae(100);LD29(100);unnamed.LD29(100);
+FlvAquat    Bacteria(100);Bacteroidota(100);Bacteroidia(100);Flavobacteriales(100);Flavobacteriaceae(100);Flavobacterium(100);unnamed.Flavobacterium(100);
+B61FlSp2    Bacteria(100);Bacteroidota(100);Bacteroidia(100);Cytophagales(100);Spirosomaceae(100);Flectobacillus(100);unnamed.Flectobacillus(100);
+St0rFro8    Bacteria(100);Proteobacteria(100);Alphaproteobacteria(100);Rhodobacterales(100);Rhodobacteraceae(100);Rhodobacter(99);unnamed.Rhodobacter(99);
+St0rFr10    Bacteria(100);Proteobacteria(100);Alphaproteobacteria(100);Sphingomonadales(100);Sphingomonadaceae(100);Novosphingobium(100);unnamed.Novosphingobium(100);</code></pre>
+<p><br></p>
+</div>
+<div id="reformat-taxonomy-files" class="section level4">
+<h4>12. reformat taxonomy files</h4>
+<pre class="bash"><code>sed 's/[[:blank:]]/\;/' &lt;FT_with_silva.taxonomy &gt;temp
+mv temp FT_with_silva.taxonomy
+
+sed 's/[[:blank:]]/\;/' &lt;FT_semicol_noprefix_mothur_unnamed.tax &gt;temp
+mv temp FT.taxonomy</code></pre>
+<p>FreshTrain looks like this now:</p>
+<pre><code>$ head -n 5 FT.taxonomy
+ClonLD29;Bacteria;Verrucomicrobia;Spartobacteria;Chthoniobacterales;verI-A;unnamed.verI-A;unnamed.verI-A;
+FlvAquat;Bacteria;Bacteroidetes;Flavobacteriia;Flavobacteriales;bacII;bacII-A;unnamed.bacII-A;
+B61FlSp2;Bacteria;Bacteroidetes;Cytophagia;Cytophagales;bacIII;bacIII-A;unnamed.bacIII-A;
+St0rFro8;Bacteria;Proteobacteria;Alphaproteobacteria;Rhodobacterales;alfVI;unnamed.alfVI;unnamed.alfVI;
+St0rFr10;Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;alfIV;alfIV-A;Novo-A2;</code></pre>
+<p>And Silva-Classified FreshTrain looks like this now:</p>
+<pre><code>$ head -n 5 FT_with_silva.taxonomy
+ClonLD29;Bacteria(100);Verrucomicrobiota(100);Verrucomicrobiae(100);Chthoniobacterales(100);Chthoniobacteraceae(100);LD29(100);unnamed.LD29(100);
+FlvAquat;Bacteria(100);Bacteroidota(100);Bacteroidia(100);Flavobacteriales(100);Flavobacteriaceae(100);Flavobacterium(100);unnamed.Flavobacterium(100);
+B61FlSp2;Bacteria(100);Bacteroidota(100);Bacteroidia(100);Cytophagales(100);Spirosomaceae(100);Flectobacillus(100);unnamed.Flectobacillus(100);
+St0rFro8;Bacteria(100);Proteobacteria(100);Alphaproteobacteria(100);Rhodobacterales(100);Rhodobacteraceae(100);Rhodobacter(99);unnamed.Rhodobacter(99);
+St0rFr10;Bacteria(100);Proteobacteria(100);Alphaproteobacteria(100);Sphingomonadales(100);Sphingomonadaceae(100);Novosphingobium(100);unnamed.Novosphingobium(100);</code></pre>
+<p><br></p>
+</div>
+</div>
+<div id="identify-conflicts" class="section level2">
+<h2>Identify Conflicts</h2>
+<div id="compare-taxonomy-files" class="section level4">
+<h4>13. compare taxonomy files</h4>
+<pre class="bash"><code>mkdir conflicts_database
+
+Rscript find_classification_disagreements.R FT.taxonomy FT_with_silva.taxonomy NA conflicts_database NA NA 70 database </code></pre>
+<table>
+<colgroup>
+<col width="45%"></col>
+<col width="54%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>find_classification_disagreements.R</code></td>
+<td>name of script</td>
+</tr>
+<tr class="even">
+<td><code>FT.taxonomy</code></td>
+<td>The FreshTrain classifications (<code>custom.custom.taxonomy</code>)</td>
+</tr>
+<tr class="odd">
+<td><code>FT_with_silva.taxonomy</code></td>
+<td>The Silva classifications of the FreshTrain (<code>custom.general.taxonomy</code>)</td>
+</tr>
+<tr class="even">
+<td><code>NA</code></td>
+<td>NA is typed as a placeholder here</td>
+</tr>
+<tr class="odd">
+<td><code>conflicts_database</code></td>
+<td>results folder</td>
+</tr>
+<tr class="even">
+<td><code>NA</code></td>
+<td>NA is typed as a placeholder here</td>
+</tr>
+<tr class="odd">
+<td><code>NA</code></td>
+<td>NA is typed as a placeholder here</td>
+</tr>
+<tr class="even">
+<td><code>70</code></td>
+<td>this is the p-value cutoff for the general database assignments of the custom database fastas. This determines if a classification is good enough to be named or should be “unclassified.”</td>
+</tr>
+<tr class="odd">
+<td><code>database</code></td>
+<td>This flag tells the script you are comparing two databases instead of OTU classifications.</td>
+</tr>
+</tbody>
+</table>
+<p>This generates csv files that lists nomenclature disagreements at each taxa-level. Note that it uses a bootstrap value and is stochastic- could consider lowering the bootstrap cutoff.</p>
+<p>There are two sets of files generated when the <code>database</code> flag is used.<br />
+The first set includes each seqID with a conflict, the full taxonomy of the seqID in both databases, and the classification bootstrap identies. These files are named:</p>
+<ul>
+<li>1_kingdom_conflicts.csv</li>
+<li>2_phylum_conflicts.csv</li>
+<li>3_class_conflicts.csv</li>
+<li>4_order_conflicts.csv</li>
+<li>5_lineage_conflicts.csv</li>
+</ul>
+<p>And they look like:</p>
+<pre><code>$ head -n 5 conflicts_database/2_phylum_conflicts.csv
+&quot;seqID.gg&quot;,&quot;kingdom.gg&quot;,&quot;phylum.gg&quot;,&quot;class.gg&quot;,&quot;order.gg&quot;,&quot;family.gg&quot;,&quot;genus.gg&quot;,&quot;species.gg&quot;,&quot;seqID.fw&quot;,&quot;kingdom.fw&quot;,&quot;phylum.fw&quot;,&quot;class.fw&quot;,&quot;order.fw&quot;,&quot;lineage.fw&quot;,&quot;clade.fw&quot;,&quot;tribe.fw&quot;
+&quot;AbmAc209&quot;,&quot;Bacteria(100)&quot;,&quot;Actinobacteriota(100)&quot;,&quot;Actinobacteria(100)&quot;,&quot;Micrococcales(100)&quot;,&quot;Microbacteriaceae(100)&quot;,&quot;Candidatus_Planktoluna(100)&quot;,&quot;unnamed.Candidatus_Planktoluna(100)&quot;,&quot;AbmAc209&quot;,&quot;Bacteria&quot;,&quot;Actinobacteria.P&quot;,&quot;Actinobacteria.C&quot;,&quot;Micrococcales&quot;,&quot;Luna1&quot;,&quot;Luna1-A&quot;,&quot;Luna1-A4&quot;
+&quot;AbmAct00&quot;,&quot;Bacteria(100)&quot;,&quot;Actinobacteriota(100)&quot;,&quot;Actinobacteria(100)&quot;,&quot;Frankiales(100)&quot;,&quot;Sporichthyaceae(100)&quot;,&quot;hgcI_clade(100)&quot;,&quot;unnamed.hgcI_clade(100)&quot;,&quot;AbmAct00&quot;,&quot;Bacteria&quot;,&quot;Actinobacteria.P&quot;,&quot;Actinobacteria.C&quot;,&quot;Frankiales&quot;,&quot;acI&quot;,&quot;acI-B&quot;,&quot;acI-B4&quot;
+&quot;AbmAct02&quot;,&quot;Bacteria(100)&quot;,&quot;Actinobacteriota(100)&quot;,&quot;Actinobacteria(100)&quot;,&quot;Frankiales(100)&quot;,&quot;Sporichthyaceae(100)&quot;,&quot;Candidatus_Planktophila(63)&quot;,&quot;unnamed.Candidatus_Planktophila(63)&quot;,&quot;AbmAct02&quot;,&quot;Bacteria&quot;,&quot;Actinobacteria.P&quot;,&quot;Actinobacteria.C&quot;,&quot;Frankiales&quot;,&quot;acI&quot;,&quot;acI-A&quot;,&quot;acI-A1&quot;
+&quot;AbmAct03&quot;,&quot;Bacteria(100)&quot;,&quot;Actinobacteriota(100)&quot;,&quot;Actinobacteria(100)&quot;,&quot;Frankiales(100)&quot;,&quot;Sporichthyaceae(100)&quot;,&quot;hgcI_clade(100)&quot;,&quot;unnamed.hgcI_clade(100)&quot;,&quot;AbmAct03&quot;,&quot;Bacteria&quot;,&quot;Actinobacteria.P&quot;,&quot;Actinobacteria.C&quot;,&quot;Frankiales&quot;,&quot;acI&quot;,&quot;acI-B&quot;,&quot;acI-B1&quot;</code></pre>
+<p>The second set of files includes the unique conflicts, and is what we will base the python script on. These files are named:</p>
+<p>Note that although the conflicts are “unique”, they are unique to the FreshTrain Lineage, not the given phylum/class/order level. Why? Because sometimes Silva splits an old name into two new names. When this happens, not ALL instances of the phylum name are a conflict, only some should be changed because some are still correct. The phython script changes upper-level names <em>for each lineage</em>.</p>
+<p>Here’s an example in Silva.138, where some instances of order Frankiales change to Micrococcales, but the order Frankiales remains.<br />
+In the unique conflicts at order level, we see an instance of order <code>Frankiales</code> changing to <code>Micrococcales</code>:</p>
+<pre><code>$ head -n 5 conflicts_database/unique_conflicts_4_order.csv
+&quot;kingdom.gg&quot;,&quot;phylum.gg&quot;,&quot;class.gg&quot;,&quot;order.gg&quot;,&quot;kingdom.fw&quot;,&quot;phylum.fw&quot;,&quot;class.fw&quot;,&quot;order.fw&quot;,&quot;lineage.fw&quot;
+&quot;Bacteria&quot;,&quot;Actinobacteriota&quot;,&quot;Acidimicrobiia&quot;,&quot;Microtrichales&quot;,&quot;Bacteria&quot;,&quot;Actinobacteria.P&quot;,&quot;Acidimicrobiia&quot;,&quot;Acidimicrobiales&quot;,&quot;acIV&quot;
+&quot;Bacteria&quot;,&quot;Actinobacteriota&quot;,&quot;Actinobacteria&quot;,&quot;Micrococcales&quot;,&quot;Bacteria&quot;,&quot;Actinobacteria.P&quot;,&quot;Actinobacteria.C&quot;,&quot;Frankiales&quot;,&quot;Luna3&quot;
+&quot;Bacteria&quot;,&quot;Proteobacteria&quot;,&quot;Alphaproteobacteria&quot;,&quot;Acetobacterales&quot;,&quot;Bacteria&quot;,&quot;Proteobacteria&quot;,&quot;Alphaproteobacteria&quot;,&quot;Rhodospirillales&quot;,&quot;alfVIII&quot;
+&quot;Bacteria&quot;,&quot;Bacteroidota&quot;,&quot;Bacteroidia&quot;,&quot;Chitinophagales&quot;,&quot;Bacteria&quot;,&quot;Bacteroidetes&quot;,&quot;Sphingobacteriia&quot;,&quot;Sphingobacteriales&quot;,&quot;bacI&quot;</code></pre>
+<p>However, if we poke around in the <code>unique_conflicts_5_lineage.csv</code> it is obvious that only one order changed and many FreshTrain references should still have order Frankiales. That’s why we make the changes for each lineage, not overall.</p>
+<pre><code>Bacteria    Actinobacteriota    Actinobacteria  Micrococcales   Microbacteriaceae   Bacteria    Actinobacteria.P    Actinobacteria.C    Micrococcales   Luna1
+Bacteria    Actinobacteriota    Actinobacteria  Frankiales  Sporichthyaceae Bacteria    Actinobacteria.P    Actinobacteria.C    Frankiales  acI
+Bacteria    Actinobacteriota    Actinobacteria  Frankiales  Sporichthyaceae Bacteria    Actinobacteria.P    Actinobacteria.C    Frankiales  acSTL
+Bacteria    Actinobacteriota    Actinobacteria  Micrococcales   Microbacteriaceae   Bacteria    Actinobacteria.P    Actinobacteria.C    Frankiales  Luna3
+Bacteria    Actinobacteriota    Actinobacteria  Micrococcales   Microbacteriaceae   Bacteria    Actinobacteria.P    Actinobacteria.C    Micrococcales   acIII
+Bacteria    Actinobacteriota    Actinobacteria  Frankiales  Sporichthyaceae Bacteria    Actinobacteria.P    Actinobacteria.C    Frankiales  acTH1</code></pre>
+<p>These lists of unique conflicts at coarser taxonomic levels are useful for fixing the conflicts in the properly formatted FreshTrain release. The lists of unique conflicts at lineage, clade, and tribe level are useful as a quick look-up for the differences between the FreshTrain nomenclature and Silva. For example, some paper is talking about hgcI_clade being abundant, you can ctrl-find and oh, it’s acI.</p>
+<p><br></p>
+</div>
+</div>
+<div id="fix-taxonomy-files" class="section level2">
+<h2>Fix taxonomy files</h2>
+<div id="change-coarse-level-conflicts-for-each-lineage" class="section level4">
+<h4>Change coarse-level conflicts for each lineage</h4>
+<pre class="bash"><code>$ Rscript fix_coarse_database_conflicts.R run_taxass/conflicts_database/ run_taxass/FT.taxonomy FT_noconflicts.taxonomy</code></pre>
 <table>
 <colgroup>
 <col width="40%"></col>
@@ -1988,62 +2218,162 @@ JQ771493.AKOEnri2   Archaea;Euryarchaeota;Thermococci;Methanofastidiosales;uncul
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>reformat_fasta.R</code></td>
-<td>Name of script.</td>
+<td><code>fix_coarse_database_conflicts.R</code></td>
+<td>name of script</td>
 </tr>
 <tr class="even">
-<td><code>silva.nr_v138.align</code></td>
-<td>input mothur-formatted taxonomy file</td>
+<td><code>run_taxass/conflicts_database/</code></td>
+<td>folder with conflict .csv files created by <code>find_classification_disagreements.R</code></td>
 </tr>
 <tr class="odd">
-<td><code>silva.nr_v138_unaligned.fasta</code></td>
-<td>output mothur-formatted taxonomy file with no no U’s, dots, or dashes</td>
+<td><code>run_taxass/FT.taxonomy</code></td>
+<td>FreshTrain version, semicolon delimited not mothur-formatted</td>
 </tr>
 <tr class="even">
-<td><code>format.seqIDs</code></td>
-<td>This could say anything. As long as the 3rd argument isn’t blank, the script will delete any blank space in the sequence ID lines, along with everything after the first blank.</td>
+<td><code>FT_noconflicts.taxonomy</code></td>
+<td>Created new version of FreshTrain, also semicolon delimited</td>
 </tr>
+</tbody>
+</table>
+<p>The terminal output lists all of the changes being made, but these can also be easily viewed in excel in the .csv conflict files.</p>
+<p><br></p>
+</div>
+</div>
+</div>
+<div id="double-check" class="section level1">
+<h1>Double-check</h1>
+<div id="check-monophyletic" class="section level2">
+<h2>Check monophyletic</h2>
+<div id="back-to-mothur-format" class="section level4">
+<h4>Back to mothur-format</h4>
+<pre class="bash"><code>./replace_first_semicolon_with_tab.sh FT_noconflicts.taxonomy FT_noconflicts_mothur.taxonomy</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
 <tr class="odd">
-<td>Leave 4th argument blank. It would tell it to find all the <code>U</code>s and replace them with <code>T</code>s but there are no U’s in silva so it would just waste time.</td>
-<td></td>
+<td><code>FT_noconflicts.taxonomy</code></td>
+<td>input (semicolon delimited)</td>
+</tr>
+<tr class="even">
+<td><code>FT_noconflicts_mothur.taxonomy</code></td>
+<td>output (mothur formatted)</td>
 </tr>
 </tbody>
 </table>
 <p><br></p>
 </div>
+<div id="double-check-that-no-new-non-unique-names-have-emerged" class="section level4">
+<h4>Double-check that no new non-unique names have emerged</h4>
+<p>It’s possible that after changing the coarse-level names to match SILVA a reference in the FreshTrain could end up with phylogenetic conflicts (so structural conflicts beyond new names). This means a daughter name could have two different parent names (i.e. not be monophyletic). These should all be fixed manually in ARB. Run the reformatting script and read it’s output carefully to check for problems.</p>
+<pre class="bash"><code>Rscript reformat_taxonomy_nomenclature.R FT_noconflicts_mothur.taxonomy FT_noconflicts_mothur_unnamed.taxonomy FreshTrain</code></pre>
+<p>This is what to look for in the terminal output:</p>
+<pre class="bash"><code>$ Rscript reformat_taxonomy_nomenclature.R FT_noconflicts_mothur.taxonomy FT_noconflicts_unnamed.taxonomy FreshTrain
+
+# the extra column is from the end-of-line semicolons, expect this message
+database imported with an extra 9th column containing: V9  . This column was removed.
+
+# all blanks should have been changed previously
+changing 0 blanks to say &quot;unnamed&quot;
+
+# Here it is identifying names that are the same at two different taxon-levels. 
+# There shouldn't be any, although if there are the fix by this script is fine (as long as doesn't result in conflict with SILVA)
+No duplicated names across taxa-levels.
+
+# Here it's stripping everything with &quot;unnamed&quot; to be only &quot;unnamed&quot;
+# And then it will change it back later (so just ignore)
+changing 423
+ unnamed.Betaproteobacteria.l unnamed.Bacteroidetes.l unnamed.verI-A.c unnamed.alfVI.c unnamed.betIV.c unnamed.bacI.c unnamed.betVII.c unnamed.bacII.c unnamed.bacV.c unnamed.LD19.c unnamed.bacVI.c unnamed.Luna3.c unnamed.acTH1.c unnamed.acV.c unnamed.alfVIII.c unnamed.alfIII.c unnamed.betVI.c 
+to say &quot;unnamed&quot;
+
+# It shouldn't find any other words for unclassified than &quot;unnamed&quot;
+# so the rest of these should all be zero:
+changing 0
+
+to say &quot;unnamed&quot;
+changing 0
+
+to say &quot;unnamed&quot;
+
+# Here is where it checks for multiple parent names at each taxon level
+# There should only be the levels it's checking at listed, NO NAMES should be changed!!
+# If any names are changed here, these are the ones that should be manually edited in ARB.
+at level  2
+at level  3
+at level  4
+at level  5
+at level  6
+at level  7
+
+Made file:  FT_noconflicts_unnamed.taxonomy</code></pre>
 </div>
 </div>
-<div id="identify-conflicts" class="section level1">
-<h1>Identify Conflicts</h1>
-<div id="classify-freshtrain-with-silva" class="section level2">
-<h2>Classify FreshTrain with Silva</h2>
+<div id="check-no-conflicts" class="section level2">
+<h2>Check no conflicts</h2>
+<div id="re-compare-with-silva" class="section level4">
+<h4>Re-compare with SILVA</h4>
+<pre class="bash"><code>sed 's/[[:blank:]]/\;/' &lt;FT_noconflicts_unnamed.taxonomy &gt;FT_noconflicts_unnamed_semicol.taxonomy
+
+mkdir conflicts_fixed
+
+Rscript find_classification_disagreements.R FT.taxonomy FT_with_silva.taxonomy NA conflicts_database NA NA 70 database </code></pre>
+<table>
+<colgroup>
+<col width="45%"></col>
+<col width="54%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>find_classification_disagreements.R</code></td>
+<td>name of script</td>
+</tr>
+<tr class="even">
+<td><code>FT.taxonomy</code></td>
+<td>The FreshTrain classifications (<code>custom.custom.taxonomy</code>), semicolon delimited</td>
+</tr>
+<tr class="odd">
+<td><code>FT_with_silva.taxonomy</code></td>
+<td>The Silva classifications of the FreshTrain (<code>custom.general.taxonomy</code>), semicolon delimited</td>
+</tr>
+<tr class="even">
+<td><code>NA</code></td>
+<td>NA is typed as a placeholder here</td>
+</tr>
+<tr class="odd">
+<td><code>conflicts_database</code></td>
+<td>results folder</td>
+</tr>
+<tr class="even">
+<td><code>NA</code></td>
+<td>NA is typed as a placeholder here</td>
+</tr>
+<tr class="odd">
+<td><code>NA</code></td>
+<td>NA is typed as a placeholder here</td>
+</tr>
+<tr class="even">
+<td><code>70</code></td>
+<td>this is the p-value cutoff for the general database assignments of the custom database fastas. This determines if a classification is good enough to be named or should be “unclassified.”</td>
+</tr>
+<tr class="odd">
+<td><code>database</code></td>
+<td>This flag tells the script you are comparing two databases instead of OTU classifications.</td>
+</tr>
+</tbody>
+</table>
+<p>There should be no conflicts left!</p>
+<p>All done!</p>
 </div>
-</div>
-<div id="remove-structural-conflicts" class="section level1">
-<h1>Remove structural conflicts</h1>
-<p>A few references in the FreshTrain end up with phylogenetic conflicts (so structural conflicts beyond new names). These were identified because organisms assigned the same FreshTrain lineage had different SILVA orders, resulting in a structure that is not monophyletic. With manual examination, they had very few references in the FreshTrain, so to fix this problem we simply remove the less-well-represented half of the references with conflicting names.</p>
-<p>I started to make a script to do it <code>remove_non-monophyletic_refs_for_SILVA-compatibility.R</code> but then I decided it really wasn’t worth the effor because I’m only doing it once. So I manually removed in text wrangler:</p>
-<div id="v132" class="section level3">
-<h3>v132</h3>
-<p>in FreshTrain these are all “Actinomycetales acSTL.”<br />
-in SILVA 132 they are either order “Frankiales” or “PeM15”.</p>
-<p>Remove all “PeM15” refs from SILVA v132 FreshTrain-compatible:</p>
-<pre><code>AbmAct53  
-LaeeEE00p1
-PavinActino1</code></pre>
-</div>
-<div id="v128" class="section level3">
-<h3>v128</h3>
-<p>Same issue with acSTL, but different ones. I know, super weird it’s not the same.</p>
-<p>Remove all “PeM15” refs from SILVA v128 FreshTrain-compatible:</p>
-<pre><code>LakecEC4
-LakStec6
-PavinActino1</code></pre>
-<p>Also an issue with betV. In FreshTrain they’re all “undefined betV”.<br />
-In SILVA 128 they are either order “Nitrosomonadales” or “TRA3-20”.</p>
-<p>Remove all “TRA3-20” refs from SILVA v128 FreshTrain-compatible:</p>
-<pre><code>LiUU2018
-LiUU2019</code></pre>
 </div>
 </div>
 

@@ -85,11 +85,11 @@ if (!is.na(userprefs[3])){
  
 
 # # Troubleshoot with local paths:
-# cat("crap forgot to comment out file paths!!!")
+# cat("\n\nyou forgot to comment out file paths!!!\n\n")
 # # mothur.formatted.tax <- "../../StartFiles-Databases/Silva.nr_v138/silva.nr_v138.tax"
 # # mothur.formatted.tax <- "../../StartFiles-Databases/withGG/general.taxonomy"
-# mothur.formatted.tax <- "../../2020-06-02_update_freshtrain/FT_semicol_noprefix_mothur-fmt.tax"
-# new.tax.file <- "../../2020-06-02_update_freshtrain/FT_semicol_noprefix_mothur-fmt_unnamed.tax"
+# mothur.formatted.tax <- "../../2020-06-02_update_freshtrain/FT_noconflicts_mothur.taxonomy"
+# new.tax.file <- "../../2020-06-02_update_freshtrain/FT_noconflicts_unnamed.taxonomy"
 # file.type <- "FreshTrain"
 # # file.type <- "General"
 
@@ -139,6 +139,10 @@ make.taxon.names.unique.across.levels <- function(tax, abbr){
   }
   non.uniq.names <- all.names[duplicated(all.names)]
   non.uniq.names <- unique(non.uniq.names)
+  non.uniq.names <- grep(pattern = "unnamed", x = non.uniq.names, ignore.case = F, value = T, invert = T)
+  if(length(non.uniq.names) == 0){
+    cat("No duplicated names across taxa-levels.\n")
+  }
   for (t in 1:ncol(tax)){
     for (n in 1:length(non.uniq.names)){
       index <- which(tax[ ,t] == non.uniq.names[n])

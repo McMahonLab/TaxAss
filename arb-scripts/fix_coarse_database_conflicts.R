@@ -7,11 +7,11 @@
 
 # ---- input ----
 
-userprefs <- commandArgs(trailingOnly = TRUE){
-  folder.path <- userprefs[1]
-  old.FreshTrain <- userprefs[2]
-  created.noconflict.FreshTrain <- userprefs[3]
-}
+userprefs <- commandArgs(trailingOnly = TRUE)
+folder.path <- userprefs[1]
+old.FreshTrain <- userprefs[2]
+created.noconflict.FreshTrain <- userprefs[3]
+
 
 
 # # Troubleshoot with local paths

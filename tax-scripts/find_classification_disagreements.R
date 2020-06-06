@@ -356,9 +356,18 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
   num.mismatches[t] <- length(index)
   
   if (Database == TRUE){
-    # identify unique mismatched upper-names of lineages (generate for database comparison)
-    unique.conflicts <- cbind(gg[index,1:(t+1), drop=F], fw[index,1:6, drop=F])
-    check.files.match(GGtable = unique.conflicts[ ,1:(t+1), drop=F], FWtable = unique.conflicts[ ,(t+2):(t+7), drop=F])
+    
+    # At coarse levels, identify unique mismatched upper-names of lineages (to change in FreshTrain release)
+    if (t <= 5){
+      check.files.match(GGtable = gg[index,1:(t+1), drop=F], FWtable = fw[index,1:6, drop=F])
+      unique.conflicts <- cbind(  gg[index,1:(t+1), drop=F],           fw[index,1:6, drop=F])
+    
+    # At fine levels, get a list of FreshTrain vs. Silva names (to use as a reference of what non-FreshTrain names mean)
+    }else{ 
+      check.files.match(GGtable = gg[index,1:(t+1), drop=F], FWtable = fw[index,1:(t+1), drop=F])
+      unique.conflicts <- cbind(  gg[index,1:(t+1), drop=F],           fw[index,1:(t+1), drop=F])
+    }
+    
     unique.conflicts <- unique.conflicts[ ,-c(1,t+2)]
     unique.conflicts <- unique(unique.conflicts)
     unique.conflict.file <- paste(results.folder.path, "/", "unique_conflicts_", t, "_", taxa.names[t],".csv", sep="")
@@ -492,7 +501,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   # Files written in find.conflicting.names() loop: the "TaxaLevel_conflicts.csv" that puts taxonomy tables side by side
   # File written afer loop: the "conflicts_summary.csv" that lists how many conflicts were at each level, and how many seqs were classified by FW
   num.mismatches <- create.summary.vector()
-  for (t in 1:5){
+  for (t in 1:7){
     num.mismatches <- find.conflicting.names(FWtable = fw, GGtable = gg,
                                              FWtable_percents = fw.percents, 
                                              GGtable_percents = gg.percents, 

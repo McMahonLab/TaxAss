@@ -19,7 +19,7 @@ created.file.folder <- userprefs[2]
 
 # # Manual Troubleshooting
 # cat("\n\nForgot to comment out file paths!!!\n")
-# input.file <- "../../2020-06-02_update_freshtrain/FT_semicol_noprefix_mothur_unnamed.tax" 
+# input.file <- "../../2020-06-02_update_freshtrain/FT_semicol_noprefix_mothur_unnamed.tax"
 # created.file.folder <- "../../2020-06-02_update_freshtrain/"
 
 # ---- functions ----
@@ -65,11 +65,13 @@ if (length(index) > 0){
   i <- order(nft[ ,2], nft[ ,3], nft[ ,4], nft[ ,5], nft[ ,6], nft[ ,7], nft[ ,8])
   nft <- nft[i, ]
   
+  ft <- ft[-index, ]
+  
 }else{
   cat("There are no unclassified lineages in the FreshTrain export- good.\n")
 }
 
-ft <- ft[-index, ]
+
 
 ft.lineages <- unique(ft[ ,2:6])
 i <- order(ft.lineages[ ,1], ft.lineages[ ,2], ft.lineages[ ,3], ft.lineages[ ,4], ft.lineages[ ,5])

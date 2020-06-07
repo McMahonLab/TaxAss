@@ -59,5 +59,5 @@ FreshTrain <- change.conflicts(t = 4, conflicts = order.conflicts, ft = FreshTra
 
 # ---- export ----
 
-cat("Making file: ", created.noconflict.FreshTrain, "\n")
+cat("\nMaking file: ", created.noconflict.FreshTrain, "\n")
 write.table(x = FreshTrain, file = created.noconflict.FreshTrain, append = F, quote = F, sep = ";", row.names = F)

@@ -2066,14 +2066,14 @@ Bacteria,Actinobacteria.P,Actinobacteria.C,Frankiales,acI</code></pre>
 <p><strong>Numbers refer to TaxAss Directions</strong><br />
 <br></p>
 </div>
-<div id="general-only-taxonomy" class="section level4">
-<h4>11. general-only taxonomy</h4>
+<div id="classify-the-freshtrain-references-with-the-silva-database" class="section level4">
+<h4>Classify the FreshTrain references with the Silva database</h4>
 <pre class="bash"><code>mothur &quot;#classify.seqs(fasta=FT_unaligned.fasta, template=silva.nr_v138_unaligned.fasta,
 taxonomy=silva.nr_v138_unnamed.tax, method=wang, probs=T, processors=2, cutoff=0)&quot;
 
-cat FT_unaligned.nr_v138_unnamed.wang.taxonomy &gt; FT_with_silva.taxonomy</code></pre>
+mv FT_unaligned.nr_v138_unnamed.wang.taxonomy FT.silva.taxonomy</code></pre>
 <p>Looks like this now:</p>
-<pre><code>$ head -n 5 FT_with_silva.taxonomy
+<pre><code>$ head -n 5 FT.silva.taxonomy
 ClonLD29    Bacteria(100);Verrucomicrobiota(100);Verrucomicrobiae(100);Chthoniobacterales(100);Chthoniobacteraceae(100);LD29(100);unnamed.LD29(100);
 FlvAquat    Bacteria(100);Bacteroidota(100);Bacteroidia(100);Flavobacteriales(100);Flavobacteriaceae(100);Flavobacterium(100);unnamed.Flavobacterium(100);
 B61FlSp2    Bacteria(100);Bacteroidota(100);Bacteroidia(100);Cytophagales(100);Spirosomaceae(100);Flectobacillus(100);unnamed.Flectobacillus(100);
@@ -2081,22 +2081,20 @@ St0rFro8    Bacteria(100);Proteobacteria(100);Alphaproteobacteria(100);Rhodobact
 St0rFr10    Bacteria(100);Proteobacteria(100);Alphaproteobacteria(100);Sphingomonadales(100);Sphingomonadaceae(100);Novosphingobium(100);unnamed.Novosphingobium(100);</code></pre>
 <p><br></p>
 </div>
-<div id="reformat-taxonomy-files" class="section level4">
-<h4>12. reformat taxonomy files</h4>
-<pre class="bash"><code>sed 's/[[:blank:]]/\;/' &lt;FT_with_silva.taxonomy &gt;temp
-mv temp FT_with_silva.taxonomy
+<div id="go-back-to-all-semicolon-delimited" class="section level4">
+<h4>Go back to all semicolon delimited</h4>
+<pre class="bash"><code>sed 's/[[:blank:]]/\;/' &lt;FT.silva.taxonomy &gt;FT.silva_semicol.taxonomy
 
-sed 's/[[:blank:]]/\;/' &lt;FT_semicol_noprefix_mothur_unnamed.tax &gt;temp
-mv temp FT.taxonomy</code></pre>
+$ sed 's/[[:blank:]]/\;/' &lt;FT_semicol_noprefix_mothur_unnamed.tax &gt; FT_semicol_noprefix_mothur_unnamed_semicol.tax</code></pre>
 <p>FreshTrain looks like this now:</p>
-<pre><code>$ head -n 5 FT.taxonomy
+<pre><code>$ head -n 5 FT_semicol_noprefix_mothur_unnamed_semicol.tax
 ClonLD29;Bacteria;Verrucomicrobia;Spartobacteria;Chthoniobacterales;verI-A;unnamed.verI-A;unnamed.verI-A;
 FlvAquat;Bacteria;Bacteroidetes;Flavobacteriia;Flavobacteriales;bacII;bacII-A;unnamed.bacII-A;
 B61FlSp2;Bacteria;Bacteroidetes;Cytophagia;Cytophagales;bacIII;bacIII-A;unnamed.bacIII-A;
 St0rFro8;Bacteria;Proteobacteria;Alphaproteobacteria;Rhodobacterales;alfVI;unnamed.alfVI;unnamed.alfVI;
 St0rFr10;Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;alfIV;alfIV-A;Novo-A2;</code></pre>
 <p>And Silva-Classified FreshTrain looks like this now:</p>
-<pre><code>$ head -n 5 FT_with_silva.taxonomy
+<pre><code>$ head -n 5 FT.silva_semicol.taxonomy
 ClonLD29;Bacteria(100);Verrucomicrobiota(100);Verrucomicrobiae(100);Chthoniobacterales(100);Chthoniobacteraceae(100);LD29(100);unnamed.LD29(100);
 FlvAquat;Bacteria(100);Bacteroidota(100);Bacteroidia(100);Flavobacteriales(100);Flavobacteriaceae(100);Flavobacterium(100);unnamed.Flavobacterium(100);
 B61FlSp2;Bacteria(100);Bacteroidota(100);Bacteroidia(100);Cytophagales(100);Spirosomaceae(100);Flectobacillus(100);unnamed.Flectobacillus(100);
@@ -2111,7 +2109,7 @@ St0rFr10;Bacteria(100);Proteobacteria(100);Alphaproteobacteria(100);Sphingomonad
 <h4>13. compare taxonomy files</h4>
 <pre class="bash"><code>mkdir conflicts_database
 
-Rscript find_classification_disagreements.R FT.taxonomy FT_with_silva.taxonomy NA conflicts_database NA NA 70 database </code></pre>
+$ Rscript find_classification_disagreements.R FT_semicol_noprefix_mothur_unnamed_semicol.tax FT.silva_semicol.taxonomy NA conflicts_database NA NA 70 database </code></pre>
 <table>
 <colgroup>
 <col width="45%"></col>
@@ -2129,11 +2127,11 @@ Rscript find_classification_disagreements.R FT.taxonomy FT_with_silva.taxonomy N
 <td>name of script</td>
 </tr>
 <tr class="even">
-<td><code>FT.taxonomy</code></td>
+<td><code>FT_semicol_noprefix_mothur_unnamed_semicol.tax</code></td>
 <td>The FreshTrain classifications (<code>custom.custom.taxonomy</code>)</td>
 </tr>
 <tr class="odd">
-<td><code>FT_with_silva.taxonomy</code></td>
+<td><code>FT.silva_semicol.taxonomy</code></td>
 <td>The Silva classifications of the FreshTrain (<code>custom.general.taxonomy</code>)</td>
 </tr>
 <tr class="even">
@@ -2142,7 +2140,7 @@ Rscript find_classification_disagreements.R FT.taxonomy FT_with_silva.taxonomy N
 </tr>
 <tr class="odd">
 <td><code>conflicts_database</code></td>
-<td>results folder</td>
+<td>results folder (must already exist)</td>
 </tr>
 <tr class="even">
 <td><code>NA</code></td>
@@ -2204,7 +2202,7 @@ Bacteria    Actinobacteriota    Actinobacteria  Frankiales  Sporichthyaceae Bact
 <h2>Fix taxonomy files</h2>
 <div id="change-coarse-level-conflicts-for-each-lineage" class="section level4">
 <h4>Change coarse-level conflicts for each lineage</h4>
-<pre class="bash"><code>$ Rscript fix_coarse_database_conflicts.R run_taxass/conflicts_database/ run_taxass/FT.taxonomy FT_noconflicts.taxonomy</code></pre>
+<pre class="bash"><code>Rscript fix_coarse_database_conflicts.R conflicts_database/ FT_semicol_noprefix_mothur_unnamed_semicol.tax FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts.tax</code></pre>
 <table>
 <colgroup>
 <col width="40%"></col>
@@ -2236,7 +2234,74 @@ Bacteria    Actinobacteriota    Actinobacteria  Frankiales  Sporichthyaceae Bact
 </tbody>
 </table>
 <p>The terminal output lists all of the changes being made, but these can also be easily viewed in excel in the .csv conflict files.</p>
-<p><br></p>
+<p>For example, the terminal output looks like:</p>
+<pre><code>$ Rscript fix_coarse_database_conflicts.R conflicts_database/ FT_semicol_noprefix_mothur_unnamed_semicol.tax FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts.tax
+
+Kingdom conflicts
+No conflicts
+
+Phylum conflicts
+Changing  Luna1  from  Actinobacteria.P  to  Actinobacteriota
+Changing  acI  from  Actinobacteria.P  to  Actinobacteriota
+Changing  acIV  from  Actinobacteria.P  to  Actinobacteriota
+Changing  acSTL  from  Actinobacteria.P  to  Actinobacteriota
+Changing  Luna3  from  Actinobacteria.P  to  Actinobacteriota
+Changing  acIII  from  Actinobacteria.P  to  Actinobacteriota
+Changing  acTH1  from  Actinobacteria.P  to  Actinobacteriota
+Changing  acV  from  Actinobacteria.P  to  Actinobacteriota
+Changing  bacIII  from  Bacteroidetes  to  Bacteroidota
+Changing  bacI  from  Bacteroidetes  to  Bacteroidota
+Changing  bacV  from  Bacteroidetes  to  Bacteroidota
+Changing  bacVI  from  Bacteroidetes  to  Bacteroidota
+Changing  bacII  from  Bacteroidetes  to  Bacteroidota
+Changing  bacIV  from  Bacteroidetes  to  Bacteroidota
+Changing  verI-A  from  Verrucomicrobia  to  Verrucomicrobiota
+Changing  verI-B  from  Verrucomicrobia  to  Verrucomicrobiota
+Changing  acTH2  from  Actinobacteria.P  to  Actinobacteriota
+
+Class conflicts
+Changing  Luna1  from  Actinobacteria.C  to  Actinobacteria
+Changing  acI  from  Actinobacteria.C  to  Actinobacteria
+Changing  acSTL  from  Actinobacteria.C  to  Actinobacteria
+Changing  Luna3  from  Actinobacteria.C  to  Actinobacteria
+Changing  acIII  from  Actinobacteria.C  to  Actinobacteria
+Changing  acTH1  from  Actinobacteria.C  to  Actinobacteria
+Changing  betI  from  Betaproteobacteria  to  Gammaproteobacteria
+Changing  betIII  from  Betaproteobacteria  to  Gammaproteobacteria
+Changing  bacIII  from  Cytophagia  to  Bacteroidia
+Changing  betII  from  Betaproteobacteria  to  Gammaproteobacteria
+Changing  bacI  from  Sphingobacteriia  to  Bacteroidia
+Changing  bacV  from  Flavobacteriia  to  Bacteroidia
+Changing  bacVI  from  Sphingobacteriia  to  Bacteroidia
+Changing  bacII  from  Flavobacteriia  to  Bacteroidia
+Changing  bacIV  from  Sphingobacteriia  to  Bacteroidia
+Changing  verI-A  from  Spartobacteria  to  Verrucomicrobiae
+Changing  betVI  from  Betaproteobacteria  to  Gammaproteobacteria
+Changing  verI-B  from  Spartobacteria  to  Verrucomicrobiae
+Changing  betVII  from  Betaproteobacteria  to  Gammaproteobacteria
+Changing  betIV  from  Betaproteobacteria  to  Gammaproteobacteria
+Changing  acTH2  from  Actinobacteria.C  to  Actinobacteria
+Changing  betV  from  Betaproteobacteria  to  Gammaproteobacteria
+
+Order conflicts
+Changing  acIV  from  Acidimicrobiales  to  Microtrichales
+Changing  Luna3  from  Frankiales  to  Micrococcales
+Changing  alfVIII  from  Rhodospirillales  to  Acetobacterales
+Changing  bacI  from  Sphingobacteriales  to  Chitinophagales
+Changing  bacIV  from  Sphingobacteriales  to  Chitinophagales
+Changing  betIV  from  Methylophilales  to  Burkholderiales
+Changing  gamII  from  Enterobacteriales  to  Enterobacterales
+Changing  gamIV  from  Pseudomonadales  to  Alteromonadales
+
+Making file:  FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts.tax</code></pre>
+<p>And the taxonomy file is semicolon delimited:</p>
+<pre><code>$ head -n 5 FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts.tax
+ClonLD29;Bacteria;Verrucomicrobiota;Verrucomicrobiae;Chthoniobacterales;verI-A;unnamed.verI-A;unnamed.verI-A;
+FlvAquat;Bacteria;Bacteroidota;Bacteroidia;Flavobacteriales;bacII;bacII-A;unnamed.bacII-A;
+B61FlSp2;Bacteria;Bacteroidota;Bacteroidia;Cytophagales;bacIII;bacIII-A;unnamed.bacIII-A;
+St0rFro8;Bacteria;Proteobacteria;Alphaproteobacteria;Rhodobacterales;alfVI;unnamed.alfVI;unnamed.alfVI;
+St0rFr10;Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;alfIV;alfIV-A;Novo-A2;</code></pre>
+<p><br> <br></p>
 </div>
 </div>
 </div>
@@ -2246,8 +2311,12 @@ Bacteria    Actinobacteriota    Actinobacteria  Frankiales  Sporichthyaceae Bact
 <h2>Check monophyletic</h2>
 <div id="back-to-mothur-format" class="section level4">
 <h4>Back to mothur-format</h4>
-<pre class="bash"><code>./replace_first_semicolon_with_tab.sh FT_noconflicts.taxonomy FT_noconflicts_mothur.taxonomy</code></pre>
+<pre class="bash"><code>./replace_first_semicolon_with_tab.sh FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts.tax FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur.tax</code></pre>
 <table>
+<colgroup>
+<col width="40%"></col>
+<col width="60%"></col>
+</colgroup>
 <thead>
 <tr class="header">
 <th>Argument</th>
@@ -2256,11 +2325,11 @@ Bacteria    Actinobacteriota    Actinobacteria  Frankiales  Sporichthyaceae Bact
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>FT_noconflicts.taxonomy</code></td>
+<td><code>FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts.tax</code></td>
 <td>input (semicolon delimited)</td>
 </tr>
 <tr class="even">
-<td><code>FT_noconflicts_mothur.taxonomy</code></td>
+<td><code>FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur.tax</code></td>
 <td>output (mothur formatted)</td>
 </tr>
 </tbody>
@@ -2310,17 +2379,25 @@ at level  6
 at level  7
 
 Made file:  FT_noconflicts_unnamed.taxonomy</code></pre>
+<p><br></p>
+</div>
+<div id="check-that-reformatting-changed-nothing" class="section level4">
+<h4>Check that reformatting changed nothing</h4>
+<pre class="bash"><code>Rscript check_files_the_same.R FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur.tax FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur_unnamed.tax</code></pre>
+<p>arguments: <code>Rscript</code> <code>check_files_the_same.R</code> <code>file1</code> <code>file2</code></p>
+<p>It will either say “Files are all equal” or it will print the error given by the R function <code>all.equal()</code><br />
+<br></p>
 </div>
 </div>
 <div id="check-no-conflicts" class="section level2">
 <h2>Check no conflicts</h2>
 <div id="re-compare-with-silva" class="section level4">
 <h4>Re-compare with SILVA</h4>
-<pre class="bash"><code>sed 's/[[:blank:]]/\;/' &lt;FT_noconflicts_unnamed.taxonomy &gt;FT_noconflicts_unnamed_semicol.taxonomy
+<pre class="bash"><code>sed 's/[[:blank:]]/\;/' &lt;FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur_unnamed.tax &gt;FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur_unnamed_semicol.tax
 
 mkdir conflicts_fixed
 
-Rscript find_classification_disagreements.R FT.taxonomy FT_with_silva.taxonomy NA conflicts_database NA NA 70 database </code></pre>
+Rscript find_classification_disagreements.R FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur_unnamed_semicol.tax FT.silva_semicol.taxonomy NA conflicts_fixed NA NA 70 database</code></pre>
 <table>
 <colgroup>
 <col width="45%"></col>
@@ -2338,11 +2415,11 @@ Rscript find_classification_disagreements.R FT.taxonomy FT_with_silva.taxonomy N
 <td>name of script</td>
 </tr>
 <tr class="even">
-<td><code>FT.taxonomy</code></td>
+<td><code>FT_semicol_noprefix_mothur_unnamed_semicol</code><br><code>_noconflicts_mothur_unnamed_semicol.tax</code></td>
 <td>The FreshTrain classifications (<code>custom.custom.taxonomy</code>), semicolon delimited</td>
 </tr>
 <tr class="odd">
-<td><code>FT_with_silva.taxonomy</code></td>
+<td><code>FT.silva_semicol.taxonomy</code></td>
 <td>The Silva classifications of the FreshTrain (<code>custom.general.taxonomy</code>), semicolon delimited</td>
 </tr>
 <tr class="even">
@@ -2350,7 +2427,7 @@ Rscript find_classification_disagreements.R FT.taxonomy FT_with_silva.taxonomy N
 <td>NA is typed as a placeholder here</td>
 </tr>
 <tr class="odd">
-<td><code>conflicts_database</code></td>
+<td><code>conflicts_fixed</code></td>
 <td>results folder</td>
 </tr>
 <tr class="even">
@@ -2371,9 +2448,13 @@ Rscript find_classification_disagreements.R FT.taxonomy FT_with_silva.taxonomy N
 </tr>
 </tbody>
 </table>
-<p>There should be no conflicts left!</p>
+<p>Look inside the generated csv files- there should be no conflicts left!</p>
 <p>All done!</p>
+<p><br> <br></p>
 </div>
+</div>
+<div id="save-new-release-versions" class="section level2">
+<h2>Save New Release Versions!</h2>
 </div>
 </div>
 

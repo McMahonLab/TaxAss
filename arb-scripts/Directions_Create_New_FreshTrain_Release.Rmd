@@ -421,17 +421,17 @@ Add:
 **Numbers refer to TaxAss Directions**  
 <br>
 
-#### 11. general-only taxonomy  
+#### Classify the FreshTrain references with the Silva database  
 ```{bash, eval=F}
 mothur "#classify.seqs(fasta=FT_unaligned.fasta, template=silva.nr_v138_unaligned.fasta,
 taxonomy=silva.nr_v138_unnamed.tax, method=wang, probs=T, processors=2, cutoff=0)"
 
-cat FT_unaligned.nr_v138_unnamed.wang.taxonomy > FT_with_silva.taxonomy
+mv FT_unaligned.nr_v138_unnamed.wang.taxonomy FT.silva.taxonomy
 ```  
 
 Looks like this now:  
 ```
-$ head -n 5 FT_with_silva.taxonomy
+$ head -n 5 FT.silva.taxonomy
 ClonLD29	Bacteria(100);Verrucomicrobiota(100);Verrucomicrobiae(100);Chthoniobacterales(100);Chthoniobacteraceae(100);LD29(100);unnamed.LD29(100);
 FlvAquat	Bacteria(100);Bacteroidota(100);Bacteroidia(100);Flavobacteriales(100);Flavobacteriaceae(100);Flavobacterium(100);unnamed.Flavobacterium(100);
 B61FlSp2	Bacteria(100);Bacteroidota(100);Bacteroidia(100);Cytophagales(100);Spirosomaceae(100);Flectobacillus(100);unnamed.Flectobacillus(100);
@@ -441,18 +441,16 @@ St0rFr10	Bacteria(100);Proteobacteria(100);Alphaproteobacteria(100);Sphingomonad
 
 <br>
 
-#### 12. reformat taxonomy files    
+#### Go back to all semicolon delimited    
 ```{bash, eval=F}
-sed 's/[[:blank:]]/\;/' <FT_with_silva.taxonomy >temp
-mv temp FT_with_silva.taxonomy
+sed 's/[[:blank:]]/\;/' <FT.silva.taxonomy >FT.silva_semicol.taxonomy
 
-sed 's/[[:blank:]]/\;/' <FT_semicol_noprefix_mothur_unnamed.tax >temp
-mv temp FT.taxonomy
+$ sed 's/[[:blank:]]/\;/' <FT_semicol_noprefix_mothur_unnamed.tax > FT_semicol_noprefix_mothur_unnamed_semicol.tax
 ```  
 
 FreshTrain looks like this now:  
 ```
-$ head -n 5 FT.taxonomy
+$ head -n 5 FT_semicol_noprefix_mothur_unnamed_semicol.tax
 ClonLD29;Bacteria;Verrucomicrobia;Spartobacteria;Chthoniobacterales;verI-A;unnamed.verI-A;unnamed.verI-A;
 FlvAquat;Bacteria;Bacteroidetes;Flavobacteriia;Flavobacteriales;bacII;bacII-A;unnamed.bacII-A;
 B61FlSp2;Bacteria;Bacteroidetes;Cytophagia;Cytophagales;bacIII;bacIII-A;unnamed.bacIII-A;
@@ -462,7 +460,7 @@ St0rFr10;Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;alfIV;alfI
 And Silva-Classified FreshTrain looks like this now:  
 
 ```
-$ head -n 5 FT_with_silva.taxonomy
+$ head -n 5 FT.silva_semicol.taxonomy
 ClonLD29;Bacteria(100);Verrucomicrobiota(100);Verrucomicrobiae(100);Chthoniobacterales(100);Chthoniobacteraceae(100);LD29(100);unnamed.LD29(100);
 FlvAquat;Bacteria(100);Bacteroidota(100);Bacteroidia(100);Flavobacteriales(100);Flavobacteriaceae(100);Flavobacterium(100);unnamed.Flavobacterium(100);
 B61FlSp2;Bacteria(100);Bacteroidota(100);Bacteroidia(100);Cytophagales(100);Spirosomaceae(100);Flectobacillus(100);unnamed.Flectobacillus(100);
@@ -478,16 +476,16 @@ St0rFr10;Bacteria(100);Proteobacteria(100);Alphaproteobacteria(100);Sphingomonad
 ```{bash, eval=F}
 mkdir conflicts_database
 
-Rscript find_classification_disagreements.R FT.taxonomy FT_with_silva.taxonomy NA conflicts_database NA NA 70 database 
+$ Rscript find_classification_disagreements.R FT_semicol_noprefix_mothur_unnamed_semicol.tax FT.silva_semicol.taxonomy NA conflicts_database NA NA 70 database 
 ```
 
 Argument                              | Description  
 --------------------------------------|----------------------------------------------
 `find_classification_disagreements.R`	|	name of script
-`FT.taxonomy`                       	| The FreshTrain classifications (`custom.custom.taxonomy`)
-`FT_with_silva.taxonomy`					    | The Silva classifications of the FreshTrain (`custom.general.taxonomy`)
+`FT_semicol_noprefix_mothur_unnamed_semicol.tax`                       	| The FreshTrain classifications (`custom.custom.taxonomy`)
+`FT.silva_semicol.taxonomy`					    | The Silva classifications of the FreshTrain (`custom.general.taxonomy`)
 `NA`										              | NA is typed as a placeholder here
-`conflicts_database`						      | results folder
+`conflicts_database`						      | results folder (must already exist)
 `NA`										              | NA is typed as a placeholder here
 `NA`										              | NA is typed as a placeholder here
 `70`										              | this is the p-value cutoff for the general database assignments of the custom database fastas. This determines if a classification is good enough to be named or should be "unclassified." 	
@@ -550,7 +548,7 @@ These lists of unique conflicts at coarser taxonomic levels are useful for fixin
 #### Change coarse-level conflicts for each lineage
 
 ```{bash, eval=F}
-$ Rscript fix_coarse_database_conflicts.R run_taxass/conflicts_database/ run_taxass/FT.taxonomy FT_noconflicts.taxonomy
+Rscript fix_coarse_database_conflicts.R conflicts_database/ FT_semicol_noprefix_mothur_unnamed_semicol.tax FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts.tax
 ```
 Argument  | Description  
 ----------|---------------
@@ -561,7 +559,82 @@ Argument  | Description
 
 The terminal output lists all of the changes being made, but these can also be easily viewed in excel in the .csv conflict files.  
 
+For example, the terminal output looks like:  
+```
+$ Rscript fix_coarse_database_conflicts.R conflicts_database/ FT_semicol_noprefix_mothur_unnamed_semicol.tax FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts.tax
+
+Kingdom conflicts
+No conflicts
+
+Phylum conflicts
+Changing  Luna1  from  Actinobacteria.P  to  Actinobacteriota
+Changing  acI  from  Actinobacteria.P  to  Actinobacteriota
+Changing  acIV  from  Actinobacteria.P  to  Actinobacteriota
+Changing  acSTL  from  Actinobacteria.P  to  Actinobacteriota
+Changing  Luna3  from  Actinobacteria.P  to  Actinobacteriota
+Changing  acIII  from  Actinobacteria.P  to  Actinobacteriota
+Changing  acTH1  from  Actinobacteria.P  to  Actinobacteriota
+Changing  acV  from  Actinobacteria.P  to  Actinobacteriota
+Changing  bacIII  from  Bacteroidetes  to  Bacteroidota
+Changing  bacI  from  Bacteroidetes  to  Bacteroidota
+Changing  bacV  from  Bacteroidetes  to  Bacteroidota
+Changing  bacVI  from  Bacteroidetes  to  Bacteroidota
+Changing  bacII  from  Bacteroidetes  to  Bacteroidota
+Changing  bacIV  from  Bacteroidetes  to  Bacteroidota
+Changing  verI-A  from  Verrucomicrobia  to  Verrucomicrobiota
+Changing  verI-B  from  Verrucomicrobia  to  Verrucomicrobiota
+Changing  acTH2  from  Actinobacteria.P  to  Actinobacteriota
+
+Class conflicts
+Changing  Luna1  from  Actinobacteria.C  to  Actinobacteria
+Changing  acI  from  Actinobacteria.C  to  Actinobacteria
+Changing  acSTL  from  Actinobacteria.C  to  Actinobacteria
+Changing  Luna3  from  Actinobacteria.C  to  Actinobacteria
+Changing  acIII  from  Actinobacteria.C  to  Actinobacteria
+Changing  acTH1  from  Actinobacteria.C  to  Actinobacteria
+Changing  betI  from  Betaproteobacteria  to  Gammaproteobacteria
+Changing  betIII  from  Betaproteobacteria  to  Gammaproteobacteria
+Changing  bacIII  from  Cytophagia  to  Bacteroidia
+Changing  betII  from  Betaproteobacteria  to  Gammaproteobacteria
+Changing  bacI  from  Sphingobacteriia  to  Bacteroidia
+Changing  bacV  from  Flavobacteriia  to  Bacteroidia
+Changing  bacVI  from  Sphingobacteriia  to  Bacteroidia
+Changing  bacII  from  Flavobacteriia  to  Bacteroidia
+Changing  bacIV  from  Sphingobacteriia  to  Bacteroidia
+Changing  verI-A  from  Spartobacteria  to  Verrucomicrobiae
+Changing  betVI  from  Betaproteobacteria  to  Gammaproteobacteria
+Changing  verI-B  from  Spartobacteria  to  Verrucomicrobiae
+Changing  betVII  from  Betaproteobacteria  to  Gammaproteobacteria
+Changing  betIV  from  Betaproteobacteria  to  Gammaproteobacteria
+Changing  acTH2  from  Actinobacteria.C  to  Actinobacteria
+Changing  betV  from  Betaproteobacteria  to  Gammaproteobacteria
+
+Order conflicts
+Changing  acIV  from  Acidimicrobiales  to  Microtrichales
+Changing  Luna3  from  Frankiales  to  Micrococcales
+Changing  alfVIII  from  Rhodospirillales  to  Acetobacterales
+Changing  bacI  from  Sphingobacteriales  to  Chitinophagales
+Changing  bacIV  from  Sphingobacteriales  to  Chitinophagales
+Changing  betIV  from  Methylophilales  to  Burkholderiales
+Changing  gamII  from  Enterobacteriales  to  Enterobacterales
+Changing  gamIV  from  Pseudomonadales  to  Alteromonadales
+
+Making file:  FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts.tax
+```  
+
+And the taxonomy file is semicolon delimited:  
+```
+$ head -n 5 FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts.tax
+ClonLD29;Bacteria;Verrucomicrobiota;Verrucomicrobiae;Chthoniobacterales;verI-A;unnamed.verI-A;unnamed.verI-A;
+FlvAquat;Bacteria;Bacteroidota;Bacteroidia;Flavobacteriales;bacII;bacII-A;unnamed.bacII-A;
+B61FlSp2;Bacteria;Bacteroidota;Bacteroidia;Cytophagales;bacIII;bacIII-A;unnamed.bacIII-A;
+St0rFro8;Bacteria;Proteobacteria;Alphaproteobacteria;Rhodobacterales;alfVI;unnamed.alfVI;unnamed.alfVI;
+St0rFr10;Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;alfIV;alfIV-A;Novo-A2;
+```
+
 <br>
+<br>
+
 
 # Double-check 
 
@@ -570,12 +643,12 @@ The terminal output lists all of the changes being made, but these can also be e
 #### Back to mothur-format  
 
 ```{bash, eval=F}
-./replace_first_semicolon_with_tab.sh FT_noconflicts.taxonomy FT_noconflicts_mothur.taxonomy
+./replace_first_semicolon_with_tab.sh FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts.tax FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur.tax
 ```
 Argument  | Description  
 ----------|---------------
-`FT_noconflicts.taxonomy` | input (semicolon delimited)    
-`FT_noconflicts_mothur.taxonomy` | output (mothur formatted)
+`FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts.tax` | input (semicolon delimited)    
+`FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur.tax` | output (mothur formatted)
 <br>
 
 #### Double-check that no new non-unique names have emerged  
@@ -627,34 +700,52 @@ at level  7
 
 Made file:  FT_noconflicts_unnamed.taxonomy
 ```
+<br>
+
+#### Check that reformatting changed nothing  
+
+```{bash, eval=F}
+Rscript check_files_the_same.R FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur.tax FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur_unnamed.tax
+```
+
+arguments: `Rscript` `check_files_the_same.R` `file1` `file2`  
+
+It will either say "Files are all equal" or it will print the error given by the R function `all.equal()`  
+<br>
 
 ## Check no conflicts  
 
 #### Re-compare with SILVA  
 
 ```{bash, eval=F}
-sed 's/[[:blank:]]/\;/' <FT_noconflicts_unnamed.taxonomy >FT_noconflicts_unnamed_semicol.taxonomy
+sed 's/[[:blank:]]/\;/' <FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur_unnamed.tax >FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur_unnamed_semicol.tax
 
 mkdir conflicts_fixed
 
-Rscript find_classification_disagreements.R FT.taxonomy FT_with_silva.taxonomy NA conflicts_database NA NA 70 database 
+Rscript find_classification_disagreements.R FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur_unnamed_semicol.tax FT.silva_semicol.taxonomy NA conflicts_fixed NA NA 70 database
 ```
 
 Argument                              | Description  
 --------------------------------------|----------------------------------------------
 `find_classification_disagreements.R`	|	name of script
-`FT.taxonomy`                       	| The FreshTrain classifications (`custom.custom.taxonomy`), semicolon delimited
-`FT_with_silva.taxonomy`					    | The Silva classifications of the FreshTrain (`custom.general.taxonomy`), semicolon delimited
+`FT_semicol_noprefix_mothur_unnamed_semicol`<br>`_noconflicts_mothur_unnamed_semicol.tax`                       	| The FreshTrain classifications (`custom.custom.taxonomy`), semicolon delimited
+`FT.silva_semicol.taxonomy`					    | The Silva classifications of the FreshTrain (`custom.general.taxonomy`), semicolon delimited
 `NA`										              | NA is typed as a placeholder here
-`conflicts_database`						      | results folder
+`conflicts_fixed`						      | results folder
 `NA`										              | NA is typed as a placeholder here
 `NA`										              | NA is typed as a placeholder here
 `70`										              | this is the p-value cutoff for the general database assignments of the custom database fastas. This determines if a classification is good enough to be named or should be "unclassified." 	
 `database`								            | This flag tells the script you are comparing two databases instead of OTU classifications.
 
-There should be no conflicts left!
+
+Look inside the generated csv files- there should be no conflicts left!
 
 All done!
+
+<br>
+<br>
+
+## Save New Release Versions!  
 
 
 

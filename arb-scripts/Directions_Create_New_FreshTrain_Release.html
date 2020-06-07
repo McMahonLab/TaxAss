@@ -1538,26 +1538,23 @@ pre code, pre, code {
 <li>fix duplicated taxon names and standardize unnamed nomenclature</li>
 <li>check that only and all expected FreshTrain names are included<br />
 </li>
+<li>repeat until all errors corrected</li>
 </ul></li>
 <li>do a first pass of reformatting Silva
 <ul>
 <li>basic text-based reformatting of fasta file</li>
 <li>fix duplicated taxon names and standardize unnamed nomenclature</li>
 </ul></li>
-<li>identify coarse-level nomenclature disagreements between the databases
+<li>fix coarse-level nomenclature disagreements between the databases
 <ul>
 <li>classify FreshTrain with SILVA<br />
 </li>
 <li>compare coarse-level disagreements</li>
+<li>change FreshTrain coarse-level nomenclature to match Silva<br />
+</li>
+<li>check for errors or mistakes introduced by changes</li>
 </ul></li>
-<li>change FreshTrain coarse-level nomenclature to match Silva
-<ul>
-<li>create a custom python script to reformat FreshTrain names</li>
-</ul></li>
-<li>manually check for non-monophyletic sequences
-<ul>
-<li>manually adjust them</li>
-</ul></li>
+<li>Save the new release version!</li>
 </ul>
 <p><br></p>
 </div>
@@ -1590,6 +1587,22 @@ pre code, pre, code {
 </tr>
 <tr class="odd">
 <td>arb-scripts</td>
+<td>check_files_the_same.R</td>
+</tr>
+<tr class="even">
+<td>arb-scripts</td>
+<td>check_included_lineages.R</td>
+</tr>
+<tr class="odd">
+<td>arb-scripts</td>
+<td>Expected_FreshTrain_Lineages.xlsx</td>
+</tr>
+<tr class="even">
+<td>arb-scripts</td>
+<td>fix_coarse_database_conflicts.R</td>
+</tr>
+<tr class="odd">
+<td>arb-scripts</td>
 <td>remove_gg_taxon-level_prefixes.sh</td>
 </tr>
 <tr class="even">
@@ -1597,18 +1610,14 @@ pre code, pre, code {
 <td>replace_first_semicolon_with_tab.sh</td>
 </tr>
 <tr class="odd">
-<td>arb-scripts</td>
-<td>check_included_lineages.R</td>
+<td>tax-scripts</td>
+<td>find_classification_disagreements.R</td>
 </tr>
 <tr class="even">
-<td>arb-scripts</td>
-<td>Expected_FreshTrain_Lineages.xlsx</td>
-</tr>
-<tr class="odd">
 <td>tax-scripts</td>
 <td>reformat_fasta.R</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>tax-scripts</td>
 <td>reformat_taxonomy_nomenclature.R</td>
 </tr>
@@ -1621,6 +1630,7 @@ pre code, pre, code {
 <h1><span style="color:SteelBlue"> Format Silva </span></h1>
 <div id="download" class="section level2">
 <h2>Download</h2>
+<p><br></p>
 <div id="download-silva-from-mothur-website" class="section level4">
 <h4>Download Silva from mothur website</h4>
 <p><a href="https://mothur.org/wiki/silva_reference_files/" class="uri">https://mothur.org/wiki/silva_reference_files/</a><br />
@@ -1650,10 +1660,12 @@ JQ771493.AKOEnri2   Archaea;Euryarchaeota;Thermococci;Methanofastidiosales;uncul
 </li>
 <li>Unclassified nomenclature is all over the place (have to look further to see it all)</li>
 </ul>
+<p><br></p>
 </div>
 </div>
 <div id="taxonomy-formatting" class="section level2">
 <h2>taxonomy formatting</h2>
+<p><br></p>
 <div id="fill-missing-names-and-fix-any-duplicate-names-in-silva-r" class="section level4">
 <h4>Fill missing names and fix any duplicate names in Silva (R)</h4>
 <pre class="bach"><code>Rscript reformat_taxonomy_nomenclature.R silva.nr_v138.tax silva.nr_v138_unnamed.tax General</code></pre>
@@ -1700,6 +1712,7 @@ JQ771493.AKOEnri2   Archaea;Euryarchaeota;Thermococci;Methanofastidiosales;unnam
 </div>
 <div id="fasta-formatting" class="section level2">
 <h2>fasta formatting</h2>
+<p><br></p>
 <div id="un-align-and-delete-crap-after-ids-r" class="section level4">
 <h4>Un-align and delete crap after IDs (R)</h4>
 <p>This takes ~20 minutes but reduces the file size from GBs to MBs.</p>
@@ -1784,6 +1797,7 @@ ShnBacte,k__Bacteria;p__Bacteroidetes;c__Flavobacteriia;o__Flavobacteriales;bacI
 </div>
 <div id="fasta-formatting-1" class="section level2">
 <h2>fasta formatting</h2>
+<p><br></p>
 <div id="replace-u-with-t-and-unalign-r" class="section level4">
 <h4>Replace <code>U</code> with <code>T</code> and unalign (R)</h4>
 <pre class="bash"><code>Rscript reformat_fasta.R FreshTrain_version.fasta FT_unaligned.fasta format.ids replace.U</code></pre>
@@ -1833,6 +1847,7 @@ NTACGATGAAGAGTTTGATCCTGGCTCAGGATGAACGCTAGCGGCAGGCTTAACACATGCAAGTCGAGGGGTATATGTCT
 </div>
 <div id="taxonomy-formatting-1" class="section level2">
 <h2>taxonomy formatting</h2>
+<p><br></p>
 <div id="make-file-semicolon-delimited-bash" class="section level4">
 <h4>Make file semicolon delimited (bash)</h4>
 <pre class="bash"><code>sed 's/,/\;/' &lt;FreshTrain_version_taxonomy.txt &gt;FT_semicol.tax</code></pre>
@@ -1972,6 +1987,7 @@ St0rFr10    Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;alfIV;a
 </div>
 <div id="remove-non-freshtrain" class="section level2">
 <h2>Remove Non-FreshTrain</h2>
+<p><br></p>
 <div id="check-for-non-freshtrain-references-lurking-in-the-freshtrain-export-r" class="section level4">
 <h4>Check for Non-FreshTrain references lurking in the FreshTrain export (R)</h4>
 <p>The full set of freshwater sequences in arb includes all of the clones, including ones that are not part of the well-defined freshwater taxonomy. These non-FreshTrain sequences cannot be present for TaxAss because only named reference sequences should recruit reads into the FreshTrain classification.</p>
@@ -2037,8 +2053,8 @@ Bacteria,Actinobacteria.P,Actinobacteria.C,Frankiales,acI</code></pre>
 <p>Compare your list of unique lineages, clades, and tribes with the expected lists. I recommend pasting them side by side in excel and then using conditional highlighting to spot any that are unique to the new export (maybe should be excluded in ARB) and unique to the expected list (maybe should be included in ARB).</p>
 <p>There is a reference files in excel of what’s expected at each FreshTrain level:</p>
 <pre><code>arb-scripts/Expected_FreshTrain_Lineages.xlsx</code></pre>
-<p>Paste these expected lineages next to your unique lineages and use conditional highlighting to spot anything unique. Then update ARB to fix export mistakes or the reference excel file if new FreshTrain references have been added.<br />
-<br></p>
+<p>Paste these expected lineages next to your unique lineages and use conditional highlighting to spot anything unique. Then update ARB to fix export mistakes or the reference excel file if new FreshTrain references have been added.</p>
+<p><br> <br></p>
 </div>
 </div>
 </div>
@@ -2051,21 +2067,7 @@ Bacteria,Actinobacteria.P,Actinobacteria.C,Frankiales,acI</code></pre>
 <h1><span style="color:SteelBlue"> Fix Conflicts </span></h1>
 <div id="classify-freshtrain-with-silva" class="section level2">
 <h2>Classify FreshTrain with Silva</h2>
-<div id="make-a-subfolder-for-the-taxass-working-directory" class="section level4">
-<h4>Make a subfolder for the TaxAss working directory</h4>
-<p>Add:</p>
-<ul>
-<li>the contents of <code>tax-scripts</code><br />
-</li>
-<li><code>FT_unaligned.fasta</code></li>
-<li><code>FT_semicol_noprefix_mothur_unnamed.tax</code><br />
-</li>
-<li><code>silva.nr_v138_unaligned.fasta</code></li>
-<li><code>silva.nr_v138_unnamed.tax</code></li>
-</ul>
-<p><strong>Numbers refer to TaxAss Directions</strong><br />
-<br></p>
-</div>
+<p><br></p>
 <div id="classify-the-freshtrain-references-with-the-silva-database" class="section level4">
 <h4>Classify the FreshTrain references with the Silva database</h4>
 <pre class="bash"><code>mothur &quot;#classify.seqs(fasta=FT_unaligned.fasta, template=silva.nr_v138_unaligned.fasta,
@@ -2105,6 +2107,7 @@ St0rFr10;Bacteria(100);Proteobacteria(100);Alphaproteobacteria(100);Sphingomonad
 </div>
 <div id="identify-conflicts" class="section level2">
 <h2>Identify Conflicts</h2>
+<p><br></p>
 <div id="compare-taxonomy-files" class="section level4">
 <h4>13. compare taxonomy files</h4>
 <pre class="bash"><code>mkdir conflicts_database
@@ -2200,6 +2203,7 @@ Bacteria    Actinobacteriota    Actinobacteria  Frankiales  Sporichthyaceae Bact
 </div>
 <div id="fix-taxonomy-files" class="section level2">
 <h2>Fix taxonomy files</h2>
+<p><br></p>
 <div id="change-coarse-level-conflicts-for-each-lineage" class="section level4">
 <h4>Change coarse-level conflicts for each lineage</h4>
 <pre class="bash"><code>Rscript fix_coarse_database_conflicts.R conflicts_database/ FT_semicol_noprefix_mothur_unnamed_semicol.tax FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts.tax</code></pre>
@@ -2306,9 +2310,10 @@ St0rFr10;Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;alfIV;alfI
 </div>
 </div>
 <div id="double-check" class="section level1">
-<h1>Double-check</h1>
+<h1><span style="color:SteelBlue"> Double-check </span></h1>
 <div id="check-monophyletic" class="section level2">
 <h2>Check monophyletic</h2>
+<p><br></p>
 <div id="back-to-mothur-format" class="section level4">
 <h4>Back to mothur-format</h4>
 <pre class="bash"><code>./replace_first_semicolon_with_tab.sh FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts.tax FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur.tax</code></pre>
@@ -2385,12 +2390,13 @@ Made file:  FT_noconflicts_unnamed.taxonomy</code></pre>
 <h4>Check that reformatting changed nothing</h4>
 <pre class="bash"><code>Rscript check_files_the_same.R FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur.tax FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur_unnamed.tax</code></pre>
 <p>arguments: <code>Rscript</code> <code>check_files_the_same.R</code> <code>file1</code> <code>file2</code></p>
-<p>It will either say “Files are all equal” or it will print the error given by the R function <code>all.equal()</code><br />
-<br></p>
+<p>It will either say “Files are all equal” or it will print the error given by the R function <code>all.equal()</code></p>
+<p><br></p>
 </div>
 </div>
 <div id="check-no-conflicts" class="section level2">
 <h2>Check no conflicts</h2>
+<p><br></p>
 <div id="re-compare-with-silva" class="section level4">
 <h4>Re-compare with SILVA</h4>
 <pre class="bash"><code>sed 's/[[:blank:]]/\;/' &lt;FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur_unnamed.tax &gt;FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur_unnamed_semicol.tax
@@ -2453,9 +2459,9 @@ Rscript find_classification_disagreements.R FT_semicol_noprefix_mothur_unnamed_s
 <p><br> <br></p>
 </div>
 </div>
-<div id="save-new-release-versions" class="section level2">
-<h2>Save New Release Versions!</h2>
 </div>
+<div id="save-new-release" class="section level1">
+<h1><span style="color:SteelBlue"> Save New Release! </span></h1>
 </div>
 
 

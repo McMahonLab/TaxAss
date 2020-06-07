@@ -31,16 +31,16 @@ pre code, pre, code {
   * basic text-based reformatting of taxonomy and fasta files  
   * fix duplicated taxon names and standardize unnamed nomenclature
   * check that only and all expected FreshTrain names are included  
+  * repeat until all errors corrected
 * do a first pass of reformatting Silva
   * basic text-based reformatting of fasta file
   * fix duplicated taxon names and standardize unnamed nomenclature
-* identify coarse-level nomenclature disagreements between the databases
+* fix coarse-level nomenclature disagreements between the databases
   * classify FreshTrain with SILVA  
   * compare coarse-level disagreements
-* change FreshTrain coarse-level nomenclature to match Silva  
-  * create a custom python script to reformat FreshTrain names
-* manually check for non-monophyletic sequences
-  * manually adjust them
+  * change FreshTrain coarse-level nomenclature to match Silva  
+  * check for errors or mistakes introduced by changes
+* Save the new release version!  
   
 <br>
 
@@ -54,10 +54,13 @@ arb export  | version.txt
 arb export  | version.fasta  
 mothur silva download | version.tax  
 mothur silva download | version.align
-arb-scripts    | remove_gg_taxon-level_prefixes.sh  
-arb-scripts    | replace_first_semicolon_with_tab.sh  
+arb-scripts    | check_files_the_same.R
 arb-scripts    | check_included_lineages.R
 arb-scripts    | Expected_FreshTrain_Lineages.xlsx
+arb-scripts    | fix_coarse_database_conflicts.R
+arb-scripts    | remove_gg_taxon-level_prefixes.sh  
+arb-scripts    | replace_first_semicolon_with_tab.sh  
+tax-scripts    | find_classification_disagreements.R
 tax-scripts    | reformat_fasta.R
 tax-scripts    | reformat_taxonomy_nomenclature.R
 
@@ -67,6 +70,7 @@ tax-scripts    | reformat_taxonomy_nomenclature.R
 # <span style="color:SteelBlue"> Format Silva </span>  
 
 ## Download  
+<br>
 
 #### Download Silva from mothur website  
 
@@ -101,9 +105,10 @@ JQ771493.AKOEnri2	Archaea;Euryarchaeota;Thermococci;Methanofastidiosales;uncultu
 * The taxonomy file has a tab delimiter btwn seqID and taxonomy names  
 * Unclassified nomenclature is all over the place (have to look further to see it all)
 
-
+<br>
 
 ## taxonomy formatting  
+<br>
 
 #### Fill missing names and fix any duplicate names in Silva (R)  
 
@@ -133,6 +138,7 @@ JQ771493.AKOEnri2	Archaea;Euryarchaeota;Thermococci;Methanofastidiosales;unnamed
 
 
 ## fasta formatting
+<br>
 
 #### Un-align and delete crap after IDs (R)
 
@@ -207,6 +213,7 @@ In arb there are also references that don't have good representation or specific
 
 
 ## fasta formatting
+<br>
 
 #### Replace `U` with `T` and unalign (R)  
 
@@ -234,6 +241,7 @@ NTACGATGAAGAGTTTGATCCTGGCTCAGGATGAACGCTAGCGGCAGGCTTAACACATGCAAGTCGAGGGGTATATGTCT
 <br>
 
 ## taxonomy formatting  
+<br>
 
 #### Make file semicolon delimited (bash)  
 
@@ -335,6 +343,7 @@ St0rFr10	Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;alfIV;alfI
 <br>
 
 ## Remove Non-FreshTrain
+<br>
 
 #### Check for Non-FreshTrain references lurking in the FreshTrain export (R)  
 
@@ -393,6 +402,8 @@ arb-scripts/Expected_FreshTrain_Lineages.xlsx
 ```
 
 Paste these expected lineages next to your unique lineages and use conditional highlighting to spot anything unique. Then update ARB to fix export mistakes or the reference excel file if new FreshTrain references have been added.  
+
+<br>
 <br>
 
 # <span style="color:SteelBlue">Second-Pass FreshTrain </span>  
@@ -407,18 +418,6 @@ After fixing which are exported in Arb, <span style="color:Red"> re-export from 
 # <span style="color:SteelBlue"> Fix Conflicts </span>  
 
 ## Classify FreshTrain with Silva  
-
-#### Make a subfolder for the TaxAss working directory  
-
-Add:  
-
-* the contents of `tax-scripts`  
-* `FT_unaligned.fasta`
-* `FT_semicol_noprefix_mothur_unnamed.tax`  
-* `silva.nr_v138_unaligned.fasta`
-* `silva.nr_v138_unnamed.tax`
-
-**Numbers refer to TaxAss Directions**  
 <br>
 
 #### Classify the FreshTrain references with the Silva database  
@@ -471,6 +470,7 @@ St0rFr10;Bacteria(100);Proteobacteria(100);Alphaproteobacteria(100);Sphingomonad
 <br>
 
 ## Identify Conflicts
+<br>
 
 #### 13. compare taxonomy files  
 ```{bash, eval=F}
@@ -544,6 +544,7 @@ These lists of unique conflicts at coarser taxonomic levels are useful for fixin
 <br>
 
 ## Fix taxonomy files
+<br>
 
 #### Change coarse-level conflicts for each lineage
 
@@ -636,9 +637,10 @@ St0rFr10;Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;alfIV;alfI
 <br>
 
 
-# Double-check 
+# <span style="color:SteelBlue"> Double-check </span>
 
 ## Check monophyletic    
+<br>
 
 #### Back to mothur-format  
 
@@ -648,7 +650,8 @@ St0rFr10;Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;alfIV;alfI
 Argument  | Description  
 ----------|---------------
 `FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts.tax` | input (semicolon delimited)    
-`FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur.tax` | output (mothur formatted)
+`FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur.tax` | output (mothur formatted)  
+
 <br>
 
 #### Double-check that no new non-unique names have emerged  
@@ -699,7 +702,8 @@ at level  6
 at level  7
 
 Made file:  FT_noconflicts_unnamed.taxonomy
-```
+```  
+
 <br>
 
 #### Check that reformatting changed nothing  
@@ -711,9 +715,11 @@ Rscript check_files_the_same.R FT_semicol_noprefix_mothur_unnamed_semicol_noconf
 arguments: `Rscript` `check_files_the_same.R` `file1` `file2`  
 
 It will either say "Files are all equal" or it will print the error given by the R function `all.equal()`  
+
 <br>
 
 ## Check no conflicts  
+<br>
 
 #### Re-compare with SILVA  
 
@@ -745,7 +751,7 @@ All done!
 <br>
 <br>
 
-## Save New Release Versions!  
+# <span style="color:SteelBlue"> Save New Release! </span>  
 
 
 

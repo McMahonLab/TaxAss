@@ -16,6 +16,12 @@
   # the first fw refers to which workflow, the one combining fw + gg ("fw") or gg alone "gg"
   # the fw.only means that only the seqIDs that the workflow assigned with fw are included in the table
 
+# This script is also used to identify and fix conflicts between the two databases
+# in the create new FreshTrain version pipeline. It finds 
+# coarse-level name mismatches that need to be changed in FreshTrain
+# a reference list of what freshwater names are called in silva 
+# and a list of any fine-level silva names that exist when FreshTrain is unnamed
+# (because these might want to be removed from FreshTrain) 
 
 # -------------------------------------------------------------
 # Receive arguments from terminal command line
@@ -54,15 +60,15 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                80,
 #                "final")
 # DATABASE COMPARISON: part of optional step 11.5
-cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-userprefs <- c("../../2020-06-02_update_freshtrain/FT_semicol_noprefix_mothur_unnamed_semicol.tax",
-               "../../2020-06-02_update_freshtrain/FT.silva_semicol.taxonomy",
-               "NA",
-               "../../2020-06-02_update_freshtrain/conflicts_database_6-12-20//",
-               NA,
-               NA,
-               70,
-               "database")
+# cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
+# userprefs <- c("../../2020-06-02_update_freshtrain/FT_semicol_noprefix_mothur_unnamed_semicol.tax",
+#                "../../2020-06-02_update_freshtrain/FT.silva_semicol.taxonomy",
+#                "NA",
+#                "../../2020-06-02_update_freshtrain/conflicts_database_6-12-20//",
+#                NA,
+#                NA,
+#                70,
+#                "database")
 # FORCING ANALYSIS: part of optional step 15.5
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
 # userprefs <- c("../../poster_mend-check/otus.custom.taxonomy",
@@ -231,7 +237,7 @@ find.fw.seqid.indeces <- function(FullTable, FWids){
   return(index)
 }
 
-uniform.unclass.names <- function(TaxonomyTable){
+uniform.unclass.names <- function(TaxonomyTable, database = FALSE){
   # this is used in the function do.bootstrap.cutoff()
   # all unnamed refs are called "unclassified" with no bootstrap value
   # things below the bootstrap cutoff will also be called "unclassified" 
@@ -241,8 +247,13 @@ uniform.unclass.names <- function(TaxonomyTable){
   
   tax <- TaxonomyTable
   
-  index <- grep(pattern = "unnamed", x = tax[ ,-1], value = FLASE, invert = FALSE, ignore.case = TRUE)
-  tax[ ,-1][index] <- "unclassified"
+  index <- grep(pattern = "unnamed", x = tax[ ,-1], value = FALSE, invert = FALSE, ignore.case = TRUE)
+  
+  if(database == TRUE){
+    tax[ ,-1][index] <- "unnamed"
+  }else{
+    tax[ ,-1][index] <- "unclassified"
+  }
   
   return(tax)
 }
@@ -300,10 +311,14 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
   taxa.names <- c("kingdom","phylum","class","order","lineage","clade","tribe")
   
   # compare names in column t+1, because first columns are seqID and t=1 is kingdom, t=7 is tribe
-  # ignore names that say unclassified, except in forcing comparison when fw giving any erroneous name counts as forcing
+  # ignore names that say unclassified, because that doesn't count as a disagreement
+  # except in forcing comparison when fw giving any erroneous name counts as forcing
+  # except in database comparison when a missing fw name when silva has a name is a problem
   if (forcing == TRUE){
     index <- which(gg[,t+1] != fw[,t+1] & fw[,t+1] != "unclassified")
-  }else{
+  }else if(Database == TRUE){
+    index <- which(gg[,t+1] != fw[,t+1] & gg[,t+1] != "unnamed" & gg[,t+1] != "unclassified")
+  }else{  
     index <- which(gg[,t+1] != fw[,t+1] & gg[,t+1] != "unclassified" & fw[,t+1] != "unclassified")
   }
   
@@ -447,7 +462,8 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   check.files.match(FWtable = fw.percents, GGtable = gg.percents)
   
   fw <- fw.percents # database only has names
-  fw <- uniform.unclass.names(TaxonomyDatabase = fw)
+  fw <- uniform.unclass.names(TaxonomyTable = fw, database = TRUE)
+  gg.percents <- uniform.unclass.names(TaxonomyTable = gg.percents, database = TRUE)
   gg <- do.bootstrap.cutoff(TaxonomyTable = gg.percents, BootstrapCutoff = taxonomy.pvalue.cutoff.gg)
   gg <- apply(gg, 2, remove.parentheses)
   

@@ -54,16 +54,16 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                80,
 #                "final")
 # DATABASE COMPARISON: part of optional step 11.5
-# cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-# userprefs <- c("../../database_comparison/custom.custom.taxonomy",
-#                "../../database_comparison/custom.general.taxonomy",
-#                "NA",
-#                "../../database_comparison/conflicts_database/",
-#                NA,
-#                NA,
-#                70,
-#                "database")
-# # FORCING ANALYSIS: part of optional step 15.5
+cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
+userprefs <- c("../../2020-06-02_update_freshtrain/FT_semicol_noprefix_mothur_unnamed_semicol.tax",
+               "../../2020-06-02_update_freshtrain/FT.silva_semicol.taxonomy",
+               "NA",
+               "../../2020-06-02_update_freshtrain/conflicts_database_6-12-20//",
+               NA,
+               NA,
+               70,
+               "database")
+# FORCING ANALYSIS: part of optional step 15.5
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
 # userprefs <- c("../../poster_mend-check/otus.custom.taxonomy",
 #                "../../poster_mend-check/otus.98.70.70.taxonomy",
@@ -234,60 +234,15 @@ find.fw.seqid.indeces <- function(FullTable, FWids){
 uniform.unclass.names <- function(TaxonomyTable){
   # this is used in the function do.bootstrap.cutoff()
   # all unnamed refs are called "unclassified" with no bootstrap value
-  # this can throw errors if new names are used for unknown things. For example, right now don't recognize NA 
+  # things below the bootstrap cutoff will also be called "unclassified" 
+  # so for this comparison purpose, unnamed in database is same as unassigned in classification
+  # database names were already made uniform in reformat_taxonomy_nomenclature.R
+  # and have format unnamed.UpperName
   
   tax <- TaxonomyTable
   
-  # 'blank entries' based on the fact that they don't have bootstrap percents after them
-  # blank.entries <- unique(grep(pattern = '.*\\(', x = tax[ ,-1], value = TRUE, invert = TRUE))
-  index <- grep(pattern = '.*\\(', x = tax[ ,-1], value = FALSE, invert = TRUE)
+  index <- grep(pattern = "unnamed", x = tax[ ,-1], value = FLASE, invert = FALSE, ignore.case = TRUE)
   tax[ ,-1][index] <- "unclassified"
-  
-  # 'empty entries' that don't have names, like p__(100) in greengenes
-  # gg.unnamed.entries <- grep(pattern = '.{1}__\\(\\d{0,3}\\)', x = tax[ ,-1], value = TRUE, invert = FALSE)
-  index <- grep(pattern = '.{1}__\\(\\d{0,3}\\)', x = tax[ ,-1], value = FALSE, invert = FALSE)
-  tax[ ,-1][index] <- "unclassified"
-  
-  # 'unnamed entries' in silva
-  # silva.unnamed.entries <- grep(pattern = 'unnamed*', x = tax[ ,-1], value = TRUE, invert = FALSE)
-  index <- grep(pattern = 'unnamed*', x = tax[ ,-1], value = FALSE, invert = FALSE)
-  tax[ ,-1][index] <- "unclassified"
-  
-  # 'unknown entries' in silva 
-  # silva.unknown.entries <- grep(pattern = 'unknown*', x = tax[ ,-1], value = TRUE, invert = FALSE, ignore.case = TRUE)
-  index <- grep(pattern = 'unknown*', x = tax[ ,-1], value = FALSE, invert = FALSE, ignore.case = TRUE)
-  tax[ ,-1][index] <- "unclassified"
-  
-  # 'uncultured entries' in silva 
-  # silva.unknown.entries <- grep(pattern = 'uncultured*', x = tax[ ,-1], value = TRUE, invert = FALSE, ignore.case = TRUE)
-  index <- grep(pattern = 'uncultured*', x = tax[ ,-1], value = FALSE, invert = FALSE, ignore.case = TRUE)
-  tax[ ,-1][index] <- "unclassified"
-  
-  # 'unclassified' entries 
-  # unclass.entries <- grep(pattern = 'unclassified*', x = tax[ ,-1], value = TRUE, invert = FALSE, ignore.case = TRUE)
-  index <- grep(pattern = 'unclassified*', x = tax[ ,-1], value = FALSE, invert = FALSE, ignore.case = TRUE)
-  tax[ ,-1][index] <- "unclassified"
-  
-  return(tax)
-}
-
-uniform.unclass.names.database <- function(TaxonomyDatabase){
-  # makes empty spots in the database be called unclassified.  more error prone b/c have to guess odd names!
-  # do this separately for the database b/c it doesn't have parentheses (it is the FW training set)
-  
-  tax <- TaxonomyDatabase
-  
-  # There's a lot of ways to guess that the database might have weird blanks....
-  index <- which(tax[,-1] == "" | tax[,-1] == 0 | tax[,-1] == "0" | is.null(tax[,-1]) | tax[,-1] == "NULL" | is.na(tax[,-1])| tax[,-1] == "NA" |
-                 tax[,-1] == "unknown" | tax[,-1] == "Unknown" | tax[,-1] == "UnKnown" | tax[,-1] == "UNKNOWN" | 
-                 tax[,-1] == "Unclassified" | tax[,-1] == "UnClassified" | tax[,-1] == "UNCLASSIFIED" |
-                 tax[,-1] == "unidentified" | tax[,-1] == "Unidentified" | tax[,-1] == "UnIdentified" | tax[,-1] == "UNIDENTIFIED" |
-                 tax[,-1] == "uncultured" | tax[,-1] == "Uncultured" | tax[,-1] == "UnCultured" | tax[,-1] == "UNCULTURED")
-  tax[,-1][index] <- "unclassified"
-  
-  # Also change any empty names to "unclassified" for ex. GG will say c__(100) for an unknown class it sorted into.
-  index2 <- grep(pattern = '.{1}__\\(\\d{0,3}\\)', x = tax[,-1], value = FALSE, invert = FALSE)
-  tax[,-1][index2] <- "unclassified" 
   
   return(tax)
 }
@@ -492,7 +447,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   check.files.match(FWtable = fw.percents, GGtable = gg.percents)
   
   fw <- fw.percents # database only has names
-  fw <- uniform.unclass.names.database(TaxonomyDatabase = fw)
+  fw <- uniform.unclass.names(TaxonomyDatabase = fw)
   gg <- do.bootstrap.cutoff(TaxonomyTable = gg.percents, BootstrapCutoff = taxonomy.pvalue.cutoff.gg)
   gg <- apply(gg, 2, remove.parentheses)
   

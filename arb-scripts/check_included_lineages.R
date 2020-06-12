@@ -6,7 +6,7 @@
 # This lists all the lineages included in the export, to double check that they are both
 # all the ones you want and 
 # only the ones you want!
-# Having poor referenced means they will have high pident in blast and non-FreshTrain seqs
+# Having poor references means they will have high pident in blast and non-FreshTrain seqs
 # will get recruited into the FreshTrain-classification, ending up with worse classification
 # than they would have gotten in silva (either unclassified or forced into incorrect name)
 
@@ -18,9 +18,9 @@ created.file.folder <- userprefs[2]
 
 
 # # Manual Troubleshooting
-# cat("\n\nForgot to comment out file paths!!!\n")
+# cat("\n\nForgot to comment out file paths!!!\n\n")
 # input.file <- "../../2020-06-02_update_freshtrain/FT_semicol_noprefix_mothur_unnamed.tax"
-# created.file.folder <- "../../2020-06-02_update_freshtrain/"
+# created.file.folder <- "../../2020-06-02_update_freshtrain/included_lineages"
 
 # ---- functions ----
 
@@ -70,7 +70,6 @@ if (length(index) > 0){
 }else{
   cat("There are no unclassified lineages in the FreshTrain export- good.\n")
 }
-
 
 
 ft.lineages <- unique(ft[ ,2:6])

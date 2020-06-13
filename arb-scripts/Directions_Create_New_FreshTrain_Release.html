@@ -1511,7 +1511,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">How to format the ARB-exported FreshTrain for use with TaxAss</h1>
 <h4 class="author">Robin Rohwer</h4>
-<h4 class="date">last updated May 28, 2020</h4>
+<h4 class="date">last updated June 12, 2020</h4>
 
 </div>
 
@@ -1992,7 +1992,8 @@ St0rFr10    Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;alfIV;a
 <h4>Check for Non-FreshTrain references lurking in the FreshTrain export (R)</h4>
 <p>The full set of freshwater sequences in arb includes all of the clones, including ones that are not part of the well-defined freshwater taxonomy. These non-FreshTrain sequences cannot be present for TaxAss because only named reference sequences should recruit reads into the FreshTrain classification.</p>
 <p>Within Arb, sequences are identified as part of the FreshTrain or not, and when data is exported from Arb you should select to only export the FW sequences. Here we check to make sure that only FreshTrain sequences are included (because it’s really bad if they are!):</p>
-<pre class="bash"><code>Rscript check_included_lineages.R FT_semicol_noprefix_mothur_unnamed.tax ./</code></pre>
+<pre class="bash"><code>mkdir included_lineages
+Rscript check_included_lineages.R FT_semicol_noprefix_mothur_unnamed.tax included_lineages</code></pre>
 <table>
 <colgroup>
 <col width="40%"></col>
@@ -2014,12 +2015,12 @@ St0rFr10    Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;alfIV;a
 <td>Name of the taxonomy file. mothur formatted, and blanks must have been filled with “unnamed…” already.</td>
 </tr>
 <tr class="odd">
-<td><code>./</code></td>
-<td>The path to the folder where generated files should go.</td>
+<td><code>included_lineages</code></td>
+<td>The folder where generated files should go (folder must already exist).</td>
 </tr>
 </tbody>
 </table>
-<p>If there are sequences where the lineage is unnamed, these are flagged as sequences to definitely remove. This is exported in the file <code>STOP-remove_these_from_FreshTrain_export.csv</code> in csv format for easy opening in excel:</p>
+<p>If there are sequences where the lineage is unnamed, these are flagged as sequences to definitely remove. This is exported in the file <code>STOP-remove_these_from_FreshTrain_export.csv</code> in csv format for easy opening in excel. Example:</p>
 <pre><code>$ head -n 5 STOP-remove_these_from_FreshTrain_export.csv
 seqid,kingdom,phylum,class,order,family,genus,species
 SphClo28,Bacteria,Bacteroidetes,unnamed.Bacteroidetes,unnamed.Bacteroidetes,unnamed.Bacteroidetes,unnamed.Bacteroidetes,unnamed.Bacteroidetes
@@ -2063,8 +2064,8 @@ Bacteria,Actinobacteria.P,Actinobacteria.C,Frankiales,acI</code></pre>
 <p>After fixing which are exported in Arb, <span style="color:Red"> re-export from Arb and repeat all of these formatting steps </span> (including checking that the non-FreshTrain sequences were removed!) If Trina leaves you hanging (even though she insisted you change the workflow to have her do this part in Arb), then you can just manually delete each of the non-FreshTrain sequence IDs and keep going.</p>
 <p><br> <br></p>
 </div>
-<div id="fix-conflicts" class="section level1">
-<h1><span style="color:SteelBlue"> Fix Conflicts </span></h1>
+<div id="find-conflicts" class="section level1">
+<h1><span style="color:SteelBlue"> Find Conflicts </span></h1>
 <div id="classify-freshtrain-with-silva" class="section level2">
 <h2>Classify FreshTrain with Silva</h2>
 <p><br></p>
@@ -2163,9 +2164,9 @@ $ Rscript find_classification_disagreements.R FT_semicol_noprefix_mothur_unnamed
 </tr>
 </tbody>
 </table>
-<p>This generates csv files that lists nomenclature disagreements at each taxa-level. Note that it uses a bootstrap value and is stochastic- could consider lowering the bootstrap cutoff.</p>
-<p>There are two sets of files generated when the <code>database</code> flag is used.<br />
-The first set includes each seqID with a conflict, the full taxonomy of the seqID in both databases, and the classification bootstrap identies. These files are named:</p>
+<p>This generates csv files that list nomenclature disagreements at each taxa-level. Note that it uses a bootstrap value and is stochastic- could consider lowering the bootstrap cutoff.</p>
+<p>There are three sets of files generated when the <code>database</code> flag is used.<br />
+The first set includes each seqID with a conflict, the full taxonomy of the seqID in both databases, and the classification bootstrap identies. These are useful to lookup details (like seqID or pvalue) for conflicts identified in the other spreadsheets.</p>
 <ul>
 <li>1_kingdom_conflicts.csv</li>
 <li>2_phylum_conflicts.csv</li>
@@ -2180,8 +2181,18 @@ The first set includes each seqID with a conflict, the full taxonomy of the seqI
 &quot;AbmAct00&quot;,&quot;Bacteria(100)&quot;,&quot;Actinobacteriota(100)&quot;,&quot;Actinobacteria(100)&quot;,&quot;Frankiales(100)&quot;,&quot;Sporichthyaceae(100)&quot;,&quot;hgcI_clade(100)&quot;,&quot;unnamed.hgcI_clade(100)&quot;,&quot;AbmAct00&quot;,&quot;Bacteria&quot;,&quot;Actinobacteria.P&quot;,&quot;Actinobacteria.C&quot;,&quot;Frankiales&quot;,&quot;acI&quot;,&quot;acI-B&quot;,&quot;acI-B4&quot;
 &quot;AbmAct02&quot;,&quot;Bacteria(100)&quot;,&quot;Actinobacteriota(100)&quot;,&quot;Actinobacteria(100)&quot;,&quot;Frankiales(100)&quot;,&quot;Sporichthyaceae(100)&quot;,&quot;Candidatus_Planktophila(63)&quot;,&quot;unnamed.Candidatus_Planktophila(63)&quot;,&quot;AbmAct02&quot;,&quot;Bacteria&quot;,&quot;Actinobacteria.P&quot;,&quot;Actinobacteria.C&quot;,&quot;Frankiales&quot;,&quot;acI&quot;,&quot;acI-A&quot;,&quot;acI-A1&quot;
 &quot;AbmAct03&quot;,&quot;Bacteria(100)&quot;,&quot;Actinobacteriota(100)&quot;,&quot;Actinobacteria(100)&quot;,&quot;Frankiales(100)&quot;,&quot;Sporichthyaceae(100)&quot;,&quot;hgcI_clade(100)&quot;,&quot;unnamed.hgcI_clade(100)&quot;,&quot;AbmAct03&quot;,&quot;Bacteria&quot;,&quot;Actinobacteria.P&quot;,&quot;Actinobacteria.C&quot;,&quot;Frankiales&quot;,&quot;acI&quot;,&quot;acI-B&quot;,&quot;acI-B1&quot;</code></pre>
-<p>The second set of files includes the unique conflicts, and is what we will base the python script on. These files are named:</p>
-<p>Note that although the conflicts are “unique”, they are unique to the FreshTrain Lineage, not the given phylum/class/order level. Why? Because sometimes Silva splits an old name into two new names. When this happens, not ALL instances of the phylum name are a conflict, only some should be changed because some are still correct. The phython script changes upper-level names <em>for each lineage</em>.</p>
+<p><br></p>
+<p>The second set of files includes the unique conflicts. The Kingdom, Phylum, Class, Order levels will be used to fix coarse-level conflicts by <code>fix_coarse_database_conflicts.R</code>. The lineage, clade, tribe levels are simply a handy reference to look up what the corresponding silva names are. These files are named:</p>
+<ul>
+<li>unique_conflicts_1_kingdom.csv</li>
+<li>unique_conflicts_2_phylum.csv</li>
+<li>unique_conflicts_3_class.csv</li>
+<li>unique_conflicts_4_order.csv</li>
+<li>unique_conflicts_5_lineage.csv</li>
+<li>unique_conflicts_6_clade.csv</li>
+<li>unique_conflicts_7_tribe.csv</li>
+</ul>
+<p>Note that although the conflicts are “unique”, they are unique to the FreshTrain Lineage, not the given phylum/class/order level. Why? Because sometimes Silva splits an old name into two new names. When this happens, not ALL instances of the phylum name are a conflict, only some should be changed because some are still correct. The R script changes upper-level names <em>for each lineage</em>.</p>
 <p>Here’s an example in Silva.138, where some instances of order Frankiales change to Micrococcales, but the order Frankiales remains.<br />
 In the unique conflicts at order level, we see an instance of order <code>Frankiales</code> changing to <code>Micrococcales</code>:</p>
 <pre><code>$ head -n 5 conflicts_database/unique_conflicts_4_order.csv
@@ -2197,10 +2208,42 @@ Bacteria    Actinobacteriota    Actinobacteria  Frankiales  Sporichthyaceae Bact
 Bacteria    Actinobacteriota    Actinobacteria  Micrococcales   Microbacteriaceae   Bacteria    Actinobacteria.P    Actinobacteria.C    Frankiales  Luna3
 Bacteria    Actinobacteriota    Actinobacteria  Micrococcales   Microbacteriaceae   Bacteria    Actinobacteria.P    Actinobacteria.C    Micrococcales   acIII
 Bacteria    Actinobacteriota    Actinobacteria  Frankiales  Sporichthyaceae Bacteria    Actinobacteria.P    Actinobacteria.C    Frankiales  acTH1</code></pre>
-<p>These lists of unique conflicts at coarser taxonomic levels are useful for fixing the conflicts in the properly formatted FreshTrain release. The lists of unique conflicts at lineage, clade, and tribe level are useful as a quick look-up for the differences between the FreshTrain nomenclature and Silva. For example, some paper is talking about hgcI_clade being abundant, you can ctrl-find and oh, it’s acI.</p>
+<p>These files are also better viewed in excel but look like:</p>
+<pre><code>$ head -n 5 unique_conflicts_4_order.csv
+&quot;kingdom.gg&quot;,&quot;phylum.gg&quot;,&quot;class.gg&quot;,&quot;order.gg&quot;,&quot;kingdom.fw&quot;,&quot;phylum.fw&quot;,&quot;class.fw&quot;,&quot;order.fw&quot;,&quot;lineage.fw&quot;
+&quot;Bacteria&quot;,&quot;Actinobacteriota&quot;,&quot;Acidimicrobiia&quot;,&quot;Microtrichales&quot;,&quot;Bacteria&quot;,&quot;Actinobacteria.P&quot;,&quot;Acidimicrobiia&quot;,&quot;Acidimicrobiales&quot;,&quot;acIV&quot;
+&quot;Bacteria&quot;,&quot;Actinobacteriota&quot;,&quot;Actinobacteria&quot;,&quot;Micrococcales&quot;,&quot;Bacteria&quot;,&quot;Actinobacteria.P&quot;,&quot;Actinobacteria.C&quot;,&quot;Frankiales&quot;,&quot;Luna3&quot;
+&quot;Bacteria&quot;,&quot;Proteobacteria&quot;,&quot;Alphaproteobacteria&quot;,&quot;Acetobacterales&quot;,&quot;Bacteria&quot;,&quot;Proteobacteria&quot;,&quot;Alphaproteobacteria&quot;,&quot;Rhodospirillales&quot;,&quot;alfVIII&quot;
+&quot;Bacteria&quot;,&quot;Bacteroidota&quot;,&quot;Bacteroidia&quot;,&quot;Chitinophagales&quot;,&quot;Bacteria&quot;,&quot;Bacteroidetes&quot;,&quot;Sphingobacteriia&quot;,&quot;Sphingobacteriales&quot;,&quot;bacI&quot;</code></pre>
 <p><br></p>
+<p>The third file is called <code>unnamed_clades_that_have_general_names.csv</code>. Use that in the next step.<br />
+<br></p>
 </div>
 </div>
+<div id="remove-better-in-silva" class="section level2">
+<h2>Remove better-in-silva</h2>
+<div id="manually-decide-whether-to-exclude-clades-with-names-in-silva-but-not-in-freshtrain" class="section level4">
+<h4>Manually decide whether to exclude clades with names in silva but not in FreshTrain</h4>
+<p>Some lineages in the FreshTrain are not as well flushed out as the acI, and if silva starts to represent them better and classify them when the FreshTrain has no name, then maybe they should be removed from the FreshTrain export until they get more additions and curation.<br />
+<br> Manually look at these clades and decide what to keep and what to remove in arb. The file is called <code>unnamed_clades_that_have_general_names.csv</code> and is in the <code>conflicts_database</code> folder. It was generated by the call to <code>find_classification_disagreements.R</code>. This is what the file looks like:</p>
+<pre><code>$ head -n 5 unnamed_clades_that_have_general_names.csv
+&quot;kingdom.gg&quot;,&quot;phylum.gg&quot;,&quot;class.gg&quot;,&quot;order.gg&quot;,&quot;family.gg&quot;,&quot;genus.gg&quot;,&quot;kingdom.fw&quot;,&quot;phylum.fw&quot;,&quot;class.fw&quot;,&quot;order.fw&quot;,&quot;lineage.fw&quot;,&quot;clade.fw&quot;
+&quot;Bacteria&quot;,&quot;Actinobacteriota&quot;,&quot;Actinobacteria&quot;,&quot;Micrococcales&quot;,&quot;Microbacteriaceae&quot;,&quot;MWH-Ta3&quot;,&quot;Bacteria&quot;,&quot;Actinobacteria.P&quot;,&quot;Actinobacteria.C&quot;,&quot;Frankiales&quot;,&quot;Luna3&quot;,&quot;unnamed&quot;
+&quot;Bacteria&quot;,&quot;Actinobacteriota&quot;,&quot;Actinobacteria&quot;,&quot;Micrococcales&quot;,&quot;Microbacteriaceae&quot;,&quot;Candidatus_Aquiluna&quot;,&quot;Bacteria&quot;,&quot;Actinobacteria.P&quot;,&quot;Actinobacteria.C&quot;,&quot;Micrococcales&quot;,&quot;Luna1&quot;,&quot;unnamed&quot;
+&quot;Bacteria&quot;,&quot;Actinobacteriota&quot;,&quot;Actinobacteria&quot;,&quot;Frankiales&quot;,&quot;Sporichthyaceae&quot;,&quot;hgcI_clade&quot;,&quot;Bacteria&quot;,&quot;Actinobacteria.P&quot;,&quot;Actinobacteria.C&quot;,&quot;Frankiales&quot;,&quot;acI&quot;,&quot;unnamed&quot;
+&quot;Bacteria&quot;,&quot;Proteobacteria&quot;,&quot;Gammaproteobacteria&quot;,&quot;Burkholderiales&quot;,&quot;Comamonadaceae&quot;,&quot;Acidovorax&quot;,&quot;Bacteria&quot;,&quot;Proteobacteria&quot;,&quot;Betaproteobacteria&quot;,&quot;Burkholderiales&quot;,&quot;betI&quot;,&quot;unnamed&quot;</code></pre>
+<p>After identifying any undesireable sequences, they should be marked as not part of the FreshTrain in arb.</p>
+<p><br> <br></p>
+</div>
+</div>
+</div>
+<div id="third-pass-freshtrain" class="section level1">
+<h1><span style="color:SteelBlue"> Third-Pass FreshTrain </span></h1>
+<p>After fixing which are exported in Arb, <span style="color:Red"> re-export from Arb and repeat all the steps to this point </span> Unideally you could just delete references yourself, but this is a pretty big decision so best if make it in Arb. (No need to repeat the silva formatting, just everything to do with FreshTrain.)</p>
+<p><br> <br></p>
+</div>
+<div id="fix-conflicts" class="section level1">
+<h1><span style="color:SteelBlue"> Fix Conflicts </span></h1>
 <div id="fix-taxonomy-files" class="section level2">
 <h2>Fix taxonomy files</h2>
 <p><br></p>
@@ -2309,8 +2352,8 @@ St0rFr10;Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;alfIV;alfI
 </div>
 </div>
 </div>
-<div id="double-check" class="section level1">
-<h1><span style="color:SteelBlue"> Double-check </span></h1>
+<div id="final-checks" class="section level1">
+<h1><span style="color:SteelBlue"> Final Checks </span></h1>
 <div id="check-monophyletic" class="section level2">
 <h2>Check monophyletic</h2>
 <p><br></p>

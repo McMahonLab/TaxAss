@@ -64,7 +64,7 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 # userprefs <- c("../../2020-06-02_update_freshtrain/FT_semicol_noprefix_mothur_unnamed_semicol.tax",
 #                "../../2020-06-02_update_freshtrain/FT.silva_semicol.taxonomy",
 #                "NA",
-#                "../../2020-06-02_update_freshtrain/conflicts_database_6-12-20//",
+#                "../../2020-06-02_update_freshtrain/conflicts_database_6-12-20",
 #                NA,
 #                NA,
 #                70,
@@ -343,6 +343,15 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
     unique.conflict.file <- paste(results.folder.path, "/", "unique_conflicts_", t, "_", taxa.names[t],".csv", sep="")
     write.csv(unique.conflicts, file = unique.conflict.file, row.names = FALSE)
     cat("Made file: ", unique.conflict.file, "\n")
+    
+    if (t == 6){
+      # at lineage all fw has names, at species no silva has names, so only check for instances of silva have name when fw is unnamed at clade level
+      index <- which(unique.conflicts[ ,t+t] == "unnamed")
+      better.in.gg <- unique.conflicts[index, ]
+      better.in.gg.file <- paste(results.folder.path, "/", "unnamed_", taxa.names[t], "s_that_have_general_names.csv", sep="")
+      write.csv(better.in.gg, file = better.in.gg.file, row.names = FALSE)
+      cat("Made file: ", better.in.gg.file, "\n")
+    }
   }
   
   # Compare the conflicting tables in entirety, use the original files with percents still in it
@@ -480,9 +489,9 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
                                              FolderPath = results.folder.path, Database = TRUE)
   }
   export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw, ALL_seqs = fw, FileName = file.name.summary.stats)
-  
+  cat("Made file: ", file.name.summary.stats, "\n")
 
-  
+
 
 # -------------------------------------------------------------
 # Look at how bad it'd be if you used only the custom database instead of the workflow
@@ -538,7 +547,9 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
                                              FolderPath = results.folder.path, forcing = TRUE)
   }
   export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw.gg.only, ALL_seqs = fw.percents, FileName = file.name.summary.stats)
-
+  cat("Made file: ", file.name.summary.stats, "\n")
+  
+  
   
 # ------------------------------------------------------------- 
 # Only compare the classifications made by the fw database to the gg classifications, not full tax tables
@@ -585,6 +596,8 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   }
   export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw.fw.only, ALL_seqs = fw.percents, FileName = file.name.summary.stats)
   cat("Made file: ", file.name.summary.stats, "\n")
+  
+  
 # ----
   # the following will be used by the plot_classification_disagreements step to help choose a good pident: 
 # ----

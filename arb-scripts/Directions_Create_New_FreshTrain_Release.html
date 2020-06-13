@@ -1708,7 +1708,6 @@ JQ771493.AKOEnri2   Archaea;Euryarchaeota;Thermococci;Methanofastidiosales;uncul
 </tr>
 </tbody>
 </table>
-<p>See the FreshTrain call of this script above for more details.</p>
 <p>Now it looks like:</p>
 <pre><code>$ head -n 5 silva.nr_v138_unnamed.tax
 CP026050.S49M2367   Bacteria;Proteobacteria;Gammaproteobacteria;Enterobacterales;Yersiniaceae;Serratia;unnamed.Serratia;
@@ -1975,14 +1974,40 @@ St0rFr10    Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;alfIV;a
 </tbody>
 </table>
 <p>The top-of-script descriptions of what this does, along with examples, is very detailed.</p>
-<p>The terminal output for this is extensive and informative- read it carefully for mistakes where names changed that shouldn’t have.<br />
-It tells you which names are changed, for example:</p>
-<ul>
-<li>alfI-A is a lineage and clade, so it is changed to alfI-A.l and alf_I-A.c .<br />
-</li>
-<li>Similarly, it lets you know that 434 blanks were changed to say “unnamed”.<br />
-<br></li>
-</ul>
+<p>Read the terminal output carefully for mistakes where names changed that shouldn’t have.<br />
+The terminal output with comments about what it means:</p>
+<pre class="bash"><code>$ Rscript reformat_taxonomy_nomenclature.R FT_semicol_noprefix_mothur.tax FT_semicol_noprefix_mothur_unnamed.tax FreshTrain
+
+# This is a check- the 9th column has nothing in it, just from the end of line ;
+database imported with an extra 9th column containing:  . This column was removed.
+
+# There were 369 missing names that got replaced with &quot;unnamed&quot;
+changing 369 blanks to say &quot;unnamed&quot;
+
+# These are all the names that got changed to not be duplicated between levels
+Replacing   Actinobacteria   with   Actinobacteria.P
+Replacing   Actinobacteria   with   Actinobacteria.C
+
+# Anything with unnamed in it's name (here just the ones we already added) gets changed to only say &quot;unnamed&quot;
+changing 369
+ unnamed
+to say &quot;unnamed&quot;
+
+# It is checking for a bunch of other words for unclassified in silva, but doesn't find them in the FreshTrain
+changing 0
+
+to say &quot;unnamed&quot;
+
+# It is checking each level for any daughter names that have 2 parent names. Nothing listed so didn't find any
+at level  2
+at level  3
+at level  4
+at level  5
+at level  6
+at level  7
+
+Made file:  FT_semicol_noprefix_mothur_unnamed.tax</code></pre>
+<p><br></p>
 <p>It is really important that blanks are filled with placeholder “unnamed…” becuase the RDP classifier takes a computational shortcut when calculating bootstrap p-values. For higher taxonomy levels it simply sums the lower levels. If the lower level is totally blank there’s nothing to sum up, so the highest level ends up being less than 100%.</p>
 <p>Now it looks like this:</p>
 <pre><code>$ head -n 5 FT_semicol_noprefix_mothur_unnamed.tax
@@ -2097,7 +2122,7 @@ St0rFr10    Bacteria(100);Proteobacteria(100);Alphaproteobacteria(100);Sphingomo
 <h4>Go back to all semicolon delimited</h4>
 <pre class="bash"><code>sed 's/[[:blank:]]/\;/' &lt;FT.silva.taxonomy &gt;FT.silva_semicol.taxonomy
 
-$ sed 's/[[:blank:]]/\;/' &lt;FT_semicol_noprefix_mothur_unnamed.tax &gt; FT_semicol_noprefix_mothur_unnamed_semicol.tax</code></pre>
+sed 's/[[:blank:]]/\;/' &lt;FT_semicol_noprefix_mothur_unnamed.tax &gt; FT_semicol_noprefix_mothur_unnamed_semicol.tax</code></pre>
 <p>FreshTrain looks like this now:</p>
 <pre><code>$ head -n 5 FT_semicol_noprefix_mothur_unnamed_semicol.tax
 ClonLD29;Bacteria;Verrucomicrobia;Spartobacteria;Chthoniobacterales;verI-A;unnamed.verI-A;unnamed.verI-A;
@@ -2122,7 +2147,7 @@ St0rFr10;Bacteria(100);Proteobacteria(100);Alphaproteobacteria(100);Sphingomonad
 <h4>13. compare taxonomy files</h4>
 <pre class="bash"><code>mkdir conflicts_database
 
-$ Rscript find_classification_disagreements.R FT_semicol_noprefix_mothur_unnamed_semicol.tax FT.silva_semicol.taxonomy NA conflicts_database NA NA 70 database </code></pre>
+Rscript find_classification_disagreements.R FT_semicol_noprefix_mothur_unnamed_semicol.tax FT.silva_semicol.taxonomy NA conflicts_database NA NA 70 database </code></pre>
 <table>
 <colgroup>
 <col width="45%"></col>
@@ -2396,7 +2421,37 @@ St0rFr10;Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;alfIV;alfI
 <div id="double-check-that-no-new-non-unique-names-have-emerged" class="section level4">
 <h4>Double-check that no new non-unique names have emerged</h4>
 <p>It’s possible that after changing the coarse-level names to match SILVA a reference in the FreshTrain could end up with phylogenetic conflicts (so structural conflicts beyond new names). This means a daughter name could have two different parent names (i.e. not be monophyletic). These should all be fixed manually in ARB. Run the reformatting script and read it’s output carefully to check for problems.</p>
-<pre class="bash"><code>Rscript reformat_taxonomy_nomenclature.R FT_noconflicts_mothur.taxonomy FT_noconflicts_mothur_unnamed.taxonomy FreshTrain</code></pre>
+<pre class="bash"><code>Rscript reformat_taxonomy_nomenclature.R FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur.tax FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur_unnamed.tax FreshTrain</code></pre>
+<table>
+<colgroup>
+<col width="40%"></col>
+<col width="60%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>reformat_taxonomy_nomenclature.R</code></td>
+<td>Name of script.</td>
+</tr>
+<tr class="even">
+<td><code>FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur.tax</code></td>
+<td>The input taxonomy file, mothur-formatted.</td>
+</tr>
+<tr class="odd">
+<td><code>FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur_unnamed.tax</code></td>
+<td>The output taxonomy file, also mothur-formatted.</td>
+</tr>
+<tr class="even">
+<td><code>FreshTrain</code></td>
+<td>Reformatting the FreshTrain database, not silva.</td>
+</tr>
+</tbody>
+</table>
 <p>This is what to look for in the terminal output:</p>
 <pre class="bash"><code>$ Rscript reformat_taxonomy_nomenclature.R FT_noconflicts_mothur.taxonomy FT_noconflicts_unnamed.taxonomy FreshTrain
 
@@ -2441,7 +2496,32 @@ Made file:  FT_noconflicts_unnamed.taxonomy</code></pre>
 <div id="check-that-reformatting-changed-nothing" class="section level4">
 <h4>Check that reformatting changed nothing</h4>
 <pre class="bash"><code>Rscript check_files_the_same.R FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur.tax FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur_unnamed.tax</code></pre>
-<p>arguments: <code>Rscript</code> <code>check_files_the_same.R</code> <code>file1</code> <code>file2</code></p>
+<table>
+<colgroup>
+<col width="40%"></col>
+<col width="60%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>check_files_the_same.R</code></td>
+<td>script name</td>
+</tr>
+<tr class="even">
+<td><code>FT_semicol_noprefix_mothur_unnamed_</code><br><code>semicol_noconflicts_mothur.tax</code></td>
+<td>file 1 of comparison- here the formatted FreshTrain before the double-checking.</td>
+</tr>
+<tr class="odd">
+<td><code>FT_semicol_noprefix_mothur_unnamed_</code><br><code>semicol_noconflicts_mothur_unnamed.tax</code></td>
+<td>file 2 of comparison- here the formatted FreshTrain that shouldn’t have changed after re-running <code>reformat_taxonomy_nomenclature.R</code>.</td>
+</tr>
+</tbody>
+</table>
 <p>It will either say “Files are all equal” or it will print the error given by the R function <code>all.equal()</code></p>
 <p><br></p>
 </div>
@@ -2506,14 +2586,108 @@ Rscript find_classification_disagreements.R FT_semicol_noprefix_mothur_unnamed_s
 </tr>
 </tbody>
 </table>
-<p>Look inside the generated csv files- there should be no conflicts left!</p>
-<p>All done!</p>
+<p>Look inside the generated csv files- there should be no conflicts left at Kingdom, Phylum, Class, or Order levels!</p>
+<p>This is what you should see:</p>
+<pre><code>$ cat conflicts_fixed/conflicts_summary.csv
+&quot;TaxaLevel&quot;,&quot;NumConflicts&quot;
+&quot;kingdom&quot;,0
+&quot;phylum&quot;,0
+&quot;class&quot;,0
+&quot;order&quot;,0
+&quot;lineage&quot;,1253
+&quot;&quot;,1106
+&quot;&quot;,0
+&quot;numFWseqs&quot;,1276
+&quot;numALLseqs&quot;,1276</code></pre>
+<p><br></p>
+</div>
+<div id="back-to-mothur-format-1" class="section level4">
+<h4>Back to mothur format</h4>
+<pre class="bash"><code>./replace_first_semicolon_with_tab.sh FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur_unnamed_semicol.tax FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur_unnamed_semicol_mothur.tax</code></pre>
+<table>
+<colgroup>
+<col width="45%"></col>
+<col width="54%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>FT_semicol_noprefix_mothur_unnamed_semicol_</code><br><code>noconflicts_mothur_unnamed_semicol.tax</code></td>
+<td>input, semicolon delimited</td>
+</tr>
+<tr class="even">
+<td><code>FT_semicol_noprefix_mothur_unnamed_semicol_</code><br><code>noconflicts_mothur_unnamed_semicol_mothur.tax</code></td>
+<td>output, mothur formatted for TaxAss</td>
+</tr>
+</tbody>
+</table>
 <p><br> <br></p>
 </div>
 </div>
 </div>
 <div id="save-new-release" class="section level1">
 <h1><span style="color:SteelBlue"> Save New Release! </span></h1>
+<div id="save-new-freshtrain-release" class="section level4">
+<h4>Save new FreshTrain release</h4>
+<p>Save the FreshTrain release with today’s date, not the export-from-arb date. This is consistent with past releases. The notes for each release should include the details about the export date/version from Arb.</p>
+<pre class="bash"><code>cp FT_unaligned.fasta FreshTrain13Jun2020silva138.fasta
+cp FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur_unnamed_semicol_mothur.tax FreshTrain13Jun2020silva138.taxonomy</code></pre>
+<p><br></p>
+<p>And they look like this:</p>
+<pre><code>$ head FreshTrain13Jun2020silva138.fasta
+&gt;ClonLD29
+AACGAACGCTGGCGGCGTGGATAAGACATGCAAGTCGAACGGGATTTTTTTCTGTAGCAATACAGAAAAAAGTCTAGTGGCGAACGGGTGCGTAACACGTGAGCAACCTACCGTGAAGTGGGGGATAGCTCGCCGAAAGGCGAATTAATACCGCATGTGGCCAAGGAAGACATCTTCCTGACGCCAAAGCCGGGGTAACCTGGCGCTTCTCGAGGGGCTCGCGGCCTATCAGCTTGTTGGTGAGGTAACGGCTCACCAAGGCTATGACGGGTAGCTGGTCTGAGAGGACGACCAGCCACACTGGAACTGAGACACGGTCCAGACACCTACGGGTGGCAGCAGTCGAGAATTTTTCACAATGGGGGAAACCCTGATGGAGCGACGCCGCGTGGAGGATGAAGGTTTTCGGATCGTAAACTCCTGTCATTAGAGAACAAGGCACATGGTTTAACTGACTGTGTGTTGATAGTATCTGAAGAGGAAGGGACGGCTAACTCTGTGCCAGCAGCCGCGGTAATACAGAGGTCTCAAGCGTTGTTCGGATTCATTGGGCGTAAAGGGTGCGTAGGTGGCGAGGTAAGTCGGATGTGAAATCTCCAAGCTCAACTTGGAAACTGCATTCGATACTGCTTTGCTAGAGGATTGTAGAGGGCATTGGAATTCACGGTGTAGCAGTGAAATGCGTAGATATCGTGAGGAAGACCAGTGGCGAAGGCGAATGCCTGGGCAATTCCTGACACTGAGGCACGAAGGCCAGGGGAGCAAACGGGATTAGATACCCCGGTAGTCCTGGCAGTAAACGGTGCACGTTTGGTGTGGGAGGATTCGACCCCTTCCGTGCCGGAGCTAACGCGTTAAACGTGCCGCCTGGGGAGTACGGTCGCAAGATTAAAACTCAAAGAAATTGACGGGGACCCGCACAAGCGGTGGAGTATGTGGCTTAATTCGATGCAACGCGAAGAACCTTACCTGGCCTTGACATGCATCTCTAATCCGGTGAAAGCCGGTGAGTGTAGCAATACACAATTTGCACAGGTGCTGCATGGCTGTCGTCAGCTCGTGTCGTGAGATGTTGGGTTAAGTCCCGCAACGAGCGCAACCCCTGTGAACTGTTGCCATGGAGACGTGAGTCTCCGGCACTCTGTTCAGACTGCCCTGTTCAACGGGGAGGAAGGTGGGGACGACGTCAAGTCAGTATGGCCCTTACGGCCAGGGCTGCACACGTACTACAATGCCCGACACAGAAGGATCCGAGACCGCAAGGTGGAGGAAATCACCAAAGTCGGGCCCAGTTCGGATTGGAGGCTGCAACTCGCCTCCATGAAGCCGGAATCGCTAGTAATGGCGCATCAGCTACGGCGCCGTGAATACGTTCCCGGGTCTTGTACACACCGCCCGTCACATCATGGGAGTCGTTTGTACCCGAAGTGCGCGCGCCAACCGCAAGGAGGCAGCGCCCTAAGGTATGAGCGGTAACTGGGATG
+&gt;FlvAquat
+NTACGATGAAGAGTTTGATCCTGGCTCAGGATGAACGCTAGCGGCAGGCTTAACACATGCAAGTCGAGGGGTATATGTCTTCGGATATAGAGACCGGCGCACGGGTGCGTAACGCGTATGCAATCTACCTTTTACAGGGGAATAGCCCAGAGAAATTTGGATTAATGCCCCATAGTATTATTAAATGGCATCATTTTATAATTAAAGTCACAACGGTAAAAGATGAGCATGCGTCCCATTAGTTAGTTGGTAAGGTAACGGCTTACCAAGACAATGATGGGNAGGGGTCCTGAGAGGGAGATCCCCCACACTGGTACTGAGACACGGACCAGACTCCTACGGGAGGCAGCAGTGAGGAATATTGGACAATGGGCGCAAGCCTGATCCAGCCATGCCGCGTGCAGGAAGACGGTCCTATGGATTGTAAACTGCTTTTATACAGGAAGAAACACTCCGACGTGTCGGAGCTTGACGGTACTGTAGGAATAAGGATCGGCTAACTCCGTGCCAGCAGCCGCGGTAATACGGAGGATCCAAGCGTTATCCGGAATCATTGGGTTTAAAGGGTCCGTAGGCGGTTTAATAAGTCAGTGGTGAAATCTGGTCGCTCAACGATCAAACGGCCATTGATACTGTTAGACTTGAATTATAAGGAAGTAACTAGAATATGTAGTGTAGCGGTGAAATGCTTAGATATTACATGGAATACCAATTGCGAAGGCAGGTTACTACTTATGGATTGACGCTGATGGACGAAAGCGTGGGGAGCGAACAGGATTAGATACCCTGGTAGTCCACGCCGTAAACGATGGATACTAGCTGTTGGGAGCAATCTCAGTGGCTAAGCGAAAGTGATAAGTATCCCACCTGGGGAGTACGTTCGCAAGAATGAAACTCAAAGGAATTGACGGGGGCCCGCACAAGCGGTGGAGCATGTGGTTTAATTCGATGATACGCGAGGAACCTTACCAAGGCTTAAATGTAGATTGACAGGACTGGAAACAGTTTTTTCTTCGGACAATTTACAAGGTGCTGCATGGTTGTCGTCAGCTCGTGCCGTGAGGTGTCAGGTTAAGTCCTATAACGAGCGCAACCCCTGTTGTTAGTTGCCAGCGAGTCATGTCGGGAACTCTAACGAGACTGCCAGTGCAAACTGTGAGGAAGGTGGGGATGACGTCAAATCATCACGGCCCTTACGCCTTGGGCTACACACGTGCTACAATGGACGGTACAGAGAGCAGCCACTGCGCAAGCAGGAGCGAATCTACAAAACCGTTCTCAGTTCGGATCGGAGTCTGCAACTCGACTCCGTGAAGCTGGAATCGCTAGTAATCGGATATCAGCCATGATCCGGTGAATACGTTCCCGGGCCTTGTACACACCGCCCGTCAAGCCATGGAAGCTGGGGGTACCTGAAGTCGGTGACCGCAAGGAGCTGCCTAGGGTAAAACTGGTAACTGGGGCTAAGTCGTAACAAGGTAGCCGTACCGGAAGG
+&gt;B61FlSp2
+GATGAACGCTAGCGGCAGGCCTAATACATGCAAGTCGAACGGTGTAGCAATACACAGTGGCGCACGGGTGCGTAACACGTATGCAACCTACCTATTATTGGGGGATAGCCTTTGGAAACGGAGATTAATACCGCATAAGACAGTGACATGGCATCATGTAGCTGTTAAAGCTTCGGCGATAATAGATGGGCATGCGTCCAATTAGTTAGTTGGTGAGGTAATGGCTCACCAAGACGATGATTGGTAGGGGATCTGAGAGGATAATCCCCCACACTGGCACTGAGATACGGGCCAGACTCCTACGGGAGGCAGCAGTAGGGAATATTGGGCAATGGACGGAAGTCTGACCCAGCCATGCCGCGTGCAGGATGAAGGCGTTATGCGTTGTAAACTGCTTTTTTATAGGAAGAAGGAGACCTTGCGAGGTTTGGTGACGGTACTATAAGAATAAGCACCGGCTAACTCCGTGCCAGCAGCCGCGGTAATACGGAGGGTGCGAGCGTTGTCCGGATTTATTGGGTTTAAAGGGTGCGTAGGCGGTTTATTAAGTCAGTGGTGAAAGACGGTCGCTCAACGATTGCAGTGCCATTGATACTGGTAGACTTGAGTTCGTATGAGGTAGCTGGAATGGATAGTGTAGCGGTGAAATGCATAGATATTATCCAGAACTCCAATTGCGTAGGCAGGTTACTAATACGATACTGACGCTGATGCACGAAAGTGTGGGGATCAAACAGGATTAGATACCCTGGTAGTCCACACTGTAAACGATGATGACTAACTGTTTGCCCTTCGGGGTGAGTGGTACAGAGAAATCGTTAAGTCATCCACCTGGGGAGTACGCCGGCAACGGTGAAACTCAAAGGAATTGACGGGGGTCCGCACAAGCGGTGGAGCATGTGGTTTAATTCGATGATACGCGAGGAACCTTACCTAGGCTAGAATGTGAAGGAATAATTTAGAGATAGATTAGTCTGCAAAGACCTGAAACAAGGTGCTGCATGGCTGTCGTCAGCTCGTGCCGTGAGGTGTTGGGTTAAGTCCCGCAACGAGCGCAACCCCTGTTGTTAGTTGCCATCAAGTCATGTTGGGCACTCTAGCAAGACTGCCTACGCAAGTAGAGAGGAAGGAGGGGACGACGTCAAGTCATCATGGCCCTTACGCCTAGGGCAACACACGTGCTACAATGGGCGGTACAGAGGGTAGCTACCAGGCAACTGGATGCCAATCTCGAAAGCCGCTCTCAGTTCGGATTGGGGTCTGCAACTCGACCCTATGAAGCTGGAATCGCTAGTAATCGGGTATCAGCTATGACCCGGTGAATACGTTCCCGGACCTTGTACACACCGCCCGTCAAGCCATGAAAGTCTGGTAGACCTAAAGTTCCGCGTCAAGAACGGGATTAGGGTAGAACAGGTAATTGGGGCTAAGTCGTAACAAGGTAGCCGTACCGGAAGGTGT
+&gt;St0rFro8
+AGAGTTTGATTATGGCTCAGAATGAACGCTGGCGGCAGGCCTAACACATGCAAGTCGAGCGCCCCGCAAGGGAGCGGCGGACGGGTGAGTAACGCGTGGGAACATACCCCTTTCTACGGAATAGCCTCGGGAAACTGAGAGTAATACCGTATAAGCCCTACGGGGGAAAGATTTATCGGGAAGGGATTGGCCCGCGTTGGATTAGGTAGTTGGTGGGGTAATGGCCTACCAAGCCGACGATCCATAGCTGGTTTGAGAGGATGATCAGCCACACTGAGACTGAGACACGGCCCAGACTCCTACGGGAGGCAGCAGTGGGGAATCTTAGACAATGGGCGCAAGCTGATCTAGCCATGCCGCGTGTTCGATGAAGGCCTTAGGGTTGTAAAGATCTTTCGTGGGGGAAGATAATGACGGTACCCCAAGAAGAAGCCCCGGCTAACTCCGTGCCAGCAGCCGCGGTAATACGGAGGGGGCTAGCGTTATTCGGAATTACTGGGCGTAAAGCGCACGTAGGCGGATTGGAAAGTCAGAGGTGAAATCCCAGAGCTCAACTTTGGAACTGCCTTTGAAACTCCCAGTCTTGAGGTCGAGAGAGGTGAGTGGAATTCCGAGTGTAGAGGTGAAATTCGTAGATATTCGGAGGAACACCAGTGGCGAAGGCGGCTCACTGGCTCGATACTGACGCTGAGGTGCGAAAGCGTGGGGAGCAAACAGGATTAGATACCCTGGTAGTCCACGCCGTAAACGATGAATGCCAGTCGTCGGGTAGCATGCTATTCGGTGACACACCTAACGGATTAAGCATTCCGCCTGGGGAGTACGGCCGCAAGGTTAAAACTCAAAGGAATTGACGGGGGCCCGCACAAGCGGTGGAGCATGTGGTTTAATTCGAAGCAACGCGCAGAACCTTACCAACCCTTGACATGGGTATCGCAGGGCCAGAGATGGTCCTTTCAGTTCGGCTGGATACCACACAGGCGCTGCATGGCTGTCGTCAGCTCGTGTCGTGAGATGTTCGGTTAAGTCCGGCAACGAGCGCAACCCACATTTTTAGTTGCCATCATTCAGTTGGGCACTCTAGAGAAACTGCCGGTGATAAGCCGGAGGAAGGTGTGGATGACGTCAAGTCCTCATGGCCCTTACGGGTTGGGCTACACACGTGCTACAATGGTGGTGACAATGGGTTAATCCCAAAAAGCCATCTCAGTTCGGATTGGGGTCTGCAACTCGACCCCATGAAGTCGGAATCGCTAGTAATCGCGTAACAGCATGACGCGGTGAATACGTTCCCGGGCCTTGTACACACCGCCCGTCACACCATGGGAATTGGATCTACCCGAAGGTGGTGCGCCAACCTGCAAAGGAGGCAGCCAACCACGGTAGGTCCAGTGACTGGGGTGAAGTCGTAACAAGGTAGCTGTAGGGGAACCTGCGGCTGGATCACCTCCTTT
+&gt;St0rFr10
+AGAGTTTGATTATGGCTCAGAACGAACGCTGGCGGCATGCCTAATACATGCAAGTCGAACGAGACCTTCGGGTCTAGTGGCGCACGGGTGCGTAACGCGTGGGAATCTGCCCTTCGGTTCGGAATAACAGTTAGAAATGACTGCTAATACCGGATGATGTCTTCGGACCAAAGATTTATCGCCGAAGGATGAGCCCGCGTAGGATTAGGTAGTTGGTGGGGTAAAGGCCTACCAAGCCTACGATCCTTAGCTGGTCTGAGAGGATGATCAGCCACACTGGGACTGAGACACGGCCCAGACTCCTACGGGAGGCAGCAGTAGGGAATATTGGACAATGGGCGAAAGCCTGATCCAGCAATGCCGCGTGAGTGATGAAGGCCTTAGGGTCGTAAAGCTCTTTTACCAGGGATGATAATGACAGTACCTGGAGAATAAGCTCCGGCTAACTCCGTGCCAGCAGCCGCGGTAATACGGAGGGAGCTAGCGTTGTTCGGAATTACTGGGCGTAAAGCGTACGTAGGCGGTTATTCAAGTCAGAGGTGAAAGCCCGGGGCTCAACCCCGGAACTGCCTTTGAAACTAGGTAGCTAGAATCTTGGAGAGGTCAGTGGAATTCCGAGTGTAGAGGTGAAATTCGTAGATATTCGGAAGAACACCAGTGGCGAAGGCGACTGACTGGACAAGTATTGACGCTGAGGTACGAAAGCGTGGGGAGCAAACAGGATTAGATACCCTGGTAGTCCACGCCGTAAACGATGATAACTAGCTGTTCGGGCACTTGGTGCTTGAGTGGCGCAGCTAACGCATTAAGTTATCCGCCTGGGGAGTACGGTCGCAAGATTAAAACTCAAAGGAATTGACGGGGGCCTGCACAAGCGGTGGAGCATGTGGTTTAATCCGAAGCAACGCGCAGAACCTTACCAGCGTTTGACATCCCGCGCTATCCAGAGAGATTTGGAGTTCCTTCGGGGACGCGGTGACAGGTGCTGCATGGCTGTCGTCAGCTCGTGTCGTGAGATGTTGGGTTAAGTCCCGCAACGAGCGCAACCCTCGTCCTTAGTTGCCATCATTCAGTTGGGCACTCTAAGGAAACCGCCGGTGATAAGCCGGAGGAAGGTGGGGATGACGTCAAGTCCTCATGGCCCTTACACGCTGGGCTACACACGTGCTACAATGGCGGTGACAGTGGGCAGCAAACTCGCGAGGGTGAGCTAATCTCCAAAAGCCGTCTCAGTTCGGATTGCACTCTGCAACTCGAGTGCATGAAGGCGGAATCGCTAGTAATCGCGGATCAGCATGCCGCGGTGAATACGTTCCCAGGCCTTGTACACACCGCCCGTCACACCATGGGAGTTGGTTTCACCCGAAGGCAGTGCGCTAACCGCAAAGGAGGCAGCTGACCACGGTGGGATCAGCGACTGGGGTGAAGTCGTAACAAGGTAGCCGTAGGGGAACCTGCGGCTGGATCACCTCCTTT</code></pre>
+<pre><code>$ head FreshTrain13Jun2020silva138.taxonomy
+ClonLD29    Bacteria;Verrucomicrobiota;Verrucomicrobiae;Chthoniobacterales;verI-A;unnamed.verI-A;unnamed.verI-A;
+FlvAquat    Bacteria;Bacteroidota;Bacteroidia;Flavobacteriales;bacII;bacII-A;unnamed.bacII-A;
+B61FlSp2    Bacteria;Bacteroidota;Bacteroidia;Cytophagales;bacIII;bacIII-A;unnamed.bacIII-A;
+St0rFro8    Bacteria;Proteobacteria;Alphaproteobacteria;Rhodobacterales;alfVI;unnamed.alfVI;unnamed.alfVI;
+St0rFr10    Bacteria;Proteobacteria;Alphaproteobacteria;Sphingomonadales;alfIV;alfIV-A;Novo-A2;
+My2Meth2    Bacteria;Proteobacteria;Gammaproteobacteria;Burkholderiales;betIV;unnamed.betIV;unnamed.betIV;
+RhfFerm2    Bacteria;Proteobacteria;Gammaproteobacteria;Burkholderiales;betI;betI-B;Rhodo;
+BctrAH57    Bacteria;Bacteroidota;Bacteroidia;Cytophagales;bacIII;bacIII-A;Flecto;
+BctFukuN    Bacteria;Bacteroidota;Bacteroidia;Chitinophagales;bacI;bacI-A;bacI-A2;
+BctFuku2    Bacteria;Bacteroidota;Bacteroidia;Chitinophagales;bacI;bacI-B;bacI-B1;</code></pre>
+</div>
+<div id="save-taxass-formatted-version-of-silva" class="section level4">
+<h4>Save TaxAss-formatted version of silva</h4>
+<p>Some of the most common problems people have is with formatting, so why not save everyone time and post the most-recent silva version alongside the FreshTrain- already unaligned and formatted with consistent nomenclature. This will save everyone time.</p>
+<pre class="bash"><code>cp silva.nr_v138_unaligned.fasta silva.nr_v138_taxass.fasta
+cp silva.nr_v138_unnamed.tax silva.nr_v138_taxass.taxonomy</code></pre>
+<p>These files are not so big, so maybe I can just host the most recent version on github for convenience. Total only 228MB unzipped (small because it’s unaligned):</p>
+<pre><code>$ ls -ltrh
+-rw-r--r--   1 athena  staff   210M Jun 13 11:41 silva.nr_v138_taxass.fasta
+-rw-r--r--   1 athena  staff    18M Jun 13 11:41 silva.nr_v138_taxass.taxonomy</code></pre>
+<p><br></p>
+</div>
+<div id="clean-up-folder" class="section level4">
+<h4>Clean up folder</h4>
+<pre class="bash"><code>mkdir final_release
+mv FreshTrain13Jun2020silva138.* silva.nr_v138_taxass.* final_release/
+
+mkdir intermediate_files/
+mv FT* silva.nr_v138_un* mothur* intermediate_files/
+
+mkdir scripts_used
+mv *.R *.sh scripts_used/
+
+mkdir start_files
+mv silva.nr_v138.* FW* start_files/</code></pre>
+<p><br> <span style="color:SteelBlue"> <em>~Now go forth and TaxAss~</em> </span> <br></p>
+</div>
 </div>
 
 

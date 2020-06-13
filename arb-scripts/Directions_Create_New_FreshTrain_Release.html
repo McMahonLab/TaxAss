@@ -1529,32 +1529,41 @@ pre code, pre, code {
 <div id="overview-of-steps" class="section level2">
 <h2>Overview of steps</h2>
 <ul>
-<li>do a first pass of reformatting FreshTrain
+<li><strong>format silva</strong>
 <ul>
-<li>export all full-length 16S from ARB<br />
+<li>text reformatting<br />
 </li>
-<li>basic text-based reformatting of taxonomy and fasta files<br />
-</li>
-<li>fix duplicated taxon names and standardize unnamed nomenclature</li>
-<li>check that only and all expected FreshTrain names are included<br />
-</li>
-<li>repeat until all errors corrected</li>
+<li>make all names consistent<br />
+<br></li>
 </ul></li>
-<li>do a first pass of reformatting Silva
+<li><strong>format FreshTrain</strong>
 <ul>
-<li>basic text-based reformatting of fasta file</li>
-<li>fix duplicated taxon names and standardize unnamed nomenclature</li>
+<li>export from ARB<br />
+</li>
+<li>text reformatting<br />
+</li>
+<li>make all names consistent<br />
+</li>
+<li>Remove seqs from arb that shouldn’t be in FreshTrain<br />
+</li>
+<li><span style="color:red"> repeat from start </span><br />
+</li>
 </ul></li>
-<li>fix coarse-level nomenclature disagreements between the databases
+<li><strong>find disagreements</strong>
 <ul>
 <li>classify FreshTrain with SILVA<br />
 </li>
-<li>compare coarse-level disagreements</li>
-<li>change FreshTrain coarse-level nomenclature to match Silva<br />
+<li>Remove any seqs from arb that are better in silva<br />
 </li>
-<li>check for errors or mistakes introduced by changes</li>
+<li><span style="color:red"> repeat from start </span><br />
+</li>
 </ul></li>
-<li>Save the new release version!</li>
+<li><strong>fix freshtrain</strong>
+<ul>
+<li>change coarse-level names to match Silva<br />
+</li>
+<li>check for any remaining problems</li>
+</ul></li>
 </ul>
 <p><br></p>
 </div>

@@ -26,21 +26,24 @@ pre code, pre, code {
 
 ## Overview of steps  
 
-* do a first pass of reformatting FreshTrain  
-  * export all full-length 16S from ARB  
-  * basic text-based reformatting of taxonomy and fasta files  
-  * fix duplicated taxon names and standardize unnamed nomenclature
-  * check that only and all expected FreshTrain names are included  
-  * repeat until all errors corrected
-* do a first pass of reformatting Silva
-  * basic text-based reformatting of fasta file
-  * fix duplicated taxon names and standardize unnamed nomenclature
-* fix coarse-level nomenclature disagreements between the databases
+* **format silva**  
+  * text reformatting  
+  * make all names consistent  
+<br>
+  
+* **format FreshTrain**  
+  * export from ARB  
+  * text reformatting   
+  * make all names consistent  
+  * Remove seqs from arb that shouldn't be in FreshTrain  
+  * <span style="color:red"> repeat from start </span>  
+* **find disagreements**  
   * classify FreshTrain with SILVA  
-  * compare coarse-level disagreements
-  * change FreshTrain coarse-level nomenclature to match Silva  
-  * check for errors or mistakes introduced by changes
-* Save the new release version!  
+  * Remove any seqs from arb that are better in silva  
+  * <span style="color:red"> repeat from start </span>  
+* **fix freshtrain**
+  * change coarse-level names to match Silva  
+  * check for any remaining problems  
   
 <br>
 

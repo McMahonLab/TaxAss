@@ -183,13 +183,12 @@ ________________________________________________________________________________
 
 Program       | Version             | Source                  | Specific Link
 --------------|---------------------|-------------------------|------------------------------------------  
-mothur        | v.1.44.1 *          | www.mothur.org          | https://github.com/mothur/mothur/releases  
+mothur        | v.1.44.1          | www.mothur.org          | https://github.com/mothur/mothur/releases  
 BLAST         | 2.10.0              | ncbi.nlm.nih.gov        | ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/  
 TaxAss        | master branch       | `tax-scripts` folder    | https://github.com/McMahonLab/TaxAss <br> You don't need your own github account; you can click the green download button on the top right of the main page (do have to download all folders unfortunately)  
 python        | 2.7 or 3.7          | your computer already has this | don't need anything extra
 r             | 3 or 4              | cran.r-project.org      | https://cran.r-project.org/
 
-\* Older versions of mothur use a different delimiter in some files and will throw errors.  
 
 You want mothur and BLAST on your "path" (that means if you type them, your computer recognizes it as a program and runs it).
 BLAST does that automatically if you use the `.dmg` file to install it, but mothur does not. 
@@ -215,7 +214,7 @@ Database      | Version | File Name          | Download From
 --------------|---------|--------------------|-------------------------  
 FreshTrain    | 30Apr2018<br>or<br>25Jan2018 | FreshTrain30Apr2018SILVAv132.zip<br>FreshTrain30Apr2018SILVAv128.zip<br>FreshTrain25Jan2018Greengenes13_5.zip | https://github.com/McMahonLab/TaxAss/FreshTrain-files
 Greengenes    | Aug 2013  | "greengenes reference taxonomy" <br> "greengenes reference alignment" | https://www.mothur.org/wiki/Greengenes-formatted_databases
-Silva         | v.132 <br> v.128 | "Full length sequences and taxonomy references" | https://www.mothur.org/wiki/Silva_reference_files
+Silva         | v.132 <br> v.128 <br> v.138 | "Full length sequences and taxonomy references" | https://www.mothur.org/wiki/Silva_reference_files
 
 (Note that if you're a non-academic or commercial user you have to pay to use silva releases earlier than v.138.)
 
@@ -231,7 +230,7 @@ These are the files you supply as input into the workflow:
 
 File                | Description
 --------------------|------------------------------------------------------------------
-	otus.fasta			  | fasta sequences for each of your OTUs (OTUs can be clustered or unique sequences)
+	otus.fasta			  | fasta sequences for each of your OTUs <br> (OTUs can be clustered, error corrected, or unique sequences)
 	otus.abund			  | relative abundance of each OTU (i.e. the OTU table)<br>(Optional- don't need if following "quickie" procedure)
 	general.fasta		  | fasta sequences in your large, general comrpehensive taxonomy database
 	general.taxonomy	| taxonomy names in your large, general comprehensive taxonomy database
@@ -260,9 +259,6 @@ The seqIDs in your otus.fasta and otus.abund files must follow these requirement
 - **cannot contain semicolons**   
 			 	The taxonomy file format produced by mothur is semicolon delimited, so semicolons in
 			 	file names will throw off all R scripts by adding an extra column.
-- **cannot contain dashes**  
-			 	If there are dashes it makes it difficult to switch between aligned and unaligned
-			 	fasta files because you can't simply remove all dashes without changing the seqID names
 - **must match between the otus.fasta file and the otus.abund file**  
 			 	(though consistent ordering is not necessary.)
 
@@ -286,38 +282,26 @@ TACGTAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAG
 >seqID
 TACGTAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAG
 ```
-___________
 
-<br>
-
-### Un-align `otus.fasta`:
-
-If you are using mothur to process your data, the fasta files will be aligned, but the dashes in aligned sequences don't work with BLAST.  
-An Aligned file looks something like this:  
+Example of aligned format:  
 ```
->SRR1531609.6
-GAG-G-A-A--TA-TT--GG-T-C----AA-T-G-G--GC-----GC-A--A---G-C-C-T-G-A-A-C-C-A---GC-C--A--T-GCC-G-A-G-T------G-C-A--G--GA-----------------------------T-G--A--C--G-G-TC----C---TA-TG-----G-A-T-----T-G-T-A---AA-C-T-GC--------------------TT-TT-G-T--A-CAG----G--A-A--G---AA-ACAC-T---C-C-C--T---------------------C----------------------------GT---------------------------G------------------------A-GGG-A-GC-T-T-G-A-C-G-----G-T---A-C-TG--------T-A-A-G----
+>seqID
+........GAG-G-A-A--TA-TT--GG-T-C----AA-T-G-G--GC-----GC-A--A---G-C-C-T-G-A-A-C-C-A---GC-C--A--T-GCC-G-A-G-T------G-C-A--G--GA-----------------------------T-G--A--C--G-G-TC----C---TA-TG-----G-A-T-----T-G-T-A---AA-C-T-GC--------------------TT-TT-G-T--A-CAG----G--A-A--G---AA-ACAC-T---C-C-C--T---------------------C----------------------------GT---------------------------G------------------------A-GGG-A-GC-T-T-G-A-C-G-----G-T---A-C-TG--------T-A-A-G----..........
 ```  
 <br>
-You can remove hyphens using this terminal command:
+**Remove the hyphens, dots, and all text after the first blank in a seqID line with `reformat_fasta.R`:**  
 
-Full 2 Commands (Type in Terminal):
-```
-sed 's/-//g' <aligned.fasta >otus.fasta
-sed 's/-//g' <names-with-dashed.count_table >otus.count_table
+Full Command (Type in Terminal):
+```{bash, eval=F}
+Rscript reformat_fasta.R aligned.fasta otus.fasta check.seqids
 ```  
 
 command   | description
 ----------|----------------------------------------------
-`sed`     | a "stream editor" for streams of text, built-in bash function  
-`s` 		  | tells it to do a substitution 
-`/-//`		|	is format `/find/replace/`, so find `-`, replace with nothing
-`g` 		  | tells it to do a global substitution (ie. every instance not just first on the line)
-`aligned.fasta` | the name of your aligned fasta file 
-`otus.fasta`	  | the name of the reformatted file you're creating (note it must have a different name than input)
-
-**NOTE: this removes hyphens from everywhere!** In case there are hyphens in any seqID names, you have to also remove
-hyphens from the names in your abund file (the second terminal command). SeqIDs must match exactly btwn the two files.
+`reformat_fasta.R`     | Name of script being run.  
+`aligned.fasta` 		  | Name of your fasta file that needs to be unaligned or have seqIDs edited. 
+`otus.fasta`		|	Name of the file this script creates. `otus.fasta` matches the names used in this workflow.
+`check.seqids` 		  | Do check the seqID names and if there are any white spaces (tabs or spaces), remove the white space and anything after it on the line. If there are no white spaces it won't change anything. If you DON'T want it to edit your seqIDs, then leave this argument blank  
 
 ___________
 
@@ -358,7 +342,7 @@ ___________
 If you used mothur for QC and are proceeding with unique sequences, as in the TaxAss paper, you can reformat the outs.count_table file this way:  
 		
 Full Command (type in terminal):
-```
+```{bash, eval=F}
 Rscript reformat_mothur_OTU_tables.R StupidLongMothurName.count_table count_table otus.abund
 ```
 
@@ -386,14 +370,14 @@ ___________
 ### Get `otus.fasta` and `otus.abund` from a dada2 `seqtab_nochim` 
 
 If you are using dada2 within RStudio, save the `seqtab_nochim` object as an R data structure:  
-```
-saveRDS(object = seqtab_nochim, file = "seqtab_nochim.rds)
+```{R, eval=F}
+saveRDS(object = seqtab_nochim, file = "seqtab_nochim.rds")
 ```
 
 You can convert this into both the otus.fasta and the otus.abund files this way: 
 
 Full Command (type in terminal):
-```
+```{bash, eval=F}
 Rscript reformat_dada2_seqtabs.R seqtab_nochim.rds otus.fasta otus.abund otus.count
 ```
 
@@ -406,42 +390,55 @@ command argument                   | description
 `otus.abund`							         | name of created relative abundance table to feed into TaxAss<br> note: this has been converted to relatve abundance (normalized by sample so that abundance values in each sample sum to 100)
 `otus.count`                       | name of created file that saves the total reads per sample. This is not used in TaxAss, but saves the information you would need to un-normalize your abundance data so that it's not lost.  
 
+<br>
+
+#### <span style="color:SteelBlue"> Use the tabs at the top of this section to find directions for the other file types! </span>  
+
+_____________________________________________
 
 _____________________________________________
 
 ## Silva files
 
-How to format the `general.taxonomy` and `general.fasta` files when using the silva database as your taxonomy reference.
-<br><br>
+How to format the `general.taxonomy` and `general.fasta` files when using the silva database as your taxonomy reference.  
+<br>
+**NOTE: I have a pre-formatted version of the latest release of silva in the FreshTrain files folder.**  
 
-### Format unclassified and duplicate names in `general.taxonomy` 
+<br>
+
+### Format names in `general.taxonomy` 
 
 SILVA uses inconsistent nomenclature for sequences that don't have names, 
 and it contains some identical names at different taxon-levels. 
-To be compatible with the FreshTrain, re-format silva into a more consistent nomenclature using 
-the script `reformat_taxonomy_nomenclature.RR`.  
+To be compatible with the FreshTrain, re-format silva's unclassified references into a more consistent nomenclature using 
+the script `reformat_taxonomy_nomenclature.R`.  
 
 Full Command (type in terminal):
 
-```
+```{bash, eval=F}
 Rscript reformat_taxonomy_nomenclature.R silva.nr_v132.tax general.taxonomy
 ```
 
 command argument   | description
 -------------------|----------------------------------------------
-silva.nr_v132.tax  | input file. the mothur-formatted silva taxonomy with inconsistent names. If you are unaligning the fasta, you can do this step before or after removing the periods from the seqID names.  
-general.taxonomy   | silva taxonomy with consistent unclassified names that is ready-to-taxass!  
+`silva.nr_v132.tax`  | input file. the mothur-formatted silva taxonomy with inconsistent names.
+`general.taxonomy`   | created silva taxonomy with consistent unclassified names that is ready-to-taxass!  
 
 Comments in the script are very detailed as to examples of the changes.
-The new missing names are easier to deal with because they follow the 
-consistent format where they begin with either:  
+
+Any of these words can describe references without a name:    
 
 * unnamed  
 * unknown  
 * uncultured  
 * uncertain  
+* Incertae_Sedis  
+* unclassified
+* ParentName_ge  (or _ph _cl _or _fa)  
 
-And are followed by a period and the closest available parent-name. The names that get changed will be spit out into the terminal output. There are a lot with the format "knownphylum_cl" for an unknown class name. These all get changed to "unnamed.knownphylum" to follow a consistent and easy-to-grep nomenclature.  
+And this script changes them to all be: 
+
+* unnamed.ClosestKnownParentName
 
 This script additionally makes all taxonomy names unique. For only those names that are duplicated, a capitol letter indicating the taxon-level is added to the end of the name, separated by a period. For example, "Actinobacteria" is a phylum and a class in Silva132, so it becomes "Actinobacteria.P" and "Actinobacteria.C" .  
 
@@ -470,22 +467,21 @@ ___________
 
 <br>
 
-### Unalign `general.fasta` (optional):  
+### Format `general.fasta`    
 
-The silva reference downloaded from mothur is aligned. Using this file directly for taxonomy assignment works just fine and takes the same amount of time computationally. BUT, if you want to save 10GB of space you don't need it aligned for taxonomy assignment so you can un-align it using the shell script `un-align_silva.sh`. This reduces the file size (for v132) from **10.68 GB to 318 MB.** _dang!_ It takes about 10 minutes to run this script to remove hyphens and semicolons, and it saves about 10 minutes later on during taxonomy assignment. None of the intermediate files change sizes, the processing time breaks even, so this is optional, just saves you 10GB of space if you're keeping the reference around. 
+The silva reference downloaded from mothur is aligned. Using this file directly for taxonomy assignment works just fine, but unaligning reduces the file size (for v132) from **10.68 GB to 318 MB.** _dang!_ It takes about 10 minutes to run this script to remove hyphens and semicolons, and it saves about 10 minutes later on during taxonomy assignment. None of the intermediate files change sizes, and the processing time breaks even, so this is optional, just saves you 10GB of space if you're keeping the reference around. 
 
-Example syntax:
-```
-./un-align_silva.sh silva.nr_v132.align general.fasta silva.nr_v132.tax general.taxonomy
-```
+Full Command (Type in Terminal):
+```{bash, eval=F}
+Rscript reformat_fasta.R aligned.fasta general.fasta 
+```  
 
 command   | description
 ----------|----------------------------------------------
-`un-align_silva.sh` | script located in tax-scripts folder  
-`silva.nr_v132.align` | the silva database fasta file downloaded from mothur  
-`general.fasta` | a new name for the output unaligned database.  
-`silva.nr_v132.tax` | the silva database taxonomy file downloaded from mothur <br> Removing the `.`'s to un-align the fasta also removes dots from the sequence ID name. So need to remove the same dots from the sequence IDs in the taxonomy file.  
-`general.taxonomy` | a new name for the output unaligned database.  
+`reformat_fasta.R`     | Name of script being run.  
+`aligned.fasta` 		  | Name of your fasta file that needs to be unaligned or have seqIDs edited. 
+`general.fasta`		|	Name of the file this script creates. `general.fasta` matches the names used in this workflow.
+`  ` 		  | No need to edit the seqID names, unless new versions of silva add white space to them, so leave this argument blank.    
 
 <br>
 (It is possible I made up the word "un-align")
@@ -514,7 +510,7 @@ To convert Greengenes to a mothur-compatible format:
 
 Full Command (type in terminal):
 
-```
+```{bash, eval=F}
 ./reformat_greengenes.sh gg_13_5_taxonomy.txt
 ```
 

@@ -213,7 +213,7 @@ Now you can open the mothur program just by typing `mothur` from any location. (
 Database      | Version | File Name          | Download From
 --------------|---------|--------------------|-------------------------  
 FreshTrain    | 30Apr2018<br>or<br>25Jan2018 | FreshTrain30Apr2018SILVAv132.zip<br>FreshTrain30Apr2018SILVAv128.zip<br>FreshTrain25Jan2018Greengenes13_5.zip | https://github.com/McMahonLab/TaxAss/FreshTrain-files
-Greengenes    | Aug 2013  | "greengenes reference taxonomy" <br> "greengenes reference alignment" | https://www.mothur.org/wiki/Greengenes-formatted_databases
+Greengenes    | Aug 2013  | "greengenes reference taxonomy" | https://www.mothur.org/wiki/Greengenes-formatted_databases
 Silva         | v.132 <br> v.128 <br> v.138 | "Full length sequences and taxonomy references" | https://www.mothur.org/wiki/Silva_reference_files
 
 (Note that if you're a non-academic or commercial user you have to pay to use silva releases earlier than v.138.)

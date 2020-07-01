@@ -455,8 +455,7 @@ After fixing which are exported in Arb, <span style="color:Red"> re-export from 
 
 #### Classify the FreshTrain references with the Silva database  
 ```{bash, eval=F}
-mothur "#classify.seqs(fasta=FT_unaligned.fasta, template=silva.nr_v138_unaligned.fasta,
-taxonomy=silva.nr_v138_unnamed.tax, method=wang, probs=T, processors=2, cutoff=0)"
+mothur "#classify.seqs(fasta=FT_unaligned.fasta, template=silva.nr_v138_unaligned.fasta, taxonomy=silva.nr_v138_unnamed.tax, method=wang, probs=T, processors=2, cutoff=0)"
 
 mv FT_unaligned.nr_v138_unnamed.wang.taxonomy FT.silva.taxonomy
 ```  
@@ -873,7 +872,7 @@ Argument                              | Description
 # <span style="color:SteelBlue"> Save New Release! </span>  
 
 #### Save new FreshTrain release  
-Save the FreshTrain release with today's date, not the export-from-arb date. This is consistent with past releases. The notes for each release should include the details about the export date/version from Arb.  
+Save the FreshTrain release with the export-from-arb date, not today's date. This is not consistent with past releases, but will lead to less confusion about what each release is based on. The notes for each release should include the details about the date and taxass script version used to create it.  
 
 ```{bash, eval=F}
 cp FT_unaligned.fasta FreshTrain13Jun2020silva138.fasta
@@ -932,13 +931,13 @@ mkdir final_release
 mv FreshTrain13Jun2020silva138.* silva.nr_v138_taxass.* final_release/
 
 mkdir intermediate_files/
-mv FT* silva.nr_v138_un* mothur* intermediate_files/
+mv FT* silva.nr_v138_un* mothur.*.logfile intermediate_files/
 
 mkdir scripts_used
 mv *.R *.sh scripts_used/
 
 mkdir start_files
-mv silva.nr_v138.* FW* start_files/
+mv silva.nr_v138.* FW* mothur_README* start_files/
 ```
 
 <br>

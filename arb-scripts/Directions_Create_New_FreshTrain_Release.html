@@ -2105,8 +2105,7 @@ Bacteria,Actinobacteria.P,Actinobacteria.C,Frankiales,acI</code></pre>
 <p><br></p>
 <div id="classify-the-freshtrain-references-with-the-silva-database" class="section level4">
 <h4>Classify the FreshTrain references with the Silva database</h4>
-<pre class="bash"><code>mothur &quot;#classify.seqs(fasta=FT_unaligned.fasta, template=silva.nr_v138_unaligned.fasta,
-taxonomy=silva.nr_v138_unnamed.tax, method=wang, probs=T, processors=2, cutoff=0)&quot;
+<pre class="bash"><code>mothur &quot;#classify.seqs(fasta=FT_unaligned.fasta, template=silva.nr_v138_unaligned.fasta, taxonomy=silva.nr_v138_unnamed.tax, method=wang, probs=T, processors=2, cutoff=0)&quot;
 
 mv FT_unaligned.nr_v138_unnamed.wang.taxonomy FT.silva.taxonomy</code></pre>
 <p>Looks like this now:</p>
@@ -2634,7 +2633,7 @@ Rscript find_classification_disagreements.R FT_semicol_noprefix_mothur_unnamed_s
 <h1><span style="color:SteelBlue"> Save New Release! </span></h1>
 <div id="save-new-freshtrain-release" class="section level4">
 <h4>Save new FreshTrain release</h4>
-<p>Save the FreshTrain release with today’s date, not the export-from-arb date. This is consistent with past releases. The notes for each release should include the details about the export date/version from Arb.</p>
+<p>Save the FreshTrain release with the export-from-arb date, not today’s date. This is not consistent with past releases, but will lead to less confusion about what each release is based on. The notes for each release should include the details about the date and taxass script version used to create it.</p>
 <pre class="bash"><code>cp FT_unaligned.fasta FreshTrain13Jun2020silva138.fasta
 cp FT_semicol_noprefix_mothur_unnamed_semicol_noconflicts_mothur_unnamed_semicol_mothur.tax FreshTrain13Jun2020silva138.taxonomy</code></pre>
 <p><br></p>
@@ -2679,13 +2678,13 @@ cp silva.nr_v138_unnamed.tax silva.nr_v138_taxass.taxonomy</code></pre>
 mv FreshTrain13Jun2020silva138.* silva.nr_v138_taxass.* final_release/
 
 mkdir intermediate_files/
-mv FT* silva.nr_v138_un* mothur* intermediate_files/
+mv FT* silva.nr_v138_un* mothur.*.logfile intermediate_files/
 
 mkdir scripts_used
 mv *.R *.sh scripts_used/
 
 mkdir start_files
-mv silva.nr_v138.* FW* start_files/</code></pre>
+mv silva.nr_v138.* FW* mothur_README* start_files/</code></pre>
 <p><br> <span style="color:SteelBlue"> <em>~Now go forth and TaxAss~</em> </span> <br></p>
 </div>
 </div>

@@ -9,6 +9,9 @@
 # This leaves everything you'd need to re-analyze from the beginning,
 # But removes things you'd need to re-analyze from the middle.
 
+# command line syntax:
+# ./RunStep_16.sh otus custom general
+
 # ---- Receive input from terminal arguments --------------------------------------------------------------------------------------------
 
 otus=$1

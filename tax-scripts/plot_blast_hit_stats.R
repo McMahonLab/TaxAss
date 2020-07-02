@@ -25,16 +25,16 @@ plots.folder.path <- userprefs[3]
 if (length(userprefs) > 3){
   mirror.location <- userprefs[4]
 }else{
-  mirror.location <- "https://cran.mtu.edu"
+  mirror.location <- "https://cloud.r-project.org/"
 }
 
 blast.plots.folder <- paste(plots.folder.path, "step_4_check_BLAST_settings", sep = "/")
 
 # cat("fuck you forgot to comment out the file paths in plot_blast_hit_stats.R!")
-# blast.file.path <- "../../ME_plot_test/otus.custom.blast.table.modified"
+# blast.file.path <- "../../2020-07-02_update-test_mend98/otus.custom.blast.table.modified"
 # pident.cutoff <- 98
-# plots.folder.path <- "../../ME_plot_test/plots"
-# mirror.location <- "https://cran.mtu.edu"
+# plots.folder.path <- "../../2020-07-02_update-test_mend98/plots"
+# mirror.location <- "https://cloud.r-project.org/"
 # blast.plots.folder <- paste(plots.folder.path, "step_4_BLAST", sep = "/")
 
 # ####

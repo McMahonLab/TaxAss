@@ -30,26 +30,61 @@ Download the scripts from the github repo: https://github.com/McMahonLab/TaxAss
 Please cite TaxAss: [Rohwer RR, Hamilton JJ, Newton RJ, McMahon KD. 2018. TaxAss: Leveraging a Custom Freshwater Database Achieves Fine-Scale Taxonomic Resolution. mSphere 3:e00327-18.](https://msphere.asm.org/content/3/5/e00327-18)
 
 
-# <span style="color:SteelBlue">List of Steps</span>
+# <span style="color:Red">Quick Directions</span>
 
-These directions include extra validation steps used in the [paper](https://msphere.asm.org/content/3/5/e00327-18) that you don't need to include to just assign taxonomy to your data.  
+The full directions include extra validation steps used in the [paper](https://msphere.asm.org/content/3/5/e00327-18) that you don't need to include to just assign taxonomy to your data, along with a lot of explanation and troubleshooting advice. Here are the basic steps to run TaxAss on your data.  
 
-**To assign FreshTrain taxonomy to your own data, we recommend:**  
+### <span style="color:Red">Set-up</span>  
 
-* add your data files, database files, and the `tax-scripts` files to an otherwise empty folder (your working directory)
-* format your files and file names according to `step 0`  
-* run a batch script from within your working directory: `./RunSteps_quickie.sh`  
-* run a batch script that deletes all the intermediate files: `./RunStep_16.sh`
+* You need mothur, blast, python, and r installed and on your path.  
+    (directions & download links in step -1)  
 
-The RunSteps_quickie.sh batch script uses a taxass percent identity of 98 to assign the database, a mothur bootstrap confidence of 80 to assign taxonomy, and 2 processors for mothur commands. You can change these settings at the top of the batch script file.  
+* You need to format your data's fasta file (e.g. not aligned, name ends with .fasta).  
+    (directions and reformatting scripts in step 0)
+    
+* You need to format your custom and general taxonomy databases.  
+    (The FreshTrain (custom) and silva & greengenes (general) databases are already formatted for you in the `FreshTrain-files` folder. Or if you use something different, follow directions in step 0)
+
+* You need the contents of the `tax-scripts` folder. 
+
+Create an empty folder to be your working directory for TaxAss.  
+Add the tax-scripts contents, your fasta file, and the database files.  
+
+### <span style="color:Red">TaxAss</span>  
+
+Navigate to the Taxass working directory in the terminal. Then run a batch script to run all the TaxAss scripts for you.  
+(steps 1, 2, 3, 4, 5, 7, 8, 9, 10, 12, 15)  
+
+```{bash, eval=F}
+./RunSteps_quickie.sh otus custom general 98 80 80 2
+```  
+Input | Despription  
+------|----------------------------------------------------------------------------
+`otus`        | The name of your fasta file, without the .fasta extension.<br>For example, if my data file is called `Lake_OTUs.fasta` I would write `Lake_OTUs`  
+`custom`      | The name of the custom database, without file extensions.<br>For example, if I am using `FreshTrain15Jun2020.taxonomy` and `FreshTrain15Jun2020.fasta` I would write `FreshTrain15Jun2020`  
+`general`     | The name of the general database, without file extensions.<br>For example, if I am using `silva.nr_v138.taxonomy` and `silva.nr_v138.fasta` I would write `silva.nr_v138`  
+`98`          | The blast percent identity cutoff used to decide which database to classify each OTU in.<br>For example, if an OTU has >98 percent identity to any reference in the FreshTrain, it will be classified with the FreshTrain database. We recommend using 98 with unique or error-corrected sequences. If you use clustered OTUs, we recommend choosing the same or lower similarity used for clustering (and using 98 or 99 to cluster!)  
+`80`          | The bootstrap confidence used in the custom classification.<br>For example, this will label an OTU "unclassified" if the Wang classifier implemented in mothur does not assign the same classification 80% of the time. 80 is mothur's default value.   
+`80`          | Same as above, but this is the bootstrap confidence used in the general classification.  
+`2`           | The number of processors to use in the mothur commands.  
+
+### <span style="color:Red">Clean-Up</span>  
+
+TaxAss has another script that deletes all the intermediate files you'll never need again and sorts the other files into  
+4 folders: `data` `databases` `scripts` `analysis`
+
+```{bash, eval=F}
+./RunStep_16.sh otus custom general
+```
+
+Where `otus` `custom` and `general` are the same as above.  
 <br>
-If you encounter error messages or if your data is very large, we recommend troubleshooting by running the steps included in RunSteps_quickie.sh individually with a small subset of your data by following the directions in  
-**steps 0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 12, 15**   
-Navigate to detailed instructions for each step using the table of contents.  
+<span style="color:Red">~done!~</span>  
 <br>
 <br>
-
 ___________
+
+# <span style="color:SteelBlue">List of Steps</span>
 
 Below is a list of all the commands in each step, including the optional ones:  
 ````
@@ -62,11 +97,10 @@ Below is a list of all the commands in each step, including the optional ones:
 
 0. format files (textwrangler/bash/R)
 	depends on your starting file formats
-	for Green Genes as general database:
-		./reformat_greengenes.sh gg_13_5_taxonomy.txt
-	for Silva as general database:
-		./un-align_silva.sh silva.nr_v132.align general.fasta silva.nr_v132.tax general.taxonomy
-		Rscript reformat_taxonomy_nomenclature.R silva.nr_v132.tax general.taxonomy
+	for fasta files:
+		Rscript reformat_fasta.R aligned.fasta created.fasta format.ids replace.U
+	for taxonomy files:
+		Rscript reformat_taxonomy_nomenclature.R mothur.formatted.tax new.tax.file file.type
 	for mothur count_table files:
 		sed 's/-//g' <aligned.fasta >otus.fasta
 		sed 's/-//g' <names-with-dashed.count_table >otus.count_table
@@ -164,14 +198,17 @@ Batch Scripts:
 
 Full TaxAss:
   a. Run a bunch of pidents
-    ./RunSteps_1-14.sh
+    ./RunSteps_1-14.sh otus custom general "100 99 98 97 96 95" 80 80 2
   b. create final taxonomy at chosen pident 
-    ./RunStep_15.sh
+    ./RunStep_15.sh otus custom general 98 80 80 2
   c. clean up after everything worked
-    ./RunStep_16.sh
+    ./RunStep_16.sh otus custom general
 
 As few steps as possible (choose pident without comparing):
-  ./RunSteps_quickie.sh
+  a. Run 1 pident with no checks
+    ./RunSteps_quickie.sh otus custom general 98 80 80 2
+  b. Clean-up folder
+    ./RunStep_16.sh otus custom general
   
 ````
 
@@ -216,6 +253,8 @@ FreshTrain    | 30Apr2018<br>or<br>25Jan2018 | FreshTrain30Apr2018SILVAv132.zip<
 Greengenes    | Aug 2013  | "greengenes reference taxonomy" | https://www.mothur.org/wiki/Greengenes-formatted_databases
 Silva         | v.132 <br> v.128 <br> v.138 | "Full length sequences and taxonomy references" | https://www.mothur.org/wiki/Silva_reference_files
 
+**Paired pre-formatted general databases are included in the FreshTrain zip files now.** Save yourself 20 min of unaligning :)  
+
 (Note that if you're a non-academic or commercial user you have to pay to use silva releases earlier than v.138.)
 
 __________________________________________________________________________________________
@@ -244,7 +283,7 @@ _____________________________________________
 
 ## OTU files  
 
-How to format `otus.fasta` and `otus.abund`, including specific directions for converting mothur and dada2 file formats.
+How to format `otus.fasta` and `otus.abund`, including specific directions for converting mothur and dada2 file formats. 
 <br><br>
 
 ### Format your sequence ID's  
@@ -402,7 +441,7 @@ _____________________________________________
 
 How to format the `general.taxonomy` and `general.fasta` files when using the silva database as your taxonomy reference.  
 <br>
-**NOTE: I have a pre-formatted version of the latest release of silva in the FreshTrain files folder.**  
+**NOTE: I have a pre-formatted version of all paired general databases in the zipped FreshTrain files folder.**  
 
 <br>
 
@@ -490,7 +529,10 @@ _____________________________________________
 
 ## Greengenes files
 
-How to format the `general.taxonomy` and `general.fasta` files when using Greengenes as your general database.
+How to format the `general.taxonomy` and `general.fasta` files when using Greengenes as your general database, and downloading them from the greengenes website.
+<br>
+**NOTE: I have a pre-formatted version of all paired general databases in the zipped FreshTrain files folder.**  
+
 <br><br>
 
 ### Format `general.taxonomy`  
@@ -506,7 +548,8 @@ Example of correct format:
 seqID	kingdom;phylum;class;order;family;genus;species;
 ```
 
-To convert Greengenes to a mothur-compatible format:
+To convert Greengenes-downloaded file to a mothur-compatible format:  
+(or you could download it from mothur... or use the one I included... )
 
 Full Command (type in terminal):
 

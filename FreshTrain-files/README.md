@@ -1,7 +1,7 @@
 The FreshTrain
 ===
 
-The zipped files in this folder contain the McMahon Lab's custom taxonomy database for lake epilimia, fondly referred to as *The FreshTrain* (for Freshwater Training Set). **There are 5 files inside each zipped folder:**  
+The zipped files in this folder contain the McMahon Lab's custom taxonomy database for lake epilimia, fondly referred to as *The FreshTrain* (for Freshwater Training Set). **There are 6 files inside each zipped folder:**  
 
 1. The FreshTrain `.taxonomy` file is a table with sequence IDs followed by taxonomic names.   
 2. The FreshTrain `.fasta` file lists the nucleotide sequence for each sequence ID.  

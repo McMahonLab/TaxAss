@@ -25,7 +25,7 @@ The silva/greengenes files are downloaded from the mothur website with minor cha
 <br>
 The citation for the original FreshTrain database and the arb version of it is:  
 
-[Newton RJ, Jones SE, Eiler A, McMahon KD, Bertilsson S. 2011. A Guide to the Natural History of Freshwater Lake Bacteria. Microbiol Mol Biol Rev 75:14–49.](https://mmbr.asm.org/content/75/1/14.full)  The arb files are available at [github.com/McMahonLab/FWMFG](https://github.com/McMahonLab/FWMFG).
+[Newton RJ, Jones SE, Eiler A, McMahon KD, Bertilsson S. 2011. A Guide to the Natural History of Freshwater Lake Bacteria. Microbiol Mol Biol Rev 75:14–49.](https://mmbr.asm.org/content/75/1/14.full)  The original arb files are available at [github.com/McMahonLab/FWMFG](https://github.com/McMahonLab/FWMFG), but you should contact us for the most recent version.  
 
 <br>
 The citation for these taxonomy assignment-compatible formats of the FreshTrain and the TaxAss method is:  

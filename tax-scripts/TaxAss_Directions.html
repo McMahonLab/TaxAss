@@ -1535,9 +1535,10 @@ pre code, pre, code {
 <ul>
 <li><p>You need mothur, blast, python, and r installed and on your path.<br />
 (directions &amp; download links in step -1)</p></li>
-<li><p>You need to format your data’s fasta file (e.g. not aligned, name ends with .fasta).<br />
+<li><p>You need to format your fasta file.<br />
+ex: not aligned, name ends with .fasta, nothing but seqID in the carrot line<br />
 (directions and reformatting scripts in step 0)</p></li>
-<li><p>You need to format your custom and general taxonomy databases.<br />
+<li><p>You need the custom and general taxonomy databases.<br />
 (The FreshTrain (custom) and silva &amp; greengenes (general) databases are already formatted for you in the <code>FreshTrain-files</code> folder. Or if you use something different, follow directions in step 0)</p></li>
 <li><p>You need the contents of the <code>tax-scripts</code> folder.</p></li>
 </ul>
@@ -1571,7 +1572,7 @@ Add the tax-scripts contents, your fasta file, and the database files.</p>
 </tr>
 <tr class="odd">
 <td><code>general</code></td>
-<td>The name of the general database, without file extensions.<br>For example, if I am using <code>silva.nr_v138.taxonomy</code> and <code>silva.nr_v138.fasta</code> I would write <code>silva.nr_v138</code></td>
+<td>The name of the general database, without file extensions.<br>For example, if I am using <code>silva_nr_v138.taxonomy</code> and <code>silva_nr_v138.fasta</code> I would write <code>silva_nr_v138</code></td>
 </tr>
 <tr class="even">
 <td><code>98</code></td>
@@ -1597,7 +1598,7 @@ Add the tax-scripts contents, your fasta file, and the database files.</p>
 <p>TaxAss has another script that deletes all the intermediate files you’ll never need again and sorts the other files into<br />
 4 folders: <code>data</code> <code>databases</code> <code>scripts</code> <code>analysis</code></p>
 <pre class="bash"><code>./RunStep_16.sh otus custom general</code></pre>
-<p>Where <code>otus</code> <code>custom</code> and <code>general</code> are the same as above.<br />
+<p>Where <code>otus</code> <code>custom</code> and <code>general</code> are the same names you used in <code>RunSteps_quickie.sh</code> above.<br />
 <br> <span style="color:Red"><sub>done!</sub></span><br />
 <br> <br> ___________</p>
 </div>

@@ -39,10 +39,11 @@ The full directions include extra validation steps used in the [paper](https://m
 * You need mothur, blast, python, and r installed and on your path.  
     (directions & download links in step -1)  
 
-* You need to format your data's fasta file (e.g. not aligned, name ends with .fasta).  
+* You need to format your fasta file.  
+    ex: not aligned, name ends with .fasta, nothing but seqID in the carrot line    
     (directions and reformatting scripts in step 0)
     
-* You need to format your custom and general taxonomy databases.  
+* You need the custom and general taxonomy databases.  
     (The FreshTrain (custom) and silva & greengenes (general) databases are already formatted for you in the `FreshTrain-files` folder. Or if you use something different, follow directions in step 0)
 
 * You need the contents of the `tax-scripts` folder. 
@@ -62,7 +63,7 @@ Input | Despription
 ------|----------------------------------------------------------------------------
 `otus`        | The name of your fasta file, without the .fasta extension.<br>For example, if my data file is called `Lake_OTUs.fasta` I would write `Lake_OTUs`  
 `custom`      | The name of the custom database, without file extensions.<br>For example, if I am using `FreshTrain15Jun2020.taxonomy` and `FreshTrain15Jun2020.fasta` I would write `FreshTrain15Jun2020`  
-`general`     | The name of the general database, without file extensions.<br>For example, if I am using `silva.nr_v138.taxonomy` and `silva.nr_v138.fasta` I would write `silva.nr_v138`  
+`general`     | The name of the general database, without file extensions.<br>For example, if I am using `silva_nr_v138.taxonomy` and `silva_nr_v138.fasta` I would write `silva_nr_v138`  
 `98`          | The blast percent identity cutoff used to decide which database to classify each OTU in.<br>For example, if an OTU has >98 percent identity to any reference in the FreshTrain, it will be classified with the FreshTrain database. We recommend using 98 with unique or error-corrected sequences. If you use clustered OTUs, we recommend choosing the same or lower similarity used for clustering (and using 98 or 99 to cluster!)  
 `80`          | The bootstrap confidence used in the custom classification.<br>For example, this will label an OTU "unclassified" if the Wang classifier implemented in mothur does not assign the same classification 80% of the time. 80 is mothur's default value.   
 `80`          | Same as above, but this is the bootstrap confidence used in the general classification.  
@@ -77,7 +78,7 @@ TaxAss has another script that deletes all the intermediate files you'll never n
 ./RunStep_16.sh otus custom general
 ```
 
-Where `otus` `custom` and `general` are the same as above.  
+Where `otus` `custom` and `general` are the same names you used in `RunSteps_quickie.sh` above.  
 <br>
 <span style="color:Red">~done!~</span>  
 <br>

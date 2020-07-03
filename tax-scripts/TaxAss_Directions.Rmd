@@ -296,9 +296,8 @@ If you are using filenames other than the default `otus.fasta` and `otus.abund` 
 - **must contain exact extensions `.fasta` and `.abund`**  
 			 	This is necessary for running the batch script, otherwise it will not be able to parse the names.  
 - **cannot contain any white space**  
-			 	No spaces in file names, use CamelCase or underscores
-- **cannot contain periods except for before the file extensions**  
-			 	This is necessary for running the batch script, otherwise mothur will truncate the name that comes before the period in `classify.seqs()` and the file names will not match the expected names in the batch scripts.  
+			 	No spaces in file names, use CamelCase, underscores, or periods.
+  
 
 ___________
 

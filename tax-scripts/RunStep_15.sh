@@ -32,7 +32,7 @@ Rscript find_classification_disagreements.R ${otus}.$pident.taxonomy ${otus}.${g
 
 # ---- Plot how awesome your TaxAss taxonomy is -----------------------------------------------------------------------------------------
 # 15.5.a
-Rscript plot_classification_improvement.R final.taxonomy.pvalues final.${general}.pvalues total.reads.per.seqID.csv plots final.taxonomy.names final.${general}.names ids.above.$pident &&
+Rscript plot_classification_improvement.R final.taxonomy.pvalues final.general.pvalues total.reads.per.seqID.csv plots final.taxonomy.names final.general.names ids.above.$pident &&
 # 15.5.b
 mothur "#classify.seqs(fasta=${otus}.fasta, template=${custom}.fasta, taxonomy=${custom}.taxonomy, method=wang, probs=T, processors=$processors, cutoff=0)" &&
 cat ${otus}.${custom}.wang.taxonomy > ${otus}.${custom}.taxonomy &&

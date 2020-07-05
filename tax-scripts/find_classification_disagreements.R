@@ -51,10 +51,10 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                80)
 # FINAL TABLE GENERATION: note you do need the otus.general.taxonomy file b/c it's used to prep a file for plot_classification_improvement.R in step 15
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-# userprefs <- c("../../test4_smallsilva/otus.98.taxonomy",
-#                "../../test4_smallsilva/otus.general.taxonomy", # make this one "quickie" if skipping general-only classification
-#                "../../test4_smallsilva/ids.above.98",
-#                "../../test4_smallsilva/conflicts_98",
+# userprefs <- c("~/Desktop/limony/IRD_2020-07-03/limony_Ie.03_R1e2t247_R2e2t195_dmx_dada.98.taxonomy",
+#                "~/Desktop/limony/IRD_2020-07-03/limony_Ie.03_R1e2t247_R2e2t195_dmx_dada.silva_nr_v138_taxass.taxonomy", # make this one "quickie" if skipping general-only classification
+#                "~/Desktop/limony/IRD_2020-07-03/ids.above.98",
+#                "~/Desktop/limony/IRD_2020-07-03/conflicts_98",
 #                98,
 #                80,
 #                80,
@@ -98,14 +98,18 @@ if (length(userprefs) < 8){final.or.database <- "non-empty string"}
 # all of the pre-determined names are used by other scripts and shouldn't be changed. 
 
 # when "final" flag is used, these are exported into the working directory:
-file.name.final.taxonomy <- paste("otus.", blast.pident.cutoff, ".", taxonomy.pvalue.cutoff.fw, ".", taxonomy.pvalue.cutoff.gg, ".taxonomy", sep = "")
+otus <- sub(pattern = "^.*/", replacement = "", x = fw.plus.gg.tax.file.path)
+otus <- sub(pattern = "\\.\\d+\\.taxonomy$", replacement = "", x = otus)
+file.name.final.taxonomy <- paste(otus, ".", blast.pident.cutoff, ".", taxonomy.pvalue.cutoff.fw, ".", taxonomy.pvalue.cutoff.gg, ".taxonomy", sep = "")
 file.name.workflow.pvalues <- "final.taxonomy.pvalues"
 file.name.general.pvalues <- "final.general.pvalues"
 file.name.workflow.names <- "final.taxonomy.names"
 file.name.general.names <- "final.general.names"
 
 # when forcing flag is used, these are exported into the working directory:
-file.name.custom.only.taxonomy <- paste("otus.custom.", taxonomy.pvalue.cutoff.fw, ".taxonomy", sep = "")
+otus.custom <- sub(pattern = "^.*/", replacement = "", x = fw.plus.gg.tax.file.path)
+otus.custom <- sub(pattern = "\\.taxonomy$", replacement = "", x = otus.custom)
+file.name.custom.only.taxonomy <- paste(otus.custom, ".", taxonomy.pvalue.cutoff.fw, ".taxonomy", sep = "")
 
 # when script is used for conflict finding, these are exported into the conflicts folder:
 file.name.bootstrap.pvalues <- paste(results.folder.path,"bootstrap_pvalues.csv", sep = "/")

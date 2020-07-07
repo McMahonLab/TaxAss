@@ -16,6 +16,12 @@
   # the first fw refers to which workflow, the one combining fw + gg ("fw") or gg alone "gg"
   # the fw.only means that only the seqIDs that the workflow assigned with fw are included in the table
 
+# This script is also used to identify and fix conflicts between the two databases
+# in the create new FreshTrain version pipeline. It finds 
+# coarse-level name mismatches that need to be changed in FreshTrain
+# a reference list of what freshwater names are called in silva 
+# and a list of any fine-level silva names that exist when FreshTrain is unnamed
+# (because these might want to be removed from FreshTrain) 
 
 # -------------------------------------------------------------
 # Receive arguments from terminal command line
@@ -45,25 +51,25 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                80)
 # FINAL TABLE GENERATION: note you do need the otus.general.taxonomy file b/c it's used to prep a file for plot_classification_improvement.R in step 15
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-# userprefs <- c("../../test4_smallsilva/otus.98.taxonomy",
-#                "../../test4_smallsilva/otus.general.taxonomy", # make this one "quickie" if skipping general-only classification
-#                "../../test4_smallsilva/ids.above.98",
-#                "../../test4_smallsilva/conflicts_98",
+# userprefs <- c("~/Desktop/limony/IRD_2020-07-03/limony_Ie.03_R1e2t247_R2e2t195_dmx_dada.98.taxonomy",
+#                "~/Desktop/limony/IRD_2020-07-03/limony_Ie.03_R1e2t247_R2e2t195_dmx_dada.silva_nr_v138_taxass.taxonomy", # make this one "quickie" if skipping general-only classification
+#                "~/Desktop/limony/IRD_2020-07-03/ids.above.98",
+#                "~/Desktop/limony/IRD_2020-07-03/conflicts_98",
 #                98,
 #                80,
 #                80,
 #                "final")
 # DATABASE COMPARISON: part of optional step 11.5
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-# userprefs <- c("../../database_comparison/custom.custom.taxonomy",
-#                "../../database_comparison/custom.general.taxonomy",
+# userprefs <- c("../../2020-06-02_update_freshtrain/FT_semicol_noprefix_mothur_unnamed_semicol.tax",
+#                "../../2020-06-02_update_freshtrain/FT.silva_semicol.taxonomy",
 #                "NA",
-#                "../../database_comparison/conflicts_database/",
+#                "../../2020-06-02_update_freshtrain/conflicts_database_6-12-20",
 #                NA,
 #                NA,
 #                70,
 #                "database")
-# # FORCING ANALYSIS: part of optional step 15.5
+# FORCING ANALYSIS: part of optional step 15.5
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
 # userprefs <- c("../../poster_mend-check/otus.custom.taxonomy",
 #                "../../poster_mend-check/otus.98.70.70.taxonomy",
@@ -92,14 +98,18 @@ if (length(userprefs) < 8){final.or.database <- "non-empty string"}
 # all of the pre-determined names are used by other scripts and shouldn't be changed. 
 
 # when "final" flag is used, these are exported into the working directory:
-file.name.final.taxonomy <- paste("otus.", blast.pident.cutoff, ".", taxonomy.pvalue.cutoff.fw, ".", taxonomy.pvalue.cutoff.gg, ".taxonomy", sep = "")
+otus <- sub(pattern = "^.*/", replacement = "", x = fw.plus.gg.tax.file.path)
+otus <- sub(pattern = "\\.\\d+\\.taxonomy$", replacement = "", x = otus)
+file.name.final.taxonomy <- paste(otus, ".", blast.pident.cutoff, ".", taxonomy.pvalue.cutoff.fw, ".", taxonomy.pvalue.cutoff.gg, ".taxonomy", sep = "")
 file.name.workflow.pvalues <- "final.taxonomy.pvalues"
 file.name.general.pvalues <- "final.general.pvalues"
 file.name.workflow.names <- "final.taxonomy.names"
 file.name.general.names <- "final.general.names"
 
 # when forcing flag is used, these are exported into the working directory:
-file.name.custom.only.taxonomy <- paste("otus.custom.", taxonomy.pvalue.cutoff.fw, ".taxonomy", sep = "")
+otus.custom <- sub(pattern = "^.*/", replacement = "", x = fw.plus.gg.tax.file.path)
+otus.custom <- sub(pattern = "\\.taxonomy$", replacement = "", x = otus.custom)
+file.name.custom.only.taxonomy <- paste(otus.custom, ".", taxonomy.pvalue.cutoff.fw, ".taxonomy", sep = "")
 
 # when script is used for conflict finding, these are exported into the conflicts folder:
 file.name.bootstrap.pvalues <- paste(results.folder.path,"bootstrap_pvalues.csv", sep = "/")
@@ -231,63 +241,23 @@ find.fw.seqid.indeces <- function(FullTable, FWids){
   return(index)
 }
 
-uniform.unclass.names <- function(TaxonomyTable){
+uniform.unclass.names <- function(TaxonomyTable, database = FALSE){
   # this is used in the function do.bootstrap.cutoff()
   # all unnamed refs are called "unclassified" with no bootstrap value
-  # this can throw errors if new names are used for unknown things. For example, right now don't recognize NA 
+  # things below the bootstrap cutoff will also be called "unclassified" 
+  # so for this comparison purpose, unnamed in database is same as unassigned in classification
+  # database names were already made uniform in reformat_taxonomy_nomenclature.R
+  # and have format unnamed.UpperName
   
   tax <- TaxonomyTable
   
-  # 'blank entries' based on the fact that they don't have bootstrap percents after them
-  # blank.entries <- unique(grep(pattern = '.*\\(', x = tax[ ,-1], value = TRUE, invert = TRUE))
-  index <- grep(pattern = '.*\\(', x = tax[ ,-1], value = FALSE, invert = TRUE)
-  tax[ ,-1][index] <- "unclassified"
+  index <- grep(pattern = "unnamed", x = tax[ ,-1], value = FALSE, invert = FALSE, ignore.case = TRUE)
   
-  # 'empty entries' that don't have names, like p__(100) in greengenes
-  # gg.unnamed.entries <- grep(pattern = '.{1}__\\(\\d{0,3}\\)', x = tax[ ,-1], value = TRUE, invert = FALSE)
-  index <- grep(pattern = '.{1}__\\(\\d{0,3}\\)', x = tax[ ,-1], value = FALSE, invert = FALSE)
-  tax[ ,-1][index] <- "unclassified"
-  
-  # 'unnamed entries' in silva
-  # silva.unnamed.entries <- grep(pattern = 'unnamed*', x = tax[ ,-1], value = TRUE, invert = FALSE)
-  index <- grep(pattern = 'unnamed*', x = tax[ ,-1], value = FALSE, invert = FALSE)
-  tax[ ,-1][index] <- "unclassified"
-  
-  # 'unknown entries' in silva 
-  # silva.unknown.entries <- grep(pattern = 'unknown*', x = tax[ ,-1], value = TRUE, invert = FALSE, ignore.case = TRUE)
-  index <- grep(pattern = 'unknown*', x = tax[ ,-1], value = FALSE, invert = FALSE, ignore.case = TRUE)
-  tax[ ,-1][index] <- "unclassified"
-  
-  # 'uncultured entries' in silva 
-  # silva.unknown.entries <- grep(pattern = 'uncultured*', x = tax[ ,-1], value = TRUE, invert = FALSE, ignore.case = TRUE)
-  index <- grep(pattern = 'uncultured*', x = tax[ ,-1], value = FALSE, invert = FALSE, ignore.case = TRUE)
-  tax[ ,-1][index] <- "unclassified"
-  
-  # 'unclassified' entries 
-  # unclass.entries <- grep(pattern = 'unclassified*', x = tax[ ,-1], value = TRUE, invert = FALSE, ignore.case = TRUE)
-  index <- grep(pattern = 'unclassified*', x = tax[ ,-1], value = FALSE, invert = FALSE, ignore.case = TRUE)
-  tax[ ,-1][index] <- "unclassified"
-  
-  return(tax)
-}
-
-uniform.unclass.names.database <- function(TaxonomyDatabase){
-  # makes empty spots in the database be called unclassified.  more error prone b/c have to guess odd names!
-  # do this separately for the database b/c it doesn't have parentheses (it is the FW training set)
-  
-  tax <- TaxonomyDatabase
-  
-  # There's a lot of ways to guess that the database might have weird blanks....
-  index <- which(tax[,-1] == "" | tax[,-1] == 0 | tax[,-1] == "0" | is.null(tax[,-1]) | tax[,-1] == "NULL" | is.na(tax[,-1])| tax[,-1] == "NA" |
-                 tax[,-1] == "unknown" | tax[,-1] == "Unknown" | tax[,-1] == "UnKnown" | tax[,-1] == "UNKNOWN" | 
-                 tax[,-1] == "Unclassified" | tax[,-1] == "UnClassified" | tax[,-1] == "UNCLASSIFIED" |
-                 tax[,-1] == "unidentified" | tax[,-1] == "Unidentified" | tax[,-1] == "UnIdentified" | tax[,-1] == "UNIDENTIFIED" |
-                 tax[,-1] == "uncultured" | tax[,-1] == "Uncultured" | tax[,-1] == "UnCultured" | tax[,-1] == "UNCULTURED")
-  tax[,-1][index] <- "unclassified"
-  
-  # Also change any empty names to "unclassified" for ex. GG will say c__(100) for an unknown class it sorted into.
-  index2 <- grep(pattern = '.{1}__\\(\\d{0,3}\\)', x = tax[,-1], value = FALSE, invert = FALSE)
-  tax[,-1][index2] <- "unclassified" 
+  if(database == TRUE){
+    tax[ ,-1][index] <- "unnamed"
+  }else{
+    tax[ ,-1][index] <- "unclassified"
+  }
   
   return(tax)
 }
@@ -345,10 +315,14 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
   taxa.names <- c("kingdom","phylum","class","order","lineage","clade","tribe")
   
   # compare names in column t+1, because first columns are seqID and t=1 is kingdom, t=7 is tribe
-  # ignore names that say unclassified, except in forcing comparison when fw giving any erroneous name counts as forcing
+  # ignore names that say unclassified, because that doesn't count as a disagreement
+  # except in forcing comparison when fw giving any erroneous name counts as forcing
+  # except in database comparison when a missing fw name when silva has a name is a problem
   if (forcing == TRUE){
     index <- which(gg[,t+1] != fw[,t+1] & fw[,t+1] != "unclassified")
-  }else{
+  }else if(Database == TRUE){
+    index <- which(gg[,t+1] != fw[,t+1] & gg[,t+1] != "unnamed" & gg[,t+1] != "unclassified")
+  }else{  
     index <- which(gg[,t+1] != fw[,t+1] & gg[,t+1] != "unclassified" & fw[,t+1] != "unclassified")
   }
   
@@ -356,14 +330,32 @@ find.conflicting.names <- function(FWtable, GGtable, FWtable_percents, GGtable_p
   num.mismatches[t] <- length(index)
   
   if (Database == TRUE){
-    # identify unique mismatched upper-names of lineages (generate for database comparison)
-    unique.conflicts <- cbind(gg[index,1:(t+1), drop=F], fw[index,1:6, drop=F])
-    check.files.match(GGtable = unique.conflicts[ ,1:(t+1), drop=F], FWtable = unique.conflicts[ ,(t+2):(t+7), drop=F])
+    
+    # At coarse levels, identify unique mismatched upper-names of lineages (to change in FreshTrain release)
+    if (t <= 5){
+      check.files.match(GGtable = gg[index,1:(t+1), drop=F], FWtable = fw[index,1:6, drop=F])
+      unique.conflicts <- cbind(  gg[index,1:(t+1), drop=F],           fw[index,1:6, drop=F])
+    
+    # At fine levels, get a list of FreshTrain vs. Silva names (to use as a reference of what non-FreshTrain names mean)
+    }else{ 
+      check.files.match(GGtable = gg[index,1:(t+1), drop=F], FWtable = fw[index,1:(t+1), drop=F])
+      unique.conflicts <- cbind(  gg[index,1:(t+1), drop=F],           fw[index,1:(t+1), drop=F])
+    }
+    
     unique.conflicts <- unique.conflicts[ ,-c(1,t+2)]
     unique.conflicts <- unique(unique.conflicts)
     unique.conflict.file <- paste(results.folder.path, "/", "unique_conflicts_", t, "_", taxa.names[t],".csv", sep="")
     write.csv(unique.conflicts, file = unique.conflict.file, row.names = FALSE)
     cat("Made file: ", unique.conflict.file, "\n")
+    
+    if (t == 6){
+      # at lineage all fw has names, at species no silva has names, so only check for instances of silva have name when fw is unnamed at clade level
+      index <- which(unique.conflicts[ ,t+t] == "unnamed")
+      better.in.gg <- unique.conflicts[index, ]
+      better.in.gg.file <- paste(results.folder.path, "/", "unnamed_", taxa.names[t], "s_that_have_general_names.csv", sep="")
+      write.csv(better.in.gg, file = better.in.gg.file, row.names = FALSE)
+      cat("Made file: ", better.in.gg.file, "\n")
+    }
   }
   
   # Compare the conflicting tables in entirety, use the original files with percents still in it
@@ -483,7 +475,8 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   check.files.match(FWtable = fw.percents, GGtable = gg.percents)
   
   fw <- fw.percents # database only has names
-  fw <- uniform.unclass.names.database(TaxonomyDatabase = fw)
+  fw <- uniform.unclass.names(TaxonomyTable = fw, database = TRUE)
+  gg.percents <- uniform.unclass.names(TaxonomyTable = gg.percents, database = TRUE)
   gg <- do.bootstrap.cutoff(TaxonomyTable = gg.percents, BootstrapCutoff = taxonomy.pvalue.cutoff.gg)
   gg <- apply(gg, 2, remove.parentheses)
   
@@ -492,7 +485,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   # Files written in find.conflicting.names() loop: the "TaxaLevel_conflicts.csv" that puts taxonomy tables side by side
   # File written afer loop: the "conflicts_summary.csv" that lists how many conflicts were at each level, and how many seqs were classified by FW
   num.mismatches <- create.summary.vector()
-  for (t in 1:5){
+  for (t in 1:7){
     num.mismatches <- find.conflicting.names(FWtable = fw, GGtable = gg,
                                              FWtable_percents = fw.percents, 
                                              GGtable_percents = gg.percents, 
@@ -500,9 +493,9 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
                                              FolderPath = results.folder.path, Database = TRUE)
   }
   export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw, ALL_seqs = fw, FileName = file.name.summary.stats)
-  
+  cat("Made file: ", file.name.summary.stats, "\n")
 
-  
+
 
 # -------------------------------------------------------------
 # Look at how bad it'd be if you used only the custom database instead of the workflow
@@ -558,7 +551,9 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
                                              FolderPath = results.folder.path, forcing = TRUE)
   }
   export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw.gg.only, ALL_seqs = fw.percents, FileName = file.name.summary.stats)
-
+  cat("Made file: ", file.name.summary.stats, "\n")
+  
+  
   
 # ------------------------------------------------------------- 
 # Only compare the classifications made by the fw database to the gg classifications, not full tax tables
@@ -605,6 +600,8 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   }
   export.summary.stats(SummaryVector = num.mismatches, FW_seqs = fw.fw.only, ALL_seqs = fw.percents, FileName = file.name.summary.stats)
   cat("Made file: ", file.name.summary.stats, "\n")
+  
+  
 # ----
   # the following will be used by the plot_classification_disagreements step to help choose a good pident: 
 # ----

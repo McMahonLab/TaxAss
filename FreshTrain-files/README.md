@@ -8,7 +8,7 @@ The zipped files in this folder contain the McMahon Lab's custom taxonomy databa
 3. The silva or greengenes `.taxonomy` file is formatted for taxass, for your convenience.
 4. The silva or greengenes `.fasta` file is formatted for taxass, for your convenience.
 5. The readme file lists the starting files, commands, and output for creating the version.  
-6. The `Compare_FreshTrain_and_General_Names.xlsx` is a reference so that you can look up what a taxon name would be in the other database.  
+6. The `Compare_FreshTrain_and_General_Names.xlsx` is a reference of taxon name comparisons.  
 
 <br> 
   

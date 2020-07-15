@@ -31,29 +31,30 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 
 # # FOR CHOOSING CUTOFF:
 # cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
-# userprefs <- c("../../test2_smallsilva/otus.abund",
-#                "../../test2_smallsilva/plots",
+# userprefs <- c("~/Desktop/limony/IRD_2020-07-14/limony_Ie.03_R1e2t247_R2e2t195_dmx_dada.abund",
+#                "~/Desktop/limony/IRD_2020-07-14/plots",
 #                "regular",
 #                NA,
 #                NA,
-#                "../../test2_smallsilva/conflicts_95",
-#                "../../test2_smallsilva/ids.above.95",
+#                "~/Desktop/limony/IRD_2020-07-14/conflicts_95",
+#                "~/Desktop/limony/IRD_2020-07-14/ids.above.95",
 #                95,
-#                "../../test2_smallsilva/conflicts_96",
-#                "../../test2_smallsilva/ids.above.96",
+#                "~/Desktop/limony/IRD_2020-07-14/conflicts_96",
+#                "~/Desktop/limony/IRD_2020-07-14/ids.above.96",
 #                96,
-#                "../../test2_smallsilva/conflicts_97",
-#                "../../test2_smallsilva/ids.above.97",
+#                "~/Desktop/limony/IRD_2020-07-14/conflicts_97",
+#                "~/Desktop/limony/IRD_2020-07-14/ids.above.97",
 #                97,
-#                "../../test2_smallsilva/conflicts_98",
-#                "../../test2_smallsilva/ids.above.98",
+#                "~/Desktop/limony/IRD_2020-07-14/conflicts_98",
+#                "~/Desktop/limony/IRD_2020-07-14/ids.above.98",
 #                98,
-#                "../../test2_smallsilva/conflicts_99",
-#                "../../test2_smallsilva/ids.above.99",
+#                "~/Desktop/limony/IRD_2020-07-14//conflicts_99",
+#                "~/Desktop/limony/IRD_2020-07-14//ids.above.99",
 #                99,
-#                "../../test2_smallsilva/conflicts_100",
-#                "../../test2_smallsilva/ids.above.100",
+#                "~/Desktop/limony/IRD_2020-07-14/conflicts_100",
+#                "~/Desktop/limony/IRD_2020-07-14/ids.above.100",
 #                100)
+
 # # JUST MAKE SEQID.READS FILE, SKIPPING STEP 14 BUT DOING 15.5.A
 # cat("fuck you forgot to comment out the file paths in plot_classification_disagreements!")
 # userprefs <- c("../../take18playwith/otus.abund", 
@@ -80,8 +81,8 @@ seqID.reads.file.path <- "total.reads.per.seqID.csv"
 present.working.directory <- "."
 
 # cat("fuck you forgot to comment out the seqid.reads file path in plot_classification_disagreements!\n")
-# seqID.reads.file.path <- "../../test2_smallsilva/total.reads.per.seqID.csv"
-# present.working.directory <- "../../test2_smallsilva/"
+# seqID.reads.file.path <- "~/Desktop/limony/IRD_2020-07-14/total.reads.per.seqID.csv"
+# present.working.directory <- "/Desktop/limony/IRD_2020-07-14/"
 
 
 # ---------------------------------------------------------------------------------------------------------------------

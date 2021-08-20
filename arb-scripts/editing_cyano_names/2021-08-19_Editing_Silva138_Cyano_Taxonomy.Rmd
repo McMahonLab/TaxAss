@@ -1,0 +1,123 @@
+---
+title: "Manual Edits Silva138's Cyano Taxonomy"
+author: "Robin Rohwer"
+date: "8/19/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Manually editing the TaxAss-formatted Silva138's _Cyanobacteria_
+RRR Aug 10, 2021  
+
+
+### Why?
+
+_Cyanobacteria_ are major freshwater players that aren't included in the FreshTrain, and their taxonomy is all over the place. The _Cyanobacteria_ taxonomy is messy: the names don't all agree with microscope-based names, it's poorly resolved, it's not monophyletic, and sometimes there's missing coarse-level names above assigned genus or family names. These edits don't fix any of those challenging problems though. Instead, this is a simple fix for the simple annoyance that many of the genus names also include species/strain IDs in them, ie `genus_spp123`, `genus_ATCC-123`, `genus_SAG12-3`, etc. All I'm doing here is scooting that `_ID123` over into the (missing in silva but not in TaxAss-formatted silva) species column. So, this is more like spelling edits than taxonomy edits, and I'm just doing it manually.
+
+### Start with the TaxAss Silva file  
+
+I'm starting with the `silva_nr_v138_taxass.taxonomy` file. For more see the main readme, but recall this is already edited to have a species column, to have unknown names be uniformly `unnamed.parentname`, and to be `name.parentname` when not monophyletic. Editing the cyano names after the fact like this shouldn't create any FreshTrain conflicts, because there are no cyanos in the FreshTrain (toot! toot!).
+
+##### Change to semicolon delimited instead of mothur-formatted:  
+```{bash, eval=F}
+sed 's/[[:blank:]]/\;/' <FreshTrain15Jun2020silva138/silva_nr_v138_taxass.taxonomy >silva138_semicol.taxonomy
+```
+
+### Manually edit the genus/species names  
+
+Using R script `pull_out_cyanos.R` get a csv of the 241 unique _Cyanobacteria_ genuses in silva. Save as `silva138_cyanos.csv` 
+
+Open in excel and save as `silva138_cyanos_manually_edited.xlsx`  
+
+Edit by deleting species IDs from the genus names, and then deleting "unnamed." from the species name once it's more specific than the edited genus. 
+
+Example:  
+
+New.Genus	| New.Species	| Old.Genus	| Old.Species
+|:-----------|:-------------|:-----------|:-------------|
+Oscillatoria | unnamed.Oscillatoria | Oscillatoria | unnamed.Oscillatoria
+Oscillatoria | Oscillatoria**\_PCC-10802** | Oscillatoria_PCC-10802 | **unnamed.**Oscillatoria_PCC-10802
+Oscillatoria | Oscillatoria_PCC-6304 | Oscillatoria_PCC-6304 | unnamed.Oscillatoria_PCC-6304
+Oscillatoria | Oscillatoria_SAG_1459-8 | Oscillatoria_SAG_1459-8 | unnamed.Oscillatoria_SAG_1459-8
+Oscillatoria | Oscillatoria_SAG8.92 | Oscillatoria_SAG8.92 | unnamed.Oscillatoria_SAG8.92
+unnamed.Oscillatoriaceae | unnamed.Oscillatoriaceae | unnamed.Oscillatoriaceae | unnamed.Oscillatoriaceae
+
+### Correct non-monophyletic names to be unique   
+
+This manual editing has introduced some new instances of non-monophyletic names. Before, the Genuses were unique because they included species identifiers, but now the same name is duplicated under different parent names.    
+
+Example:  
+
+Order | Family | New.Genus	| New.Species	| Old.Genus	
+|:-----------|:-------------|:-------|:-------------|:--------------|
+Cyanobacteriales | **Desertifilaceae** | Oscillatoria | unnamed.Oscillatoria | Oscillatoria
+Cyanobacteriales | **Oscillatoriaceae** | Oscillatoria | Oscillatoria_PCC-10802 | Oscillatoria_PCC-10802
+Cyanobacteriales | Oscillatoriaceae | Oscillatoria | Oscillatoria_PCC-6304 | Oscillatoria_PCC-6304
+unnamed.Cyanobacteriia | unnamed.Cyanobacteriia | Oscillatoria | Oscillatoria_SAG_1459-8 | Oscillatoria_SAG_1459-8
+Cyanobacteriales | Desertifilaceae | Oscillatoria | Oscillatoria_SAG8.92 | Oscillatoria_SAG8.92  
+
+
+##### Convert the excel "key" into a semicolon-delimited taxonomy file, with only the new names.  
+
+Use `put_new_names_into_mothur_format.R` and save as `new_names_semicoldelim.taxonomy`.  
+<br>
+
+##### Convert to mothur's format with the Arb script `replace_first_semicolon_with_tab.sh`  
+
+```{bash, eval=F}
+./replace_first_semicolon_with_tab.sh new_names_semicoldelim.taxonomy new_names_mothur.taxonomy
+```
+<br>
+
+##### Use the TaxAss script `reformat_taxonomy_nomenclature.R` to fix this.   
+
+```{bash, eval=F}
+Rscript reformat_taxonomy_nomenclature.R new_names_mothur.taxonomy new_names_monophyletic.taxonomy General
+```
+
+The Silva TaxAss processing corrects duplicate names so that my downstream R scripts can easily group by taxonomy. This isn't correcting the taxonomy to be monophyletic, it's just avoiding "unexpected" duplicate names. For example, this way when grouping by genus, the two Oscillatoria genera that belong to different families will not be grouped together.  
+
+
+### Create a "key" matching old names with edited names  
+
+We pulled out the 241 unique names to edit manually, but there were 4,842 _Cyanobacteria_ references in the silva taxonomy. Now we need to use the new names as a key to change the entire database.  
+
+##### First change back to semicolon delimited:
+
+```{bash, eval=F}
+sed 's/[[:blank:]]/\;/' <new_names_monophyletic.taxonomy >new_names_monophyletic_semicol.taxonomy
+```
+<br>
+
+##### Next use R to combine the old and new taxonomy tables to create a Key.  
+Use `create_key_from_manual_and_monophyletic_tables.R` to make `Cyanobacteria_silva138_Name_Edits.csv`.  
+<br>
+
+##### Then open in excel and do some more manual curation  
+We fixed duplicated genus names to be `polyphyliticname.parentname`. So manually fix a few species names that are `unnamed.polyphyleticname` to say `unnamed.polyphyleticname.parentname`.  
+
+Note that because cyano taxonomy sucks and upper-level names are missing sometimes you get weird things like:    
+
+`genus.unnamed.class`  which is a genus name and means the genus is polyphyletic, and the class this one is under is unnamed.  
+`unnamed.genus.class`  which is a species name and means the species is unnamed and belongs to a polyphyletic genus that belongs to class.  
+
+### Correct the full silva taxonomy  
+
+##### Edit the full taxonomy in R
+Use `adjust_silva_taxonomy_using_key.R` to create a semicolon-delimited full taxonomy table, called `silva138_EditedCyanos_semicol.taxonomy`. This steps through each _Cyanobacteria_ species and changes the full Kingdom-Species taxonomy from old to new. Note that only genus and species names actually change though.  
+<br>
+
+
+##### Convert back to the mothur format and it's ready to use with TaxAss!  
+```{shell, eval=F}
+./replace_first_semicolon_with_tab.sh silva138_EditedCyanos_semicol.taxonomy silva_nr_v138_taxass_cyano_edits.taxonomy
+```
+
+### Check out the changes 
+
+##### The excel table `Compare_silva138_with_Edited_Cyano_Names.xlsx` lists all of the original and edited _Cyanobacteria_ names, and names that changed are highlighted.  
+
+~end~

@@ -7,8 +7,15 @@ The zipped files in this folder contain the McMahon Lab's custom taxonomy databa
 2. The FreshTrain `.fasta` file lists the nucleotide sequence for each sequence ID.  
 3. The silva or greengenes `.taxonomy` file is formatted for taxass, for your convenience.
 4. The silva or greengenes `.fasta` file is formatted for taxass, for your convenience.
-5. The readme file lists the starting files, commands, and output for creating the version.  
+5. The `README` file lists the starting files, commands, and output for creating the version.  
 6. The `Compare_FreshTrain_and_General_Names.xlsx` is a reference of taxon name comparisons.  
+
+There are an additional 3 files for Silva 138:  
+
+7. The silva file `cyano_edits.taxonomy` can alternately be paired with the silva fasta file.  
+8. The `README-cyano_edits` file details the edits to "clean up" but not "correct" silva's Cyanobacteria genus names.  
+9. The `Compare_Edited_Cyano_and_Silva138_Names.xlsx` is a reference of _Cyanobacteria_ name comparisons.
+
 
 <br> 
   

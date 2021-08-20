@@ -13,7 +13,7 @@ The zipped files in this folder contain the McMahon Lab's custom taxonomy databa
 There are an additional 3 files for Silva 138:  
 
 7. The silva file `cyano_edits.taxonomy` can alternately be paired with the silva fasta file.  
-8. The `README-cyano_edits` file details the edits to "clean up" but not "correct" silva's Cyanobacteria genus names.  
+8. The `README-cyano_edits` file details the edits to "clean up" but not "correct" silva's _Cyanobacteria_ genus names.  
 9. The `Compare_Edited_Cyano_and_Silva138_Names.xlsx` is a reference of _Cyanobacteria_ name comparisons.
 
 

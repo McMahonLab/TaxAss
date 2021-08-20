@@ -1,7 +1,4 @@
 ---
-title: "Manual Edits Silva138's Cyano Taxonomy"
-author: "Robin Rohwer"
-date: "8/19/2021"
 output: html_document
 ---
 
@@ -9,7 +6,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Manually editing the TaxAss-formatted Silva138's _Cyanobacteria_
+### Manually editing the TaxAss-formatted Silva138's _Cyanobacteria_
 RRR Aug 10, 2021  
 
 

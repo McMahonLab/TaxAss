@@ -4,6 +4,8 @@
 .Rproj.user/
 tax-scripts/.RData
 .Rproj.user
+.RData
+TaxAss.Rproj
 
 # Other Databases
 FreshTrain-files/gg_13_5.fasta

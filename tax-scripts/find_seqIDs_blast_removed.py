@@ -35,6 +35,11 @@ if os.path.isfile(outputfile) :
 	print("Existing file called " + str(outputfile) + " was deleted.")
 
 
+# create a blank output file so that something is created even if there are no missing IDs
+with open(outputfile,"w") as missing :
+	missing.write("")
+
+
 # Create hash of all SeqIDs in fasta file
 allIDs = {}
 with open(fastafile) as fasta:

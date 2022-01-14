@@ -31,27 +31,27 @@ if (length(userprefs) > 3){
 blast.plots.folder <- paste(plots.folder.path, "step_4_check_BLAST_settings", sep = "/")
 
 # cat("fuck you forgot to comment out the file paths in plot_blast_hit_stats.R!")
-# blast.file.path <- "../../2020-07-02_update-test_mend98/otus.custom.blast.table.modified"
+# blast.file.path <- "~/Desktop/TYMEFLIES/data/2022-01-05_IMG_IDs_for_Actino_bins/2022-01-14_taxass/ActinoBins16S.FreshTrain15Jun2020silva138.blast.table.modified"
 # pident.cutoff <- 98
-# plots.folder.path <- "../../2020-07-02_update-test_mend98/plots"
+# plots.folder.path <- "~/Desktop/TYMEFLIES/data/2022-01-05_IMG_IDs_for_Actino_bins/2022-01-14_taxass/plots/"
 # mirror.location <- "https://cloud.r-project.org/"
 # blast.plots.folder <- paste(plots.folder.path, "step_4_BLAST", sep = "/")
 
 # ####
-# Install Necessary Packages
+# Install Necessary Packages --not longer necessary
 # ####
 
-# The package reshape is needed, must specify cran mirror and library path with Rscript
-library.path <- .libPaths() # this is the default installation path
-get.necessary.packages <- function(){
-  if (library(package = "reshape", logical.return = TRUE, lib.loc = library.path) == FALSE){
-    install.packages("reshape", repos = mirror.location)
-    library("reshape", lib.loc = library.path)
-  }else{
-    library("reshape", lib.loc = library.path)
-  }
-  cat("\n")
-}
+# # The package reshape is needed, must specify cran mirror and library path with Rscript
+# library.path <- .libPaths() # this is the default installation path
+# get.necessary.packages <- function(){
+#   if (library(package = "tidyr", logical.return = TRUE, lib.loc = library.path) == FALSE){
+#     install.packages("tidyr", repos = mirror.location)
+#     library("tidyr", lib.loc = library.path)
+#   }else{
+#     library("tidyr", lib.loc = library.path)
+#   }
+#   cat("\n")
+# }
 
 # ####
 # Define Functions for Handling Data
@@ -93,11 +93,15 @@ reformat.fract.ids.vs.hit.num <- function(BlastTable){
   blast <- blast[ ,c(1,7)]
   blast[ ,2] <- as.numeric(blast[ ,2])
   
-  # Use the reshape package to rearrange your data tables
-  # id is hit.num because that is the category we're arranging by
-  # measured is qseqid because that is the variable we're applying the aggregate funciton to- what's the total #?
-  blast.melted <- melt(data = blast, id.vars = "hit.num", measure.vars = "qseqid")
-  blast.casted <- cast(data = blast.melted, formula = hit.num ~ variable, fun.aggregate = length)
+  # use aggregate instead of reshape package
+  blast.casted <- aggregate(x = blast$qseqid, by = list(blast$hit.num), FUN = length)
+  colnames(blast.casted) <- c("hit.num","qseqid")
+  
+  # # Use the reshape package to rearrange your data tables
+  # # id is hit.num because that is the category we're arranging by
+  # # measured is qseqid because that is the variable we're applying the aggregate funciton to- what's the total #?
+  # blast.melted <- melt(data = blast, id.vars = "hit.num", measure.vars = "qseqid")
+  # blast.casted <- cast(data = blast.melted, formula = hit.num ~ variable, fun.aggregate = length)
   
   # Convert the qseqid length column to % total length/numbers
   blast.casted$qseqid <- blast.casted$qseqid / sum(blast.casted$qseqid) * 100
@@ -261,7 +265,7 @@ line.plot.overlay.blast.results <- function(BlastTable, CutoffVector, OutputFold
 # Use Functions
 # ####
 
-get.necessary.packages()
+# get.necessary.packages()
 
 make.plot.directory(FolderPath = plots.folder.path)
 

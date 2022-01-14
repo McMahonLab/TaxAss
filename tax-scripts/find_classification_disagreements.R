@@ -42,19 +42,19 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 # -------------------------------------------------------------
 # CONFLICT FINDING ONLY:
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-# userprefs <- c("../../test4_smallsilva/otus.98.taxonomy",
-#                "../../test4_smallsilva/otus.general.taxonomy",
-#                "../../test4_smallsilva/ids.above.98",
-#                "../../test4_smallsilva/conflicts_98",
+# userprefs <- c("~/Desktop/limony/IRD_2020-07-14/limony_Ie.03_R1e2t247_R2e2t195_dmx_dada.98.taxonomy",
+#                "~/Desktop/limony/IRD_2020-07-14/limony_Ie.03_R1e2t247_R2e2t195_dmx_dada.silva_nr_v138_taxass.taxonomy",
+#                "~/Desktop/limony/IRD_2020-07-14/ids.above.98",
+#                "~/Desktop/limony/IRD_2020-07-14/conflicts_98",
 #                98,
 #                80,
 #                80)
 # FINAL TABLE GENERATION: note you do need the otus.general.taxonomy file b/c it's used to prep a file for plot_classification_improvement.R in step 15
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-# userprefs <- c("~/Desktop/limony/IRD_2020-07-03/limony_Ie.03_R1e2t247_R2e2t195_dmx_dada.98.taxonomy",
-#                "~/Desktop/limony/IRD_2020-07-03/limony_Ie.03_R1e2t247_R2e2t195_dmx_dada.silva_nr_v138_taxass.taxonomy", # make this one "quickie" if skipping general-only classification
-#                "~/Desktop/limony/IRD_2020-07-03/ids.above.98",
-#                "~/Desktop/limony/IRD_2020-07-03/conflicts_98",
+# userprefs <- c("~/Desktop/taxass_MEv34_silva138cyanos/MEv34.98.taxonomy",
+#                "~/Desktop/taxass_MEv34_silva138cyanos/MEv34.silva_nr_v138_taxass_cyano_edits.taxonomy", # make this one "quickie" if skipping general-only classification
+#                "~/Desktop/taxass_MEv34_silva138cyanos/ids.above.98",
+#                "~/Desktop/taxass_MEv34_silva138cyanos/conflicts_98",
 #                98,
 #                80,
 #                80,
@@ -71,13 +71,13 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                "database")
 # FORCING ANALYSIS: part of optional step 15.5
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-# userprefs <- c("../../poster_mend-check/otus.custom.taxonomy",
-#                "../../poster_mend-check/otus.98.70.70.taxonomy",
-#                "../../poster_mend-check/ids.above.98",
-#                "../../poster_mend-check/conflicts_forcing",
+# userprefs <- c("~/Desktop/taxass_MEv34_silva138cyanos/MEv34.FreshTrain15Jun2020silva138.taxonomy",
+#                "~/Desktop/taxass_MEv34_silva138cyanos/MEv34.98.80.80.taxonomy",
+#                "~/Desktop/taxass_MEv34_silva138cyanos/ids.above.98",
+#                "~/Desktop/taxass_MEv34_silva138cyanos/conflicts_forcing",
 #                NA,
-#                70,
-#                70,
+#                80,
+#                80,
 #                "forcing")
 # -------------------------------------------------------------
 
@@ -224,6 +224,33 @@ remove.parentheses <- function(x){
   return(fixed.name)
 }
 
+make.degenerates.unique <- function(tax, voldemort){ # modified from reformat_taxonomy_nomenclature.R
+  # voldemort is whatever text you're making unique (b/c it cannot be named... voldemort...)
+  
+  rownames(tax) <- tax[ ,1]
+  my.colname <- colnames(tax)[1]
+  tax <- tax[ ,-1]
+  
+  for (t in 1:ncol(tax)){
+    index <- which(tax[ ,t] == voldemort)
+    tax[index,t] <- paste(tax[index,t], tax[index,t - 1], sep = ".")
+    tax[index,t] <- remove.parentheses(x = tax[index,t])
+  }
+  
+  remove.extra.u <- function(x){
+    dot.voldemort <- paste0(".", voldemort)
+    x <- gsub(pattern = dot.voldemort, replacement = "", x = x)
+    return(x)
+  }
+  tax <- apply(X = tax, MARGIN = 2, FUN = remove.extra.u)
+  
+  tax <- cbind(rownames(tax), tax)
+  colnames(tax)[1] <- my.colname
+  row.names(tax) <- NULL
+  
+  return(tax)
+}
+
 
 # -------------------------------------------------------------
 # Define Functions for Data Analysis
@@ -241,22 +268,25 @@ find.fw.seqid.indeces <- function(FullTable, FWids){
   return(index)
 }
 
-uniform.unclass.names <- function(TaxonomyTable, database = FALSE){
+uniform.unclass.names <- function(TaxonomyTable, database = FALSE, final = FALSE){
   # this is used in the function do.bootstrap.cutoff()
-  # all unnamed refs are called "unclassified" with no bootstrap value
-  # things below the bootstrap cutoff will also be called "unclassified" 
+  # all unnamed refs are called "unclassified" with no bootstrap value for classification comparisons
   # so for this comparison purpose, unnamed in database is same as unassigned in classification
   # database names were already made uniform in reformat_taxonomy_nomenclature.R
   # and have format unnamed.UpperName
   
   tax <- TaxonomyTable
   
+  if(final == TRUE){
+    return(tax) # leave "unnamed.Parent" in the final version
+  }
+  
   index <- grep(pattern = "unnamed", x = tax[ ,-1], value = FALSE, invert = FALSE, ignore.case = TRUE)
   
   if(database == TRUE){
-    tax[ ,-1][index] <- "unnamed"
+    tax[ ,-1][index] <- "unnamed" # change unnamed.Parent to just be unnamed
   }else{
-    tax[ ,-1][index] <- "unclassified"
+    tax[ ,-1][index] <- "unclassified" # change all unnamed to be indistinguishable from unclassified
   }
   
   return(tax)
@@ -271,7 +301,7 @@ pull.out.percent <- function(text){
   return(text)
 }
 
-do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
+do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff, ...){
   # Apply classification bootstrap value cutoff 
   # Everything below the supplied cutoff value is changed to "unclassified"
   # (by bootstrap cutoff I mean the stat that's the % of times it got classified into that taxonomy cluster)
@@ -284,7 +314,7 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff){
   
   # create a matrix of bootstrap numbers and then a T/F matrix
   tax.nums <- apply(tax[ ,2:ncol(tax)], 2, pull.out.percent)
-  index <- which(tax.nums == "unclassified")
+  index <- grep(pattern = "unclassified", x = tax.nums, ignore.case = TRUE, value = F)
   tax.nums[index] <- 0
   tax.nums <- apply(X = tax.nums, MARGIN = 2, FUN = as.numeric)
   tax.TF <- tax.nums >= cutoff
@@ -425,22 +455,26 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   fw.percents.fw.only <- fw.percents[fw.indeces, ]
   fw.percents.gg.only <- fw.percents[-fw.indeces, ]
   
-  final.taxonomy.fw.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.fw.only, BootstrapCutoff = taxonomy.pvalue.cutoff.fw)
-  final.taxonomy.gg.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.gg.only, BootstrapCutoff = taxonomy.pvalue.cutoff.gg)
+  final.taxonomy.fw.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.fw.only, BootstrapCutoff = taxonomy.pvalue.cutoff.fw, final = TRUE)
+  final.taxonomy.gg.only <- do.bootstrap.cutoff(TaxonomyTable = fw.percents.gg.only, BootstrapCutoff = taxonomy.pvalue.cutoff.gg, final = TRUE)
   
   final.taxonomy <- rbind(final.taxonomy.fw.only, final.taxonomy.gg.only)
   colnames(final.taxonomy) <- c("seqID","kingdom","phylum","class","order","lineage","clade","tribe")
+  final.simple <- final.taxonomy # keep unclassified simple for generating tax.names below
+  final.taxonomy <- make.degenerates.unique(tax = final.taxonomy, voldemort = "unclassified")
   
   write.table(x = final.taxonomy, file = file.name.final.taxonomy, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
   cat("Made file: ", file.name.final.taxonomy, "\n")
   
   # the following will be used by the plot_classification_improvement.R script
   if (gg.only.tax.file.path != "quickie"){
-    tax.nums <- view.bootstraps(TaxonomyTable = final.taxonomy)
+    final.simple <- do.bootstrap.cutoff(TaxonomyTable = final.simple, BootstrapCutoff = 1, final = FALSE) # make unnamed say unclassified, unclassified.Parent say unclassified
+    
+    tax.nums <- view.bootstraps(TaxonomyTable = final.simple)
     write.table(x = tax.nums, file = file.name.workflow.pvalues, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
     cat("Made file: ", file.name.workflow.pvalues, "\n")
     
-    tax.names <- apply(final.taxonomy, 2, remove.parentheses)
+    tax.names <- apply(final.simple, 2, remove.parentheses)
     write.table(x = tax.names, file = file.name.workflow.names, sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
     cat("Made file: ", file.name.workflow.names, "\n")
     
@@ -477,7 +511,7 @@ if (final.or.database == "final" | final.or.database == "Final" | final.or.datab
   fw <- fw.percents # database only has names
   fw <- uniform.unclass.names(TaxonomyTable = fw, database = TRUE)
   gg.percents <- uniform.unclass.names(TaxonomyTable = gg.percents, database = TRUE)
-  gg <- do.bootstrap.cutoff(TaxonomyTable = gg.percents, BootstrapCutoff = taxonomy.pvalue.cutoff.gg)
+  gg <- do.bootstrap.cutoff(TaxonomyTable = gg.percents, BootstrapCutoff = taxonomy.pvalue.cutoff.gg) # don't think I need database = TRUE here b/c already used it in prev line... double check
   gg <- apply(gg, 2, remove.parentheses)
   
   check.files.match(FWtable = fw, GGtable = gg)

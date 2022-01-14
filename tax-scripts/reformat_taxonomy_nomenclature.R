@@ -228,7 +228,7 @@ uniform.unclassified <- function(tax){
 make.degenerates.unique <- function(tax, voldemort){
   # tax is the taxonomy table without seqid column
   # voldemort is whatever text you're making unique (b/c it cannot be named... voldemort...)
-  # orininally this script maintained all the different words, but now they all just become unnamed
+  # originally this script maintained all the different words, but now they all just become unnamed
   for (t in 1:ncol(tax)){
     index <- which(tax[ ,t] == voldemort)
     tax[index,t] <- paste(tax[index,t], tax[index,t - 1], sep = ".")

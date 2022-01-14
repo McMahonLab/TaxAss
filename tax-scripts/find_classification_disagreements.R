@@ -51,10 +51,10 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                80)
 # FINAL TABLE GENERATION: note you do need the otus.general.taxonomy file b/c it's used to prep a file for plot_classification_improvement.R in step 15
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-# userprefs <- c("~/Desktop/limony/IRD_2020-07-14/limony_Ie.03_R1e2t247_R2e2t195_dmx_dada.98.taxonomy",
-#                "~/Desktop/limony/IRD_2020-07-14/limony_Ie.03_R1e2t247_R2e2t195_dmx_dada.silva_nr_v138_taxass.taxonomy", # make this one "quickie" if skipping general-only classification
-#                "~/Desktop/limony/IRD_2020-07-14/ids.above.98",
-#                "~/Desktop/limony/IRD_2020-07-14/conflicts_98",
+# userprefs <- c("~/Desktop/taxass_MEv34_silva138cyanos/MEv34.98.taxonomy",
+#                "~/Desktop/taxass_MEv34_silva138cyanos/MEv34.silva_nr_v138_taxass_cyano_edits.taxonomy", # make this one "quickie" if skipping general-only classification
+#                "~/Desktop/taxass_MEv34_silva138cyanos/ids.above.98",
+#                "~/Desktop/taxass_MEv34_silva138cyanos/conflicts_98",
 #                98,
 #                80,
 #                80,
@@ -71,13 +71,13 @@ userprefs <- commandArgs(trailingOnly = TRUE)
 #                "database")
 # FORCING ANALYSIS: part of optional step 15.5
 # cat("fuck you forgot to comment out the file paths in find_classification_disagreements.R!")
-# userprefs <- c("../../poster_mend-check/otus.custom.taxonomy",
-#                "../../poster_mend-check/otus.98.70.70.taxonomy",
-#                "../../poster_mend-check/ids.above.98",
-#                "../../poster_mend-check/conflicts_forcing",
+# userprefs <- c("~/Desktop/taxass_MEv34_silva138cyanos/MEv34.FreshTrain15Jun2020silva138.taxonomy",
+#                "~/Desktop/taxass_MEv34_silva138cyanos/MEv34.98.80.80.taxonomy",
+#                "~/Desktop/taxass_MEv34_silva138cyanos/ids.above.98",
+#                "~/Desktop/taxass_MEv34_silva138cyanos/conflicts_forcing",
 #                NA,
-#                70,
-#                70,
+#                80,
+#                80,
 #                "forcing")
 # -------------------------------------------------------------
 
@@ -310,11 +310,11 @@ do.bootstrap.cutoff <- function(TaxonomyTable, BootstrapCutoff, ...){
   cutoff <- as.numeric(BootstrapCutoff)
   
   # make all unclassified things uniformly called "unclassified"
-  tax <- uniform.unclass.names(TaxonomyTable = tax, ...)
+  tax <- uniform.unclass.names(TaxonomyTable = tax)
   
   # create a matrix of bootstrap numbers and then a T/F matrix
   tax.nums <- apply(tax[ ,2:ncol(tax)], 2, pull.out.percent)
-  index <- which(tax.nums == "unclassified")
+  index <- grep(pattern = "unclassified", x = tax.nums, ignore.case = TRUE, value = F)
   tax.nums[index] <- 0
   tax.nums <- apply(X = tax.nums, MARGIN = 2, FUN = as.numeric)
   tax.TF <- tax.nums >= cutoff

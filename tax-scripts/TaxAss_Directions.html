@@ -1486,7 +1486,7 @@ border-radius: 0px;
 
 <h1 class="title toc-ignore">TaxAss Workflow</h1>
 <h4 class="author">Robin Rohwer</h4>
-<h4 class="date">last updated: July 3, 2020</h4>
+<h4 class="date">last updated: February 12, 2023</h4>
 
 </div>
 
@@ -1773,13 +1773,13 @@ As few steps as possible (choose pident without comparing):
 <tbody>
 <tr class="odd">
 <td>mothur</td>
-<td>v.1.44.1</td>
+<td>v.1.48.0</td>
 <td>www.mothur.org</td>
 <td><a href="https://github.com/mothur/mothur/releases" class="uri">https://github.com/mothur/mothur/releases</a></td>
 </tr>
 <tr class="even">
 <td>BLAST</td>
-<td>2.10.0</td>
+<td>2.13.0</td>
 <td>ncbi.nlm.nih.gov</td>
 <td><a href="ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/" class="uri">ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/</a></td>
 </tr>
@@ -1794,13 +1794,13 @@ unfortunately)</td>
 </tr>
 <tr class="even">
 <td>python</td>
-<td>2.7 or 3.7</td>
+<td>3.10.9</td>
 <td>your computer already has this</td>
 <td>don’t need anything extra</td>
 </tr>
 <tr class="odd">
 <td>R</td>
-<td>3 or 4</td>
+<td>4.2.2</td>
 <td>cran.r-project.org</td>
 <td><a href="https://cran.r-project.org/" class="uri">https://cran.r-project.org/</a></td>
 </tr>
@@ -1844,19 +1844,25 @@ export PATH=~/mothur:$PATH</code></pre>
 <tbody>
 <tr class="odd">
 <td>FreshTrain</td>
-<td>30Apr2018<br>or<br>25Jan2018</td>
-<td>FreshTrain30Apr2018SILVAv132.zip<br>FreshTrain30Apr2018SILVAv128.zip<br>FreshTrain25Jan2018Greengenes13_5.zip</td>
+<td>15Jun2020</td>
+<td>FreshTrain15Jun2020silva138</td>
 <td><a href="https://github.com/McMahonLab/TaxAss/FreshTrain-files" class="uri">https://github.com/McMahonLab/TaxAss/FreshTrain-files</a></td>
 </tr>
 <tr class="even">
+<td>Silva<br>(TaxAss formatted)</td>
+<td>v.138</td>
+<td>FreshTrain15Jun2020silva138</td>
+<td><a href="https://github.com/McMahonLab/TaxAss/FreshTrain-files" class="uri">https://github.com/McMahonLab/TaxAss/FreshTrain-files</a></td>
+</tr>
+<tr class="odd">
 <td>Greengenes</td>
 <td>Aug 2013</td>
 <td>“greengenes reference taxonomy”</td>
 <td><a href="https://www.mothur.org/wiki/Greengenes-formatted_databases" class="uri">https://www.mothur.org/wiki/Greengenes-formatted_databases</a></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Silva</td>
-<td>v.132 <br> v.128 <br> v.138</td>
+<td>v.138</td>
 <td>“Full length sequences and taxonomy references”</td>
 <td><a href="https://www.mothur.org/wiki/Silva_reference_files" class="uri">https://www.mothur.org/wiki/Silva_reference_files</a></td>
 </tr>
@@ -1898,8 +1904,9 @@ error corrected, or unique sequences)</td>
 </tr>
 <tr class="even">
 <td>otus.abund</td>
-<td>relative abundance of each OTU (i.e. the OTU table)<br>(Optional-
-don’t need if following “quickie” procedure)</td>
+<td>relative abundance of each OTU (i.e. the OTU
+table)<br>(<strong>Optional</strong>- don’t need if following “quickie”
+procedure)</td>
 </tr>
 <tr class="odd">
 <td>general.fasta</td>
@@ -1928,9 +1935,11 @@ working directory.</strong><br />
 To make your life easier, create a new folder that contains the
 tax-scripts, the database and data files listed above, and nothing else.
 Then navigate to this folder in the terminal to make it your present
-working directory (<code>pwd</code>). Also, rename your files to match
-the above names so that you can copy and paste commands from this
+working directory (<code>pwd</code>). Optionally, rename your files to
+match the above names so that you can copy and paste commands from this
 workflow.</p>
+<p>Small example <code>otus.fasta</code> and <code>otus.abund</code>
+files are provided in the <code>test-data</code> folder.</p>
 <hr />
 </div>
 </div>

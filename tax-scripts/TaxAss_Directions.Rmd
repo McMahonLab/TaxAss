@@ -1,7 +1,7 @@
 ---
 title: "TaxAss Workflow"
 author: "Robin Rohwer"
-date: "last updated: July 3, 2020"
+date: "last updated: February 12, 2023"
 output: 
   html_document:
     toc: true
@@ -226,11 +226,11 @@ ________________________________________________________________________________
 
 Program       | Version             | Source                  | Specific Link
 --------------|---------------------|-------------------------|------------------------------------------  
-mothur        | v.1.44.1          | www.mothur.org          | https://github.com/mothur/mothur/releases  
-BLAST         | 2.10.0              | ncbi.nlm.nih.gov        | ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/  
+mothur        | v.1.48.0          | www.mothur.org          | https://github.com/mothur/mothur/releases  
+BLAST         | 2.13.0              | ncbi.nlm.nih.gov        | ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/  
 TaxAss        | master branch       | `tax-scripts` folder    | https://github.com/McMahonLab/TaxAss <br> You don't need your own github account; you can click the green download button on the top right of the main page (do have to download all folders unfortunately)  
-python        | 2.7 or 3.7          | your computer already has this | don't need anything extra
-R             | 3 or 4              | cran.r-project.org      | https://cran.r-project.org/
+python        | 3.10.9          | your computer already has this | don't need anything extra
+R             | 4.2.2              | cran.r-project.org      | https://cran.r-project.org/
 
 
 You want mothur and BLAST on your "path" (that means if you type them, your computer recognizes it as a program and runs it).
@@ -255,9 +255,10 @@ Now you can open the mothur program just by typing `mothur` from any location. (
 
 Database      | Version | File Name          | Download From
 --------------|---------|--------------------|-------------------------  
-FreshTrain    | 30Apr2018<br>or<br>25Jan2018 | FreshTrain30Apr2018SILVAv132.zip<br>FreshTrain30Apr2018SILVAv128.zip<br>FreshTrain25Jan2018Greengenes13_5.zip | https://github.com/McMahonLab/TaxAss/FreshTrain-files
+FreshTrain    | 15Jun2020 | FreshTrain15Jun2020silva138 | https://github.com/McMahonLab/TaxAss/FreshTrain-files
+Silva<br>(TaxAss formatted) | v.138 | FreshTrain15Jun2020silva138 | https://github.com/McMahonLab/TaxAss/FreshTrain-files
 Greengenes    | Aug 2013  | "greengenes reference taxonomy" | https://www.mothur.org/wiki/Greengenes-formatted_databases
-Silva         | v.132 <br> v.128 <br> v.138 | "Full length sequences and taxonomy references" | https://www.mothur.org/wiki/Silva_reference_files
+Silva         | v.138 | "Full length sequences and taxonomy references" | https://www.mothur.org/wiki/Silva_reference_files
 
 **Paired pre-formatted general databases are included in the FreshTrain zip files now.** Save yourself 20 min of unaligning :)  
 
@@ -276,14 +277,16 @@ These are the files you supply as input into the workflow:
 File                | Description
 --------------------|------------------------------------------------------------------
 	otus.fasta			  | fasta sequences for each of your OTUs <br> (OTUs can be clustered, error corrected, or unique sequences)
-	otus.abund			  | relative abundance of each OTU (i.e. the OTU table)<br>(Optional- don't need if following "quickie" procedure)
+	otus.abund			  | relative abundance of each OTU (i.e. the OTU table)<br>(**Optional**- don't need if following "quickie" procedure)
 	general.fasta		  | fasta sequences in your large, general comrpehensive taxonomy database
 	general.taxonomy	| taxonomy names in your large, general comprehensive taxonomy database
 	custom.fasta		  | fasta sequences in your small, ecosystem-specific taxonomy database
 	custom.taxonomy		| taxonomy names in your small, ecosystem-specific taxonomy database
 
 **Move everything into the same folder, and make that your working directory.**  
-To make your life easier, create a new folder that contains the tax-scripts, the database and data files listed above, and nothing else. Then navigate to this folder in the terminal to make it your present working directory (`pwd`). Also, rename your files to match the above names so that you can copy and paste commands from this workflow.
+To make your life easier, create a new folder that contains the tax-scripts, the database and data files listed above, and nothing else. Then navigate to this folder in the terminal to make it your present working directory (`pwd`). Optionally, rename your files to match the above names so that you can copy and paste commands from this workflow.
+
+Small example `otus.fasta` and `otus.abund` files are provided in the `test-data` folder.
 
 _____________________________________________
 

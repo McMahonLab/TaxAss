@@ -79,6 +79,11 @@ TaxAss has another script that deletes all the intermediate files you'll never n
 ```
 
 Where `otus` `custom` and `general` are the same names you used in `RunSteps_quickie.sh` above.  
+
+### <span style="color:Red">Test Data</span>  
+
+A small ready-formatted Lake Mendota dataset is provided in the `test-data` folder. You can use this to troubleshoot- for example do you get errors on the test data (maybe an installation error?) or only on your own data (maybe a formatting error?). Still need help? You can always leave a github issue or send Robin an email.  
+
 <br>
 <span style="color:Red">~done!~</span>  
 <br>
